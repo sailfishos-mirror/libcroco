@@ -1,3 +1,11 @@
+2003-03-20  Gaël Chamoulaud  <strider@freespiders.org>
+
+	* configure.in: added conditional compilation of the unit tests
+	in tests/ subdir 
+
+	* tests/Makefile.am (INCLUDES): conditional compilation of the unit tests
+	in tests/ subdir 
+
 2003-03-19  Gaël Chamoulaud  <strider@freespiders.org>
 
 	* Relicense from GPL -> LGPL
