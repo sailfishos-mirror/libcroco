@@ -1,5 +1,5 @@
 #Headers files to be distributed
-crocoincdir=$(includedir)/@PACKAGE@
+crocoincdir=$(includedir)/libcroco/@PACKAGE@
 crocoinc_HEADERS= libcroco.h \
 cr-additional-sel.h \
 cr-attr-sel.h \
