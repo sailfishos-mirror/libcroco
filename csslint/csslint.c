@@ -114,6 +114,9 @@ csslint_show_version (const char *name)
 #ifdef CROCO_SELENG_ENABLED
 	fprintf(stderr, "SELENG ");
 #endif
+#ifdef CROCO_LAYENG_ENABLED
+	fprintf(stderr, "LAYENG ");
+#endif
 #ifdef CROCO_TESTS_ENABLED
 	fprintf(stderr, "TESTS ");
 #endif

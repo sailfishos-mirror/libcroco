@@ -1,3 +1,8 @@
+2003-06-28  Gaël Chamoulaud (strider) <strider@freespiders.org>
+
+	* csslint/csslint.c (csslint_show_version): Added CROCO_LAYENG_ENABLED
+	test in csslint_show_version function.	
+
 2003-06-23  Dodji Seketeli  <dodji()47()seketeli()dot()org>
 
 	* docs/design/parser-architecture.txt: more bits on this.

@@ -1,3 +1,8 @@
+2003-06-28  Gaël Chamoulaud  <strider@freespiders.org>
+
+	* csslint.c (csslint_show_version): Added CROCO_LAYENG_ENABLED test
+	in csslint_show_version function. 
+
 2003-04-02  Gaël Chamoulaud  <strider@freespiders.org>
 
 	* csslint.1: updated man page
