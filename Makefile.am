@@ -21,7 +21,7 @@ rpm: cleantar
 	@(mkdir -p $(top_srcdir)/rpmbuildroot ; $(MAKE) dist && rpmbuild  -ta --buildroot $(top_srcdir)/rpmbuildroot $(distdir).tar.gz)
 
 test:	
-	if test -x $(top_srcdir)/tests/testctl ; then $(top_srcdir)/tests/testctl cleanup ; $(top_srcdir)/tests/testctl  ; $(top_srcdir)/tests/testctl run ; fi 
+	if test -x $(top_srcdir)/tests/testctl ; then $(top_srcdir)/tests/testctl cleanup ; $(top_srcdir)/tests/testctl run ; fi 
 
 apidoc:
 	if ! test -d docs/apis ; then  mkdir -p docs/apis ;  fi ;

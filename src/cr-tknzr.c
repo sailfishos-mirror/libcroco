@@ -847,8 +847,7 @@ cr_tknzr_parse_nmstart (CRTknzr * a_this,
 
         return CR_OK;
 
-      error:
-
+ error:        
         cr_tknzr_set_cur_pos (a_this, &init_pos);
 
         return status;
@@ -1005,6 +1004,9 @@ cr_tknzr_parse_ident (CRTknzr * a_this, CRString ** a_str)
         if (stringue) {
                 cr_string_destroy (stringue) ;
                 stringue = NULL ;
+        }
+        if (status != CR_OK ) {
+                cr_tknzr_set_cur_pos (a_this, &init_pos) ;
         }
         return status ;
 }
@@ -1216,7 +1218,7 @@ cr_tknzr_parse_uri (CRTknzr * a_this,
                         status = CR_PARSING_ERROR;
                         goto error;
                 }
-                if (str) {
+                if (str) {                        
                         if (*a_str == NULL) {
                                 *a_str = str;
                                 str = NULL;
@@ -1225,14 +1227,14 @@ cr_tknzr_parse_uri (CRTknzr * a_this,
                                         ((*a_str)->stryng,
                                          str->stryng->str,
                                          str->stryng->len);
-                                cr_parsing_location_copy 
-                                        (&(*a_str)->location,
-                                         &str->location) ;
                                 cr_string_destroy (str);
-                        }
+                        }                        
                 }
         }
 
+        cr_parsing_location_copy
+                (&(*a_str)->location,
+                 &location) ;
         return CR_OK ;
  error:
         if (str) {

@@ -778,17 +778,18 @@ set_prop_margin_x_from_value (CRStyle * a_style, CRTerm * a_value,
                 if (a_value->content.str
                     && a_value->content.str->stryng
                     && a_value->content.str->stryng->str
-                    && !strncmp (a_value->content.str->stryng->str,
-                                 "inherit", sizeof ("inherit")-1)) {
-			status = cr_num_set (num_val, 0.0, NUM_AUTO);
+                    && !strcmp (a_value->content.str->stryng->str,
+                                 "inherit")) {
+			status = cr_num_set (num_val, 0.0, NUM_INHERIT);
                 } else if (a_value->content.str
                            && a_value->content.str->stryng
-                           && !strncmp (a_value->content.str->stryng->str,
-                                        "auto", sizeof ("auto")-1)) {
+                           && !strcmp (a_value->content.str->stryng->str,
+                                        "auto")) {
                         status = cr_num_set (num_val, 0.0, NUM_AUTO);
                 } else {
                         status = CR_UNKNOWN_TYPE_ERROR;
                 }
+                break ;
 
         case TERM_NUMBER:
                 status = cr_num_copy (num_val, a_value->content.num);
@@ -1059,12 +1060,11 @@ static enum CRStatus
 set_prop_background_color (CRStyle * a_style, CRTerm * a_value)
 {
 	enum CRStatus status = CR_OK;
-	CRRgb *a_rgb = &a_style->rgb_props[RGB_PROP_BACKGROUND_COLOR].sv;
+	CRRgb *rgb = &a_style->rgb_props[RGB_PROP_BACKGROUND_COLOR].sv;
 
 	g_return_val_if_fail (a_style && a_value, CR_BAD_PARAM_ERROR);
 
-	status = cr_rgb_set_from_term (a_rgb, a_value);
-
+	status = cr_rgb_set_from_term (rgb, a_value);
 	return status;
 }
 
@@ -1391,6 +1391,9 @@ init_style_font_size_field (CRStyle * a_style)
 {
         g_return_val_if_fail (a_style, CR_BAD_PARAM_ERROR);
 
+        memset (&a_style->font_size, 0, 
+               sizeof (CRFontSizeVal)) ;
+        /*
         if (!a_style->font_size) {
                 a_style->font_size = cr_font_size_new ();
                 if (!a_style->font_size) {
@@ -1399,7 +1402,7 @@ init_style_font_size_field (CRStyle * a_style)
         } else {
                 cr_font_size_clear (a_style->font_size);
         }
-
+        */
         return CR_OK;
 }
 
@@ -1415,14 +1418,14 @@ set_prop_font_size_from_value (CRStyle * a_style, CRTerm * a_value)
                 if (a_value->content.str
                     && a_value->content.str->stryng
                     && a_value->content.str->stryng->str
-                    && !strcmp (a_value->content.str->stryng->str, 
+                    && !strcmp (a_value->content.str->stryng->str,
                                 "xx-small")) {
                         status = init_style_font_size_field (a_style);
                         g_return_val_if_fail (status == CR_OK, status);
 
-                        a_style->font_size->type =
+                        a_style->font_size.sv.type =
                                 PREDEFINED_ABSOLUTE_FONT_SIZE;
-                        a_style->font_size->value.predefined =
+                        a_style->font_size.sv.value.predefined =
                                 FONT_SIZE_XX_SMALL;
 
                 } else if (a_value->content.str
@@ -1433,9 +1436,9 @@ set_prop_font_size_from_value (CRStyle * a_style, CRTerm * a_value)
                         status = init_style_font_size_field (a_style);
                         g_return_val_if_fail (status == CR_OK, status);
 
-                        a_style->font_size->type =
+                        a_style->font_size.sv.type =
                                 PREDEFINED_ABSOLUTE_FONT_SIZE;
-                        a_style->font_size->value.predefined =
+                        a_style->font_size.sv.value.predefined =
                                 FONT_SIZE_X_SMALL;
                 } else if (a_value->content.str
                            && a_value->content.str->stryng
@@ -1445,9 +1448,9 @@ set_prop_font_size_from_value (CRStyle * a_style, CRTerm * a_value)
                         status = init_style_font_size_field (a_style);
                         g_return_val_if_fail (status == CR_OK, status);
 
-                        a_style->font_size->type =
+                        a_style->font_size.sv.type =
                                 PREDEFINED_ABSOLUTE_FONT_SIZE;
-                        a_style->font_size->value.predefined =
+                        a_style->font_size.sv.value.predefined =
                                 FONT_SIZE_SMALL;
                 } else if (a_value->content.str
                            && a_value->content.str->stryng
@@ -1456,9 +1459,9 @@ set_prop_font_size_from_value (CRStyle * a_style, CRTerm * a_value)
                         status = init_style_font_size_field (a_style);
                         g_return_val_if_fail (status == CR_OK, status);
 
-                        a_style->font_size->type =
+                        a_style->font_size.sv.type =
                                 PREDEFINED_ABSOLUTE_FONT_SIZE;
-                        a_style->font_size->value.predefined =
+                        a_style->font_size.sv.value.predefined =
                                 FONT_SIZE_MEDIUM;
                 } else if (a_value->content.str
                            && a_value->content.str->stryng
@@ -1468,9 +1471,9 @@ set_prop_font_size_from_value (CRStyle * a_style, CRTerm * a_value)
                         status = init_style_font_size_field (a_style);
                         g_return_val_if_fail (status == CR_OK, status);
 
-                        a_style->font_size->type =
+                        a_style->font_size.sv.type =
                                 PREDEFINED_ABSOLUTE_FONT_SIZE;
-                        a_style->font_size->value.predefined =
+                        a_style->font_size.sv.value.predefined =
                                 FONT_SIZE_LARGE;
                 } else if (a_value->content.str
                            && a_value->content.str->stryng
@@ -1480,9 +1483,9 @@ set_prop_font_size_from_value (CRStyle * a_style, CRTerm * a_value)
                         status = init_style_font_size_field (a_style);
                         g_return_val_if_fail (status == CR_OK, status);
 
-                        a_style->font_size->type =
+                        a_style->font_size.sv.type =
                                 PREDEFINED_ABSOLUTE_FONT_SIZE;
-                        a_style->font_size->value.predefined =
+                        a_style->font_size.sv.value.predefined =
                                 FONT_SIZE_X_LARGE;
                 } else if (a_value->content.str
                            && a_value->content.str->stryng
@@ -1492,9 +1495,9 @@ set_prop_font_size_from_value (CRStyle * a_style, CRTerm * a_value)
                         status = init_style_font_size_field (a_style);
                         g_return_val_if_fail (status == CR_OK, status);
 
-                        a_style->font_size->type =
+                        a_style->font_size.sv.type =
                                 PREDEFINED_ABSOLUTE_FONT_SIZE;
-                        a_style->font_size->value.predefined =
+                        a_style->font_size.sv.value.predefined =
                                 FONT_SIZE_XX_LARGE;
                 } else if (a_value->content.str
                            && a_value->content.str->stryng
@@ -1504,8 +1507,8 @@ set_prop_font_size_from_value (CRStyle * a_style, CRTerm * a_value)
                         status = init_style_font_size_field (a_style);
                         g_return_val_if_fail (status == CR_OK, status);
 
-                        a_style->font_size->type = RELATIVE_FONT_SIZE;
-                        a_style->font_size->value.relative = FONT_SIZE_LARGER;
+                        a_style->font_size.sv.type = RELATIVE_FONT_SIZE;
+                        a_style->font_size.sv.value.relative = FONT_SIZE_LARGER;
                 } else if (a_value->content.str
                            && a_value->content.str->stryng
                            && a_value->content.str->stryng->str
@@ -1514,8 +1517,8 @@ set_prop_font_size_from_value (CRStyle * a_style, CRTerm * a_value)
                         status = init_style_font_size_field (a_style);
                         g_return_val_if_fail (status == CR_OK, status);
 
-                        a_style->font_size->type = RELATIVE_FONT_SIZE;
-                        a_style->font_size->value.relative =
+                        a_style->font_size.sv.type = RELATIVE_FONT_SIZE;
+                        a_style->font_size.sv.value.relative =
                                 FONT_SIZE_SMALLER;
                 } else if (a_value->content.str
                            && a_value->content.str->stryng
@@ -1523,9 +1526,11 @@ set_prop_font_size_from_value (CRStyle * a_style, CRTerm * a_value)
                            && !strcmp (a_value->content.str->stryng->str, "inherit")) {
                         status = init_style_font_size_field (a_style);
                         g_return_val_if_fail (status == CR_OK, status);
-			a_style->font_size->type = INHERITED_FONT_SIZE;
+			a_style->font_size.sv.type = INHERITED_FONT_SIZE;
 
                 } else {
+                        cr_utils_trace_info ("Unknow value of font-size") ;
+                        status = init_style_font_size_field (a_style);
                         return CR_UNKNOWN_PROP_VAL_ERROR;
                 }
                 break;
@@ -1535,16 +1540,16 @@ set_prop_font_size_from_value (CRStyle * a_style, CRTerm * a_value)
                         status = init_style_font_size_field (a_style);
                         g_return_val_if_fail (status == CR_OK, status);
 
-                        a_style->font_size->type = ABSOLUTE_FONT_SIZE;
-                        a_style->font_size->value.absolute =
-                                cr_num_dup (a_value->content.num);
+                        a_style->font_size.sv.type = ABSOLUTE_FONT_SIZE;
+                        cr_num_copy (&a_style->font_size.sv.value.absolute,
+                                     a_value->content.num) ;
                 }
                 break;
 
         default:
+                status = init_style_font_size_field (a_style);
                 return CR_UNKNOWN_PROP_VAL_ERROR;
         }
-
         return CR_OK;
 }
 
@@ -1727,7 +1732,7 @@ cr_style_new (gboolean a_set_props_to_initial_values)
 
 /**
  *Sets the style properties to their default values according to the css2 spec
- * i.e inherit if the property is inherited, its initial value otherway.
+ * i.e inherit if the property is inherited, its initial value otherwise.
  *@param a_this the current instance of #CRStyle.
  *@return CR_OK upon successfull completion, an error code otherwise.
  */
@@ -1781,7 +1786,8 @@ cr_style_set_props_to_default_values (CRStyle * a_this)
                          *REVIEW: color is inherited and the default value is
 			 *ua dependant.
                          */
-			cr_rgb_set_to_inherit (&a_this->rgb_props[i].sv) ;
+			cr_rgb_set_to_inherit (&a_this->rgb_props[i].sv,
+                                               TRUE) ;
 			break;
 
 			/*default background color is white */
@@ -1789,6 +1795,8 @@ cr_style_set_props_to_default_values (CRStyle * a_this)
 			/* TODO: the default value should be transparent */
 			cr_rgb_set (&a_this->rgb_props[i].sv,
 				    255, 255, 255, FALSE);
+                        cr_rgb_set_to_transparent (&a_this->rgb_props[i].sv,
+                                                   TRUE) ;
 			break;
 
 		default:
@@ -1814,6 +1822,10 @@ cr_style_set_props_to_default_values (CRStyle * a_this)
 	a_this->font_variant = FONT_VARIANT_INHERIT;
 	a_this->font_weight = FONT_WEIGHT_INHERIT;
 	a_this->font_family = NULL;
+        
+        cr_font_size_set_to_inherit (&a_this->font_size.sv) ;
+        cr_font_size_clear (&a_this->font_size.cv) ;
+        cr_font_size_clear (&a_this->font_size.av) ;
 
         /* To make the inheritance resolution possible and efficient */
         a_this->inherited_props_resolved = FALSE ;
@@ -1839,6 +1851,9 @@ cr_style_set_props_to_initial_values (CRStyle *a_this)
         for (i = 0; i < NB_NUM_PROPS; i++) {
                 switch (i) {
                 case NUM_PROP_WIDTH:
+                        cr_num_set (&a_this->num_props[i].sv, 800,
+                                    NUM_LENGTH_PX) ;
+                        break ;
                 case NUM_PROP_TOP:
                 case NUM_PROP_RIGHT:
                 case NUM_PROP_BOTTOM:
@@ -1880,8 +1895,9 @@ cr_style_set_props_to_initial_values (CRStyle *a_this)
                 case RGB_PROP_BACKGROUND_COLOR:
                         cr_rgb_set (&a_this->rgb_props[i].sv,
                                     255, 255, 255, FALSE);
+                        cr_rgb_set_to_transparent (&a_this->rgb_props[i].sv,
+                                                   TRUE) ;                        
                         break;
-
                 default:
                         cr_rgb_set (&a_this->rgb_props[i].sv, 0, 0, 0, FALSE);
                         break;
@@ -1900,9 +1916,10 @@ cr_style_set_props_to_initial_values (CRStyle *a_this)
         a_this->font_weight = FONT_WEIGHT_NORMAL;
         a_this->font_stretch = FONT_STRETCH_NORMAL;
 	a_this->white_space = WHITE_SPACE_NORMAL;
-
+        cr_font_size_set_predefined_absolute_font_size
+                (&a_this->font_size.sv, FONT_SIZE_MEDIUM) ;
         a_this->inherited_props_resolved = FALSE ;
-        
+
         return CR_OK;
 }
 
@@ -1928,15 +1945,17 @@ cr_style_resolve_inherited_properties (CRStyle *a_this)
         if (a_this->inherited_props_resolved == TRUE)
                 return CR_OK ;
 
-        if (a_this->num_props[i].sv.type == NUM_INHERIT) {
-                cr_num_copy (&a_this->num_props[i].sv,
-                             &a_this->parent_style->num_props[i].sv);
+        for (i=0 ; i < NB_NUM_PROPS ;i++) {
+                if (a_this->num_props[i].sv.type == NUM_INHERIT) {
+                        cr_num_copy (&a_this->num_props[i].cv,
+                                     &a_this->parent_style->num_props[i].cv);
+                }
         }
 	for (i=0; i < NB_RGB_PROPS; i++) {
 		if (cr_rgb_is_set_to_inherit (&a_this->rgb_props[i].sv) == TRUE) {
-			cr_rgb_set_from_rgb(
-				&a_this->rgb_props[i].sv,
-				&a_this->parent_style->rgb_props[i].sv);
+			cr_rgb_copy (
+				&a_this->rgb_props[i].cv,
+				&a_this->parent_style->rgb_props[i].cv);
 		}
 	}
 	for (i = 0; i < NB_BORDER_STYLE_PROPS; i++) {
@@ -1971,7 +1990,10 @@ cr_style_resolve_inherited_properties (CRStyle *a_this)
 	if (a_this->font_family == NULL)  {
 		a_this->font_family = a_this->parent_style->font_family;
 	}
-
+        if (a_this->font_size.sv.type == INHERITED_FONT_SIZE) {
+                cr_font_size_copy (&a_this->font_size.cv,
+                                   &a_this->parent_style->font_size.cv) ;
+        }
         a_this->inherited_props_resolved = TRUE ;
 	return ret;
 }
@@ -2323,7 +2345,17 @@ cr_style_num_prop_val_to_string (CRNumPropVal * a_prop_val,
         g_string_append_printf (str, "sv: %s ", tmp_str);
         g_free (tmp_str);
         tmp_str = NULL;
+        
         tmp_str = cr_num_to_string (&a_prop_val->cv);
+        if (!tmp_str) {
+                status = CR_ERROR;
+                goto cleanup;
+        }
+        g_string_append_printf (str, "cv: %s ", tmp_str);
+        g_free (tmp_str);
+        tmp_str = NULL;
+
+        tmp_str = cr_num_to_string (&a_prop_val->av);
         if (!tmp_str) {
                 status = CR_ERROR;
                 goto cleanup;
@@ -2725,12 +2757,26 @@ cr_style_to_string (CRStyle * a_this, GString ** a_str, guint a_nb_indent)
         g_string_append (str, "\n");
 
         cr_utils_dump_n_chars2 (' ', str, indent);
-        tmp_str = cr_font_size_to_string (a_this->font_size);
+        tmp_str = cr_font_size_to_string (&a_this->font_size.sv);
         if (tmp_str) {
-                g_string_append_printf (str, "font-size: %s", tmp_str);
+                g_string_append_printf (str, "font-size {sv:%s, ",
+                                        tmp_str) ;
         } else {
-                g_string_append (str, "font-size: NULL");
+                g_string_append (str, "font-size {sv:NULL, ");
         }
+        tmp_str = cr_font_size_to_string (&a_this->font_size.cv);
+        if (tmp_str) {
+                g_string_append_printf (str, "cv:%s, ", tmp_str);
+        } else {
+                g_string_append (str, "cv:NULL, ");
+        }
+        tmp_str = cr_font_size_to_string (&a_this->font_size.av);
+        if (tmp_str) {
+                g_string_append_printf (str, "av:%s}", tmp_str);
+        } else {
+                g_string_append (str, "av:NULL}");
+        }
+
         tmp_str = NULL;
         g_string_append (str, "\n");
 

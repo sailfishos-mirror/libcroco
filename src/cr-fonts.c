@@ -309,9 +309,6 @@ cr_font_size_clear (CRFontSize * a_this)
                 break;
 
         case ABSOLUTE_FONT_SIZE:
-                if (a_this->value.absolute) {
-                        cr_num_destroy (a_this->value.absolute);
-                }
                 memset (a_this, 0, sizeof (CRFontSize));
                 break;
 
@@ -336,21 +333,80 @@ cr_font_size_copy (CRFontSize * a_dst, CRFontSize * a_src)
                 break;
 
         case ABSOLUTE_FONT_SIZE:
-                if (a_src->value.absolute) {
-                        cr_font_size_clear (a_dst);
-                        if (!a_dst->value.absolute) {
-                                a_dst->value.absolute = cr_num_new ();
-                        }
-                        cr_num_copy (a_dst->value.absolute,
-                                     a_src->value.absolute);
-                        a_dst->type = a_src->type;
-                }
+                cr_font_size_clear (a_dst);
+                cr_num_copy (&a_dst->value.absolute,
+                             &a_src->value.absolute);
+                a_dst->type = a_src->type;
                 break;
 
         default:
                 return CR_UNKNOWN_TYPE_ERROR;
         }
         return CR_OK;
+}
+
+enum CRStatus 
+cr_font_size_set_predefined_absolute_font_size (CRFontSize *a_this, 
+                                                enum CRPredefinedAbsoluteFontSize a_predefined)
+{
+        g_return_val_if_fail (a_this, CR_BAD_PARAM_ERROR) ;
+        g_return_val_if_fail (a_predefined >= PREDEFINED_ABSOLUTE_FONT_SIZE
+                              && a_predefined < NB_FONT_SIZE_TYPE,
+                              CR_BAD_PARAM_ERROR) ;
+
+        a_this->type = PREDEFINED_ABSOLUTE_FONT_SIZE ;
+        a_this->value.predefined = a_predefined ;
+
+        return CR_OK ;
+}
+
+enum CRStatus 
+cr_font_size_set_relative_font_size (CRFontSize *a_this,
+                                     enum CRRelativeFontSize a_relative)
+{
+        g_return_val_if_fail (a_this, CR_BAD_PARAM_ERROR) ;
+        g_return_val_if_fail (a_relative >= FONT_SIZE_LARGER
+                              && a_relative < NB_RELATIVE_FONT_SIZE,
+                              CR_BAD_PARAM_ERROR) ;
+        
+        a_this->type = RELATIVE_FONT_SIZE ;
+        a_this->value.relative = a_relative ;
+        return CR_OK ;
+}
+
+enum CRStatus 
+cr_font_size_set_absolute_font_size (CRFontSize *a_this,
+                                     enum CRNumType a_num_type,
+                                     gdouble a_value)
+{
+        g_return_val_if_fail (a_this, CR_BAD_PARAM_ERROR) ;
+        g_return_val_if_fail (a_num_type >= NUM_AUTO
+                              && a_num_type < NB_NUM_TYPE,
+                              CR_BAD_PARAM_ERROR) ;
+
+        a_this->type = ABSOLUTE_FONT_SIZE ;
+        cr_num_set (&a_this->value.absolute,
+                    a_value, a_num_type) ;        
+        return CR_OK ;
+}
+
+enum CRStatus
+cr_font_size_set_to_inherit (CRFontSize *a_this)
+{
+        g_return_val_if_fail (a_this, CR_BAD_PARAM_ERROR) ;
+
+        cr_font_size_clear (a_this) ;
+        a_this->type = INHERITED_FONT_SIZE ;
+
+        return CR_OK ;
+}
+
+gboolean
+cr_font_size_is_set_to_inherit (CRFontSize *a_this)
+{
+        g_return_val_if_fail (a_this, FALSE) ;
+
+        return a_this->type == INHERITED_FONT_SIZE ;
 }
 
 gchar *
@@ -369,7 +425,7 @@ cr_font_size_to_string (CRFontSize * a_this)
                                 (a_this->value.predefined));
                 break;
         case ABSOLUTE_FONT_SIZE:
-                str = cr_num_to_string (a_this->value.absolute);
+                str = cr_num_to_string (&a_this->value.absolute);
                 break;
         case RELATIVE_FONT_SIZE:
                 str = g_strdup (cr_relative_font_size_to_string
@@ -382,6 +438,106 @@ cr_font_size_to_string (CRFontSize * a_this)
                 break;
         }
         return str;
+}
+
+void 
+cr_font_size_get_smaller_predefined_font_size (enum CRPredefinedAbsoluteFontSize a_font_size,
+                                               enum CRPredefinedAbsoluteFontSize *a_smaller_size)
+{
+        enum CRPredefinedAbsoluteFontSize result = FONT_SIZE_MEDIUM ;
+
+        g_return_if_fail (a_smaller_size) ;
+        g_return_if_fail (a_font_size < NB_PREDEFINED_ABSOLUTE_FONT_SIZES
+                          && a_font_size >= FONT_SIZE_XX_SMALL) ;
+
+        switch (a_font_size) {
+        case FONT_SIZE_XX_SMALL:
+                result =  FONT_SIZE_XX_SMALL ;
+                break ;
+        case FONT_SIZE_X_SMALL:
+                result =  FONT_SIZE_XX_SMALL ;
+                break ;
+        case FONT_SIZE_SMALL:
+                result =  FONT_SIZE_X_SMALL;
+                break ;
+        case FONT_SIZE_MEDIUM:
+                result =  FONT_SIZE_SMALL;
+                break ;
+        case FONT_SIZE_LARGE:
+                result =  FONT_SIZE_MEDIUM;
+                break ;
+        case FONT_SIZE_X_LARGE:
+                result =  FONT_SIZE_LARGE;
+                break ;
+        case FONT_SIZE_XX_LARGE:
+                result =  FONT_SIZE_XX_LARGE;
+                break ;
+	case FONT_SIZE_INHERIT:
+                cr_utils_trace_info ("can't return a smaller size for FONT_SIZE_INHERIT") ;                
+                result =  FONT_SIZE_MEDIUM ;
+                break ;
+        default:
+                cr_utils_trace_info ("Unknown FONT_SIZE") ;
+                result = FONT_SIZE_MEDIUM ;
+                break ;
+        }
+        *a_smaller_size = result ;
+}
+
+
+void 
+cr_font_size_get_larger_predefined_font_size (enum CRPredefinedAbsoluteFontSize a_font_size,
+                                              enum CRPredefinedAbsoluteFontSize *a_larger_size)
+{
+        enum CRPredefinedAbsoluteFontSize result = FONT_SIZE_MEDIUM ;
+        
+        g_return_if_fail (a_larger_size) ;
+        g_return_if_fail (a_font_size >= FONT_SIZE_XX_SMALL 
+                          && a_font_size < NB_PREDEFINED_ABSOLUTE_FONT_SIZES) ;
+
+        switch (a_font_size) {
+        case FONT_SIZE_XX_SMALL:
+                result =  FONT_SIZE_X_SMALL ;
+                break ;
+        case FONT_SIZE_X_SMALL:
+                result =  FONT_SIZE_SMALL ;
+                break ;
+        case FONT_SIZE_SMALL:
+                result =  FONT_SIZE_MEDIUM;
+                break ;
+        case FONT_SIZE_MEDIUM:
+                result =  FONT_SIZE_LARGE;
+                break ;
+        case FONT_SIZE_LARGE:
+                result =  FONT_SIZE_X_LARGE;
+                break ;
+        case FONT_SIZE_X_LARGE:
+                result =  FONT_SIZE_XX_LARGE ;
+                break ;
+        case FONT_SIZE_XX_LARGE:
+                result =  FONT_SIZE_XX_LARGE;
+                break ;
+	case FONT_SIZE_INHERIT:
+                cr_utils_trace_info ("can't return a bigger size for FONT_SIZE_INHERIT") ;                
+                result =  FONT_SIZE_MEDIUM ;
+                break ;
+        default:
+                cr_utils_trace_info ("Unknown FONT_SIZE") ;
+                result = FONT_SIZE_MEDIUM ;
+                break ;
+        }
+        *a_larger_size = result ;
+}
+
+gboolean
+cr_font_size_is_predefined_absolute_font_size (enum CRPredefinedAbsoluteFontSize a_font_size)
+{
+        if (a_font_size >= FONT_SIZE_XX_SMALL
+            && a_font_size < NB_PREDEFINED_ABSOLUTE_FONT_SIZES) {
+                return TRUE ;
+        } else {
+                return FALSE ;
+        }
 }
 
 gchar *
@@ -453,6 +609,22 @@ cr_font_variant_to_string (enum CRFontVariant a_code)
                 break;
         }
         return str;
+}
+
+enum CRFontWeight
+cr_font_weight_get_bolder (enum CRFontWeight a_weight)
+{
+        if (a_weight >= NB_FONT_WEIGHTS) {
+                return FONT_WEIGHT_900 ;
+        } else if (a_weight < FONT_WEIGHT_NORMAL) {
+                return FONT_WEIGHT_NORMAL ;
+        } else if (a_weight == FONT_WEIGHT_BOLDER
+                   || a_weight == FONT_WEIGHT_BOLDER) {
+                cr_utils_trace_info ("FONT_WEIGHT_BOLDER or FONT_WEIGHT_LIGHTER should not appear here") ;
+                return FONT_WEIGHT_NORMAL ;
+        } else {
+                return a_weight << 1 ;
+        }
 }
 
 const gchar *
@@ -561,11 +733,7 @@ cr_font_size_destroy (CRFontSize * a_font_size)
 {
         g_return_if_fail (a_font_size);
 
-        if (a_font_size->type == ABSOLUTE_FONT_SIZE
-            && a_font_size->value.absolute) {
-                cr_num_destroy (a_font_size->value.absolute);
-                a_font_size->value.absolute = NULL;
-        }
+        g_free (a_font_size) ;
 }
 
 /*******************************************************

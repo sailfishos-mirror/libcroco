@@ -29,7 +29,7 @@
 #include "cr-parser.h"
 
 static CRRgb gv_standard_colors[] = {
-        {"aliceblue", 240, 248, 255, 0},
+        {"aliceblue", 240, 248, 255, 0,},
         {"antiquewhite", 250, 235, 215, 0},
         {"aqua", 0, 255, 255, 0},
         {"aquamarine", 127, 255, 212, 0},
@@ -173,9 +173,10 @@ static CRRgb gv_standard_colors[] = {
         {"violet", 238, 130, 238, 0},
         {"wheat", 245, 222, 179, 0},
         {"white", 255, 255, 255, 0},
-        {"whitesmoke", 245, 245, 245, 0},
-        {"yellow", 255, 255, 0, 0},
-        {"yellowgreen", 154, 205, 50, 0}
+        {"whitesmoke", 245, 245, 245, 0,},
+        {"yellow", 255, 255, 0, 0,},
+        {"yellowgreen", 154, 205, 50, 0,},
+        {"transparent", 255, 255, 255, 0, 0, 1}
 };
 
 /**
@@ -338,6 +339,7 @@ cr_rgb_set (CRRgb * a_this, gulong a_red,
         a_this->green = a_green;
         a_this->blue = a_blue;
         a_this->inherit = FALSE ;
+        a_this->is_transparent = FALSE ;
         return CR_OK;
 }
 
@@ -349,11 +351,11 @@ cr_rgb_set (CRRgb * a_this, gulong a_red,
  *
  */
 enum CRStatus 
-cr_rgb_set_to_inherit (CRRgb *a_this)
+cr_rgb_set_to_inherit (CRRgb *a_this, gboolean a_inherit)
 {
         g_return_val_if_fail (a_this, CR_BAD_PARAM_ERROR) ;
 
-        a_this->inherit = TRUE ;
+        a_this->inherit = a_inherit ;
 
         return CR_OK ;
 }
@@ -367,6 +369,36 @@ cr_rgb_is_set_to_inherit (CRRgb *a_this)
 }
 
 /**
+ *Tests if the the rgb is set to the
+ *value "transparent" or not.
+ *@param a_this the current instance of
+ *#CRRgb
+ *@return TRUE if the rgb has been set to
+ *transparent, FALSE otherwise.
+ */
+gboolean 
+cr_rgb_is_set_to_transparent (CRRgb *a_this)
+{
+        g_return_val_if_fail (a_this, FALSE) ;
+        return a_this->is_transparent ;
+}
+
+
+/**
+ *Sets the rgb to the "transparent" value (or not)
+ *@param a_this the current instance of #CRRgb
+ *@param a_is_transparent set to transparent or not.
+ */
+enum CRStatus 
+cr_rgb_set_to_transparent (CRRgb *a_this, 
+                           gboolean a_is_transparent)
+{
+        g_return_val_if_fail (a_this, CR_BAD_PARAM_ERROR) ;        
+        a_this->is_transparent = a_is_transparent ;
+        return CR_OK ;
+}
+
+/**
  *Sets the rgb from an other one.
  *@param a_this the current instance of #CRRgb.
  *@param a_rgb the rgb to "copy"
@@ -377,8 +409,7 @@ cr_rgb_set_from_rgb (CRRgb * a_this, CRRgb * a_rgb)
 {
         g_return_val_if_fail (a_this && a_rgb, CR_BAD_PARAM_ERROR);
 
-        cr_rgb_set (a_this, a_rgb->red, a_rgb->green,
-                    a_rgb->blue, a_rgb->is_percentage);
+        cr_rgb_copy (a_this, a_rgb) ;
 
         return CR_OK;
 }
@@ -455,6 +486,7 @@ cr_rgb_set_from_hex_str (CRRgb * a_this, const guchar * a_hex)
         if (status == CR_OK) {
                 status = cr_rgb_set (a_this, colors[0],
                                      colors[1], colors[2], FALSE);
+                cr_rgb_set_to_transparent (a_this, FALSE) ;
         }
         return status;
 }
@@ -484,15 +516,13 @@ cr_rgb_set_from_term (CRRgb *a_this, const struct _CRTerm *a_value)
                     && a_value->content.str->stryng->str) {
 			if (!strncmp ("inherit",
                                       a_value->content.str->stryng->str,
-                                      sizeof ("inherit")-1))
-			{
+                                      sizeof ("inherit")-1)) {
 				a_this->inherit = TRUE;
-			}
-			else 
-			{
+                                a_this->is_transparent = FALSE ;
+			} else  {
                         	status = cr_rgb_set_from_name
-				  (a_this,
-				   a_value->content.str->stryng->str) ;
+                                        (a_this,
+                                         a_value->content.str->stryng->str) ;
 			}
                 } else {
                         cr_utils_trace_info 
@@ -515,6 +545,16 @@ cr_rgb_set_from_term (CRRgb *a_this, const struct _CRTerm *a_value)
                 status =  CR_UNKNOWN_TYPE_ERROR ;
 	}
         return status ;
+}
+
+enum CRStatus 
+cr_rgb_copy (CRRgb *a_dest, CRRgb*a_src)
+{
+        g_return_val_if_fail (a_dest && a_src,
+                              CR_BAD_PARAM_ERROR) ;
+
+        memcpy (a_dest, a_src, sizeof (CRRgb)) ;
+        return CR_OK ;
 }
 
 /**
@@ -576,8 +616,6 @@ cleanup:
 	}
 	return result ;
 }
-		  
-	
 	  
 
 	

@@ -352,11 +352,11 @@ cr_term_to_string (CRTerm * a_this)
                                 g_string_append_printf (str_buf, "%s(",
                                                         content);
 
-                                if (a_this->ext_content.func_param) {
+                                if (cur->ext_content.func_param) {
                                         guchar *tmp_str = NULL;
 
                                         tmp_str = cr_term_to_string
-                                                (a_this->
+                                                (cur->
                                                  ext_content.func_param);
 
                                         if (tmp_str) {
@@ -366,10 +366,10 @@ cr_term_to_string (CRTerm * a_this)
                                                 tmp_str = NULL;
                                         }
 
-                                        g_string_append (str_buf, ")");
                                         g_free (content);
                                         content = NULL;
                                 }
+                                g_string_append (str_buf, ")");
                         }
 
                         break;

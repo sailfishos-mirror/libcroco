@@ -45,6 +45,7 @@ struct _CRRgb
         glong blue ;
         gboolean is_percentage ;
 	gboolean inherit ;
+        gboolean is_transparent ;
         CRParsingLocation location ;
 } ;
 
@@ -62,10 +63,16 @@ enum CRStatus cr_rgb_set (CRRgb *a_this, gulong a_red,
                           gulong a_green, gulong a_blue,
                           gboolean a_is_percentage) ;
 
-enum CRStatus  cr_rgb_set_to_inherit (CRRgb *a_this) ;
+enum CRStatus cr_rgb_copy (CRRgb *a_dest, CRRgb*a_src) ;
+
+enum CRStatus  cr_rgb_set_to_inherit (CRRgb *a_this, gboolean a_inherit) ;
 
 gboolean cr_rgb_is_set_to_inherit (CRRgb *a_this) ;
 
+gboolean cr_rgb_is_set_to_transparent (CRRgb *a_this) ;
+
+enum CRStatus cr_rgb_set_to_transparent (CRRgb *a_this, 
+                                         gboolean a_is_transparent) ;
 enum CRStatus cr_rgb_set_from_rgb (CRRgb *a_this, CRRgb *a_rgb) ;
 
 enum CRStatus cr_rgb_set_from_name (CRRgb *a_this, const guchar *a_color_name) ;

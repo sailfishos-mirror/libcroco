@@ -175,8 +175,17 @@ cr_num_to_string (CRNum * a_this)
         case NUM_PERCENTAGE:
                 tmp_char2 = (guchar *) "%";
                 break;
-
+        case NUM_INHERIT:
+                tmp_char2 = (guchar *) "inherit";
+                break ;
+        case NUM_AUTO:
+                tmp_char2 = (guchar *) "auto";
+                break ;
+        case NUM_GENERIC:
+                tmp_char2 = NULL ;
+                break ;
         default:
+                tmp_char2 = (guchar *) "unknown";
                 break;
         }
 

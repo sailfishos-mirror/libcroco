@@ -20,7 +20,7 @@
   /*line:3 column:1 byte offset:19 */
 
   /*http://pouet.com*/
-  /*line:3 column:13 byte offset:31 */
+  /*line:3 column:9 byte offset:27 */
 
   /*screen*/
   /*line:3 column:33 byte offset:51 */
@@ -31,14 +31,35 @@
   /*aural*/
   /*line:3 column:48 byte offset:66 */
 
+@import url("http://pouet.com") screen2, paper2, aural2;
+
+/*****************************************************
+ *Parsing location inforamtion for the @import rule
+ ******************************************************/
+
+  /*@import*/
+  /*line:4 column:1 byte offset:74 */
+
+  /*http://pouet.com*/
+  /*line:4 column:9 byte offset:82 */
+
+  /*screen2*/
+  /*line:4 column:31 byte offset:104 */
+
+  /*paper2*/
+  /*line:4 column:40 byte offset:113 */
+
+  /*aural2*/
+  /*line:4 column:48 byte offset:121 */
+
 @page coin :pseudo-page
 
   /*@page*/
-  /*line:5 column:1 byte offset:75 */
+  /*line:6 column:1 byte offset:131 */
   /*coin*/
-  /*line:5 column:7 byte offset:81 */
+  /*line:6 column:7 byte offset:137 */
   /*pseudo-page*/
-  /*line:5 column:13 byte offset:87 */
+  /*line:6 column:13 byte offset:143 */
 
 {
 
@@ -50,9 +71,9 @@ page-prop0 : page-val0;
  *Parsing location information of the property
  ************************************************/
   /*page-prop0*/
-  /*line:6 column:7 byte offset:107 */
+  /*line:7 column:7 byte offset:163 */
   /*page-val0*/
-  /*line:6 column:19 byte offset:119 */
+  /*line:7 column:19 byte offset:175 */
 
 
 page-prop1 : page-val1;
@@ -62,17 +83,17 @@ page-prop1 : page-val1;
  *Parsing location information of the property
  ************************************************/
   /*page-prop1*/
-  /*line:7 column:7 byte offset:137 */
+  /*line:8 column:7 byte offset:193 */
   /*page-val1*/
-  /*line:7 column:19 byte offset:149 */
+  /*line:8 column:19 byte offset:205 */
 }
 @media paper, aural
   /*@media*/
-  /*line:10 column:1 byte offset:164 */
+  /*line:11 column:1 byte offset:220 */
   /*paper*/
-  /*line:10 column:8 byte offset:171 */
+  /*line:11 column:8 byte offset:227 */
   /*aural*/
-  /*line:10 column:15 byte offset:178 */
+  /*line:11 column:15 byte offset:234 */
 
 {
 x {
@@ -80,9 +101,9 @@ x {
  *Parsing location information of the selector
  ************************************************/
 /*x*/
-/*line:11 column:5 byte offset:190 */
+/*line:12 column:5 byte offset:246 */
   /*x*/
-  /*line:11 column:5 byte offset:190 */
+  /*line:12 column:5 byte offset:246 */
 
 
 foo : fooval;
@@ -92,9 +113,9 @@ foo : fooval;
  *Parsing location information of the property
  ************************************************/
   /*foo*/
-  /*line:12 column:7 byte offset:200 */
+  /*line:13 column:7 byte offset:256 */
   /*fooval*/
-  /*line:12 column:12 byte offset:205 */
+  /*line:13 column:12 byte offset:261 */
 
 
 bar : barval;
@@ -104,9 +125,9 @@ bar : barval;
  *Parsing location information of the property
  ************************************************/
   /*bar*/
-  /*line:13 column:7 byte offset:220 */
+  /*line:14 column:7 byte offset:276 */
   /*barval*/
-  /*line:13 column:12 byte offset:225 */
+  /*line:14 column:12 byte offset:281 */
  }
 
 }
@@ -116,7 +137,7 @@ bar : barval;
  ******************************************************/
 
   /*@font-face*/
-  /*line:17 column:1 byte offset:243 */
+  /*line:18 column:1 byte offset:299 */
 
 
 font-prop1 : font1;
@@ -126,9 +147,9 @@ font-prop1 : font1;
  *Parsing location information of the property
  ************************************************/
   /*font-prop1*/
-  /*line:18 column:2 byte offset:257 */
+  /*line:19 column:2 byte offset:313 */
   /*font1*/
-  /*line:18 column:14 byte offset:269 */
+  /*line:19 column:14 byte offset:325 */
 
 
 font-prop2 : font2;
@@ -138,39 +159,39 @@ font-prop2 : font2;
  *Parsing location information of the property
  ************************************************/
   /*font-prop2*/
-  /*line:19 column:2 byte offset:278 */
+  /*line:20 column:2 byte offset:334 */
   /*font2*/
-  /*line:19 column:14 byte offset:290 */
+  /*line:20 column:14 byte offset:346 */
 }
 x>y[attr="val"].class#tatati z+toto {
 /************************************************
  *Parsing location information of the selector
  ************************************************/
 /*x*/
-/*line:21 column:1 byte offset:300 */
+/*line:22 column:1 byte offset:356 */
   /*x*/
-  /*line:21 column:1 byte offset:300 */
+  /*line:22 column:1 byte offset:356 */
 /*y[attr="val"].class#tatati*/
-/*line:21 column:5 byte offset:304 */
+/*line:22 column:5 byte offset:360 */
   /*y*/
-  /*line:21 column:5 byte offset:304 */
+  /*line:22 column:5 byte offset:360 */
 
   /*[attr="val"]*/
-  /*line:21 column:6 byte offset:305 */
+  /*line:22 column:6 byte offset:361 */
 
   /*.class*/
-  /*line:21 column:17 byte offset:316 */
+  /*line:22 column:17 byte offset:372 */
 
   /*#tatati*/
-  /*line:21 column:22 byte offset:321 */
+  /*line:22 column:22 byte offset:377 */
 /*z*/
-/*line:21 column:30 byte offset:329 */
+/*line:22 column:30 byte offset:385 */
   /*z*/
-  /*line:21 column:30 byte offset:329 */
+  /*line:22 column:30 byte offset:385 */
 /*toto*/
-/*line:21 column:34 byte offset:333 */
+/*line:22 column:34 byte offset:389 */
   /*toto*/
-  /*line:21 column:34 byte offset:333 */
+  /*line:22 column:34 byte offset:389 */
 
 
 prop1 : function(a);
@@ -180,9 +201,9 @@ prop1 : function(a);
  *Parsing location information of the property
  ************************************************/
   /*prop1*/
-  /*line:22 column:2 byte offset:340 */
+  /*line:23 column:2 byte offset:396 */
   /*function(a)*/
-  /*line:22 column:9 byte offset:347 */
+  /*line:23 column:9 byte offset:403 */
 
 
 prop2 : val2;
@@ -192,7 +213,7 @@ prop2 : val2;
  *Parsing location information of the property
  ************************************************/
   /*prop2*/
-  /*line:23 column:2 byte offset:362 */
+  /*line:24 column:2 byte offset:418 */
   /*val2*/
-  /*line:23 column:9 byte offset:369 */
+  /*line:24 column:9 byte offset:425 */
  }

@@ -3,8 +3,6 @@
 /*
  * This file is part of The Croco Library
  *
- * Copyright (C) 2002-2003 Dodji Seketeli <dodji@seketeli.org>
- *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of version 2.1 of 
  * the GNU Lesser General Public
@@ -20,7 +18,11 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
  * USA
+ *
+ * Author: Dodji Seketeli
+ * See COPYRIGHTS file for copyright information.
  */
+
 #ifndef __CR_FONTS_H__
 #define __CR_FONTS_H__
 #endif
@@ -103,9 +105,10 @@ enum CRPredefinedAbsoluteFontSize
  *you know what you are doing.
  */
 enum CRRelativeFontSize
-{
+{        
         FONT_SIZE_LARGER,
-        FONT_SIZE_SMALLER
+        FONT_SIZE_SMALLER,
+        NB_RELATIVE_FONT_SIZE
 } ;
 
 /**
@@ -144,7 +147,9 @@ enum CRFontSizeType {
          *the None of the field of the CRFontSize::value enum
          *will be defined.
          */
-        INHERITED_FONT_SIZE
+        INHERITED_FONT_SIZE,
+
+        NB_FONT_SIZE_TYPE
 } ;
 
 typedef struct _CRFontSize CRFontSize ;
@@ -153,7 +158,7 @@ struct _CRFontSize {
         union  {
                 enum CRPredefinedAbsoluteFontSize predefined ;
                 enum CRRelativeFontSize relative ;
-                CRNum * absolute ;
+                CRNum absolute ;
         } value;
 } ;
 
@@ -161,7 +166,7 @@ enum CRFontSizeAdjustType
 {
         FONT_SIZE_ADJUST_NONE = 0,
         FONT_SIZE_ADJUST_NUMBER,
-        FONT_SIZE_ADJUST_INHERIT        
+        FONT_SIZE_ADJUST_INHERIT
 } ;
 typedef struct _CRFontSizeAdjust CRFontSizeAdjust ;
 struct _CRFontSizeAdjust
@@ -253,7 +258,20 @@ CRFontSize * cr_font_size_new (void) ;
 
 enum CRStatus cr_font_size_clear (CRFontSize *a_this) ;
 
-enum CRStatus cr_font_size_copy (CRFontSize *a_dst, CRFontSize *a_src) ;
+enum CRStatus cr_font_size_copy (CRFontSize *a_dst, 
+                                 CRFontSize *a_src) ;
+enum CRStatus cr_font_size_set_predefined_absolute_font_size (CRFontSize *a_this, 
+                                                              enum CRPredefinedAbsoluteFontSize a_predefined) ;
+enum CRStatus cr_font_size_set_relative_font_size (CRFontSize *a_this,
+                                                   enum CRRelativeFontSize a_relative) ;
+
+enum CRStatus cr_font_size_set_absolute_font_size (CRFontSize *a_this,
+                                                   enum CRNumType a_num_type,
+                                                   gdouble a_value) ;
+
+enum CRStatus cr_font_size_set_to_inherit (CRFontSize *a_this) ;
+
+gboolean cr_font_size_is_set_to_inherit (CRFontSize *a_this) ;
 
 gchar* cr_font_size_to_string (CRFontSize *a_this) ;
 
@@ -269,12 +287,25 @@ gchar * cr_font_size_adjust_to_string (CRFontSizeAdjust *a_this) ;
 
 void cr_font_size_adjust_destroy (CRFontSizeAdjust *a_this) ;
 
+void 
+cr_font_size_get_smaller_predefined_font_size (enum CRPredefinedAbsoluteFontSize a_font_size,
+                                               enum CRPredefinedAbsoluteFontSize *a_smaller_size) ;
+void
+cr_font_size_get_larger_predefined_font_size (enum CRPredefinedAbsoluteFontSize a_font_size,
+                                              enum CRPredefinedAbsoluteFontSize *a_larger_size) ;
+
+gboolean
+cr_font_size_is_predefined_absolute_font_size (enum CRPredefinedAbsoluteFontSize a_font_size) ;
+
 /***********************************
  *various other font related functions
  ***********************************/
 const gchar * cr_font_style_to_string (enum CRFontStyle a_code) ;
 
 const gchar * cr_font_weight_to_string (enum CRFontWeight a_code)  ;
+
+enum CRFontWeight
+cr_font_weight_get_bolder (enum CRFontWeight a_weight) ;
 
 const gchar * cr_font_variant_to_string (enum CRFontVariant a_code) ;
 

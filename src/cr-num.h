@@ -72,7 +72,8 @@ enum CRNumType
         NUM_FREQ_KHZ,
         NUM_PERCENTAGE,
 	NUM_INHERIT,
-        NUM_UNKNOWN_TYPE
+        NUM_UNKNOWN_TYPE,
+        NB_NUM_TYPE
 } ;
 
 

@@ -490,9 +490,7 @@ import_style (CRDocHandler *a_this,
         GString *gstr = NULL ;
         GList *cur_media = NULL ;
 
-        g_return_if_fail (a_this 
-                          && a_media_list
-                          && a_location) ;
+        g_return_if_fail (a_this && a_location) ;
 
         gstr = g_string_new (NULL) ;
         if (!gstr) {

@@ -54,14 +54,11 @@ const guchar *gv_at_font_face_buf =
 
 const guchar *gv_at_import_buf = "@import \"subs.css\";";
 
-static void
-  display_help (char *prg_name);
+static void display_help (char *prg_name);
 
-static void
-  display_about (char *prg_name);
+static  void display_about (char *prg_name);
 
-static enum CRStatus
-  test_cr_parser_parse (guchar * a_file_uri);
+static enum  CRStatus test_cr_parser_parse (guchar * a_file_uri);
 
 /**
  *Displays the usage of the test

@@ -210,8 +210,15 @@ enum CRBoxOffsetProp
         NB_BOX_OFFSET_PROPS
 } ;
 
-
-
+typedef struct _CRFontSizeVal CRFontSizeVal ;
+struct _CRFontSizeVal {
+        /*specified value*/
+        CRFontSize sv ;
+        /*computed value*/
+        CRFontSize cv ;
+        /*actual value*/
+        CRFontSize av ;
+} ;
 
 /**
  *The css2 style class.
@@ -258,7 +265,7 @@ struct _CRStyle
         /**
          *the 'font-size' property.
          */
-        CRFontSize *font_size ;
+        CRFontSizeVal font_size ;
         CRFontSizeAdjust *font_size_adjust ;
         enum CRFontStyle font_style ;
         enum CRFontVariant font_variant ;

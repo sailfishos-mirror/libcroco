@@ -1,3 +1,77 @@
+2004-05-29  Dodji Seketeli  <dodji@gnome.org>
+
+	* tests/test-functional-notation.sh,tests/test-inputs/functional-notation.css,
+	tests/test-output-refs/test-functional-notation.out:
+	Added regression tests for #143308
+	
+	* src/cr-parser.c:
+	(cr_parser_parse_term): better handling unary operator.
+	* src/cr-stylesheet.c : 
+	(cr_stylesheet_dump): fprintf (fd, str) ; doesn't behave
+	correctly when str contains a '%' char. Do fprintf (fd, "%", str)
+	instead ;
+	* src/cr-tknzr.c:
+	(cr_tknzr_parse_ident):
+	Properly roll back the input stream when an error occurs.
+	This ChangeLog entry fixes
+	http://bugzilla.gnome.org/show_bug.cgi?id=143308.
+	
+2004-05-01  Dodji Seketeli  <dodji@gnome.org>
+
+	* src/cr-num.c: 
+	(cr_num_to_string): don't output, say, 24generic when the number
+	is a generic number. Otherwise, this breaks regression tests.
+
+2004-04-30  Dodji Seketeli  <dodji@gnome.org>
+
+	* src/cr-num.c: 
+	(cr_num_to_string): added the serialisation numbers of type
+	NUM_INHERIT, NUM_AUTO, NUM_GENERIC
+	* src/cr-rgb.[ch]: 
+	added a "transparent" flag to the CRRgb.
+	added "transparent" to gv_standard_colors.
+	(cr_rgb_is_set_to_transparen):
+	(cr_rgb_set_to_transparent):
+	added these fonction to set/get the rgb transparent property.
+	(cr_rgb_set_from_rgb): deep copy here.
+	(cr_rgb_copy): added this to perform a deep copy.
+	* src/cr-style.c: 
+	(set_prop_margin_x_from_value): fix a stupid break missing bug.
+	(cr_style_set_props_to_initial_values): 
+	set the background-color property initial value to "transparent".
+	(cr_style_num_prop_val_to_string): fix some formating bugs here.
+	
+2004-04-28  Dodji Seketeli  <dodji@gnome.org>
+
+	* src/cr-style.c: 
+	(set_prop_font_size_from_value):
+	fix a buglet in here.
+	(cr_style_resolve_inherited_properties):
+	When we resolve inheritance, set the *computed value*, not
+	the specified value.
+	Resolve inheritance for the "font-size" property.
+
+2004-04-27  Dodji Seketeli  <dodji@gnome.org>
+
+	* Makefile.am: fixed a error when launching make test.
+	* src/cr-fonts.[ch]: 
+	(cr_font_size_get_smaller_predefined_font_size): 
+	(cr_font_size_get_larger_predefined_font_size):
+	(cr_font_size_is_predefined_absolute_font_size):
+	added these new public method.
+	tests/test-inputs/parsing-location.css: updated this test output.
+	
+2004-04-19  Dodji Seketeli  <dodji@gnome.org>
+
+	* csslint/csslint.c: 
+	(import_style): make this work with null media list.
+	* src/cr-tknzr.c: 
+	(cr_tknzr_parse_uri): correctly set the parsing location
+	of uris (e.g: url("an-url");). The parsing location
+	points the 'u' of the 'url' keyword.
+	This is an attempt to fix
+	http://bugzilla.gnome.org/show_bug.cgi?id=139881 .
+
 2004-04-18  Dodji Seketeli  <dodji@gnome.org>
 
 	* configure.in: bumped version number 0.6.0 and lib version
@@ -51,12 +125,54 @@
 	record parsing location of number tokens.
 	These fix http://bugzilla.gnome.org/show_bug.cgi?id=139878.
 
-2004-04-11  Dodji Seketeli  <dodji@gnome.org>
+2004-04-15  Dodji Seketeli  <dodji@gnome.org>
 
+	* src/cr-font.c: 
+	(cr_font_size_copy): reflect the CRFont
+	layout change.
+	(cr_font_size_set_predefined_absolute_font_size): 
+	(cr_font_size_set_relative_font_size):
+	(cr_font_size_set_absolute_font_size):
+	(cr_font_size_set_to_inherit):
+	added these
+	methods to set the values of a CRFontSize.
+	(cr_font_size_is_set_to_inherit):added this method
+	to set the CRFontSize to the inherit value.
+	(cr_font_weight_get_bolder): added this method to get
+	a bolder font weight than a given one.
+	* src/font.h:
+	make CRFont instanciate on the stack.
+	* src/cr-num.h: cleanup.
+	* cr-style.c: 
+	(set_prop_font_size_from_value): reflect the changes
+	Done in the layout of the CRStyle::font_size field.
+	(cr_style_set_props_to_default_values): 
+	set font_size specified value to inherit.
+	(cr_style_set_props_to_initial_values): 
+	set the 'width' prop to 800px. 
+	Set the 'font-size' prop to "medium".
+	(this is to be applied to
+	the root box)
+	(cr_style_resolve_inherited_properties):
+	Specified value inherit the *computed* value of
+	their parent style, not the specified one !
+	Started to work on the inheritance resolution
+	of the font_size prop.
+	(cr_style_to_string): updated this to reflect the
+	addition of specified, computed and actual value
+	in CRFontSize.
+	* src/cr-style.h: 
+	created struct _CRFontSizeVal. It has a specified,
+	computed and actual value. CRStyle::font_size
+	is now of type struct _CRFontSizeVal.
+
+2004-04-11  Dodji Seketeli  <dodji@gnome.org>
+  
 	* tests/test-output-refs/test-sel-child-class.out:
 	added the reference output of the new test-sel-child-class
 	regression test.
 
+	
 	* tests/test-inputs/sel-child-class.css
 	* tests/test-inputs/sel-child-class.xml
 	* tests/test-sel-child-class.sh: added these new files.
