@@ -2362,6 +2362,7 @@ cr_tknzr_get_next_token (CRTknzr *a_this, CRToken **a_tk)
         case '\t':
         case '\n':
         case '\f':
+        case '\r':
         {
                 guchar *start = NULL, *end = NULL ;
                 status = cr_tknzr_parse_w (a_this, &start, &end) ;
