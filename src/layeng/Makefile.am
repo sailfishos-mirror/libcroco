@@ -5,7 +5,7 @@ crlayenginc_HEADERS= *.h
 
 #the layout engine files
 if HAVE_LAYENG
-LAYENG_SRCS= cr-style.c cr-box.c cr-lay-eng.c
+LAYENG_SRCS= cr-style.c cr-box.c cr-box-view.c cr-lay-eng.c
 endif
 
 libcrlayeng_la_SOURCES=$(LAYENG_SRCS)

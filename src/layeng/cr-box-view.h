@@ -35,26 +35,43 @@
 G_BEGIN_DECLS
 
 #define CR_TYPE_BOX_VIEW            (cr_box_view_get_type ())
-#define CR_BOX_VIEW(obj)            (G_TYPE_CHECK_INSTANCE_CAST ((obj), CR_TYPE_BOX_VIEW, GtkLayout))
-#define CR_BOX_VIEW_CLASS(klass)    (G_TYPE_CHECK_CLASS_CAST ((klass), CR_TYPE_BOX_VIEW, GtkLayoutClass))
+#define CR_BOX_VIEW(obj)            (G_TYPE_CHECK_INSTANCE_CAST ((obj), CR_TYPE_BOX_VIEW, CRBoxView))
+#define CR_BOX_VIEW_CLASS(klass)    (G_TYPE_CHECK_CLASS_CAST ((klass), CR_TYPE_BOX_VIEW, CRBoxViewClass))
 #define CR_IS_BOX_VIEW(obj)         (G_TYPE_CHECK_INSTANCE_TYPE ((obj), CR_TYPE_BOX_VIEW))
 #define CR_IS_BOX_VIEW_CLASS(klass) (G_TYPE_CHECK_CLASS_TYPE ((klass), CR_TYPE_BOX_VIEW))
-#define CR_BOX_VIEW_GET_CLASS(obj)  (G_TYPE_INSTANCE_GET_CLASS ((obj), CR_TYPE_BOX_VIEW, GtkLayoutClass))
+#define CR_BOX_VIEW_GET_CLASS(obj)  (G_TYPE_INSTANCE_GET_CLASS ((obj), CR_TYPE_BOX_VIEW, CRBoxViewClass))
 
 typedef struct _CRBoxView CRBoxView ;
 typedef struct _CRBoxViewClass CRBoxViewClass ;
+typedef struct _CRBoxViewPriv CRBoxViewPriv ;
 
 struct _CRBoxView
 {
-	GtkLayout view ;
-	CRBox *box ;
+	GtkLayout parent ;
+        CRBoxViewPriv *priv ;
+
+        /**<public fields>*/
+        CRBoxView *children ;
+        CRBoxView *next ;
+        CRBoxView *prev ;
+        
 } ;
 
 struct _CRBoxViewClass
 {
 	GtkLayoutClass parent_class ;
-	
 } ;
+
+
+GType
+cr_box_view_get_type (void) ;
+
+CRBoxView *
+cr_box_view_new (void) ;
+
+void
+cr_box_view_destroy (GtkObject *a_this) ;
+
 
 G_END_DECLS
 
