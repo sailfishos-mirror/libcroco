@@ -1388,8 +1388,7 @@ cr_sel_eng_get_matched_properties_from_cascade  (CRSelEng *a_this,
 {
         CRStatement ** stmts_tab = NULL ;
         enum CRStatus status = CR_OK ;
-        gulong tab_size = 0, tab_len = 0, i = 0, total_tab_len = 0,
-                index = 0;
+        gulong tab_size = 0, tab_len = 0, i = 0, index = 0;
         enum CRStyleOrigin origin = 0 ;
         gushort stmts_chunck_size = 8 ;
         CRStyleSheet *sheet = NULL ;
@@ -1400,30 +1399,14 @@ cr_sel_eng_get_matched_properties_from_cascade  (CRSelEng *a_this,
                               && a_props_hashtable,
                               CR_BAD_PARAM_ERROR) ;
 
-        stmts_tab = g_try_malloc (stmts_chunck_size *
-                                  sizeof (CRStatement *)) ;
-
-        if (!stmts_tab)
-        {
-                cr_utils_trace_info ("Out of memory") ;
-                status = CR_ERROR ;
-                goto error ;
-        }
-        memset (stmts_tab, 0, stmts_chunck_size * sizeof (CRStatement*)) ;
-        tab_size = stmts_chunck_size ;
-                tab_len = tab_size ;
-
         for (origin = ORIGIN_UA ; origin < NB_ORIGINS ; origin++)
         {
                 sheet = cr_cascade_get_sheet (a_cascade, origin) ;
                 if (!sheet)
-                        continue ;                
-
-                while ((status = cr_sel_eng_get_matched_rulesets_real 
-                        (a_this, sheet, a_node, stmts_tab + index, &tab_len))
-                       == CR_OUTPUT_TOO_SHORT_ERROR)
+                        continue ;
+                if (tab_size - index < 1)
                 {
-                        stmts_tab = g_try_realloc 
+                        stmts_tab = g_try_realloc
                                 (stmts_tab,
                                  (tab_size + stmts_chunck_size)
                                  * sizeof (CRStatement*)) ;
@@ -1433,8 +1416,33 @@ cr_sel_eng_get_matched_properties_from_cascade  (CRSelEng *a_this,
                                 status = CR_ERROR ;
                                 goto error ;
                         }
-                        tab_size +=  stmts_chunck_size ;
+                        tab_size += stmts_chunck_size ;
+                        /*
+                         *compute the max size left for
+                         *cr_sel_eng_get_matched_rulesets_real()'s output tab 
+                         */
+                        tab_len = tab_size - index ;
+                }
+                while ((status = cr_sel_eng_get_matched_rulesets_real
+                        (a_this, sheet, a_node, stmts_tab + index, &tab_len))
+                       == CR_OUTPUT_TOO_SHORT_ERROR)
+                {
+                        stmts_tab = g_try_realloc
+                                (stmts_tab,
+                                 (tab_size + stmts_chunck_size)
+                                 * sizeof (CRStatement*)) ;
+                        if (!stmts_tab)
+                        {
+                                cr_utils_trace_info ("Out of memory") ;
+                                status = CR_ERROR ;
+                                goto error ;
+                        }
+                        tab_size += stmts_chunck_size ;
                         index += tab_len ;
+                        /*
+                         *compute the max size left for
+                         *cr_sel_eng_get_matched_rulesets_real()'s output tab 
+                         */
                         tab_len = tab_size - index ;
                 }
                 if (status != CR_OK)
@@ -1443,7 +1451,7 @@ cr_sel_eng_get_matched_properties_from_cascade  (CRSelEng *a_this,
                                              "selector engine") ;
                         goto error ;
                 }
-                total_tab_len += tab_len ;
+                index += tab_len ;
         }
 
         /*
@@ -1452,13 +1460,12 @@ cr_sel_eng_get_matched_properties_from_cascade  (CRSelEng *a_this,
          *Make sure one can walk from the declaration to
          *the stylesheet.
          */
-        for (i = 0 ; i < total_tab_len ; i ++)
+        for (i = 0 ; i < index ; i ++)
         {
                 CRStatement *stmt = stmts_tab[i] ;
 
                 if (!stmt)
-                        continue ;
-                
+                        continue ;                
                 switch (stmt->type)
                 {
                 case RULESET_STMT:
@@ -1468,7 +1475,6 @@ cr_sel_eng_get_matched_properties_from_cascade  (CRSelEng *a_this,
                                 (a_props_hashtable,
                                  stmt) ;
                         break ;
-
                 default:
                         break ;
                 }

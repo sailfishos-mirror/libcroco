@@ -1,3 +1,13 @@
+2004-02-26  Dodji Seketeli  <dodji@gnome.org>
+
+	* src/cr-sel-eng.c: 
+	(cr_sel_eng_get_matched_properties_from_cascade):
+	Second (or maybe third) attempt to fix the cascading
+	cascading thing. I got *really* confused here.
+	I hope it works this time.
+	Thanks to to Rob BUIS who reported the bug.
+	Off to bed now.
+
 2004-02-24  Dodji Seketeli <dodji@gnome.org>
 
 	* src/cr-parser.c: 
