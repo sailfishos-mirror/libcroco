@@ -36,13 +36,17 @@ G_BEGIN_DECLS
 
 /**
  *@file
- *The libcroco basic input source
+ *The libcroco basic input stream class
  *declaration file.
  */
 
 typedef struct _CRInput CRInput ;
 typedef struct _CRInputPriv CRInputPriv ;
 
+/**
+ *The #CRInput class provides the abstraction of 
+ *an utf8-encoded character stream.
+ */
 struct _CRInput 
 {
         CRInputPriv *priv ;

@@ -29,6 +29,7 @@
  *The declaration of the #CRTknzr (tokenizer)
  *class.
  */
+
 #ifndef __CR_TKNZR_H__
 #define __CR_TKNZR_H__
 
@@ -42,8 +43,15 @@ G_BEGIN_DECLS
 typedef struct _CRTknzr CRTknzr ;
 typedef struct _CRTknzrPriv CRTknzrPriv ;
 
+/**
+ *The tokenizer is the class that knows
+ *about all the css token. Its main job is
+ *to return the next token found in the character 
+ *input stream.
+ */
 struct _CRTknzr
 {
+        /*the private data of the tokenizer.*/
         CRTknzrPriv *priv ;
 } ;
 

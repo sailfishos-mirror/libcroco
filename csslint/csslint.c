@@ -34,8 +34,8 @@
  */
 struct Options
 {
-	gboolean param_version ;
-	gboolean param_cssom ;
+	gboolean show_version ;
+	gboolean use_cssom ;
 
 	gchar ** files_list ;
 };
@@ -66,26 +66,25 @@ csslint_parse_cmd_line (int a_argc, char **a_argv,
 	int i= 0 ;
 
 	g_return_if_fail (a_options) ;
-	memset (a_options, 0, sizeof (struct Options)) ;
-
-    if (a_argc <= 1) 
-    {
-        csslint_usage(a_argv[0]);
-    }
+	        
+        if (a_argc <= 1) 
+        {
+                csslint_usage(a_argv[0]);
+        }
 		
 	for (i = 1 ; i < a_argc ; i++)
 	{
 		if (a_argv[i][0] != '-') break ;
 		
 		if ((!strcmp (a_argv[i], "-version")) || 
-			(!strcmp (a_argv[i], "--version")))
+                    (!strcmp (a_argv[i], "--version")))
 		{
-			a_options->param_version = TRUE ;
+			a_options->show_version = TRUE ;
 		}
 		if ((!strcmp (a_argv[i], "-cssom")) || 
-			(!strcmp (a_argv[i], "--cssom")))
+                    (!strcmp (a_argv[i], "--cssom")))
 		{
-			a_options->param_cssom = TRUE ;
+			a_options->use_cssom = TRUE ;
 		}
 	}
 	
@@ -178,15 +177,17 @@ main (int argc, char **argv)
 	struct Options options;
 	enum CRStatus status = CR_OK;
 	
+        memset (&options, 0, sizeof (struct Options)) ;
+        options.use_cssom = TRUE ;
 	csslint_parse_cmd_line (argc, argv, &options);
 
-	if (options.param_version == TRUE)
+	if (options.show_version == TRUE)
 	{
 		csslint_show_version(argv[0]);
 		return 0;
 	}
 
-	if (options.param_cssom == TRUE)
+	if (options.use_cssom == TRUE)
 	{
 		if (options.files_list != NULL)
 		{

@@ -251,7 +251,8 @@ struct _CRDocHandler
 
 	/**
 	 *Is called to notify an unrecoverable parsing error.
-	 *
+	 *This is the place to put emergency routines that free allocated
+	 *resources.
 	 */
 	void (*unrecoverable_error) (CRDocHandler *a_this) ;
 

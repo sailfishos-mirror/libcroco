@@ -1524,7 +1524,6 @@ static enum CRStatus
 cr_tknzr_parse_important (CRTknzr *a_this)
 {
         guint32 cur_char = 0 ;
-        guchar next_bytes [9] ;
         CRInputPos init_pos ;
         enum CRStatus status = CR_OK ;
 
@@ -1540,28 +1539,22 @@ cr_tknzr_parse_important (CRTknzr *a_this)
 
         cr_tknzr_try_to_skip_spaces (a_this) ;
 
-        PEEK_BYTE (a_this, 1, &next_bytes[0]) ;
-        PEEK_BYTE (a_this, 2, &next_bytes[1]) ;
-        PEEK_BYTE (a_this, 3, &next_bytes[2]) ;
-        PEEK_BYTE (a_this, 4, &next_bytes[3]) ;
-        PEEK_BYTE (a_this, 5, &next_bytes[4]) ;
-        PEEK_BYTE (a_this, 6, &next_bytes[5]) ;
-        PEEK_BYTE (a_this, 7, &next_bytes[6]) ;
-        PEEK_BYTE (a_this, 8, &next_bytes[7]) ;
-        PEEK_BYTE (a_this, 9, &next_bytes[9]) ;
-
-        if (next_bytes[0]     == 'i'
-            && next_bytes[1]  == 'm'
-            && next_bytes[2]  == 'p'
-            && next_bytes[3]  == 'o'
-            && next_bytes[4]  == 'r'
-            && next_bytes[5]  == 't'
-            && next_bytes[6]  == 'a'
-            && next_bytes[7]  == 'n'
-            && next_bytes[8]  == 't')
+        if (BYTE (PRIVATE (a_this)->input, 1, NULL)       == 'i'
+            && BYTE (PRIVATE (a_this)->input, 2, NULL)    == 'm'
+            && BYTE (PRIVATE (a_this)->input, 3, NULL)    == 'p'
+            && BYTE (PRIVATE (a_this)->input, 4, NULL)    == 'o'
+            && BYTE (PRIVATE (a_this)->input, 5, NULL)    == 'r'
+            && BYTE (PRIVATE (a_this)->input, 6, NULL)    == 't'
+            && BYTE (PRIVATE (a_this)->input, 7, NULL)    == 'a'
+            && BYTE (PRIVATE (a_this)->input, 8, NULL)    == 'n'
+            && BYTE (PRIVATE (a_this)->input, 9, NULL)    == 't')
         {
                 SKIP_BYTES (a_this, 9) ;
                 return CR_OK ;
+        }
+        else
+        {
+                status = CR_PARSING_ERROR ;
         }
 
  error:

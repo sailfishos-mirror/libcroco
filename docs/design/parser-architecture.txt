@@ -131,8 +131,14 @@ to:
 	     the a_property and a_value out parameter are valid if and only
 	     if the function return value is CR_OK.
 
+	     * whenever the function is parsing a construct that must
+	     be notified to the user as part of the SAC api spec, notify
+	     the user by calling the right SAC callback.
+
 	     * if the parsing failed, leave the position in the stream unchanged.
 	     That is the position in the character stream should be as if
 	     the parsing function hasn't been called at all.
+
+	     
 
  

@@ -3,8 +3,12 @@
 
 Well, in the cr_statement_xxx_parse_functions, memleaks 
 occur (the parsing result set in the sac callback is not freed)
-when a parsing fails. This is because I haven't implemented
-the "error" SAC callbacks yet. I must do it !!!
+when a parsing fails. This is because the unrecoverable error
+does not get called when the standalone parsing functions exported
+by CRParser are called independently.
+I have now to support 2 modes of parsing. Normal and standalone.
+In standalone mode, the standalone parsing functions must
+call the "unrecoverable_error" sac callback when they fail.
 
 More debug of the test case for cr_statement_parse_from_buf ().
 

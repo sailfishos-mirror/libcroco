@@ -1671,6 +1671,8 @@ cr_parser_parse_any_core (CRParser *a_this)
         case INCLUDES_TK:
         case DASHMATCH_TK:
         case S_TK:
+        case IMPORTANT_SYM_TK:
+        case SEMICOLON_TK:
                 status = CR_OK ;
                 break ;
         case FUNCTION_TK:

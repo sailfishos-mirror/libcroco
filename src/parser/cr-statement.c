@@ -71,6 +71,29 @@ parse_font_face_start_font_face_cb (CRDocHandler *a_this)
 }
 
 static void
+parse_font_face_unrecoverable_error_cb (CRDocHandler *a_this)
+{
+        CRStatement *stmt = NULL ;
+        enum CRStatus status = CR_OK ;
+
+        g_return_if_fail (a_this) ;
+        
+        status = cr_doc_handler_get_ctxt (a_this, (gpointer*)&stmt) ;
+        if (status != CR_OK)
+        {
+                cr_utils_trace_info ("Couldn't get parsing context. "
+                                     "This may lead to some memory leaks.") ;
+                return ;
+        }
+        if (stmt)
+        {
+                cr_statement_destroy (stmt) ;
+                cr_doc_handler_set_ctxt (a_this, NULL) ;
+                return ;
+        }        
+}
+
+static void
 parse_font_face_property_cb (CRDocHandler *a_this,
 			     GString *a_name,
 			     CRTerm *a_value)
@@ -81,11 +104,11 @@ parse_font_face_property_cb (CRDocHandler *a_this,
 	CRStatement *stmt = NULL ;
 
 	g_return_if_fail (a_this && a_name) ;
-	
+
 	status = cr_doc_handler_get_ctxt (a_this, (gpointer*)&stmt) ;
 	g_return_if_fail (status == CR_OK && stmt) ;
 	g_return_if_fail (stmt->type == AT_FONT_FACE_RULE_STMT) ;
-	
+
 	name = g_string_new_len (a_name->str, a_name->len) ;
 	g_return_if_fail (name) ;	
 	decl = cr_declaration_new (stmt, name, a_value) ;
@@ -149,6 +172,29 @@ parse_page_start_page_cb (CRDocHandler *a_this,
 }
 
 static void
+parse_page_unrecoverable_error_cb (CRDocHandler *a_this)
+{
+        CRStatement *stmt = NULL ;
+        enum CRStatus status = CR_OK ;
+
+        g_return_if_fail (a_this) ;
+
+        status = cr_doc_handler_get_ctxt (a_this, (gpointer*)&stmt) ;
+        if (status != CR_OK)
+        {
+                cr_utils_trace_info ("Couldn't get parsing context. "
+                                     "This may lead to some memory leaks.") ;
+                return ;
+        }
+        if (stmt)
+        {
+                cr_statement_destroy (stmt) ;
+                stmt = NULL ;
+                cr_doc_handler_set_ctxt (a_this, NULL) ;
+        }
+}
+
+static void
 parse_page_property_cb (CRDocHandler *a_this,
 			GString *a_name, 
 			CRTerm *a_expression)
@@ -184,8 +230,9 @@ parse_page_end_page_cb (CRDocHandler *a_this,
 	status = cr_doc_handler_get_ctxt (a_this, (gpointer*)&stmt) ;
 	g_return_if_fail (status == CR_OK && stmt);
 	g_return_if_fail (stmt->type == AT_PAGE_RULE_STMT);
-
+        
 	status = cr_doc_handler_set_result (a_this, stmt) ;
+        status = cr_doc_handler_set_result (a_this, NULL) ;
 	g_return_if_fail (status == CR_OK) ;
 }
 
@@ -211,8 +258,34 @@ parse_at_media_start_media_cb (CRDocHandler *a_this,
 	at_media = cr_statement_new_at_media_rule (NULL, NULL,
 						   media_list) ;
 
-	status = cr_doc_handler_set_ctxt (a_this, at_media) ;
-	g_return_if_fail (status == CR_OK) ;	
+	status = cr_doc_handler_set_ctxt (a_this, at_media) ;        
+	g_return_if_fail (status == CR_OK) ;
+        status = cr_doc_handler_set_result (a_this, at_media) ;
+        g_return_if_fail (status == CR_OK) ;
+}
+
+static void
+parse_at_media_unrecoverable_error_cb (CRDocHandler *a_this)
+{
+        enum CRStatus status = CR_OK ;
+        CRStatement * stmt = NULL ;
+
+        g_return_if_fail (a_this) ;
+
+        status = cr_doc_handler_get_result (a_this, (gpointer*)&stmt) ;
+        if (status != CR_OK)
+        {
+                cr_utils_trace_info ("Couldn't get parsing context. "
+                                     "This may lead to some memory leaks.") ;
+                return ;
+        }
+        if (stmt)
+        {
+                cr_statement_destroy (stmt) ;
+                stmt = NULL ;
+                cr_doc_handler_set_ctxt (a_this, NULL) ;
+                cr_doc_handler_set_result (a_this, NULL) ;
+        }
 }
 
 static void
@@ -321,6 +394,27 @@ parse_ruleset_start_selector_cb (CRDocHandler *a_this,
 	g_return_if_fail (ruleset) ;
 
 	cr_doc_handler_set_result (a_this, ruleset) ;	
+}
+
+static void
+parse_ruleset_unrecoverable_error_cb (CRDocHandler *a_this)
+{
+        CRStatement *stmt = NULL ;
+        enum CRStatus status = CR_OK ;
+
+        status = cr_doc_handler_get_result (a_this, (gpointer*)&stmt) ;
+        if (status != CR_OK)
+        {
+                cr_utils_trace_info ("Couldn't get parsing context. "
+                                     "This may lead to some memory leaks.") ;
+                return ;
+        }
+        if (stmt)
+        {
+                cr_statement_destroy (stmt) ;
+                stmt = NULL ;
+                cr_doc_handler_set_result (a_this, NULL) ;
+        }
 }
 
 static void
@@ -927,7 +1021,8 @@ cr_statement_ruleset_parse_from_buf (const guchar * a_buf,
 	sac_handler->start_selector = parse_ruleset_start_selector_cb ;
 	sac_handler->end_selector = parse_ruleset_end_selector_cb ;
 	sac_handler->property = parse_ruleset_property_cb ;
-
+        sac_handler->unrecoverable_error = 
+                parse_ruleset_unrecoverable_error_cb ;
 	
 	cr_parser_set_sac_handler (parser, sac_handler) ;
 	cr_parser_try_to_skip_spaces_and_comments (parser) ;
@@ -1076,6 +1171,8 @@ cr_statement_at_media_rule_parse_from_buf (const guchar *a_buf,
 		parse_at_media_end_selector_cb ;
 	sac_handler->end_media = 
 		parse_at_media_end_media_cb ;
+        sac_handler->unrecoverable_error =
+                parse_at_media_unrecoverable_error_cb ;
 
 	status = cr_parser_set_sac_handler (parser, sac_handler) ;
 	if (status != CR_OK)
@@ -1388,6 +1485,8 @@ cr_statement_at_page_rule_parse_from_buf (const guchar *a_buf,
 		parse_page_property_cb ;
 	sac_handler->end_page = 
 		parse_page_end_page_cb ;
+        sac_handler->unrecoverable_error =
+                parse_page_unrecoverable_error_cb ;
 
 	status = cr_parser_set_sac_handler (parser, sac_handler) ;
 	if (status != CR_OK)
@@ -1590,6 +1689,8 @@ cr_statement_font_face_rule_parse_from_buf (const guchar *a_buf,
 	sac_handler->start_font_face = parse_font_face_start_font_face_cb ;
 	sac_handler->property = parse_font_face_property_cb ;
 	sac_handler->end_font_face = parse_font_face_end_font_face_cb ;	
+        sac_handler->unrecoverable_error =
+                parse_font_face_unrecoverable_error_cb ;
 
 	status = cr_parser_set_sac_handler (parser, sac_handler) ;
 	if (status != CR_OK)

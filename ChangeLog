@@ -1,3 +1,24 @@
+2003-06-22  Dodji Seketeli  <dodji at seketeli dot org>
+
+	* src/parser/cr-statement.c: added
+	parse_font_face_unrecoverable_error_cb(), 
+	parse_page_unrecoverable_error_cb() ... to handle
+	parsing error in the cr_statement_xxx_parse() method.
+	These callback method are not called yet.
+	
+	* src/parser/cr-tknzr.c: made the cr_tknzr_parse_important() look
+	somewhat better.
+	
+	* src/parser/cr-parser.c: fixed some bugs in the parser.
+	It does now parse the w3c forward compatible parsing test sheet
+	at http://www.w3.org/Style/CSS/Test/CSS1/current/sec71.htm .
+
+	* docs/design/parser-architecture.txt: updated this doc.
+	A lot more is still needed.
+
+	* csslint/csslint.c: fixed some small bugs in csslint. Now, --cssom is
+	set by default.
+
 2003-06-21  dodji  <dodji@seketeli.org>
 
 	* src/parser/cr-statement.[ch]:
