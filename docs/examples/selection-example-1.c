@@ -86,12 +86,32 @@ int init(struct workspace *ws, char **args)
 /* ...and destruct in reverse order*/
 void fini(struct workspace *ws)
 {
-  if (ws->selector) cr_sel_eng_destroy(ws->selector);
-  if (ws->cascade) cr_cascade_destroy(ws->cascade);
-  if (ws->stylesheet) cr_stylesheet_destroy(ws->stylesheet);
-  if (ws->result) xmlXPathFreeObject(ws->result);
-  if (ws->xpath) xmlXPathFreeContext(ws->xpath); 
-  if (ws->document) xmlFreeDoc(ws->document);
+  if (ws->selector) 
+  {
+	  cr_sel_eng_destroy(ws->selector);
+	  ws->selector = NULL ;
+  }
+  if (ws->cascade) 
+  {
+	  cr_cascade_destroy(ws->cascade);
+	  ws->cascade = NULL ;
+  }
+
+  if (ws->result) 
+  {	  
+	  xmlXPathFreeObject(ws->result);
+	  ws->result = NULL ;
+  }
+  if (ws->xpath) 
+  {
+	  xmlXPathFreeContext(ws->xpath); 
+	  ws->xpath = NULL ;
+  }
+  if (ws->document) 
+  {
+	  xmlFreeDoc(ws->document);
+	  ws->document = NULL ;
+  }  
 }
 
 void print_property(gpointer name, gpointer decl, gpointer data)

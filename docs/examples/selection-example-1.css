@@ -10,19 +10,25 @@ report > entry
 
 note
 { 
-  color : green;
+  color : note-color;
   frame : solid;
 }
 
 note[id]
 { 
-  color : blue;
+  color : note-id-color;
   frame : solid;
 }
 
 note[id=bar]
 { 
   margin : 5px;
+  color: note-id-bar-color ;
+}
+
+note[id=foo]
+{ 
+  color : note-id-foo-color;
 }
 
 entry[type=notice] note[id=bar]

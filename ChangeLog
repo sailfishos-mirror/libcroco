@@ -1,3 +1,9 @@
+2003-12-12  Dodji Seketeli <dodji@gnome.org>
+
+	* docs/examples/selection-example-1.c: a bit of cleanup 
+	and bug fix here.
+	* docs/examples/selection-example-1.css: added more test cases.
+	
 2003-12-11  Dodji Seketeli <dodji@gnome.org>
 
 	* configure.in: updated version numbers for 0.4.
