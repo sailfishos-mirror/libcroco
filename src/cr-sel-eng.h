@@ -72,7 +72,7 @@ cr_sel_eng_sel_get_matched_rulesets (CRSelEng *a_this,
                                      CRStyleSheet *a_sheet,
                                      xmlNode *a_node,
                                      CRStatement ***a_rulesets,
-                                     glong *a_len) ;
+                                     gulong *a_len) ;
 void
 cr_sel_eng_destroy (CRSelEng *a_this) ;
 

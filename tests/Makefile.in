@@ -93,12 +93,13 @@ U = @U@
 VERSION = @VERSION@
 WITH_SELENG = @WITH_SELENG@
 
-noinst_PROGRAMS = test0 test1 test2 test3 test4
+noinst_PROGRAMS = test0 test1 test2 test3 test4 test5
 test0_SOURCES = test0-main.c 
 test1_SOURCES = test1-main.c 
 test2_SOURCES = test2-main.c cr-test-utils.c cr-test-utils.h
 test3_SOURCES = test3-main.c cr-test-utils.c cr-test-utils.h
 test4_SOURCES = test4-main.c cr-test-utils.c cr-test-utils.h
+test5_SOURCES = test5-main.c cr-test-utils.c cr-test-utils.h
 
 LDADD = $(top_srcdir)/src/libcroco.la
 
@@ -111,7 +112,7 @@ mkinstalldirs = $(SHELL) $(top_srcdir)/mkinstalldirs
 CONFIG_HEADER = ../libcroco-config.h
 CONFIG_CLEAN_FILES = 
 noinst_PROGRAMS =  test0$(EXEEXT) test1$(EXEEXT) test2$(EXEEXT) \
-test3$(EXEEXT) test4$(EXEEXT)
+test3$(EXEEXT) test4$(EXEEXT) test5$(EXEEXT)
 PROGRAMS =  $(noinst_PROGRAMS)
 
 
@@ -138,6 +139,10 @@ test4_OBJECTS =  test4-main.$(OBJEXT) cr-test-utils.$(OBJEXT)
 test4_LDADD = $(LDADD)
 test4_DEPENDENCIES =  $(top_srcdir)/src/libcroco.la
 test4_LDFLAGS = 
+test5_OBJECTS =  test5-main.$(OBJEXT) cr-test-utils.$(OBJEXT)
+test5_LDADD = $(LDADD)
+test5_DEPENDENCIES =  $(top_srcdir)/src/libcroco.la
+test5_LDFLAGS = 
 COMPILE = $(CC) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
 LTCOMPILE = $(LIBTOOL) --mode=compile $(CC) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
 CCLD = $(CC)
@@ -150,9 +155,10 @@ DISTFILES = $(DIST_COMMON) $(SOURCES) $(HEADERS) $(TEXINFOS) $(EXTRA_DIST)
 TAR = gtar
 GZIP_ENV = --best
 DEP_FILES =  .deps/cr-test-utils.P .deps/test0-main.P .deps/test1-main.P \
-.deps/test2-main.P .deps/test3-main.P .deps/test4-main.P
-SOURCES = $(test0_SOURCES) $(test1_SOURCES) $(test2_SOURCES) $(test3_SOURCES) $(test4_SOURCES)
-OBJECTS = $(test0_OBJECTS) $(test1_OBJECTS) $(test2_OBJECTS) $(test3_OBJECTS) $(test4_OBJECTS)
+.deps/test2-main.P .deps/test3-main.P .deps/test4-main.P \
+.deps/test5-main.P
+SOURCES = $(test0_SOURCES) $(test1_SOURCES) $(test2_SOURCES) $(test3_SOURCES) $(test4_SOURCES) $(test5_SOURCES)
+OBJECTS = $(test0_OBJECTS) $(test1_OBJECTS) $(test2_OBJECTS) $(test3_OBJECTS) $(test4_OBJECTS) $(test5_OBJECTS)
 
 all: all-redirect
 .SUFFIXES:
@@ -231,6 +237,10 @@ test3$(EXEEXT): $(test3_OBJECTS) $(test3_DEPENDENCIES)
 test4$(EXEEXT): $(test4_OBJECTS) $(test4_DEPENDENCIES)
 	@rm -f test4$(EXEEXT)
 	$(LINK) $(test4_LDFLAGS) $(test4_OBJECTS) $(test4_LDADD) $(LIBS)
+
+test5$(EXEEXT): $(test5_OBJECTS) $(test5_DEPENDENCIES)
+	@rm -f test5$(EXEEXT)
+	$(LINK) $(test5_LDFLAGS) $(test5_OBJECTS) $(test5_LDADD) $(LIBS)
 
 tags: TAGS
 

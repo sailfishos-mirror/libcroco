@@ -2552,8 +2552,10 @@ cr_parser_parse_simple_selector (CRParser *a_this, CRSimpleSel **a_sel)
         else if (token && token->type == IDENT_TK)
         {
                 sel->name = token->str ;
+                sel->type_mask |= TYPE_SELECTOR ;
                 token->str = NULL ;
                 found_sel = TRUE ;
+                
         }
         else
         {
@@ -2592,7 +2594,7 @@ cr_parser_parse_simple_selector (CRParser *a_this, CRSimpleSel **a_sel)
 
                         add_sel->content.id_name = token->str ;
                         token->str = NULL ;
-
+                        
                         add_sel_list = 
                                 cr_additional_sel_append 
                                 (add_sel_list, add_sel) ;

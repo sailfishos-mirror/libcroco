@@ -58,7 +58,7 @@ cr_sel_eng_get_matched_rulesets_real (CRSelEng *a_this,
                                       CRStyleSheet *a_stylesheet,
                                       xmlNode *a_node,
                                       CRStatement **a_rulesets, 
-                                      glong *a_len) ;
+                                      gulong *a_len) ;
 struct _CRSelEngPriv
 {
         /*not used yet*/
@@ -342,7 +342,7 @@ sel_matches_node_real (CRSelEng *a_this, CRSimpleSel *a_sel,
 {
         CRSimpleSel *cur_sel = NULL ;
 	xmlNode *cur_node = NULL ;
-
+        
 	g_return_val_if_fail (a_this && PRIVATE (a_this)
 			      && a_this && a_node 
 			      && a_node->type == XML_ELEMENT_NODE
@@ -353,6 +353,8 @@ sel_matches_node_real (CRSelEng *a_this, CRSimpleSel *a_sel,
 	for (cur_sel = a_sel ; 
 	     cur_sel && cur_sel->next ; 
 	     cur_sel = cur_sel->next) ;
+
+        *a_result = FALSE ;
 
 	for (cur_node = a_node ; cur_sel ; cur_sel = cur_sel->prev)
 	{
@@ -560,13 +562,13 @@ cr_sel_eng_get_matched_rulesets_real (CRSelEng *a_this,
                                       CRStyleSheet *a_stylesheet,
                                       xmlNode *a_node,
                                       CRStatement **a_rulesets, 
-                                      glong *a_len)
+                                      gulong *a_len)
 {
         CRStatement *cur_stmt = NULL ;
         CRSelector *sel_list = NULL, *cur_sel = NULL ;
         gboolean matches = FALSE ;
         enum CRStatus status = CR_OK ;
-        glong i = 0;
+        gulong i = 0;
 
         g_return_val_if_fail (a_this
                               && a_stylesheet
@@ -687,6 +689,7 @@ cr_sel_eng_get_matched_rulesets_real (CRSelEng *a_this,
          */
         g_return_val_if_fail (!PRIVATE (a_this)->cur_stmt, CR_ERROR) ;
         PRIVATE (a_this)->sheet = NULL ;
+        *a_len = i ;
         return CR_OK ;
 }
 
@@ -717,7 +720,7 @@ cr_sel_eng_new (void)
                 g_free (result) ;
 		return NULL ;
 	}
-        memset (result, 0, sizeof (CRSelEngPriv)) ;
+        memset (PRIVATE (result), 0, sizeof (CRSelEngPriv)) ;
 
 	return result ;
 }
@@ -771,12 +774,12 @@ cr_sel_eng_sel_get_matched_rulesets (CRSelEng *a_this,
                                      CRStyleSheet *a_sheet,
                                      xmlNode *a_node,
                                      CRStatement ***a_rulesets,
-                                     glong *a_len)
+                                     gulong *a_len)
 {
         CRStatement ** stmts_tab = NULL ;
         enum CRStatus status = CR_OK ;
-        glong tab_size = 0, tab_len = 0 ;
-        gshort stmts_chunck_size = 8 ;
+        gulong tab_size = 0, tab_len = 0 ;
+        gushort stmts_chunck_size = 8 ;
 
         g_return_val_if_fail (a_this
                               && a_sheet
@@ -794,6 +797,7 @@ cr_sel_eng_sel_get_matched_rulesets (CRSelEng *a_this,
                 status = CR_ERROR ;
                 goto error ;
         }
+        memset (stmts_tab, 0, stmts_chunck_size * sizeof (CRStatement*)) ;
 
         tab_size = stmts_chunck_size ;
         tab_len = tab_size ;

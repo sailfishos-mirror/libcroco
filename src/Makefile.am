@@ -28,4 +28,4 @@ libcroco_la_SOURCES= \
 	*.h
 
 INCLUDES=-I$(top_srcdir) -I$(top_srcdir)/intl `pkg-config --cflags glib-2.0` `pkg-config --cflags libxml-2.0` @LIBXML2_CFLAGS@
-libcroco_la_LDFLAGS=-version-info @LIBCROCO_VERSION_INFO@ @LIBXML2_FLAGS@
+libcroco_la_LDFLAGS=-version-info @LIBCROCO_VERSION_INFO@ @LIBXML2_LIBS@
