@@ -350,7 +350,7 @@ cr_style_set_props_to_defaults (CRStyle *a_this)
                 a_this->border_style_props[i] = BORDER_STYLE_NONE ;
         }
 
-        a_this->display = DISPLAY_INLINE ;
+        a_this->display = DISPLAY_BLOCK ;
         a_this->position = POSITION_STATIC ;
         a_this->float_type = FLOAT_NONE ;
         a_this->parent_style = NULL ;
@@ -1110,8 +1110,9 @@ set_prop_background_color (CRStyle *a_style, CRTerm *a_value)
         g_return_val_if_fail (a_style && a_value,
                               CR_BAD_PARAM_ERROR) ;
 
-        if (a_value->type == TERM_RGB)
+        switch (a_value->type)
         {
+        case TERM_RGB:
                 if (a_value->content.rgb)
                 {
                         status = cr_rgb_set_from_rgb
@@ -1119,16 +1120,23 @@ set_prop_background_color (CRStyle *a_style, CRTerm *a_value)
                                  rgb_props[RGB_PROP_BACKGROUND_COLOR].sv,
                                  a_value->content.rgb) ;
                 }
-        }
-        else if (a_value->type == TERM_IDENT)
-        {
-                status = cr_rgb_set_from_name (&a_style->
-                                               rgb_props[RGB_PROP_BACKGROUND_COLOR].sv,
-                                               a_value->content.str->str) ;
-        }
-        else
-        {
-                return CR_UNKNOWN_TYPE_ERROR ;
+                break ;
+
+        case TERM_IDENT:
+                status = cr_rgb_set_from_name 
+                        (&a_style->rgb_props[RGB_PROP_BACKGROUND_COLOR].sv,
+                         a_value->content.str->str) ;
+                break ;
+
+        case TERM_HASH:
+                status = cr_rgb_set_from_hex_str
+                        (&a_style->rgb_props[RGB_PROP_BACKGROUND_COLOR].sv, 
+                         a_value->content.str->str) ;
+                break ;
+
+        default:
+                status =  CR_UNKNOWN_TYPE_ERROR ;
+                break ;
         }
 
         return status ;

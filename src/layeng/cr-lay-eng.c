@@ -647,7 +647,8 @@ create_box_tree_real (CRLayEng * a_this,
                                  *by default, text/img boxes are inline.
                                  */
                                 cur_box->type = BOX_TYPE_INLINE ;
-                                
+                                cur_box->style->display = DISPLAY_INLINE ;
+
                                 /*
                                  *store a pointer to the node that generated
                                  *the current box into that current box.
@@ -752,7 +753,8 @@ get_box_rightmost_x (CRBox *a_this)
  *computes the inner edge size of a box which
  *contents text only.
  *This fonction uses pango to compute the size
- *of the box.
+ *of the box. Note that layout_text_in_box must have
+ *been called prior to this function.
  *Note that this is highly experimental for the time being.
  *It more a design sketch than a real working code.
  *@param a_this in/out parameter the current box which inner edge is to
@@ -766,13 +768,12 @@ compute_text_box_inner_edge_size (CRBox *a_this)
         GtkWidget *label = NULL ;
         PangoLayout *pgo_layout = NULL ;
         PangoRectangle ink_rect = {0}, logical_rect = {0} ;
-        guchar *text = NULL ;
 
         g_return_val_if_fail (a_this 
                               && a_this->content
                               && a_this->content->type == TEXT_CONTENT_TYPE,
                               CR_BAD_PARAM_ERROR) ;
-
+        
         if (a_this->content->u.text == NULL 
             || strlen (a_this->content->u.text) == 0)
         {
@@ -781,33 +782,92 @@ compute_text_box_inner_edge_size (CRBox *a_this)
                 return CR_OK ;
         }
 
-        text = a_this->content->u.text ;
+        g_return_val_if_fail (a_this->content->content_cache,
+                              CR_BAD_PARAM_ERROR) ;
 
-        label = gtk_label_new (NULL) ;
-        g_return_val_if_fail (label, CR_ERROR) ;
-
+        label = a_this->content->content_cache ;
         gtk_misc_set_alignment (GTK_MISC (label),0, 0) ;
-        gtk_misc_set_padding (GTK_MISC (label), 0, 0) ;        
+        gtk_misc_set_padding (GTK_MISC (label), 0, 0) ;
 
-        pgo_layout = gtk_widget_create_pango_layout (label, text) ;
+        pgo_layout = gtk_label_get_layout (GTK_LABEL (label)) ;
+
         pango_layout_get_pixel_extents (pgo_layout, &ink_rect,
                                         &logical_rect) ;
 
         a_this->inner_edge.width = logical_rect.width ;
         a_this->inner_edge.height = logical_rect.height ;
-        gtk_label_set_text (GTK_LABEL (label), text) ;
-        a_this->content->content_cache = label ;        
+        
+        return status ;
+}
 
-/* cleanup:*/
+static enum CRStatus
+layout_text_in_box (CRLayEng *a_this, CRBox *a_text_box)
+{
+        GtkWidget *label = NULL ;
+        PangoLayout * pgo_layout = NULL ;
+        PangoAttrList *pgo_attr_list = NULL ;
+        PangoAttribute *pgo_attr = NULL ;
+        PangoFontDescription *pgo_font_desc = NULL ;
+        PangoRectangle ink_rect, logical_rect ;
+        glong wrap_width = 0 ;
 
+        g_return_val_if_fail (a_this && a_text_box
+                              && a_text_box->content
+                              && (a_text_box->content->type 
+                                  == TEXT_CONTENT_TYPE)
+                              && a_text_box->content->u.text,
+                              CR_BAD_PARAM_ERROR) ;
 
-        if (pgo_layout)
+        g_return_val_if_fail ((a_text_box->parent->inner_edge.max_width
+                               + a_text_box->parent->inner_edge.x)
+                              >= a_text_box->inner_edge.x,
+                              CR_BAD_PARAM_ERROR) ;
+
+        if (!a_text_box->content->content_cache)
         {
-                g_object_unref (G_OBJECT (pgo_layout)) ;
-                pgo_layout = NULL ;
+                a_text_box->content->content_cache = 
+                        gtk_label_new (NULL) ;
+                g_return_val_if_fail (a_text_box->content->content_cache, 
+                                      CR_ERROR) ;
         }
 
-        return status ;
+        label = a_text_box->content->content_cache ;
+        g_return_val_if_fail (GTK_IS_LABEL (label), CR_ERROR) ;
+
+        gtk_label_set_text (GTK_LABEL (label), 
+                            a_text_box->content->u.text) ;
+        gtk_label_set_use_markup (GTK_LABEL (label),
+				  FALSE) ;
+	gtk_label_set_use_underline (GTK_LABEL (label),
+				     FALSE) ;
+        pgo_layout = gtk_label_get_layout (GTK_LABEL (label)) ;
+
+        /*
+         *set the wrap width if necessary.
+         */
+        if (cr_num_is_fixed_length 
+            (&a_text_box->style->num_props[NUM_PROP_WIDTH].cv)
+            == TRUE)
+        {
+                wrap_width = 
+                        a_text_box->style->num_props[NUM_PROP_WIDTH].cv.val ;
+
+                gtk_widget_set_size_request (label, wrap_width,
+                                     -1) ;
+        }
+       
+/*        else 
+        {                
+                wrap_width = a_text_box->parent->inner_edge.max_width 
+                        + a_text_box->parent->inner_edge.x -
+                        a_text_box->inner_edge.x ;
+        }
+*/
+        /*
+         *TODO: set the font description attributes.
+         */                
+
+        return CR_OK ;
 }
 
 /**
@@ -879,9 +939,23 @@ compute_box_size (CRLayEng *a_this,
                 +
                 a_cur_box->style->num_props[NUM_PROP_PADDING_LEFT].cv.val ;
 
+        a_cur_box->inner_edge.max_width =
+                a_cur_box->outer_edge.max_width +
+                a_cur_box->outer_edge.x -
+                a_cur_box->inner_edge.x ;
+
         /*
          *Step 3.
          */
+        if (cr_num_is_fixed_length 
+            (&a_cur_box->style->num_props[NUM_PROP_WIDTH].cv)
+            == TRUE)
+        {
+                a_cur_box->inner_edge.width = 
+                        a_cur_box->style->num_props[NUM_PROP_WIDTH].cv.val ;
+                a_cur_box->inner_edge.max_width = a_cur_box->inner_edge.width ;
+        }
+
         if (a_cur_box->children)
         {
                 /*
@@ -905,6 +979,7 @@ compute_box_size (CRLayEng *a_this,
                         switch (a_cur_box->content->type)
                         {
                         case TEXT_CONTENT_TYPE:
+                                layout_text_in_box (a_this, a_cur_box) ;
                                 compute_text_box_inner_edge_size
                                         (a_cur_box) ;
                                 break ;
@@ -1041,7 +1116,7 @@ layout_block_box (CRLayEng *a_this,
 
         g_return_val_if_fail (a_cur_box && a_cur_box->style,
                               CR_BAD_PARAM_ERROR) ;
-
+        
         CRBox *cont_box = a_cur_box->parent ;
 
         /************************************
@@ -1051,9 +1126,9 @@ layout_block_box (CRLayEng *a_this,
         /*
          *position the 'x' of the top
          *leftmost corner of this box
-         *at the leftmost abscissa of it's 
+         *at the leftmost abscissa of it's
          *containing box.
-         *Position the 'y' of 
+         *Position the 'y' of
          *the top left corner of this
          *just under the previous box.
          */
@@ -1061,6 +1136,9 @@ layout_block_box (CRLayEng *a_this,
         {
                 a_cur_box->outer_edge.x = 0 ;
                 a_cur_box->outer_edge.y = 0 ;
+                a_cur_box->inner_edge.width = 800 ;
+                a_cur_box->inner_edge.height = 600 ;
+                a_cur_box->inner_edge.max_width = 800 ;
         }
         else
         {
@@ -1078,10 +1156,18 @@ layout_block_box (CRLayEng *a_this,
                 }
         }
 
+        g_return_val_if_fail (a_cur_box->parent->inner_edge.max_width 
+                              + a_cur_box->parent->inner_edge.x
+                              > a_cur_box->outer_edge.x,
+                              CR_ERROR) ;
+
+        a_cur_box->outer_edge.max_width = 
+                a_cur_box->parent->inner_edge.max_width 
+                + a_cur_box->parent->inner_edge.x - 
+                a_cur_box->outer_edge.x ;
+
         status = compute_box_size (a_this,
                                    a_cur_box) ;
-        
-
         return status ;
 }
 
@@ -1154,6 +1240,11 @@ layout_inline_box (CRLayEng *a_this,
          *3/Compute the outer edge of the containing
          *box; this is recursive.
          *******************************************/                
+
+        a_cur_box->outer_edge.max_width = 
+                a_cur_box->parent->inner_edge.max_width 
+                + a_cur_box->parent->inner_edge.x - 
+                a_cur_box->outer_edge.x ;
 
         status = compute_box_size (a_this,
                                    a_cur_box) ;

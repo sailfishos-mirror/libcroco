@@ -1,3 +1,22 @@
+2003-06-04  Dodji  <dodji@seketeli.org>
+
+	* tests/test7-main.c: created a new xml/css document to bring the test to
+	a broader extend. It appeared that libcroco's layout code is 
+	damned bugged... I am debugging it...
+
+	* src/seleng/cr-style.c:changed the default element display property
+	to "block" and not "inline" anymore.
+	Also made the set_prop_background_color () function support
+	hex strings (e.g.: #ffffff or #ee)
+
+	* src/parser/cr-rgb.[ch]: added cr_rgb_set_from_hex_str ()
+	to support hash (hex) strings (#ffffff or #eee).
+
+	* src/parser/cr-num.c:support of fixed/variable length numbers.
+
+	* src/layeng/cr-lay-eng.c: a lot of layout fixes.
+	
+
 2003-05-31	Kang Jeong-Hee	<Keizi@mail.co.kr>
 
 	* src/parser/*.[ch]: s/void */gpointer/

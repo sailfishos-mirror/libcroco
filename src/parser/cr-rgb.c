@@ -391,6 +391,85 @@ cr_rgb_set_from_name (CRRgb *a_this, const guchar *a_color_name)
         return status ;
 }
 
+enum CRStatus
+cr_rgb_set_from_hex_str (CRRgb *a_this, const guchar * a_hex)
+{
+        enum CRStatus status = CR_OK ;
+        gulong i = 0 ;
+        guchar colors[3] = {0} ;
+
+        g_return_val_if_fail (a_this && a_hex,
+                              CR_BAD_PARAM_ERROR) ;
+
+        if (strlen (a_hex) == 3)
+        {                
+                for (i = 0 ;i < 3 ; i++)
+                {
+                        switch (a_hex[i])
+                        {
+                        case '0' ... '9':
+                                colors[i] = a_hex[i] - '0';
+                                colors[i] = (colors[i] << 4) | colors[i] ;
+                                break ;
+
+                        case 'a' ... 'z':
+                                colors[i] = 10 + a_hex[i] - 'a';
+                                colors[i] = (colors[i] << 4) | colors[i] ;
+                                break ;
+
+                        case 'A' ... 'Z':
+                                colors[i] = 10 + a_hex[i] - 'A';
+                                colors[i] = (colors[i] << 4) | colors[i] ;
+                                break ;
+                        default:
+                                status = CR_UNKNOWN_TYPE_ERROR ;
+                        }
+                }
+        }
+        else if (strlen (a_hex) == 6)
+        {
+                for (i = 0 ; i < 6 ; i++)
+                {
+                        
+                        switch (a_hex[i])
+                        {
+                        case '0' ... '9':
+                                colors[i/2] <<= 4 ;
+                                colors[i/2] |= a_hex[i] - '0';
+                                status = CR_OK ;
+                                break ;
+
+                        case 'a' ... 'z':
+                                colors[i/2] <<= 4 ;
+                                colors[i/2] |= 10 + a_hex[i] - 'a';
+                                status = CR_OK ;
+                                break ;
+
+                        case 'A' ... 'Z':
+                                colors[i/2] <<= 4 ;
+                                colors[i/2] |= 10 + a_hex[i] - 'A';
+                                status = CR_OK ;
+                                break ;
+
+                        default:
+                                status = CR_UNKNOWN_TYPE_ERROR ;
+                        }                        
+                }
+        }
+        else
+        {
+                status = CR_UNKNOWN_TYPE_ERROR ;
+        }
+        
+        if (status == CR_OK)
+        {
+                status = cr_rgb_set (a_this, colors[0],
+                                     colors[1], colors[2],
+                                     FALSE) ;
+        }
+        return status ;
+}
+
 /**
  *Destructor of #CRRgb.
  *@param a_this the "this pointer" of the

@@ -225,7 +225,7 @@ cr_num_dup (CRNum *a_this)
         g_return_val_if_fail (result, NULL) ;
 
         status = cr_num_copy (result, a_this) ;
-        g_return_val_if_fail (status, NULL) ;
+        g_return_val_if_fail (status == CR_OK, NULL) ;
 
         return result ;
 }
@@ -239,6 +239,26 @@ cr_num_set (CRNum *a_this, gdouble a_val, enum CRNumType a_type)
         a_this->type = a_type ;
 
         return CR_OK ;
+}
+
+gboolean
+cr_num_is_fixed_length (CRNum *a_this)
+{
+        gboolean result = FALSE ;
+
+        g_return_val_if_fail (a_this, FALSE) ;
+
+        switch (a_this->type)
+        {
+        case NUM_LENGTH_EM ... NUM_LENGTH_PC:
+                result = TRUE ;
+                break ;
+        default:
+                result = FALSE ;
+                break ;
+        }
+
+        return result ;
 }
 
 /**

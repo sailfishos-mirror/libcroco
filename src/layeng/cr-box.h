@@ -82,7 +82,7 @@ typedef struct _CRBoxEdge CRBoxEdge ;
  */
 struct _CRBoxEdge
 {
-	gulong x, y, width, height, x_offset, y_offset ;
+	gulong x, y, width, max_width, height, x_offset, y_offset ;
 } ;
 
 

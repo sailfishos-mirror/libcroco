@@ -31,55 +31,54 @@
 #ifndef __CR_RGB_H__
 #define __CR_RGB_H__
 
-#ifdef __cplusplus
-extern "C"
+G_BEGIN_DECLS
+
+
+typedef struct _CRRgb CRRgb ;
+struct _CRRgb
 {
-#endif
+        /*
+         *the unit of the rgb.
+         *Either NO_UNIT (integer) or 
+         *UNIT_PERCENTAGE (percentage).
+         */
+        const guchar *name ;
+        glong red ;
+        glong green ;
+        glong blue ;
+        gboolean is_percentage ;
+} ;
 
-	typedef struct _CRRgb CRRgb ;
-	struct _CRRgb
-	{
-                /*
-                 *the unit of the rgb.
-                 *Either NO_UNIT (integer) or 
-                 *UNIT_PERCENTAGE (percentage).
-                 */
-                const guchar *name ;
-		glong red ;
-		glong green ;
-		glong blue ;
-                gboolean is_percentage ;
-	} ;
+CRRgb *
+cr_rgb_new (void) ;
 
-	CRRgb *
-	cr_rgb_new (void) ;
+CRRgb *
+cr_rgb_new_with_vals (gulong a_red, gulong a_green, 
+                      gulong a_blue, gboolean a_is_percentage) ;
 
-	CRRgb *
-	cr_rgb_new_with_vals (gulong a_red, gulong a_green, 
-                              gulong a_blue, gboolean a_is_percentage) ;
-
-        enum CRStatus
-        cr_rgb_set (CRRgb *a_this, gulong a_red,
-                    gulong a_green, gulong a_blue,
-                    gboolean a_is_percentage) ;
+enum CRStatus
+cr_rgb_set (CRRgb *a_this, gulong a_red,
+            gulong a_green, gulong a_blue,
+            gboolean a_is_percentage) ;
         
-        enum CRStatus
-        cr_rgb_set_from_rgb (CRRgb *a_this, CRRgb *a_rgb) ;
+enum CRStatus
+cr_rgb_set_from_rgb (CRRgb *a_this, CRRgb *a_rgb) ;
 
-        enum CRStatus
-        cr_rgb_set_from_name (CRRgb *a_this, const guchar *a_color_name) ;
+enum CRStatus
+cr_rgb_set_from_name (CRRgb *a_this, const guchar *a_color_name) ;
 
-        guchar *
-        cr_rgb_to_string (CRRgb *a_this) ;
+enum CRStatus
+cr_rgb_set_from_hex_str (CRRgb *a_this, const guchar * a_hex_value) ;
 
-        void
-        cr_rgb_dump (CRRgb *a_this, FILE *a_fp) ;
+guchar *
+cr_rgb_to_string (CRRgb *a_this) ;
 
-	void
-	cr_rgb_destroy (CRRgb *a_this) ;
+void
+cr_rgb_dump (CRRgb *a_this, FILE *a_fp) ;
 
-#ifdef __cplusplus
-} /*extern "C"*/
-#endif
+void
+cr_rgb_destroy (CRRgb *a_this) ;
+
+G_END_DECLS
 
 #endif /*__CR_RGB_H__*/

@@ -39,11 +39,18 @@
 
 G_BEGIN_DECLS
 
-
+/**
+ *The different types
+ *of numbers.
+ *Please, do not modify
+ *the declaration order of the enum
+ *members, unless you know 
+ *what you are doing.
+ */
 enum CRNumType
 {
-        NUM_GENERIC,
-        NUM_AUTO,
+        NUM_AUTO = 0,
+        NUM_GENERIC,        
         NUM_LENGTH_EM,
         NUM_LENGTH_EX,
         NUM_LENGTH_PX,
@@ -98,6 +105,9 @@ cr_num_copy (CRNum *a_dest, CRNum *a_src) ;
 enum CRStatus
 cr_num_set (CRNum *a_this, gdouble a_val, 
             enum CRNumType a_type) ;
+
+gboolean
+cr_num_is_fixed_length (CRNum *a_this) ;
 
 void
 cr_num_destroy (CRNum *a_this) ;
