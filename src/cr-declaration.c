@@ -3,8 +3,6 @@
 /*
  * This file is part of The Croco Library
  *
- * Copyright (C) 2002-2003 Dodji Seketeli <dodji@seketeli.org>
- *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of version 2.1 of the GNU Lesser General Public
  * License as published by the Free Software Foundation.
@@ -18,6 +16,8 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
  * USA
+ *
+ *See COPYRIGHTS file for copyright information.
  */
 
 /*
@@ -289,7 +289,13 @@ cr_declaration_parse_list_from_buf (const guchar *a_str, enum CREncoding a_enc)
 		status = cr_parser_parse_declaration (parser, &property,
 						      &value) ;
 		if (status != CR_OK || !property)
+		{
+			if (status == CR_END_OF_INPUT_ERROR)
+			{
+				status = CR_OK ;
+			}
 			break ;
+		}
 		cur_decl = cr_declaration_new (NULL, property, value) ;
 		if (cur_decl)
 		{

@@ -3,7 +3,6 @@
 /*
  * This file is part of The Croco Library
  *
- * Copyright (C) 2002-2003 Dodji Seketeli <dodji@seketeli.org>
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of version 2.1 of the 
@@ -19,6 +18,8 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
  * USA
+ *
+ * See COPYRIGHTS file for copyrights information.
  */
 
 /*
@@ -185,9 +186,9 @@ if ((status) != CR_OK) \
  */
 #define CHECK_PARSING_STATUS_ERR(a_this, a_status, a_is_exception,\
                                  a_err_msg, a_err_status) \
-if ((status) != CR_OK) \
+if ((a_status) != CR_OK) \
 { \
-        if (a_is_exception == FALSE) status = CR_PARSING_ERROR ; \
+        if (a_is_exception == FALSE) a_status = CR_PARSING_ERROR ; \
         cr_parser_push_error (a_this, a_err_msg, a_err_status) ; \
         goto error ; \
 }
@@ -1990,7 +1991,7 @@ cr_parser_parse_property (CRParser *a_this, GString **a_property)
 
         status = cr_parser_parse_ident (a_this, a_property) ;
 
-        CHECK_PARSING_STATUS (status, FALSE) ;
+        CHECK_PARSING_STATUS (status, TRUE) ;
 
         cr_parser_try_to_skip_spaces_and_comments (a_this) ;
 
@@ -3788,11 +3789,12 @@ cr_parser_parse_declaration (CRParser *a_this, GString **a_property,
 
         status = cr_parser_parse_property (a_this, a_property) ;
 
+        if (status == CR_END_OF_INPUT_ERROR)
+                goto error ;
         CHECK_PARSING_STATUS_ERR 
                 (a_this, status, FALSE,
                  "while parsing declaration: next property is malformed",
                  CR_SYNTAX_ERROR) ;
-
 
         READ_NEXT_CHAR (a_this, &cur_char) ;
 
