@@ -47,6 +47,8 @@ const guchar *xml_content=
 "<E2 attr2=\"val2\">text2</E2>"
 "<E3 attr3=\"val3_1 val3_2 val3_3\">text3</E3>"
 "<E4 attr4=\"val4_1-val4_2-val4_3\">text4</E4>"
+"<E5 class=\"class5\">text5</E5>"
+"<E6 id=\"id6\">text6</E6>"
 "</document>";
 
 static void 
@@ -133,7 +135,7 @@ walk_xml_tree_and_lookup_rules (CRSelEng *a_sel_eng,
                                                            stdout, 2) ;
                                 }
                         }
-                        g_print ("xml end element: %s\n",
+                        g_print ("\n\nxml end element: %s\n",
                                  cur_node->name);
                         g_print ("'''''''''''''''''''''''''\n") ;
 
