@@ -47,6 +47,7 @@ G_BEGIN_DECLS
 enum CRNumType
 {
         NUM_GENERIC,
+        NUM_AUTO,
         NUM_LENGTH_EM,
         NUM_LENGTH_EX,
         NUM_LENGTH_PX,

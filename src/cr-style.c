@@ -158,6 +158,10 @@ set_border_x_style_from_value (CRStyle *a_style,
                                enum CRDirection a_dir) ;
 
 static enum CRStatus
+set_margin_x_from_value (CRStyle *a_style, CRTerm *a_value,
+                         enum CRDirection a_dir) ;
+
+static enum CRStatus
 cr_style_init_properties (void)
 {
 
@@ -516,6 +520,82 @@ set_border_x_style_from_value (CRStyle *a_style,
         return status ;
 }
 
+static enum CRStatus
+set_margin_x_from_value (CRStyle *a_style, CRTerm *a_value,
+                         enum CRDirection a_dir)
+{
+        enum CRStatus status = CR_OK ;
+        CRNum *num_val = NULL, *parent_num_val = NULL ;
+
+        g_return_val_if_fail (a_style && a_value, 
+                              CR_BAD_PARAM_ERROR) ;
+
+        switch (a_dir)
+        {
+        case DIR_TOP:
+                num_val = &a_style->margin_top ;
+                parent_num_val = 
+                        &a_style->parent_style->margin_top ;
+                break ;
+
+        case DIR_RIGHT:
+                num_val = 
+                        &a_style->margin_right ;
+
+                parent_num_val = 
+                        &a_style->parent_style->margin_right ;
+                break ;
+
+        case DIR_BOTTOM:
+                num_val = &a_style->margin_bottom ;
+                parent_num_val = 
+                        &a_style->parent_style->margin_bottom ;
+                break ;
+
+        case DIR_LEFT:
+                num_val = &a_style->margin_left ;
+                parent_num_val = 
+                        &a_style->parent_style->margin_left ;
+                break ;
+
+        default:
+                break ;
+        }
+
+        switch (a_value->type)
+        {
+        case TERM_IDENT:
+                if (a_value->content.str 
+                    && a_value->content.str->str
+                    && !strncmp (a_value->content.str->str,
+                                 "inherit", strlen ("inherit")))
+                {
+                        status = cr_num_copy (num_val, parent_num_val) ;
+                }
+                else if (a_value->content.str 
+                         && a_value->content.str->str
+                         && !strncmp (a_value->content.str->str,
+                                      "auto", strlen ("auto")))
+                {
+                        status = cr_num_set (num_val, 0.0, NUM_AUTO) ;
+                }
+                else
+                {
+                        status = CR_UNKNOWN_TYPE_ERROR ;
+                }
+
+        case TERM_NUMBER:
+                status = cr_num_copy (num_val, a_value->content.num) ;
+                break ;
+
+        default:
+                status = CR_UNKNOWN_TYPE_ERROR ;
+                break ;
+        }
+
+        return status ;
+}
+
 CRStyle *
 cr_style_new (void)
 {
@@ -649,15 +729,23 @@ cr_style_set_style_from_decl (CRStyle *a_this, CRDeclaration *a_decl,
                 break ;
 
         case PROP_MARGIN_TOP:
+                status = set_margin_x_from_value (a_this, value,
+                                                  DIR_TOP) ;
                 break ;
 
         case PROP_MARGIN_RIGHT:
+                status = set_margin_x_from_value (a_this, value,
+                                                  DIR_RIGHT) ;
                 break ;
 
         case PROP_MARGIN_BOTTOM:
+                status = set_margin_x_from_value (a_this, value,
+                                                  DIR_BOTTOM) ;
                 break ;
 
         case PROP_MARGIN_LEFT:
+                status = set_margin_x_from_value (a_this, value,
+                                                  DIR_TOP) ;
                 break ;
 
         case PROP_DISPLAY:
