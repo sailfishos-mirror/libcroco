@@ -1091,7 +1091,7 @@ cr_tknzr_parse_name (CRTknzr *a_this, GString **a_str)
 
         if (str_needs_free == TRUE && *a_str)
         {
-                g_free (*a_str) ;
+                g_string_free (*a_str, TRUE) ;
                 *a_str= NULL ;
         }
 
@@ -1144,7 +1144,7 @@ cr_tknzr_parse_hash (CRTknzr *a_this, GString **a_str)
 
         if (str_needs_free == TRUE && *a_str)
         {
-                g_free (*a_str) ;
+                g_string_free (*a_str, TRUE) ;
                 *a_str = NULL ;
         }
 
@@ -1509,7 +1509,7 @@ cr_tknzr_parse_atkeyword (CRTknzr *a_this, GString **a_str)
 
         if (str_needs_free == TRUE && *a_str)
         {
-                g_free (*a_str) ;
+                g_string_free (*a_str, TRUE) ;
                 *a_str = NULL ;
         }
 
