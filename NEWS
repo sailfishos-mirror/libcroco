@@ -1,6 +1,9 @@
-0.5: March 16 3004:
+0.5.1: April 18 2004:
+
+     - fixes: #140334, #140317, #139891, #139615. [Dodji Seketeli]
+
+0.5: March 16 2004:
      
-     - 
      - better regression suite framework [Dodji Seketeli]
      - support of the 'color' property gathering [Benjamin Dauvergne]
      - furious memory leaks/corruptions hunting [Dodji Seketeli, Rob BUIS]

@@ -12,4 +12,5 @@ test6.out \
 test-prop-ident.out \
 test-unknown-at-rule.out \
 test-unknown-at-rule2.out \
+test-several-media.out \
 test5.1.css.out

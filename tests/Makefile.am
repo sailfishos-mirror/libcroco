@@ -1,8 +1,8 @@
 SUBDIRS=test-inputs test-output-refs
 EXTRA_DIST=testctl vg.supp global-vars.sh valgrind-version.sh \
-test-prop-ident.sh \
-test-unknown-at-rule.sh \
-test-unknown-at-rule2.sh
+test-prop-ident.sh test-unknown-at-rule.sh test-unknown-at-rule2.sh \
+test-several-media.sh
+
 
 #the list of all possible tests goes here.
 
