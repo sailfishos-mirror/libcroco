@@ -30,7 +30,7 @@
 
 
 #include "stdio.h"
-#include "string.h"
+#include <string.h>
 #include "cr-input.h"
 #include "cr-enc-handler.h"
 
@@ -758,11 +758,13 @@ cr_input_peek_char (CRInput *a_this, guint32 *a_char)
 
         status =
                 cr_utils_read_char_from_utf8_buf 
-                (PRIVATE (a_this)->in_buf + PRIVATE (a_this)->next_byte_index,
+                (PRIVATE (a_this)->in_buf + 
+                 PRIVATE (a_this)->next_byte_index,
                  nb_bytes_left, a_char, &consumed) ;
 
         return status ;
 }
+
 
 
 /**
@@ -828,6 +830,41 @@ cr_input_peek_byte (CRInput *a_this, enum CRSeekPos a_origin,
                 return CR_END_OF_INPUT_ERROR ;
         }
 }
+
+/**
+ *Same as cr_input_peek_byte() but with a simplified
+ *interface.
+ *@param a_this the current byte input stream.
+ *@param a_offset the offset of the byte to peek, starting
+ *from the current input postion pointer.
+ *@param a_eof out parameter. Is set to true is we reach end of
+ *stream. If set to NULL by the caller, this parameter is not taken
+ *in account.
+ *@return the read byte or 0 if smthing bad happened.
+ */
+guchar 
+cr_input_peek_byte2 (CRInput *a_this, gulong a_offset, 
+                     gboolean *a_eof)
+{
+        guchar result = 0 ;
+        enum CRStatus status = CR_ERROR ;
+
+        g_return_val_if_fail (a_this && PRIVATE (a_this),
+                              0) ;
+
+        if (a_eof) 
+                *a_eof = FALSE ;
+
+        status = cr_input_peek_byte (a_this, CR_SEEK_CUR, a_offset,
+                                     &result) ;
+
+        if ((status == CR_END_OF_INPUT_ERROR)
+            && a_eof)
+                *a_eof = TRUE ;
+
+        return result ;
+}
+
 
 /**
  *Returns the memory address of the byte located at a given offset

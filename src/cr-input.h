@@ -97,6 +97,10 @@ extern "C" {
         cr_input_peek_byte (CRInput *a_this, enum CRSeekPos a_origin,
                             gulong a_offset, guchar *a_byte) ;
 
+        guchar 
+        cr_input_peek_byte2 (CRInput *a_this, gulong a_offset, 
+                             gboolean *a_eof) ;
+
         enum CRStatus
         cr_input_peek_char (CRInput *a_this, guint32 *a_char) ;
 
