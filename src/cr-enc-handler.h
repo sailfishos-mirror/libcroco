@@ -52,9 +52,10 @@ typedef struct _CREncHandler CREncHandler ;
                                                   guchar *a_out,
                                                   gulong *a_out_len) ;
 
-        typedef enum CRStatus (*CREncInputStrLenAsUtf8Func) (guchar *a_in_start,
-                                                             guchar *a_in_end,
-                                                             gulong *a_in_size);
+        typedef enum CRStatus (*CREncInputStrLenAsUtf8Func) 
+        (guchar *a_in_start,
+         guchar *a_in_end,
+         gulong *a_in_size);
 
         typedef enum CRStatus  (*CREncUtf8StrLenAsOutputFunc)
         (guchar *a_in_start,

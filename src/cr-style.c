@@ -6,7 +6,8 @@
  * Copyright (C) 2002-2003 Dodji Seketeli <dodji@seketeli.org>
  *
  * This program is free software; you can redistribute it and/or
- * modify it under the terms of version 2.1 of the GNU Lesser General Public
+ * modify it under the terms of version 2.1 of 
+ * the GNU Lesser General Public
  * License as published by the Free Software Foundation.
  *
  * This program is distributed in the hope that it will be useful,
@@ -14,7 +15,8 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
- * You should have received a copy of the GNU Lesser General Public License
+ * You should have received a copy of the 
+ * GNU Lesser General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
  * USA
@@ -710,7 +712,8 @@ set_prop_position_from_value (CRStyle *a_style, CRTerm *a_value)
                         {"absolute", POSITION_ABSOLUTE},
                         {"fixed", POSITION_FIXED},
                         {"inherited", POSITION_INHERIT},
-                        {NULL, POSITION_STATIC} /*must alwas be the last one*/
+                        {NULL, POSITION_STATIC} 
+                        /*must alwas be the last one*/
                 } ;
 
         g_return_val_if_fail (a_value, CR_BAD_PARAM_ERROR) ;
@@ -733,7 +736,8 @@ set_prop_position_from_value (CRStyle *a_style, CRTerm *a_value)
                                       a_value->content.str->str,
                                       strlen (position_vals_map[i].name)))
                         {
-                                a_style->position = position_vals_map[i].type ;
+                                a_style->position = 
+                                        position_vals_map[i].type ;
                                 status = CR_OK ;
                         }
                 }
@@ -741,7 +745,7 @@ set_prop_position_from_value (CRStyle *a_style, CRTerm *a_value)
                 {
                         if (a_style->parent_style)
                         {
-                                a_style->position =
+                                a_style->position  =
                                         a_style->parent_style->position ;
                         }
                         else

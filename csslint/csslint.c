@@ -105,7 +105,7 @@ csslint_parse_cmd_line (int a_argc, char **a_argv,
  *@param a_argv the argv variable passed to the main function.
  */
 static void 
-csslint_showVersion (const char *name) 
+csslint_show_version (const char *name) 
 {
     fprintf(stderr, "%s: using libcroco version %s\n", name, VERSION);
     fprintf(stderr, "   compiled with: ");
@@ -182,7 +182,7 @@ main (int argc, char **argv)
 
 	if (options.param_version == TRUE)
 	{
-		csslint_showVersion(argv[0]);
+		csslint_show_version(argv[0]);
 		return 0;
 	}
 
