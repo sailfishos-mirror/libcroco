@@ -313,7 +313,9 @@ cr_declaration_unlink (CRDeclaration * a_decl)
 		default:
 			break ;
 		}
-		if (children_decl_ptr && *children_decl_ptr)
+		if (children_decl_ptr 
+		    && *children_decl_ptr
+		    && *children_decl_ptr == a_decl)
 			*children_decl_ptr = 
 				(*children_decl_ptr)->next ;
 	}

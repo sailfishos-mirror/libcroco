@@ -1,3 +1,9 @@
+2004-01-04  Dodji Seketeli  <dodji@gnome.org>
+
+	* src/parser/cr-declaration.c: 
+	(cr_declaration_unlin): fixed a bug spoted by
+	Rob BUIS.
+
 2003-12-27  Dodji Seketeli  <dodji@gnome.org>
 
 	* csslint/csslint.c: did some fixes/cleanup here.
