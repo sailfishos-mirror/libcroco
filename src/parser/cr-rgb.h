@@ -44,10 +44,11 @@ extern "C"
                  *Either NO_UNIT (integer) or 
                  *UNIT_PERCENTAGE (percentage).
                  */
-                gboolean is_percentage ;
+                const guchar *name ;
 		glong red ;
 		glong green ;
 		glong blue ;
+                gboolean is_percentage ;
 	} ;
 
 	CRRgb *
@@ -64,6 +65,9 @@ extern "C"
         
         enum CRStatus
         cr_rgb_set_from_rgb (CRRgb *a_this, CRRgb *a_rgb) ;
+
+        enum CRStatus
+        cr_rgb_set_from_name (CRRgb *a_this, const guchar *a_color_name) ;
 
         guchar *
         cr_rgb_to_string (CRRgb *a_this) ;

@@ -57,6 +57,10 @@ enum CRPropertyID
 	PROP_ID_BORDER_RIGHT_STYLE,
 	PROP_ID_BORDER_BOTTOM_STYLE,
 	PROP_ID_BORDER_LEFT_STYLE,
+        PROP_ID_BORDER_TOP,
+        PROP_ID_BORDER_RIGHT,
+        PROP_ID_BORDER_BOTTOM,
+        PROP_ID_BORDER_LEFT,
 	PROP_ID_MARGIN_TOP,
 	PROP_ID_MARGIN_RIGHT,
 	PROP_ID_MARGIN_BOTTOM,
@@ -100,6 +104,10 @@ static CRPropertyDesc gv_prop_table [] =
 	{"border-right-style", PROP_ID_BORDER_RIGHT_STYLE},
 	{"border-bottom-style", PROP_ID_BORDER_BOTTOM_STYLE},
 	{"border-left-style", PROP_ID_BORDER_LEFT_STYLE},
+        {"border-top", PROP_ID_BORDER_TOP},
+        {"border-right", PROP_ID_BORDER_RIGHT},
+        {"border-bottom", PROP_ID_BORDER_BOTTOM},
+        {"border-left", PROP_ID_BORDER_LEFT},
 	{"margin-top", PROP_ID_MARGIN_TOP},
 	{"margin-right", PROP_ID_MARGIN_RIGHT},
 	{"margin-bottom", PROP_ID_MARGIN_BOTTOM},
@@ -141,10 +149,13 @@ cr_style_init_properties (void) ;
 
 enum CRDirection
 {
-        DIR_TOP,
+        DIR_TOP = 0,
         DIR_RIGHT,
         DIR_BOTTOM,
-        DIR_LEFT
+        DIR_LEFT,
+
+        /*must be the last one*/
+        NB_DIRS
 } ;
 
 static enum CRStatus
@@ -184,6 +195,24 @@ set_prop_float (CRStyle *a_style, CRTerm *a_value) ;
 
 static enum CRStatus
 set_prop_width (CRStyle *a_style, CRTerm *a_value) ;
+
+static enum CRStatus
+set_prop_color_rgb (CRStyle *a_style, CRTerm *a_value) ;
+
+static enum CRStatus
+set_prop_background_color_rgb (CRStyle *a_style, CRTerm *a_value) ;
+
+static enum CRStatus
+set_prop_border_x_color_from_value (CRStyle *a_style, CRTerm *a_value,
+                                    enum CRDirection a_dir) ;
+
+static enum CRStatus
+set_prop_border_x_from_value (CRStyle *a_style, CRTerm *a_value,
+                              enum CRDirection a_dir) ;
+
+static enum CRStatus
+set_prop_border_from_value (CRStyle *a_style, CRTerm *a_value,
+                            enum CRDirection a_dir) ;
 
 static enum CRStatus
 cr_style_init_properties (void)
@@ -448,6 +477,7 @@ set_prop_border_x_width_from_value (CRStyle *a_style,
                 break ;
 
         default:
+                return CR_BAD_PARAM_ERROR ;
                 break ;
         }
 
@@ -1024,7 +1054,7 @@ set_prop_width (CRStyle *a_style, CRTerm *a_value)
 }
 
 static enum CRStatus
-set_prop_color (CRStyle *a_style, CRTerm *a_value)
+set_prop_color_rgb (CRStyle *a_style, CRTerm *a_value)
 {
         g_return_val_if_fail (a_style && a_value,
                               CR_BAD_PARAM_ERROR) ;
@@ -1044,7 +1074,7 @@ set_prop_color (CRStyle *a_style, CRTerm *a_value)
 }
 
 static enum CRStatus
-set_prop_background_color (CRStyle *a_style, CRTerm *a_value)
+set_prop_background_color_rgb (CRStyle *a_style, CRTerm *a_value)
 {
         g_return_val_if_fail (a_style && a_value,
                               CR_BAD_PARAM_ERROR) ;
@@ -1058,6 +1088,128 @@ set_prop_background_color (CRStyle *a_style, CRTerm *a_value)
                                  rgb_props[RGB_PROP_BACKGROUND_COLOR].sv,
                                  a_value->content.rgb) ;
                 }
+        }
+
+        return CR_OK ;
+}
+
+/**
+ *Sets border-top-color, border-right-color,
+ *border-bottom-color or border-left-color properties
+ *in the style structure. The value is taken from a
+ *css2 term of type IDENT or RGB.
+ *@param a_style the style structure to set.
+ *@param a_value the css2 term to take the color information from.
+ *@param a_dir the direction (TOP, LEFT, RIGHT, or BOTTOM).
+ *@return CR_OK upon successfull completion, an error code otherwise.
+ */
+static enum CRStatus
+set_prop_border_x_color_from_value (CRStyle *a_style, CRTerm *a_value,
+                                    enum CRDirection a_dir)
+{
+        CRRgb *rgb_color = NULL ;
+        enum CRStatus status = CR_OK ;
+
+        g_return_val_if_fail (a_style && a_value,
+                              CR_BAD_PARAM_ERROR) ;
+        
+        switch (a_dir)
+        {
+        case DIR_TOP:
+                rgb_color = &a_style->rgb_props[RGB_PROP_BORDER_TOP_COLOR].sv ;
+                break ;
+
+        case DIR_RIGHT:
+                rgb_color = &a_style->rgb_props[RGB_PROP_BORDER_RIGHT_COLOR].sv ;
+                break ;
+
+        case DIR_BOTTOM:
+                rgb_color = &a_style->rgb_props[RGB_PROP_BORDER_BOTTOM_COLOR].sv;
+                break ;
+
+        case DIR_LEFT:
+                rgb_color = &a_style->rgb_props[RGB_PROP_BORDER_LEFT_COLOR].sv ;
+                break ;
+
+        default:
+                cr_utils_trace_info ("unknown DIR type") ;
+                return CR_BAD_PARAM_ERROR ;
+        }
+
+        status = CR_UNKNOWN_PROP_VAL_ERROR ;
+
+        if (a_value->type == TERM_IDENT)
+        {
+                if (a_value->content.str && a_value->content.str->str)
+                {
+                        status = cr_rgb_set_from_name 
+                                (rgb_color, a_value->content.str->str) ;
+                        
+                }
+
+                if (status != CR_OK)
+                {
+                        cr_rgb_set_from_name (rgb_color, "black") ;
+                }
+        }
+        else if (a_value->type == TERM_RGB)
+        {
+                if (a_value->content.rgb)
+                {
+                        status = cr_rgb_set_from_rgb 
+                                (rgb_color, a_value->content.rgb) ;
+                }
+        }
+
+        return status ;
+}
+
+
+static enum CRStatus
+set_prop_border_x_from_value (CRStyle *a_style, CRTerm *a_value,
+                              enum CRDirection a_dir)
+{
+        CRTerm *cur_term = NULL ;
+
+        enum CRStatus status = CR_OK ;
+
+        g_return_val_if_fail (a_style && a_value,
+                              CR_BAD_PARAM_ERROR) ;
+
+        for (cur_term = a_value ; cur_term ; cur_term = cur_term->next)
+        {
+                status = 
+                        set_prop_border_x_width_from_value (a_style, cur_term,
+                                                            a_dir) ;
+
+                if (status != CR_OK)
+                {
+                        status = set_prop_border_x_style_from_value 
+                                (a_style, cur_term, a_dir) ;
+                }
+
+                if (status != CR_OK)
+                {
+                        status = set_prop_border_x_color_from_value 
+                                (a_style, a_value, a_dir) ;
+                }
+        }
+
+        return CR_OK ;
+}
+
+static enum CRStatus
+set_prop_border_from_value (CRStyle *a_style, CRTerm *a_value,
+                            enum CRDirection a_dir)
+{
+        enum CRDirection direction = 0 ;
+
+        g_return_val_if_fail (a_style && a_value,
+                              CR_BAD_PARAM_ERROR) ;
+
+        for (direction = 0 ; direction < NB_DIRS ; direction ++)
+        {
+                set_prop_border_x_from_value (a_style, a_value, direction) ;
         }
 
         return CR_OK ;
@@ -1257,7 +1409,22 @@ cr_style_set_style_from_decl (CRStyle *a_this, CRDeclaration *a_decl,
                                                             DIR_LEFT) ;
                 break ;
 
+                /*TODO!!*/
+        case PROP_ID_BORDER_TOP:                
+                break ;
+
+        case PROP_ID_BORDER_RIGHT:
+                break ;
+
+        case PROP_ID_BORDER_BOTTOM:
+                break ;
+
+        case PROP_ID_BORDER_LEFT:
+                break ;
+
         case PROP_ID_MARGIN_TOP:
+                break ;
+
                 status = 
                         set_prop_margin_x_from_value (a_this, value,
                                                       DIR_TOP) ;
@@ -1319,11 +1486,11 @@ cr_style_set_style_from_decl (CRStyle *a_this, CRDeclaration *a_decl,
                 break ;
 
         case PROP_ID_COLOR:
-                status = set_prop_color (a_this, value) ;
+                status = set_prop_color_rgb (a_this, value) ;
                 break ;
 
         case PROP_ID_BACKGROUND_COLOR:
-                status = set_prop_background_color (a_this, value) ;
+                status = set_prop_background_color_rgb (a_this, value) ;
 
         default:
                 return CR_UNKNOWN_TYPE_ERROR ;
