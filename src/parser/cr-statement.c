@@ -453,11 +453,18 @@ CRStatement*
 cr_statement_new_ruleset (CRStyleSheet * a_sheet,
 			  CRSelector *a_sel_list, 
 			  CRDeclaration *a_decl_list,
-			  CRAtMediaRule *a_media_rule)
+			  CRStatement *a_parent_media_rule)
 {
 	CRStatement *result = NULL ;
 
 	g_return_val_if_fail (a_sheet, NULL) ;
+
+	if (a_parent_media_rule)
+	{
+		g_return_val_if_fail 
+			(a_parent_media_rule->type == AT_MEDIA_RULE_STMT,
+			 NULL) ;
+	}
 
 	result = g_try_malloc (sizeof (CRStatement)) ;
 
@@ -483,7 +490,7 @@ cr_statement_new_ruleset (CRStyleSheet * a_sheet,
 	if (a_sel_list)
 		cr_selector_ref (a_sel_list) ;
 	result->kind.ruleset->decl_list = a_decl_list;
-	result->kind.ruleset->media_rule = a_media_rule;
+	result->kind.ruleset->parent_media_rule = a_parent_media_rule;
 
 	cr_statement_set_parent_sheet (result, a_sheet) ;
 

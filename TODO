@@ -2,6 +2,9 @@
 *coding:)
 
 Provide support for font selection. (hard)
+ First make sure to be able to gather all the font related property
+  values.
+ Then, figure out how to implement a font selector that uses pango.
 
 Go forward in the cascading implementation in cr-sel-eng.c
      test/debug it.

@@ -74,7 +74,7 @@ struct _CRRuleSet
 	 *The parent media rule, or NULL if
 	 *no parent media rule exists.
 	 */
-	CRAtMediaRule *media_rule ;
+	CRStatement *parent_media_rule ;
 } ;
 
 /*
@@ -218,7 +218,7 @@ struct _CRStatement
          *libcroco itself will never modify
          *this pointer.
          */        
-        gpointer *app_data ;
+        gpointer app_data ;
 
         /**
          *a custom pointer used
@@ -226,7 +226,7 @@ struct _CRStatement
          *application should never use this
          *pointer.
          */
-        gpointer *croco_data ;
+        gpointer croco_data ;
 
 } ;
 
@@ -235,7 +235,7 @@ CRStatement*
 cr_statement_new_ruleset (CRStyleSheet *a_sheet,
                           CRSelector *a_sel_list, 
 			  CRDeclaration *a_decl_list,
-			  CRAtMediaRule *a_media_rule) ;
+			  CRStatement *a_media_rule) ;
 
 CRStatement*
 cr_statement_new_at_import_rule (CRStyleSheet *a_container_sheet,
