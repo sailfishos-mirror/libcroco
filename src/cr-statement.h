@@ -151,9 +151,11 @@ enum CRStatementType
 	 *each unknown at-rule will
 	 *be of this type.
 	 */
+
+        /**A css at-rule*/
 	AT_RULE_STMT = 0,
 
-	/**A css at-rule*/
+	/*A css ruleset*/
 	RULESET_STMT,
 
 	/**A css2 import rule*/

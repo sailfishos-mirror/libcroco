@@ -216,6 +216,122 @@ cr_declaration_parse_from_buf (CRStatement *a_statement,
 	return result ;
 }
 
+/**
+ *Parses a ';' separated list of properties declaration.
+ *@param a_str the input buffer that contains the list of declaration to
+ *parse.
+ *@param a_enc the encoding of a_str
+ *@return the parsed list of declaration, NULL if parsing failed.
+ */
+CRDeclaration *
+cr_declaration_parse_list_from_buf (const guchar *a_str, enum CREncoding a_enc)
+{
+
+	enum CRStatus status = CR_OK ;
+	CRTerm *value = NULL ;
+	GString *property = NULL;
+	CRDeclaration *result = NULL, *cur_decl = NULL ;
+	CRParser * parser = NULL ;
+	CRTknzr *tokenizer = NULL ;
+
+	g_return_val_if_fail (a_str, NULL) ;
+
+	parser = cr_parser_new_from_buf (a_str, 
+					 strlen (a_str),
+					 a_enc, FALSE) ;
+	g_return_val_if_fail (parser, NULL) ;
+	status = cr_parser_get_tknzr (parser, &tokenizer) ;
+	if (status != CR_OK || !tokenizer)
+	{
+		if (status == CR_OK)
+			status = CR_ERROR ;
+		goto cleanup ;
+	}
+	status = cr_parser_try_to_skip_spaces_and_comments (parser) ;
+	if (status != CR_OK)
+		goto cleanup ;
+
+	status = cr_parser_parse_declaration (parser, &property,
+					      &value) ;
+	if (status != CR_OK || !property)
+	{
+		if (status != CR_OK)
+			status =  CR_ERROR ;
+		goto cleanup ;
+	}
+	result = cr_declaration_new (NULL, property, value) ;
+	if (result)
+	{
+		property = NULL ;
+		value = NULL ;
+	}
+	/*now, go parse the other declarations*/
+	for (;;)
+	{
+		guint32 c = 0 ;
+		cr_parser_try_to_skip_spaces_and_comments (parser) ;
+		status = cr_tknzr_peek_char (tokenizer, &c) ;
+		if (status != CR_OK)
+		{
+			if (status == CR_END_OF_INPUT_ERROR)
+				status = CR_OK ;
+			goto cleanup ;
+		}
+		if (c == ';')
+		{
+			status = cr_tknzr_read_char (tokenizer, &c) ;
+		}
+		else
+		{
+			break ;
+		}
+		cr_parser_try_to_skip_spaces_and_comments (parser) ;
+		status = cr_parser_parse_declaration (parser, &property,
+						      &value) ;
+		if (status != CR_OK || !property)
+			break ;
+		cur_decl = cr_declaration_new (NULL, property, value) ;
+		if (cur_decl)
+		{
+			result = cr_declaration_append (result, cur_decl) ;
+			property = NULL ;
+			value = NULL ;
+			cur_decl = NULL;
+		}
+		else
+		{
+			break ;
+		}
+	}
+
+ cleanup:
+
+	if (parser)
+	{
+		cr_parser_destroy (parser) ;
+		parser = NULL ;
+	}
+
+	if (property)
+	{
+		g_string_free (property, TRUE) ;
+		property = NULL ;
+	}
+
+	if (value)
+	{
+		cr_term_destroy (value) ;
+		value = NULL ;
+	}
+
+	if (status != CR_OK && result)
+	{		
+		cr_declaration_destroy (result) ;
+		result = NULL ;
+	}
+	return result ;
+}
+
 
 /**
  *Appends a new declaration to the current declarations list.

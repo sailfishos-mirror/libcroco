@@ -78,6 +78,11 @@ CRDeclaration *
 cr_declaration_parse_from_buf (CRStatement *a_statement,
 			       const guchar *a_str,
 			       enum CREncoding a_enc) ;
+
+CRDeclaration *
+cr_declaration_parse_list_from_buf (const guchar *a_str, 
+				    enum CREncoding a_enc) ;
+
 CRDeclaration *
 cr_declaration_append (CRDeclaration *a_this, CRDeclaration *a_new) ;
 

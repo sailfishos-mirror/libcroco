@@ -74,6 +74,9 @@ enum CRStatus
 cr_parser_set_tknzr (CRParser *a_this, CRTknzr *a_tknzr) ;
 
 enum CRStatus
+cr_parser_get_tknzr (CRParser *a_this, CRTknzr **a_tknzr) ;
+
+enum CRStatus
 cr_parser_try_to_skip_spaces_and_comments (CRParser *a_this) ;
 
 

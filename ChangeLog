@@ -1,3 +1,17 @@
+2004-02-12  Dodji Seketeli  <dodji@gnome.org>
+
+	* src/cr-declaration.[ch]: 
+	(cr_declaration_parse_list_from_buf): added this new api entry point
+	to parse comma separated list of property declarations.
+	* src/cr-parser.c: 
+	(cr_parser_parse_expr): dont return an error when we encounter EOF immediately
+	at the end of an expression.
+	(cr_parser_get_tknzr): added this new api entry point to get
+	the parser's underlying tokenizer.
+	* src/cr-statement.h: fixed a comment here.
+	* tests/test4-main.c: wrote a test for the new
+	cr_declaration_parse_list_from_buf() function.
+
 2004-02-11  Dodji Seketeli  <dodji@gnome.org>
 
 	* src/Makefile.am: make sure headers go in $prefix/include/libcroco/libcroco .

@@ -3682,10 +3682,12 @@ cr_parser_parse_expr (CRParser *a_this, CRTerm **a_expr)
                 {
                         if (status == CR_END_OF_INPUT_ERROR)
                         {
+                                /*
                                 if (!nb_terms)
                                 {
                                         goto error ;
-                                }                                        
+                                }
+                                */                                       
                                 status = CR_OK ;
                                 break ;
                         }
@@ -5124,7 +5126,32 @@ cr_parser_set_tknzr (CRParser *a_this, CRTknzr *a_tknzr)
         return CR_OK ;
 }
 
+/**
+ *Getter of the parser's underlying tokenizer
+ *@param a_this the current instance of #CRParser
+ *@param a_tknzr out parameter. The returned tokenizer
+ *@return CR_OK upon succesful completion, an error code
+ *otherwise
+ */
+enum CRStatus
+cr_parser_get_tknzr (CRParser *a_this, CRTknzr **a_tknzr)
+{
+        g_return_val_if_fail (a_this && PRIVATE (a_this)
+                              && a_tknzr,
+                              CR_BAD_PARAM_ERROR) ;
 
+        *a_tknzr = PRIVATE (a_this)->tknzr ;
+        return CR_OK ;
+}
+
+/**
+ *Parses a stylesheet from a buffer
+ *@param a_this the current instance of #CRparser
+ *@param a_buf the input buffer
+ *@param a_len the length of the input buffer
+ *@param a_enc the encoding of the buffer
+ *@return CR_OK upon successful completion, an error code otherwise.
+ */
 enum CRStatus
 cr_parser_parse_buf (CRParser *a_this, const guchar *a_buf, 
                      gulong a_len, enum CREncoding a_enc)
