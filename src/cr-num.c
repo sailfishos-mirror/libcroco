@@ -3,7 +3,6 @@
 /*
  * This file is part of The Croco Library
  *
- * Copyright (C) 2002-2003 Dodji Seketeli <dodji@seketeli.org>
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of version 2.1 of the GNU Lesser General Public
@@ -18,6 +17,9 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
  * USA
+ *
+ * Author: Dodji Seketeli
+ * See COPYRIGHTS file for copyrights information.
  */
 
 /*
@@ -267,16 +269,11 @@ cr_num_is_fixed_length (CRNum * a_this)
 
         g_return_val_if_fail (a_this, FALSE);
 
-        switch (a_this->type) {
-        case NUM_LENGTH_EM...NUM_LENGTH_PC:
-                result = TRUE;
-                break;
-        default:
-                result = FALSE;
-                break;
+        if (a_this->type >= NUM_LENGTH_EM 
+            && a_this->type <= NUM_LENGTH_PC) {
+                result = TRUE ;
         }
-
-        return result;
+        return result ;
 }
 
 /**

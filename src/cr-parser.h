@@ -3,8 +3,6 @@
 /*
  * This file is part of The Croco Library
  *
- * Copyright (C) 2002-2003 Dodji Seketeli <dodji@seketeli.org>
- *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of version 2.1 of the GNU Lesser General Public
  * License as published by the Free Software Foundation.
@@ -18,6 +16,8 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
  * USA
+ *
+ * See COPYRIGHTS file for copyrights information.
  */
 
 
@@ -60,7 +60,7 @@ CRParser *
 cr_parser_new (CRTknzr *a_tknzr) ;
 
 CRParser *
-cr_parser_new_from_buf (const guchar *a_buf, gulong a_len,
+cr_parser_new_from_buf (guchar *a_buf, gulong a_len,
                         enum CREncoding a_enc, 
                         gboolean a_free_buf) ;
 CRParser *
@@ -108,6 +108,9 @@ cr_parser_parse_buf (CRParser *a_this, const guchar *a_buf,
 
 enum CRStatus
 cr_parser_set_default_sac_handler (CRParser *a_this) ;
+
+enum CRStatus
+cr_parser_parse_term (CRParser *a_this, CRTerm **a_term) ;
 
 enum CRStatus
 cr_parser_parse_expr (CRParser *a_this, CRTerm **a_expr) ;

@@ -9,7 +9,7 @@
  *
  *To compile this file, type:
  *
- *gcc -g  -o sac-example-1 `croco-config --cflags`  `croco-config --libs` sac-example-1.c
+ *gcc -g -Wall -o sac-example-1 `croco-config --cflags`  `croco-config --libs` sac-example-1.c
  *
  *Make sure you have compiled and installed libcroco prior to trying to
  *compile this file :)
@@ -23,7 +23,8 @@
  *Initial Author: Dodji Seketeli <Dodji 47 seketeli dot org>
  */
 
-#include <libcroco.h>
+#include <string.h>
+#include <libcroco/libcroco.h>
 
 /**
  *This is a callback function that will

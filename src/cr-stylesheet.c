@@ -3,7 +3,7 @@
 /*
  * This file is part of The Croco Library
  *
- * Copyright (C) 2002-2003 Dodji Seketeli <dodji seketeli.org>
+ * Copyright (C) 2002-2004 Dodji Seketeli
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of version 2.1 of the GNU Lesser General Public
@@ -57,6 +57,43 @@ cr_stylesheet_new (CRStatement * a_stmts)
 }
 
 /**
+ *@param a_this the current instance of #CRStyleSheet
+ *@return the serialized stylesheet.
+ */
+gchar *
+cr_stylesheet_to_string (CRStyleSheet *a_this)
+{
+	gchar *str = NULL;
+	GString *stringue = NULL;
+	CRStatement *cur_stmt = NULL;
+
+        g_return_val_if_fail (a_this, NULL);
+
+	if (a_this->statements) {
+		stringue = g_string_new (NULL) ;
+		g_return_val_if_fail (stringue, NULL) ;
+	}
+        for (cur_stmt = a_this->statements;
+             cur_stmt; cur_stmt = cur_stmt->next) {
+		if (cur_stmt->prev) {
+			g_string_append (stringue, "\n\n") ;
+		}
+		str = cr_statement_to_string (cur_stmt, 0) ;
+		if (str) {
+			g_string_append (stringue, str) ;
+			g_free (str) ;
+			str = NULL ;
+		}
+        }
+	if (stringue) {
+		str = stringue->str ;
+		g_string_free (stringue, FALSE) ;
+		stringue = NULL ;
+	}
+	return str ;
+}
+
+/**
  *Dumps the current css2 stylesheet to a file.
  *@param a_this the current instance of #CRStyleSheet.
  *@param a_fp the destination file
@@ -64,14 +101,16 @@ cr_stylesheet_new (CRStatement * a_stmts)
 void
 cr_stylesheet_dump (CRStyleSheet * a_this, FILE * a_fp)
 {
-        CRStatement *cur_stmt = NULL;
+	gchar *str = NULL ;
 
         g_return_if_fail (a_this);
 
-        for (cur_stmt = a_this->statements;
-             cur_stmt; cur_stmt = cur_stmt->next) {
-                cr_statement_dump (cur_stmt, a_fp, 0);
-        }
+	str = cr_stylesheet_to_string (a_this) ;
+	if (str) {
+		fprintf (a_fp, str) ;
+		g_free (str) ;
+		str = NULL ;
+	}
 }
 
 /**

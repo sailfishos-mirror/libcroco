@@ -187,6 +187,12 @@ cr_term_to_string (CRTerm *a_this) ;
 void
 cr_term_dump (CRTerm *a_this, FILE *a_fp) ;
 
+int
+cr_term_nr_values (CRTerm *a_this) ;
+
+CRTerm *
+cr_term_get_from_list (CRTerm *a_this, int itemnr) ;
+
 void
 cr_term_ref (CRTerm *a_this) ;
 

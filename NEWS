@@ -1,3 +1,31 @@
+0.5.1: April 18 2004:
+
+     - fixes: #140334, #140317, #139891, #139615.
+
+0.5: March 16 2004:
+     
+     - better regression suite framework [Dodji Seketeli]
+     - support of the 'color' property gathering [Benjamin Dauvergne]
+     - furious memory leaks/corruptions hunting [Dodji Seketeli, Rob BUIS]
+     - total support of the !important keyword [Dodji Seketeli, Rob BUIS]
+     - selectors evaluation in csslint [Dodji Seketeli, Rob BUIS]
+     - fix compilation warnings [David A Knight, Dodji Seketeli]
+     - more complete CSS statement serialisation [Dodji Seketeli]
+     - better gathering of style information [Dodjij Seketeli]
+     - better cascading algorithm conformance [Dodji Seketeli, Rob BUIS]
+     - @import rule parsing fix [Dodji Seketeli]
+     - support of CSS3 indentifiers [Dodji Seketeli]
+     - better w3c DOM integration support [Rob BUIS, Dodji Seketeli]
+     - many parsing fixes [Dodji Seketeli]
+     - style structure debuging facility [Dodji Seketeli]
+     - better fragment parsing support [Dodji Seketeli]
+     - Split libcroco and sewfox [Dodji Seketeli]
+     - class selector evaluation fix [Rob BUIS]
+     - csslint cleanup and bugfixes [Dodji Seketeli]
+     - :first-child pseudo class selector support [Dodji Seketeli]
+     - pluggable pseudo class selectors evaluators [Dodji Seketeli]
+
+
 libcroco 0.2.0
     2003 Jun 29
         libcroco 0.2.0 ChangeLog:

@@ -3,8 +3,6 @@
 /*
  * This file is part of The Croco Library
  *
- * Copyright (C) 2002-2003 Dodji Seketeli <dodji@seketeli.org>
- *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of version 2.1 of the GNU Lesser General Public
  * License as published by the Free Software Foundation.
@@ -18,11 +16,10 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
  * USA
+ *
+ * See COPYRIGHTS files for copyrights information.
  */
 
-/*
- *$Id$
- */
 
 #include <string.h>
 #include "cr-statement.h"
@@ -35,28 +32,9 @@
 
 #define DECLARATION_INDENT_NB 2
 
-static void
-  cr_statement_clear (CRStatement * a_this);
+static void cr_statement_clear (CRStatement * a_this);
 
-static void
-  cr_statement_dump_ruleset (CRStatement * a_this, FILE * a_fp, glong a_indent);
-
-static void
-  cr_statement_dump_charset (CRStatement * a_this, FILE * a_fp,
-                             gulong a_indent);
-
-static void
-  cr_statement_dump_page (CRStatement * a_this, FILE * a_fp, gulong a_indent);
-
-static void
-  cr_statement_dump_media_rule (CRStatement * a_this, FILE * a_fp,
-                                gulong a_indent);
-
-static void
-  cr_statement_dump_import_rule (CRStatement * a_this, FILE * a_fp,
-                                 gulong a_indent);
-
-static void
+static void  
 parse_font_face_start_font_face_cb (CRDocHandler * a_this)
 {
         CRStatement *stmt = NULL;
@@ -73,11 +51,13 @@ static void
 parse_font_face_unrecoverable_error_cb (CRDocHandler * a_this)
 {
         CRStatement *stmt = NULL;
+	CRStatement **stmtptr = NULL;
         enum CRStatus status = CR_OK;
 
         g_return_if_fail (a_this);
 
-        status = cr_doc_handler_get_ctxt (a_this, (gpointer *) & stmt);
+	stmtptr = &stmt;
+        status = cr_doc_handler_get_ctxt (a_this, (gpointer *) stmtptr);
         if (status != CR_OK) {
                 cr_utils_trace_info ("Couldn't get parsing context. "
                                      "This may lead to some memory leaks.");
@@ -99,10 +79,12 @@ parse_font_face_property_cb (CRDocHandler * a_this,
         GString *name = NULL;
         CRDeclaration *decl = NULL;
         CRStatement *stmt = NULL;
+        CRStatement **stmtptr = NULL;
 
         g_return_if_fail (a_this && a_name);
 
-        status = cr_doc_handler_get_ctxt (a_this, (gpointer *) & stmt);
+	stmtptr = &stmt;
+        status = cr_doc_handler_get_ctxt (a_this, (gpointer *) stmtptr);
         g_return_if_fail (status == CR_OK && stmt);
         g_return_if_fail (stmt->type == AT_FONT_FACE_RULE_STMT);
 
@@ -137,11 +119,13 @@ static void
 parse_font_face_end_font_face_cb (CRDocHandler * a_this)
 {
         CRStatement *result = NULL;
+        CRStatement **resultptr = NULL;
         enum CRStatus status = CR_OK;
 
         g_return_if_fail (a_this);
 
-        status = cr_doc_handler_get_ctxt (a_this, (gpointer *) & result);
+	resultptr = &result;
+        status = cr_doc_handler_get_ctxt (a_this, (gpointer *) resultptr);
         g_return_if_fail (status == CR_OK && result);
         g_return_if_fail (result->type == AT_FONT_FACE_RULE_STMT);
 
@@ -176,11 +160,13 @@ static void
 parse_page_unrecoverable_error_cb (CRDocHandler * a_this)
 {
         CRStatement *stmt = NULL;
+        CRStatement **stmtptr = NULL;
         enum CRStatus status = CR_OK;
 
         g_return_if_fail (a_this);
 
-        status = cr_doc_handler_get_ctxt (a_this, (gpointer *) & stmt);
+	stmtptr = &stmt;
+        status = cr_doc_handler_get_ctxt (a_this, (gpointer *) stmtptr);
         if (status != CR_OK) {
                 cr_utils_trace_info ("Couldn't get parsing context. "
                                      "This may lead to some memory leaks.");
@@ -200,10 +186,12 @@ parse_page_property_cb (CRDocHandler * a_this,
 {
         GString *name = NULL;
         CRStatement *stmt = NULL;
+        CRStatement **stmtptr = NULL;
         CRDeclaration *decl = NULL;
         enum CRStatus status = CR_OK;
 
-        status = cr_doc_handler_get_ctxt (a_this, (gpointer *) & stmt);
+	stmtptr = &stmt;
+        status = cr_doc_handler_get_ctxt (a_this, (gpointer *) stmtptr);
         g_return_if_fail (status == CR_OK && stmt->type == AT_PAGE_RULE_STMT);
 
         name = g_string_new_len (a_name->str, a_name->len);
@@ -223,8 +211,10 @@ parse_page_end_page_cb (CRDocHandler * a_this,
 {
         enum CRStatus status = CR_OK;
         CRStatement *stmt = NULL;
+        CRStatement **stmtptr = NULL;
 
-        status = cr_doc_handler_get_ctxt (a_this, (gpointer *) & stmt);
+	stmtptr = &stmt;
+        status = cr_doc_handler_get_ctxt (a_this, (gpointer *) stmtptr);
         g_return_if_fail (status == CR_OK && stmt);
         g_return_if_fail (stmt->type == AT_PAGE_RULE_STMT);
 
@@ -262,10 +252,12 @@ parse_at_media_unrecoverable_error_cb (CRDocHandler * a_this)
 {
         enum CRStatus status = CR_OK;
         CRStatement *stmt = NULL;
+        CRStatement **stmtptr = NULL;
 
         g_return_if_fail (a_this);
 
-        status = cr_doc_handler_get_result (a_this, (gpointer *) & stmt);
+	stmtptr = &stmt;
+        status = cr_doc_handler_get_result (a_this, (gpointer *) stmtptr);
         if (status != CR_OK) {
                 cr_utils_trace_info ("Couldn't get parsing context. "
                                      "This may lead to some memory leaks.");
@@ -284,12 +276,14 @@ parse_at_media_start_selector_cb (CRDocHandler * a_this,
                                   CRSelector * a_sellist)
 {
         enum CRStatus status = CR_OK;
-        CRStatement *at_media = NULL,
-                *ruleset = NULL;
+        CRStatement *at_media = NULL;
+        CRStatement **at_media_ptr = NULL;
+	CRStatement *ruleset = NULL;
 
         g_return_if_fail (a_this && a_this->priv && a_sellist);
 
-        status = cr_doc_handler_get_ctxt (a_this, (gpointer *) & at_media);
+	at_media_ptr = &at_media;
+        status = cr_doc_handler_get_ctxt (a_this, (gpointer *) at_media_ptr);
         g_return_if_fail (status == CR_OK && at_media);
         g_return_if_fail (at_media->type == AT_MEDIA_RULE_STMT);
         ruleset = cr_statement_new_ruleset (NULL, a_sellist, NULL, at_media);
@@ -310,6 +304,7 @@ parse_at_media_property_cb (CRDocHandler * a_this,
          *current at-media being parsed.
          */
         CRStatement *stmt = NULL;
+        CRStatement **stmtptr = NULL;
         CRDeclaration *decl = NULL;
         GString *name = NULL;
 
@@ -318,7 +313,8 @@ parse_at_media_property_cb (CRDocHandler * a_this,
         name = g_string_new_len (a_name->str, a_name->len);
         g_return_if_fail (name);
 
-        status = cr_doc_handler_get_ctxt (a_this, (gpointer *) & stmt);
+	stmtptr = &stmt;
+        status = cr_doc_handler_get_ctxt (a_this, (gpointer *) stmtptr);
         g_return_if_fail (status == CR_OK && stmt);
         g_return_if_fail (stmt->type == RULESET_STMT);
 
@@ -339,10 +335,12 @@ parse_at_media_end_selector_cb (CRDocHandler * a_this, CRSelector * a_sellist)
          *current at-media being parsed.
          */
         CRStatement *stmt = NULL;
+        CRStatement **stmtptr = NULL;
 
         g_return_if_fail (a_this && a_sellist);
 
-        status = cr_doc_handler_get_ctxt (a_this, (gpointer *) & stmt);
+	stmtptr = &stmt;
+        status = cr_doc_handler_get_ctxt (a_this, (gpointer *) stmtptr);
         g_return_if_fail (status == CR_OK && stmt
                           && stmt->type == RULESET_STMT);
         g_return_if_fail (stmt->kind.ruleset->parent_media_rule);
@@ -357,10 +355,12 @@ parse_at_media_end_media_cb (CRDocHandler * a_this, GList * a_media_list)
 {
         enum CRStatus status = CR_OK;
         CRStatement *at_media = NULL;
+        CRStatement **at_media_ptr = NULL;
 
         g_return_if_fail (a_this && a_this->priv);
 
-        status = cr_doc_handler_get_ctxt (a_this, (gpointer *) & at_media);
+	at_media_ptr = &at_media;
+        status = cr_doc_handler_get_ctxt (a_this, (gpointer *) at_media_ptr);
         g_return_if_fail (status == CR_OK && at_media);
 
         status = cr_doc_handler_set_result (a_this, at_media);
@@ -384,9 +384,11 @@ static void
 parse_ruleset_unrecoverable_error_cb (CRDocHandler * a_this)
 {
         CRStatement *stmt = NULL;
+        CRStatement **stmtptr = NULL;
         enum CRStatus status = CR_OK;
 
-        status = cr_doc_handler_get_result (a_this, (gpointer *) & stmt);
+	stmtptr = &stmt;
+        status = cr_doc_handler_get_result (a_this, (gpointer *) stmtptr);
         if (status != CR_OK) {
                 cr_utils_trace_info ("Couldn't get parsing context. "
                                      "This may lead to some memory leaks.");
@@ -406,6 +408,7 @@ parse_ruleset_property_cb (CRDocHandler * a_this,
 {
         enum CRStatus status = CR_OK;
         CRStatement *ruleset = NULL;
+        CRStatement **rulesetptr = NULL;
         CRDeclaration *decl = NULL;
         GString *stringue = NULL;
 
@@ -414,7 +417,8 @@ parse_ruleset_property_cb (CRDocHandler * a_this,
         stringue = g_string_new (a_name->str);
         g_return_if_fail (stringue);
 
-        status = cr_doc_handler_get_result (a_this, (gpointer *) & ruleset);
+	rulesetptr = &ruleset;
+        status = cr_doc_handler_get_result (a_this, (gpointer *) rulesetptr);
         g_return_if_fail (status == CR_OK
                           && ruleset && ruleset->type == RULESET_STMT);
 
@@ -429,11 +433,13 @@ static void
 parse_ruleset_end_selector_cb (CRDocHandler * a_this, CRSelector * a_sellist)
 {
         CRStatement *result = NULL;
+        CRStatement **resultptr = NULL;
         enum CRStatus status = CR_OK;
 
         g_return_if_fail (a_this && a_sellist);
 
-        status = cr_doc_handler_get_result (a_this, (gpointer *) & result);
+	resultptr = &result;
+        status = cr_doc_handler_get_result (a_this, (gpointer *) resultptr);
 
         g_return_if_fail (status == CR_OK
                           && result && result->type == RULESET_STMT);
@@ -585,18 +591,11 @@ cr_statement_ruleset_to_string (CRStatement * a_this, glong a_indent)
                         tmp_str = NULL;
                 }
         }
-
+        g_string_append_printf (stringue, " {\n");
         if (a_this->kind.ruleset->decl_list) {
-                g_string_append_printf (stringue, " {\n");
-
                 tmp_str = cr_declaration_list_to_string2
                         (a_this->kind.ruleset->decl_list,
                          a_indent + DECLARATION_INDENT_NB, TRUE);
-                /*
-                   cr_declaration_dump (a_this->kind.ruleset->decl_list,
-                   a_fp, a_indent + DECLARATION_INDENT_NB,
-                   TRUE) ;
-                 */
                 if (tmp_str) {
                         g_string_append_printf (stringue, "%s", tmp_str);
                         g_free (tmp_str);
@@ -604,9 +603,8 @@ cr_statement_ruleset_to_string (CRStatement * a_this, glong a_indent)
                 }
                 g_string_append_printf (stringue, "%s", "\n");
                 cr_utils_dump_n_chars2 (' ', stringue, a_indent);
-                g_string_append_printf (stringue, "%s", "}");
         }
-
+        g_string_append_printf (stringue, "%s", "}");
         result = stringue->str;
 
         if (stringue) {
@@ -620,81 +618,92 @@ cr_statement_ruleset_to_string (CRStatement * a_this, glong a_indent)
         return result;
 }
 
-/**
- *Dumps a ruleset statement to a file.
- *@param a_this the current instance of #CRStatement.
- *@param a_fp the destination file pointer.
- *@param a_indent the number of indentation white spaces to add.
- */
-static void
-cr_statement_dump_ruleset (CRStatement * a_this, FILE * a_fp, glong a_indent)
-{
-        guchar *str = NULL;
-
-        g_return_if_fail (a_fp && a_this);
-        str = cr_statement_ruleset_to_string (a_this, a_indent);
-        if (str) {
-                fprintf (a_fp, str);
-                g_free (str);
-                str = NULL;
-        }
-}
 
 /**
- *TODO: write cr_statement_font_face_rule_to_string()
- *and make this function use it.
- *Dumps a font face rule statement to a file.
- *@param a_this the current instance of font face rule statement.
- *@param a_fp the destination file pointer.
- *@param a_indent the number of white space indentation.
+ *Serializes a font face rule statement into a string.
+ *@param a_this the current instance of #CRStatement to consider
+ *It must be a font face rule statement.
+ *@param a_indent the number of white spaces of indentation.
+ *@return the serialized string. Must be deallocated by the caller
+ *using g_free().
  */
-static void
-cr_statement_dump_font_face_rule (CRStatement * a_this, FILE * a_fp,
-                                  glong a_indent)
+static gchar *
+cr_statement_font_face_rule_to_string (CRStatement * a_this, 
+                                       glong a_indent)
 {
-        g_return_if_fail (a_this && a_this->type == AT_FONT_FACE_RULE_STMT);
+        gchar *result = NULL, *tmp_str = NULL ;
+        GString *stringue = NULL ;
+
+        g_return_val_if_fail (a_this 
+                              && a_this->type == AT_FONT_FACE_RULE_STMT,
+                              NULL);
 
         if (a_this->kind.font_face_rule->decl_list) {
-                cr_utils_dump_n_chars (' ', a_fp, a_indent);
-
+                stringue = g_string_new (NULL) ;
+                g_return_val_if_fail (stringue, NULL) ;
                 if (a_indent)
-                        cr_utils_dump_n_chars (' ', a_fp, a_indent);
-
-                fprintf (a_fp, "@font-face {\n");
-                cr_declaration_dump
+                        cr_utils_dump_n_chars2 (' ', stringue, 
+                                        a_indent);
+                g_string_append_printf (stringue, "@font-face {\n");
+                tmp_str = cr_declaration_list_to_string2 
                         (a_this->kind.font_face_rule->decl_list,
-                         a_fp, a_indent + DECLARATION_INDENT_NB, TRUE);
-                fprintf (a_fp, "\n}");
+                         a_indent + DECLARATION_INDENT_NB, TRUE) ;
+                if (tmp_str) {
+                        g_string_append_printf (stringue, "%s"
+                                                ,tmp_str) ;
+                        g_free (tmp_str) ;
+                        tmp_str = NULL ;
+                }
+                g_string_append_printf (stringue, "\n}");
         }
+        if (stringue) {
+                result = stringue->str ;
+                g_string_free (stringue, FALSE) ;
+                stringue = NULL ;
+        }
+        return result ;
 }
 
+
 /**
- *Dumps an @charset rule statement to a file.
- *@param a_this the current instance of the @charset rule statement.
- *@param a_fp the destination file pointer.
- *@param a_indent the number of indentation white spaces.
+ *Serialises an @charset statement into a string.
+ *@param a_this the statement to serialize.
+ *@return the serialized charset statement. Must be
+ *freed by the caller using g_free().
  */
-static void
-cr_statement_dump_charset (CRStatement * a_this, FILE * a_fp, gulong a_indent)
+static gchar *
+cr_statement_charset_to_string (CRStatement *a_this, 
+                                gulong a_indent)
 {
-        guchar *str = NULL;
+        gchar *str = NULL ;
+        GString *stringue = NULL ;
 
-        g_return_if_fail (a_this && a_this->type == AT_CHARSET_RULE_STMT);
+        g_return_val_if_fail (a_this
+                              && a_this->type == AT_CHARSET_RULE_STMT,
+                              NULL) ;
 
-        if (a_this->kind.charset_rule && a_this->kind.charset_rule->charset) {
+        if (a_this->kind.charset_rule
+            && a_this->kind.charset_rule->charset) {
                 str = g_strndup (a_this->kind.charset_rule->charset->str,
                                  a_this->kind.charset_rule->charset->len);
-
-                g_return_if_fail (str);
-
-                cr_utils_dump_n_chars (' ', a_fp, a_indent);
-                fprintf (a_fp, "@charset \"%s\" ;", str);
+                g_return_val_if_fail (str, NULL);
+                stringue = g_string_new (NULL) ;
+                g_return_val_if_fail (stringue, NULL) ;
+                cr_utils_dump_n_chars2 (' ', stringue, a_indent);
+                g_string_append_printf (stringue, 
+                                        "@charset \"%s\" ;", str);
                 if (str) {
                         g_free (str);
                         str = NULL;
                 }
         }
+        if (stringue) {
+                str = stringue->str ;
+                g_string_free (stringue, FALSE) ;
+        }
+        return str ;
 }
+
 
 /**
  *Serialises the at page rule statement into a string
@@ -745,86 +754,30 @@ cr_statement_at_page_rule_to_string (CRStatement *a_this,
         return result ;
 }
 
-/**
- *Dumps an @page rule statement on stdout.
- *@param a_this the statement to dump on stdout.
- *@param a_fp the destination file pointer.
- *@param a_indent the number of indentation white spaces.
- */
-static void
-cr_statement_dump_page (CRStatement * a_this, FILE * a_fp, gulong a_indent)
-{
-        guchar *str = NULL;
-
-        g_return_if_fail (a_this
-                          && a_this->type == AT_PAGE_RULE_STMT
-                          && a_this->kind.page_rule);
-
-        str = cr_statement_at_page_rule_to_string (a_this, a_indent) ;
-        if (str) {
-                fprintf (a_fp, str);
-                g_free (str) ;
-                str = NULL ; 
-        }
-}
-
 
 /**
- *Return the number of rules in the statement list;
- *@param a_this the current instance of #CRStatement.
- *@return number of rules in the statement list.
+ *Serializes an @media statement.
+ *@param a_this the current instance of #CRStatement
+ *@param a_indent the number of spaces of indentation.
+ *@return the serialized @media statement. Must be freed
+ *by the caller using g_free().
  */
-int
-cr_statement_nr_rules (CRStatement * a_this)
+static gchar *
+cr_statement_media_rule_to_string (CRStatement *a_this,
+                                   gulong a_indent)
 {
-        CRStatement *cur = NULL;
-        int nr = 0;
-
-        g_return_val_if_fail (a_this, -1);
-
-        for (cur = a_this; cur; cur = cur->next)
-                nr++;
-        return nr;
-}
-
-/**
- *Use an index to get a CRStatement from the statement list.
- *@param a_this the current instance of #CRStatement.
- *@param itemnr the index into the statement list.
- *@return CRStatement at position itemnr, if itemnr > number of statements - 1,
- *it will return NULL.
- */
-CRStatement *
-cr_statement_get_from_list (CRStatement * a_this, int itemnr)
-{
-        CRStatement *cur = NULL;
-        int nr = 0;
-
-        g_return_val_if_fail (a_this, NULL);
-
-        for (cur = a_this; cur; cur = cur->next)
-                if (nr++ == itemnr)
-                        return cur;
-        return NULL;
-}
-
-/**
- *Dumps an @media rule statement to a file.
- *@param a_this the statement to dump.
- *@param a_fp the destination file pointer
- *@param a_indent the number of white spaces indentation.
- */
-static void
-cr_statement_dump_media_rule (CRStatement * a_this, FILE * a_fp,
-                              gulong a_indent)
-{
+        gchar *str = NULL ;
+        GString *stringue = NULL ;
         GList *cur = NULL;
 
-        g_return_if_fail (a_this->type == AT_MEDIA_RULE_STMT);
+        g_return_val_if_fail (a_this->type == AT_MEDIA_RULE_STMT,
+                              NULL);
 
         if (a_this->kind.media_rule) {
-                cr_utils_dump_n_chars (' ', a_fp, a_indent);
-                fprintf (a_fp, "@media");
+                stringue = g_string_new (NULL) ;                
+                cr_utils_dump_n_chars2 (' ', stringue, a_indent);
+                g_string_append (stringue, "@media");
+
                 for (cur = a_this->kind.media_rule->media_list; cur;
                      cur = cur->next) {
                         if (cur->data) {
@@ -834,46 +787,63 @@ cr_statement_dump_media_rule (CRStatement * a_this, FILE * a_fp,
 
                                 if (str) {
                                         if (cur->prev) {
-                                                fprintf (a_fp, ",");
+                                                g_string_append
+                                                        (stringue, 
+                                                         ",");
                                         }
-                                        fprintf (a_fp, " %s", str);
+                                        g_string_append_printf 
+                                                (stringue, 
+                                                 " %s", str);
                                         g_free (str);
                                         str = NULL;
                                 }
                         }
                 }
-                fprintf (a_fp, " {\n");
-                cr_statement_dump (a_this->kind.media_rule->rulesets,
-                                   a_fp, a_indent + DECLARATION_INDENT_NB);
-                fprintf (a_fp, "\n}");
+                g_string_append (stringue, " {\n");
+                str = cr_statement_list_to_string
+                        (a_this->kind.media_rule->rulesets,
+                         a_indent + DECLARATION_INDENT_NB) ;
+                if (str) {
+                        g_string_append (stringue, str) ;
+                        g_free (str) ;
+                        str = NULL ;
+                }
+                g_string_append (stringue, "\n}");
         }
+        if (stringue) {
+                str = stringue->str ;
+                g_string_free (stringue, FALSE) ;
+        }
+        return str ;
 }
 
-/**
- *Dumps an @import rule statement to a file.
- *@param a_fp the destination file pointer.
- *@param a_indent the number of white space indentations.
- */
-static void
-cr_statement_dump_import_rule (CRStatement * a_this, FILE * a_fp,
-                               gulong a_indent)
+
+static gchar *
+cr_statement_import_rule_to_string (CRStatement *a_this,
+                                    gulong a_indent)
 {
-        g_return_if_fail (a_this
-                          && a_this->type == AT_IMPORT_RULE_STMT
-                          && a_this->kind.import_rule);
+        GString *stringue = NULL ;
+        guchar *str = NULL;
 
-        if (a_this->kind.import_rule->url) {
-                guchar *str = NULL;
+        g_return_val_if_fail (a_this
+                              && a_this->type == AT_IMPORT_RULE_STMT
+                              && a_this->kind.import_rule,
+                              NULL) ;
 
+        if (a_this->kind.import_rule->url) { 
+                stringue = g_string_new (NULL) ;
+                g_return_val_if_fail (stringue, NULL) ;
                 str = g_strndup (a_this->kind.import_rule->url->str,
                                  a_this->kind.import_rule->url->len);
-                cr_utils_dump_n_chars (' ', a_fp, a_indent);
-
+                cr_utils_dump_n_chars2 (' ', stringue, a_indent);
                 if (str) {
-                        fprintf (a_fp, "@import url(\"%s\")", str);
+                        g_string_append_printf (stringue,
+                                                "@import url(\"%s\")", 
+                                                str);
                         g_free (str);
+                        str = NULL ;
                 } else          /*there is no url, so no import rule, get out! */
-                        return;
+                        return NULL;
 
                 if (a_this->kind.import_rule->media_list) {
                         GList *cur = NULL;
@@ -884,21 +854,26 @@ cr_statement_dump_import_rule (CRStatement * a_this, FILE * a_fp,
                                         GString *gstr = cur->data;
 
                                         if (cur->prev) {
-                                                fprintf (a_fp, ", ");
+                                                g_string_append 
+                                                        (stringue, ", ");
                                         }
-
-                                        str = g_strndup (gstr->str,
-                                                         gstr->len);
-                                        if (str) {
-                                                fprintf (a_fp, str);
-                                                g_free (str);
-                                        }
+                                        g_string_append_len 
+                                                (stringue,
+                                                 gstr->str,
+                                                 gstr->len) ;
                                 }
                         }
                 }
-                fprintf (a_fp, " ;");
+                g_string_append (stringue, " ;");
         }
+        if (stringue) {
+                str = stringue->str ;
+                g_string_free (stringue, FALSE) ;
+                stringue = NULL ;
+        }
+        return str ;
 }
+
 
 /*******************
  *public functions
@@ -920,7 +895,7 @@ cr_statement_does_buf_parses_against_core (const guchar * a_buf,
         enum CRStatus status = CR_OK;
         gboolean result = FALSE;
 
-        parser = cr_parser_new_from_buf (a_buf, strlen (a_buf),
+        parser = cr_parser_new_from_buf ((guchar*)a_buf, strlen (a_buf),
                                          a_encoding, FALSE);
         g_return_val_if_fail (parser, FALSE);
 
@@ -1026,12 +1001,14 @@ cr_statement_ruleset_parse_from_buf (const guchar * a_buf,
 {
         enum CRStatus status = CR_OK;
         CRStatement *result = NULL;
+        CRStatement **resultptr = NULL;
         CRParser *parser = NULL;
         CRDocHandler *sac_handler = NULL;
 
         g_return_val_if_fail (a_buf, NULL);
 
-        parser = cr_parser_new_from_buf (a_buf, strlen (a_buf), a_enc, FALSE);
+        parser = cr_parser_new_from_buf ((guchar*)a_buf, strlen (a_buf), 
+                                         a_enc, FALSE);
 
         g_return_val_if_fail (parser, NULL);
 
@@ -1051,8 +1028,9 @@ cr_statement_ruleset_parse_from_buf (const guchar * a_buf,
                 goto cleanup;
         }
 
+	resultptr = &result;
         status = cr_doc_handler_get_result (sac_handler,
-                                            (gpointer *) & result);
+                                            (gpointer *) resultptr);
         if (!((status == CR_OK) && result)) {
                 if (result) {
                         cr_statement_destroy (result);
@@ -1064,6 +1042,7 @@ cr_statement_ruleset_parse_from_buf (const guchar * a_buf,
         if (parser) {
                 cr_parser_destroy (parser);
                 parser = NULL;
+                sac_handler = NULL ;
         }
         if (sac_handler) {
                 cr_doc_handler_unref (sac_handler);
@@ -1153,10 +1132,12 @@ cr_statement_at_media_rule_parse_from_buf (const guchar * a_buf,
 {
         CRParser *parser = NULL;
         CRStatement *result = NULL;
+        CRStatement **resultptr = NULL;
         CRDocHandler *sac_handler = NULL;
         enum CRStatus status = CR_OK;
 
-        parser = cr_parser_new_from_buf (a_buf, strlen (a_buf), a_enc, FALSE);
+        parser = cr_parser_new_from_buf ((guchar*)a_buf, strlen (a_buf), 
+                                         a_enc, FALSE);
         if (!parser) {
                 cr_utils_trace_info ("Instanciation of the parser failed");
                 goto cleanup;
@@ -1189,8 +1170,9 @@ cr_statement_at_media_rule_parse_from_buf (const guchar * a_buf,
         if (status != CR_OK)
                 goto cleanup;
 
+	resultptr = &result;
         status = cr_doc_handler_get_result (sac_handler,
-                                            (gpointer *) & result);
+                                            (gpointer *) resultptr);
         if (status != CR_OK)
                 goto cleanup;
 
@@ -1199,6 +1181,7 @@ cr_statement_at_media_rule_parse_from_buf (const guchar * a_buf,
         if (parser) {
                 cr_parser_destroy (parser);
                 parser = NULL;
+                sac_handler = NULL ;
         }
         if (sac_handler) {
                 cr_doc_handler_unref (sac_handler);
@@ -1326,7 +1309,7 @@ cr_statement_at_import_rule_parse_from_buf (const guchar * a_buf,
         GList *media_list = NULL;
         GString *import_string = NULL;
 
-        parser = cr_parser_new_from_buf (a_buf, strlen (a_buf),
+        parser = cr_parser_new_from_buf ((guchar*)a_buf, strlen (a_buf),
                                          a_encoding, FALSE);
         if (!parser) {
                 cr_utils_trace_info ("Instanciation of parser failed.");
@@ -1438,10 +1421,11 @@ cr_statement_at_page_rule_parse_from_buf (const guchar * a_buf,
         CRParser *parser = NULL;
         CRDocHandler *sac_handler = NULL;
         CRStatement *result = NULL;
+        CRStatement **resultptr = NULL;
 
         g_return_val_if_fail (a_buf, NULL);
 
-        parser = cr_parser_new_from_buf (a_buf, strlen (a_buf),
+        parser = cr_parser_new_from_buf ((guchar*)a_buf, strlen (a_buf),
                                          a_encoding, FALSE);
         if (!parser) {
                 cr_utils_trace_info ("Instanciation of the parser failed.");
@@ -1472,21 +1456,22 @@ cr_statement_at_page_rule_parse_from_buf (const guchar * a_buf,
         if (status != CR_OK)
                 goto cleanup;
 
+	resultptr = &result;
         status = cr_doc_handler_get_result (sac_handler,
-                                            (gpointer *) & result);
+                                            (gpointer *) resultptr);
 
       cleanup:
 
         if (parser) {
                 cr_parser_destroy (parser);
                 parser = NULL;
+                sac_handler = NULL ;
         }
         if (sac_handler) {
                 cr_doc_handler_unref (sac_handler);
                 sac_handler = NULL;
         }
         return result;
-
 }
 
 /**
@@ -1547,7 +1532,7 @@ cr_statement_at_charset_rule_parse_from_buf (const guchar * a_buf,
 
         g_return_val_if_fail (a_buf, NULL);
 
-        parser = cr_parser_new_from_buf (a_buf, strlen (a_buf),
+        parser = cr_parser_new_from_buf ((guchar*)a_buf, strlen (a_buf),
                                          a_encoding, FALSE);
         if (!parser) {
                 cr_utils_trace_info ("Instanciation of the parser failed.");
@@ -1630,11 +1615,12 @@ cr_statement_font_face_rule_parse_from_buf (const guchar * a_buf,
                                             enum CREncoding a_encoding)
 {
         CRStatement *result = NULL;
+        CRStatement **resultptr = NULL;
         CRParser *parser = NULL;
         CRDocHandler *sac_handler = NULL;
         enum CRStatus status = CR_OK;
 
-        parser = cr_parser_new_from_buf (a_buf, strlen (a_buf),
+        parser = cr_parser_new_from_buf ((guchar*)a_buf, strlen (a_buf),
                                          a_encoding, FALSE);
         if (!parser)
                 goto cleanup;
@@ -1668,8 +1654,9 @@ cr_statement_font_face_rule_parse_from_buf (const guchar * a_buf,
         if (status != CR_OK)
                 goto cleanup;
 
+	resultptr = &result;
         status = cr_doc_handler_get_result (sac_handler,
-                                            (gpointer *) & result);
+                                            (gpointer *) resultptr);
         if (status != CR_OK || !result)
                 goto cleanup;
 
@@ -1677,6 +1664,7 @@ cr_statement_font_face_rule_parse_from_buf (const guchar * a_buf,
         if (parser) {
                 cr_parser_destroy (parser);
                 parser = NULL;
+                sac_handler = NULL ;
         }
         if (sac_handler) {
                 cr_doc_handler_unref (sac_handler);
@@ -1811,6 +1799,45 @@ cr_statement_unlink (CRStatement * a_stmt)
         a_stmt->parent_sheet = NULL;
 
         return result;
+}
+
+/**
+ *Return the number of rules in the statement list;
+ *@param a_this the current instance of #CRStatement.
+ *@return number of rules in the statement list.
+ */
+gint
+cr_statement_nr_rules (CRStatement * a_this)
+{
+        CRStatement *cur = NULL;
+        int nr = 0;
+
+        g_return_val_if_fail (a_this, -1);
+
+        for (cur = a_this; cur; cur = cur->next)
+                nr++;
+        return nr;
+}
+
+/**
+ *Use an index to get a CRStatement from the statement list.
+ *@param a_this the current instance of #CRStatement.
+ *@param itemnr the index into the statement list.
+ *@return CRStatement at position itemnr, if itemnr > number of statements - 1,
+ *it will return NULL.
+ */
+CRStatement *
+cr_statement_get_from_list (CRStatement * a_this, int itemnr)
+{
+        CRStatement *cur = NULL;
+        int nr = 0;
+
+        g_return_val_if_fail (a_this, NULL);
+
+        for (cur = a_this; cur; cur = cur->next)
+                if (nr++ == itemnr)
+                        return cur;
+        return NULL;
 }
 
 /**
@@ -2247,6 +2274,92 @@ cr_statement_at_font_face_rule_add_decl (CRStatement * a_this,
 }
 
 /**
+ *Serializes a css statement into a string
+ *@param a_this the current statement to serialize
+ *@param a_indent the number of white space of indentation.
+ *@return the serialized statement. Must be freed by the caller
+ *using g_free().
+ */
+gchar *
+cr_statement_to_string (CRStatement * a_this, gulong a_indent)
+{
+        gchar *str = NULL ;
+
+        if (!a_this)
+                return NULL;
+
+        switch (a_this->type) {
+        case RULESET_STMT:
+                str = cr_statement_ruleset_to_string 
+                        (a_this, a_indent);
+                break;
+
+        case AT_FONT_FACE_RULE_STMT:
+                str = cr_statement_font_face_rule_to_string 
+                        (a_this, a_indent) ;
+                break;
+
+        case AT_CHARSET_RULE_STMT:
+                str = cr_statement_charset_to_string
+                        (a_this, a_indent);                
+                break;
+
+        case AT_PAGE_RULE_STMT:
+                str = cr_statement_at_page_rule_to_string
+                        (a_this, a_indent);
+                break;
+
+        case AT_MEDIA_RULE_STMT:
+                str = cr_statement_media_rule_to_string
+                        (a_this, a_indent);
+                break;
+
+        case AT_IMPORT_RULE_STMT:
+                str = cr_statement_import_rule_to_string
+                        (a_this, a_indent);
+                break;
+
+        default:
+                cr_utils_trace_info ("Statement unrecognized");
+                break;
+        }
+        return str ;
+}
+
+gchar*
+cr_statement_list_to_string (CRStatement *a_this, gulong a_indent)
+{
+        CRStatement *cur_stmt = NULL ;
+        GString *stringue = NULL ;
+        gchar *str = NULL ;
+
+        g_return_val_if_fail (a_this, NULL) ;
+
+        stringue = g_string_new (NULL) ;
+        if (!stringue) {
+                cr_utils_trace_info ("Out of memory") ;
+                return NULL ;
+        }
+        for (cur_stmt = a_this ; cur_stmt;
+             cur_stmt = cur_stmt->next) {
+                str = cr_statement_to_string (cur_stmt, a_indent) ;
+                if (str) {
+                        if (!cur_stmt->prev) {
+                                g_string_append (stringue, str) ;
+                        } else {
+                                g_string_append_printf 
+                                        (stringue, "\n%s", str) ;
+                        }
+                        g_free (str) ;
+                        str = NULL ;
+                }                
+        }
+        str = stringue->str ;
+        g_string_free (stringue, FALSE) ;
+        return str ;
+}
+
+/**
  *Dumps the css2 statement to a file.
  *@param a_this the current css2 statement.
  *@param a_fp the destination file pointer.
@@ -2255,43 +2368,151 @@ cr_statement_at_font_face_rule_add_decl (CRStatement * a_this,
 void
 cr_statement_dump (CRStatement * a_this, FILE * a_fp, gulong a_indent)
 {
+        gchar *str = NULL ;
 
         if (!a_this)
                 return;
 
-        if (a_this->prev) {
-                fprintf (a_fp, "\n\n");
+        str = cr_statement_to_string (a_this, a_indent) ;
+        if (str) {
+                fprintf (a_fp, "%s",str) ;
+                g_free (str) ;
+                str = NULL ;
         }
+}
 
-        switch (a_this->type) {
-        case RULESET_STMT:
-                cr_statement_dump_ruleset (a_this, a_fp, a_indent);
-                break;
+/**
+ *Dumps a ruleset statement to a file.
+ *@param a_this the current instance of #CRStatement.
+ *@param a_fp the destination file pointer.
+ *@param a_indent the number of indentation white spaces to add.
+ */
+void
+cr_statement_dump_ruleset (CRStatement * a_this, FILE * a_fp, glong a_indent)
+{
+        guchar *str = NULL;
 
-        case AT_FONT_FACE_RULE_STMT:
-                cr_statement_dump_font_face_rule (a_this, a_fp, a_indent);
-                break;
+        g_return_if_fail (a_fp && a_this);
+        str = cr_statement_ruleset_to_string (a_this, a_indent);
+        if (str) {
+                fprintf (a_fp, str);
+                g_free (str);
+                str = NULL;
+        }
+}
 
-        case AT_CHARSET_RULE_STMT:
-                cr_statement_dump_charset (a_this, a_fp, a_indent);
-                break;
+/**
+ *Dumps a font face rule statement to a file.
+ *@param a_this the current instance of font face rule statement.
+ *@param a_fp the destination file pointer.
+ *@param a_indent the number of white space indentation.
+ */
+void
+cr_statement_dump_font_face_rule (CRStatement * a_this, FILE * a_fp,
+                                  glong a_indent)
+{
+        gchar *str = NULL ;
+        g_return_if_fail (a_this 
+                          && a_this->type == AT_FONT_FACE_RULE_STMT);
 
-        case AT_PAGE_RULE_STMT:
-                cr_statement_dump_page (a_this, a_fp, a_indent);
-                break;
+        str = cr_statement_font_face_rule_to_string (a_this,
+                                                     a_indent) ;
+        if (str) {
+                fprintf (a_fp, "%s", str) ;
+                g_free (str) ;
+                str = NULL ;
+        }
+}
 
-        case AT_MEDIA_RULE_STMT:
-                cr_statement_dump_media_rule (a_this, a_fp, a_indent);
-                break;
+/**
+ *Dumps an @charset rule statement to a file.
+ *@param a_this the current instance of the @charset rule statement.
+ *@param a_fp the destination file pointer.
+ *@param a_indent the number of indentation white spaces.
+ */
+void
+cr_statement_dump_charset (CRStatement * a_this, FILE * a_fp, gulong a_indent)
+{
+        guchar *str = NULL;
 
-        case AT_IMPORT_RULE_STMT:
-                cr_statement_dump_import_rule (a_this, a_fp, a_indent);
-                break;
+        g_return_if_fail (a_this && a_this->type == AT_CHARSET_RULE_STMT);
 
-        default:
-                fprintf (a_fp, "Statement unrecognized at %s:%d",
-                         __FILE__, __LINE__);
-                break;
+        str = cr_statement_charset_to_string (a_this,
+                                              a_indent) ;
+        if (str) {
+                fprintf (a_fp, str) ;
+                g_free (str) ;
+                str = NULL ;
+        }
+}
+
+
+/**
+ *Dumps an @page rule statement on stdout.
+ *@param a_this the statement to dump on stdout.
+ *@param a_fp the destination file pointer.
+ *@param a_indent the number of indentation white spaces.
+ */
+void
+cr_statement_dump_page (CRStatement * a_this, FILE * a_fp, gulong a_indent)
+{
+        guchar *str = NULL;
+
+        g_return_if_fail (a_this
+                          && a_this->type == AT_PAGE_RULE_STMT
+                          && a_this->kind.page_rule);
+
+        str = cr_statement_at_page_rule_to_string (a_this, a_indent) ;
+        if (str) {
+                fprintf (a_fp, str);
+                g_free (str) ;
+                str = NULL ; 
+        }
+}
+
+
+/**
+ *Dumps an @media rule statement to a file.
+ *@param a_this the statement to dump.
+ *@param a_fp the destination file pointer
+ *@param a_indent the number of white spaces indentation.
+ */
+void
+cr_statement_dump_media_rule (CRStatement * a_this, 
+                              FILE * a_fp,
+                              gulong a_indent)
+{
+        gchar *str = NULL ;
+        g_return_if_fail (a_this->type == AT_MEDIA_RULE_STMT);
+
+        str = cr_statement_media_rule_to_string (a_this, a_indent) ;
+        if (str) {
+                fprintf (a_fp, str) ;
+                g_free (str) ;
+                str = NULL ;
+        }
+}
+
+/**
+ *Dumps an @import rule statement to a file.
+ *@param a_fp the destination file pointer.
+ *@param a_indent the number of white space indentations.
+ */
+void
+cr_statement_dump_import_rule (CRStatement * a_this, FILE * a_fp,
+                               gulong a_indent)
+{
+        gchar *str = NULL ;
+        g_return_if_fail (a_this
+                          && a_this->type == AT_IMPORT_RULE_STMT
+                          && a_fp
+                          && a_this->kind.import_rule);
+
+        str = cr_statement_import_rule_to_string (a_this, a_indent) ;
+        if (str) {
+                fprintf (a_fp, str) ;
+                g_free (str) ;
+                str = NULL ;
         }
 }
 

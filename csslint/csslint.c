@@ -3,7 +3,7 @@
 /*
  * csslint.c : a small tester program for CSS2 input
  *
- * Copyright (C) 2002-2003 Gaël Chamoulaud, Dodji Seketeli.
+ * Copyright (C) 2002-2004 Gaël Chamoulaud, Dodji Seketeli.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of version 2.1 of the GNU Lesser General Public

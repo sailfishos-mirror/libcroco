@@ -3,8 +3,6 @@
 /*
  * This file is part of The Croco Library
  *
- * Copyright (C) 2002-2003 Dodji Seketeli <dodji@seketeli.org>
- *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of version 2.1 of the GNU Lesser General Public
  * License as published by the Free Software Foundation.
@@ -18,15 +16,16 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
  * USA
+ * 
+ * See COPYRIGHTS file for copyrights information.
  */
 
-/*
- *$Id$
- */
 
 #include <stdio.h>
 #include <string.h>
 #include "cr-rgb.h"
+#include "cr-term.h"
+#include "cr-parser.h"
 
 static CRRgb gv_standard_colors[] = {
         {"aliceblue", 240, 248, 255, 0},
@@ -378,7 +377,7 @@ cr_rgb_set_from_name (CRRgb * a_this, const guchar * a_color_name)
         if (i < sizeof (gv_standard_colors))
                 status = CR_OK;
         else
-                status = CR_UNKNOWN_TYPE_ERROR;
+               status = CR_UNKNOWN_TYPE_ERROR;
 
         return status;
 }
@@ -437,6 +436,42 @@ cr_rgb_set_from_hex_str (CRRgb * a_this, const guchar * a_hex)
 }
 
 /**
+ *Set the rgb from a terminal symbol
+ *@param a_this the instance of #CRRgb to set
+ *@param a_value the terminal from which to set
+ */
+enum CRStatus
+cr_rgb_set_from_term (CRRgb *a_this, const struct _CRTerm *a_value)
+{
+        enum CRStatus status = CR_OK ;
+        g_return_val_if_fail (a_this && a_value,
+                              CR_BAD_PARAM_ERROR) ;
+
+	switch(a_value->type) {
+	case TERM_RGB:
+                if (a_value->content.rgb) {
+                        cr_rgb_set_from_rgb
+                                (a_this, a_value->content.rgb) ;
+                }
+		break ;
+	case TERM_IDENT:
+	        status = cr_rgb_set_from_name 
+                        (a_this,
+                         a_value->content.str->str) ;
+		break ;
+	case TERM_HASH:
+                status = cr_rgb_set_from_hex_str
+                        (a_this, 
+                         a_value->content.str->str) ;
+                break ;
+	default:
+                status =  CR_UNKNOWN_TYPE_ERROR ;
+	}
+
+        return status ;
+}
+
+/**
  *Destructor of #CRRgb.
  *@param a_this the "this pointer" of the
  *current instance of #CRRgb.
@@ -448,3 +483,56 @@ cr_rgb_destroy (CRRgb * a_this)
 
         g_free (a_this);
 }
+
+/**
+ *Parses a text buffer that contains a rgb color
+ *
+ *@param a_str a string that contains a color description
+ *@param a_enc the encoding of a_str
+ *@return the parsed color, or NULL in case of error
+ */
+CRRgb *cr_rgb_parse_from_buf (const guchar *a_str,
+                              enum CREncoding a_enc)
+{
+	enum CRStatus status = CR_OK ;
+	CRTerm *value = NULL ;
+	CRParser * parser = NULL;
+	CRRgb *result = NULL;
+	
+	g_return_val_if_fail (a_str, NULL);
+	
+	parser = cr_parser_new_from_buf ((guchar*)a_str, strlen (a_str), 
+                                         a_enc, FALSE) ;
+
+	g_return_val_if_fail (parser, NULL);
+
+	status = cr_parser_try_to_skip_spaces_and_comments (parser) ;
+	if (status != CR_OK)
+	    	goto cleanup;
+
+	status = cr_parser_parse_term (parser, &value);
+	if (status != CR_OK)
+	    	goto cleanup;
+
+	result = cr_rgb_new ();
+	if (!result)
+	    	goto cleanup;
+
+	status = cr_rgb_set_from_term (result, value);
+
+cleanup:
+	if (parser) {
+	    	cr_parser_destroy (parser);
+		parser = NULL;
+	}
+	if (value) {
+	    	cr_term_destroy(value);
+		value = NULL;
+	}
+	return result ;
+}
+		  
+	
+	  
+
+	

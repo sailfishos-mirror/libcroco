@@ -8,19 +8,15 @@
  *
  *To compile it using gcc, type
  *
- *gcc -g `croco-config --cflags`  `croco-config --libs` -o cssom-example-1 cssom-example-1.c
+ *gcc -g -Wall `croco-config --cflags`  `croco-config --libs` -o cssom-example-1 cssom-example-1.c
  *
  *Prior to that, you must have compiled and installed libcroco, of course.
  *
- *@author Dodji Seketeli <dodji@seketeli.org>
- */
-
-/*
- *$Id$
+ *@author Dodji Seketeli
  */
 
 #include <string.h>
-#include <libcroco.h>
+#include <libcroco/libcroco.h>
 
 /**
  *Displays the usage of this program.

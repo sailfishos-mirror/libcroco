@@ -117,6 +117,7 @@ cr_input_new_real (void)
 /**
  *Creates a new input stream from a memory buffer.
  *@param a_buf the memory buffer to create the input stream from.
+ *The #CRInput keeps this pointer so user should not free it !.
  *@param a_len the size of the input buffer.
  *@param a_enc the buffer's encoding.
  *@param a_free_buf if set to TRUE, this a_buf will be freed
@@ -125,9 +126,10 @@ cr_input_new_real (void)
  *@return the newly built instance of #CRInput.
  */
 CRInput *
-cr_input_new_from_buf (const guchar * a_buf,
+cr_input_new_from_buf (guchar * a_buf,
                        gulong a_len,
-                       enum CREncoding a_enc, gboolean a_free_buf)
+                       enum CREncoding a_enc,
+                       gboolean a_free_buf)
 {
         CRInput *result = NULL;
         enum CRStatus status = CR_OK;
@@ -150,19 +152,21 @@ cr_input_new_from_buf (const guchar * a_buf,
                         (enc_handler, a_buf, &len,
                          &PRIVATE (result)->in_buf,
                          &PRIVATE (result)->in_buf_size);
-
                 if (status != CR_OK)
                         goto error;
-
+                PRIVATE (result)->free_in_buf = TRUE;
+                if (a_free_buf == TRUE && a_buf) {
+                        g_free (a_buf) ;
+                        a_buf = NULL ;
+                }
                 PRIVATE (result)->line = 1;
                 PRIVATE (result)->nb_bytes = PRIVATE (result)->in_buf_size;
         } else {
                 PRIVATE (result)->in_buf = (guchar *) a_buf;
                 PRIVATE (result)->in_buf_size = a_len;
                 PRIVATE (result)->nb_bytes = a_len;
+                PRIVATE (result)->free_in_buf = a_free_buf;
         }
-
-        PRIVATE (result)->free_in_buf = a_free_buf;
 
         return result;
 
@@ -247,6 +251,11 @@ cr_input_new_from_uri (const gchar * a_file_uri, enum CREncoding a_enc)
                 if (!result) {
                         goto cleanup;
                 }
+                /*
+                 *we should  free buf here because it's own by CRInput.
+                 *(see the last parameter of cr_input_new_from_buf().
+                 */
+                buf = NULL ;
         }
 
       cleanup:
