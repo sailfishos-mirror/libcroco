@@ -1,3 +1,9 @@
+2004-02-29  Dodji Seketeli  <dodji@gnome.org>
+
+	* src/cr-sel-eng.c: 
+	(put_css_properties_in_props_list): fixed a small bug in here:
+	Always Initialise output function argument !!!.
+
 2004-02-29  Dodji Seketeli <dodji@gnome.org>
 
 	* src/cr-prop-list.[ch], src/Makefile.am,src/libcroco.h: 

@@ -1090,7 +1090,10 @@ put_css_properties_in_props_list (CRPropList **a_props,
         for (cur_decl = a_stmt->kind.ruleset->decl_list ; 
              cur_decl ; cur_decl = cur_decl->next)
         {
-                CRDeclaration *decl = NULL ;
+                CRDeclaration *decl ;
+                
+                decl = NULL ;
+                pair = NULL ;
 
                 if (!cur_decl->property || !cur_decl->property->str)
                         continue ;
