@@ -43,61 +43,16 @@
 static void
 dump (CRDeclaration *a_this, FILE *a_fp, glong a_indent)
 {
-	guchar *str = NULL, *tmp_str = NULL, *tmp_str2 = NULL;
+	guchar *str = NULL ;
 	g_return_if_fail (a_this) ;
-
-	if (a_this->property && a_this->property->str)
-	{		
-		tmp_str = g_strndup (a_this->property->str,
-				     a_this->property->len) ;
-		if (tmp_str)
-		{
-			tmp_str2 = g_strconcat (tmp_str, " : ", NULL) ;
-			if (!tmp_str2) goto error ;
-			if (tmp_str)
-			{
-				g_free (tmp_str) ;
-				tmp_str = NULL ;
-			}
-			str = tmp_str2 ;	
-		}
-
-		if (str)
-		{
-			cr_utils_dump_n_chars (' ', a_fp, a_indent) ;
-			fprintf (a_fp,"%s", str) ;
-			g_free (str) ;
-			str = NULL ;
-		}
-		else
-			goto error ;
-
-		if (a_this->value)
-		{
-			cr_term_dump (a_this->value, a_fp) ;
-		}
-
-	}
-
 	
-	return ;
-
- error:
+	str = cr_declaration_to_string (a_this, a_indent) ;
 	if (str)
 	{
+		fprintf (a_fp,"%s", str) ;
 		g_free (str) ;
 		str = NULL ;
-	}
-	if (tmp_str)
-	{
-		g_free (tmp_str) ;
-		tmp_str = NULL ;
-	}
-	if (tmp_str2)
-	{
-		g_free (tmp_str2) ;
-		tmp_str2 = NULL ;
-	}
+	}	
 }
 
 /**
@@ -166,6 +121,7 @@ cr_declaration_parse_from_buf (CRStatement *a_statement,
 	GString *property = NULL;
 	CRDeclaration *result = NULL ;
 	CRParser * parser = NULL ;
+	gboolean important = FALSE ;
 
 	g_return_val_if_fail (a_str, NULL) ;
 	if (a_statement)
@@ -182,7 +138,7 @@ cr_declaration_parse_from_buf (CRStatement *a_statement,
 		goto cleanup ;
 
 	status = cr_parser_parse_declaration (parser, &property,
-					      &value) ;
+					      &value, &important) ;
 	if (status != CR_OK || !property)
 		goto cleanup ;
 
@@ -191,6 +147,7 @@ cr_declaration_parse_from_buf (CRStatement *a_statement,
 	{
 		property = NULL ;
 		value = NULL ;
+		result->important = important ;
 	}
 
  cleanup:
@@ -233,6 +190,7 @@ cr_declaration_parse_list_from_buf (const guchar *a_str, enum CREncoding a_enc)
 	CRDeclaration *result = NULL, *cur_decl = NULL ;
 	CRParser * parser = NULL ;
 	CRTknzr *tokenizer = NULL ;
+	gboolean important = FALSE ;
 
 	g_return_val_if_fail (a_str, NULL) ;
 
@@ -252,7 +210,7 @@ cr_declaration_parse_list_from_buf (const guchar *a_str, enum CREncoding a_enc)
 		goto cleanup ;
 
 	status = cr_parser_parse_declaration (parser, &property,
-					      &value) ;
+					      &value, &important) ;
 	if (status != CR_OK || !property)
 	{
 		if (status != CR_OK)
@@ -264,6 +222,7 @@ cr_declaration_parse_list_from_buf (const guchar *a_str, enum CREncoding a_enc)
 	{
 		property = NULL ;
 		value = NULL ;
+		result->important = important ;
 	}
 	/*now, go parse the other declarations*/
 	for (;;)
@@ -285,9 +244,10 @@ cr_declaration_parse_list_from_buf (const guchar *a_str, enum CREncoding a_enc)
 		{
 			break ;
 		}
+		important = FALSE ;
 		cr_parser_try_to_skip_spaces_and_comments (parser) ;
 		status = cr_parser_parse_declaration (parser, &property,
-						      &value) ;
+						      &value, &important) ;
 		if (status != CR_OK || !property)
 		{
 			if (status == CR_END_OF_INPUT_ERROR)
@@ -299,6 +259,7 @@ cr_declaration_parse_list_from_buf (const guchar *a_str, enum CREncoding a_enc)
 		cur_decl = cr_declaration_new (NULL, property, value) ;
 		if (cur_decl)
 		{
+			cur_decl->important = important ;
 			result = cr_declaration_append (result, cur_decl) ;
 			property = NULL ;
 			value = NULL ;
@@ -591,15 +552,17 @@ cr_declaration_to_string (CRDeclaration *a_this,
 			}
 			else
 				goto error ;
-		}		
+		}
+		if (a_this->important == TRUE)
+		{
+			g_string_append_printf (stringue, " %s", "!important") ;
+		}
 	}
-
 	if (stringue && stringue->str)
 	{
 		result = stringue->str ;
 		g_string_free (stringue, FALSE) ;
 	}
-
 	return result ;
 
  error:

@@ -1189,24 +1189,22 @@ put_css_properties_in_props_list (CRPropList **a_props,
                  *style sheets which override 
                  *the default style sheet."
                  */
-                if (decl->parent_statement 
+                if (decl->parent_statement
                     && decl->parent_statement->parent_sheet
                     && (decl->parent_statement->parent_sheet->origin 
                         <
                         a_stmt->parent_sheet->origin))
                 {
-                        tmp_props = cr_prop_list_unlink 
+                        tmp_props = cr_prop_list_unlink
                                 (props, pair) ;
-                        if (!tmp_props)
-                        {
-                                cr_utils_trace_info ("tmp_props != NULL failed") ;
-                                continue ;
-                        }
+                        /*TODO: pair leaks here, fix it!!*/
                         props = tmp_props ;
                         tmp_props = NULL ;
-                        cr_prop_list_append2 (props,
-                                              cur_decl->property,
-                                              cur_decl) ;
+                        props = cr_prop_list_append2
+                                (props,
+                                 cur_decl->property,
+                                 cur_decl) ;
+                        
                         continue ;
                 }
                 else if (decl->parent_statement 

@@ -64,7 +64,16 @@ struct _CRDeclaration
 	/*the previous one declaration*/
 	CRDeclaration *prev ;
 
+	/*does the declaration have the important keyword ?*/
+	gboolean important ;
+
 	glong ref_count ;
+
+	/*reserved for future usage*/
+	gpointer rfu0 ;	
+	gpointer rfu1 ;
+	gpointer rfu2 ;
+	gpointer rfu3 ;
 } ;
 
 

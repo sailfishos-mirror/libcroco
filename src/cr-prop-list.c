@@ -365,7 +365,7 @@ cr_prop_list_unlink (CRPropList *a_this,
 	{
 		if (next)
 			return next ;
-		return a_this ;
+		return NULL ;
 	}
 	return a_this ;
 }

@@ -64,7 +64,8 @@ error (CRDocHandler *a_this) ;
 static void
 property (CRDocHandler *a_this,
           GString *a_name,
-          CRTerm *a_expression) ;
+          CRTerm *a_expression,
+          gboolean a_important) ;
 
 static void
 end_selector (CRDocHandler *a_this,
@@ -669,7 +670,8 @@ end_selector (CRDocHandler *a_this,
 static void
 property (CRDocHandler *a_this,
           GString *a_name,
-          CRTerm *a_expression)
+          CRTerm *a_expression,
+          gboolean a_important)
 {
         enum CRStatus status = CR_OK ;
         ParsingContext *ctxt = NULL ;
@@ -704,7 +706,7 @@ property (CRDocHandler *a_this,
                                    str, a_expression) ;
         g_return_if_fail (decl) ;
         str = NULL ;
-
+        decl->important = a_important ;
         /*
          *add the new declaration to the current statement
          *being build.

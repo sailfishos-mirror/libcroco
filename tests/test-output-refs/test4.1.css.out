@@ -1,5 +1,5 @@
 * {
-  font-family : Verdana, Arial, Helvetica, sans-serif, monospace
+  font-family : Verdana, Arial, Helvetica, sans-serif, monospace !important
 }
 
 tutu:class1:class2 {

@@ -1,3 +1,19 @@
+2004-03-05  Dodji Seketeli  <dodji@gnome.org>
+
+	* csslint/csslint.c: 
+	(parse_cmd_line) fixed silly bug in there.
+	* src/cr-declaration.[ch],src/cr-om-parser.c,
+	src/cr-parser.[ch],src/cr-statement.c,tests/test2-main.c,
+	tests/test3-main.c: 
+	added the support of the "!important"
+	keyword at the parsing level.
+	* tests/test-inputs/test4.1.css: update nr tests to reflect
+	the new !important thing.
+	* src/cr-sel-eng.c: 
+	(put_css_properties_in_props_list): fix a small subtle
+	bug in here. Selection engine is becoming more and more
+	reliable ;).
+
 2004-03-04  Dodji Seketeli  <dodji@gnome.org>
 
 	* src/cr-enc-handler.c:

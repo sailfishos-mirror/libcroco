@@ -3796,6 +3796,59 @@ cr_parser_parse_expr (CRParser *a_this, CRTerm **a_expr)
 }
 
 /**
+ *Parses a declaration priority as defined by
+ *the css2 grammar in appendix C:
+ *prio: IMPORTANT_SYM S*
+ *@param a_this the current instance of #CRParser.
+ *@param a_prio a string representing the priority.
+ *Today, only "!important" is returned as only this
+ *priority is defined by css2.
+ */
+enum CRStatus
+cr_parser_parse_prio (CRParser *a_this, GString **a_prio)
+{
+        enum CRStatus status = CR_ERROR ;
+        CRInputPos init_pos ;
+        CRToken *token = NULL ;
+
+        g_return_val_if_fail (a_this && PRIVATE (a_this)
+                              && a_prio && *a_prio == NULL,
+                              CR_BAD_PARAM_ERROR) ;
+
+        RECORD_INITIAL_POS (a_this, &init_pos) ;
+
+        status = cr_tknzr_get_next_token 
+                (PRIVATE (a_this)->tknzr,
+                 &token) ;
+        if (status == CR_END_OF_INPUT_ERROR)
+        {
+                goto error ;
+        }
+        ENSURE_PARSING_COND (status == CR_OK 
+                             && token
+                             && token->type == IMPORTANT_SYM_TK) ;
+
+        cr_parser_try_to_skip_spaces_and_comments 
+                (a_this) ;
+        *a_prio = g_string_new ("!important") ;
+        cr_token_destroy (token) ;
+        token = NULL ;
+        return CR_OK ;
+
+ error:
+        if (token)
+        {
+                cr_token_destroy (token) ;
+                token = NULL ;
+        }
+        cr_tknzr_set_cur_pos (PRIVATE (a_this)->tknzr, &init_pos) ;
+        
+        return status ;
+}
+
+/**
+ *TODO: return the parsed priority, so that
+ *upper layers can take benefit from it.
  *Parses a "declaration" as defined by the css2 spec in appendix D.1:
  *declaration ::= [property ':' S* expr prio?]?
  *
@@ -3808,15 +3861,17 @@ cr_parser_parse_expr (CRParser *a_this, CRTerm **a_expr)
  */
 enum CRStatus
 cr_parser_parse_declaration (CRParser *a_this, GString **a_property,
-                             CRTerm **a_expr)
+                             CRTerm **a_expr, gboolean *a_important)
 {
         enum CRStatus status = CR_ERROR ;
         CRInputPos init_pos ;
         guint32 cur_char = 0 ;
         CRTerm *expr = NULL ;
+        GString *prio = NULL ;
 
         g_return_val_if_fail (a_this && PRIVATE (a_this)
-                              && a_property && a_expr,
+                              && a_property && a_expr
+                              && a_important,
                               CR_BAD_PARAM_ERROR) ;
 
         RECORD_INITIAL_POS (a_this, &init_pos) ;
@@ -3849,8 +3904,21 @@ cr_parser_parse_declaration (CRParser *a_this, GString **a_property,
         CHECK_PARSING_STATUS_ERR 
                 (a_this, status, FALSE,
                  "while parsing declaration: next expression is malformed",
-                 CR_SYNTAX_ERROR) ;
+                 CR_SYNTAX_ERROR) ; 
 
+        cr_parser_try_to_skip_spaces_and_comments 
+                (a_this) ;
+        status = cr_parser_parse_prio (a_this, &prio) ;
+        if (prio)
+        {
+                g_string_free (prio, TRUE) ;
+                prio = NULL ;
+                *a_important = TRUE ;
+        }
+        else
+        {
+                *a_important = FALSE ;
+        }
         if (*a_expr)
         {
                 cr_term_append_term (*a_expr, expr) ;
@@ -3966,7 +4034,7 @@ cr_parser_parse_ruleset (CRParser *a_this)
         CRTerm *expr = NULL ;
         CRSimpleSel * simple_sels = NULL ;
         CRSelector *selector = NULL ;
-        gboolean start_selector = FALSE ;
+        gboolean start_selector = FALSE, is_important = FALSE ;
 
         g_return_val_if_fail (a_this, CR_BAD_PARAM_ERROR) ;
 
@@ -3982,7 +4050,6 @@ cr_parser_parse_ruleset (CRParser *a_this)
                  "while parsing rulset: current char should be '{'",
                  CR_SYNTAX_ERROR) ;
 
-                
         if (PRIVATE (a_this)->sac_handler
             &&PRIVATE (a_this)->sac_handler->start_selector)
         {
@@ -4001,22 +4068,23 @@ cr_parser_parse_ruleset (CRParser *a_this)
         }
 
         cr_parser_try_to_skip_spaces_and_comments (a_this) ;
-        
+
         PRIVATE (a_this)->state = TRY_PARSE_RULESET_STATE ;
 
-        status = cr_parser_parse_declaration (a_this, &property, &expr) ;
+        status = cr_parser_parse_declaration (a_this, &property, 
+                                              &expr, &is_important) ;
 
         if (expr)
         {
                 cr_term_ref (expr) ;
         }
-
-        if ( status == CR_OK 
+        if ( status == CR_OK
              && PRIVATE (a_this)->sac_handler
              && PRIVATE (a_this)->sac_handler->property)
         {
                 PRIVATE (a_this)->sac_handler->property 
-                        (PRIVATE (a_this)->sac_handler, property, expr) ;
+                        (PRIVATE (a_this)->sac_handler, property, expr,
+                         is_important) ;
         }
 
         if (status == CR_OK)
@@ -4038,7 +4106,6 @@ cr_parser_parse_ruleset (CRParser *a_this)
                         expr = NULL ;
                 }
         }
-
         CHECK_PARSING_STATUS_ERR
                 (a_this, status, FALSE,
                  "while parsing ruleset: next construction should be a declaration",
@@ -4055,35 +4122,31 @@ cr_parser_parse_ruleset (CRParser *a_this)
                 cr_parser_try_to_skip_spaces_and_comments (a_this) ;
 
                 status = cr_parser_parse_declaration (a_this, &property,
-                                                      &expr) ;
+                                                      &expr, &is_important) ;
 
                 if (expr)
                 {
                         cr_term_ref (expr) ;
                 }
-
                 if (status == CR_OK 
                     && PRIVATE (a_this)->sac_handler
                     && PRIVATE (a_this)->sac_handler->property)
                 {
                         PRIVATE (a_this)->sac_handler->property 
                                 (PRIVATE (a_this)->sac_handler, 
-                                 property, expr) ;
+                                 property, expr, is_important) ;
                 }
-
                 if (property)
                 {
                         g_string_free (property, TRUE) ;
                         property = NULL ;
                 }
-
                 if (expr)
                 {
                         cr_term_unref (expr) ;
                         expr = NULL ;
                 }
         }
-
         cr_parser_try_to_skip_spaces_and_comments (a_this) ;
 
         READ_NEXT_CHAR (a_this, &cur_char) ;
@@ -4125,7 +4188,6 @@ cr_parser_parse_ruleset (CRParser *a_this)
         return CR_OK ;
 
  error:
-
         if (start_selector == TRUE
             && PRIVATE (a_this)->sac_handler
             && PRIVATE (a_this)->sac_handler->error)
@@ -4133,24 +4195,20 @@ cr_parser_parse_ruleset (CRParser *a_this)
                 PRIVATE (a_this)->sac_handler->error 
                         (PRIVATE (a_this)->sac_handler) ;                
         }
-
         if (expr)
         {
                 cr_term_unref (expr) ;
                 expr = NULL ;
         }
-
         if (simple_sels)
         {
                 cr_simple_sel_destroy (simple_sels) ;
                 simple_sels = NULL ;
         }
-
         if (property)
         {
                 g_string_free (property, TRUE) ;
         }
-
         if (selector)
         {
                 cr_selector_unref (selector) ;
@@ -4555,7 +4613,8 @@ cr_parser_parse_page (CRParser *a_this)
         GString *page_selector = NULL, 
                 *page_pseudo_class = NULL, 
                 *property = NULL ;
-        
+        gboolean important = TRUE ;
+
         g_return_val_if_fail (a_this, CR_BAD_PARAM_ERROR) ;
 
         RECORD_INITIAL_POS (a_this, &init_pos) ;
@@ -4587,12 +4646,11 @@ cr_parser_parse_page (CRParser *a_this)
                 cr_tknzr_unget_token (PRIVATE (a_this)->tknzr,
                                       token) ;
                 token = NULL ;
-        }        
+        }
 
        /* 
         *try to parse pseudo_page
         */
-
         cr_parser_try_to_skip_spaces_and_comments (a_this) ;
         status = cr_tknzr_get_next_token (PRIVATE (a_this)->tknzr,
                                           &token) ;
@@ -4642,8 +4700,9 @@ cr_parser_parse_page (CRParser *a_this)
         PRIVATE (a_this)->state = TRY_PARSE_PAGE_STATE ;
 
         status = cr_parser_parse_declaration (a_this, &property,
-                                              &css_expression) ;
-        ENSURE_PARSING_COND (status == CR_OK)
+                                              &css_expression,
+                                              &important) ;
+        ENSURE_PARSING_COND (status == CR_OK) ;
 
         /*
          *call the relevant SAC handler here...
@@ -4656,21 +4715,17 @@ cr_parser_parse_page (CRParser *a_this)
 
                 PRIVATE (a_this)->sac_handler->property 
                         (PRIVATE (a_this)->sac_handler, 
-                         property,
-                         css_expression) ;
+                         property, css_expression, important) ;
         }
-
         /*
          *... and free the data structure passed to that last
          *SAC handler.
          */
-
         if (property)
         {
                 g_string_free (property, TRUE) ;
                 property = NULL ;
         }
-
         if (css_expression)
         {
                 cr_term_unref (css_expression) ;
@@ -4684,60 +4739,53 @@ cr_parser_parse_page (CRParser *a_this)
                 {
                         cr_token_destroy (token) ;
                         token = NULL ;
-                }
-                
+                }                
                 status = cr_tknzr_get_next_token 
                         (PRIVATE (a_this)->tknzr, &token) ;
 
                 ENSURE_PARSING_COND (status == CR_OK && token) ; 
 
                 if (token->type != SEMICOLON_TK) break ;
-                
+
                 cr_token_destroy (token) ;
                 token = NULL ;
-
                 cr_parser_try_to_skip_spaces_and_comments (a_this) ;
 
                 status = cr_parser_parse_declaration (a_this, &property,
-                                                      &css_expression) ;
+                                                      &css_expression, 
+                                                      &important) ;
                 CHECK_PARSING_STATUS (status, FALSE) ;
                 
                 /*
                  *call the relevant SAC handler here...
                  */
-
                 if (PRIVATE (a_this)->sac_handler
                     && PRIVATE (a_this)->sac_handler->property)
                 {
                         cr_term_ref (css_expression) ;
                         PRIVATE (a_this)->sac_handler->property 
                                 (PRIVATE (a_this)->sac_handler, 
-                                 property,
-                                 css_expression) ;
+                                 property, css_expression,
+                                 important) ;
                 }
-
                 /*
                  *... and free the data structure passed to that last
                  *SAC handler.
                  */
-
                 if (property)
                 {
                         g_string_free (property, TRUE) ;
                         property = NULL ;
                 }
-
                 if (css_expression)
                 {
                         cr_term_unref (css_expression) ;
                         css_expression = NULL ;
                 }
         }
-
         ENSURE_PARSING_COND (status == CR_OK 
                              && token
                              && token->type == CBC_TK) ;
-
         cr_token_destroy (token) ; token = NULL ;
 
 
@@ -4774,39 +4822,32 @@ cr_parser_parse_page (CRParser *a_this)
         return CR_OK ;
 
  error:
-
         if (token)
         {
                 cr_token_destroy (token) ;
                 token = NULL ;
         }
-
         if (page_selector)
         {
                 g_string_free (page_selector, TRUE) ;
                 page_selector = NULL ;
         }
-
         if (page_pseudo_class)
         {
                 g_string_free (page_pseudo_class, TRUE) ;
                 page_pseudo_class = NULL ;
         }
-
         if (property)
         {
                 g_string_free (property, TRUE) ;
                 property = NULL ;
         }
-
         if (css_expression)
         {
                 cr_term_destroy (css_expression) ;
                 css_expression = NULL ;
         }
-
         cr_tknzr_set_cur_pos (PRIVATE (a_this)->tknzr, &init_pos) ;
-
         return status ;
 }
 
@@ -4924,6 +4965,7 @@ cr_parser_parse_font_face (CRParser *a_this)
         GString *property = NULL ;
         CRTerm * css_expression = NULL ;
         CRToken *token = NULL ;
+        gboolean important = FALSE ;
         guint32 next_char = 0, cur_char = 0 ;
 
         g_return_val_if_fail (a_this, CR_BAD_PARAM_ERROR) ;
@@ -4937,82 +4979,68 @@ cr_parser_parse_font_face (CRParser *a_this)
                              && token->type == FONT_FACE_SYM_TK) ;
 
         cr_parser_try_to_skip_spaces_and_comments (a_this) ;
-
         if (token)
         {
                 cr_token_destroy (token) ;
                 token = NULL ;
         }
-
         status = cr_tknzr_get_next_token (PRIVATE (a_this)->tknzr,
                                           &token) ;
         ENSURE_PARSING_COND (status == CR_OK 
                              && token 
                              && token->type == CBO_TK) ;
-
-
         if (token)
         {
                 cr_token_destroy (token) ;
                 token = NULL ;
         }
-
         /*
          *here, call the relevant SAC handler.
          */
-
         if (PRIVATE (a_this)->sac_handler 
             && PRIVATE (a_this)->sac_handler->start_font_face)
         {
                 PRIVATE (a_this)->sac_handler->start_font_face 
                         (PRIVATE (a_this)->sac_handler) ;
         }
-
         PRIVATE (a_this)->state = TRY_PARSE_FONT_FACE_STATE ;
-
         /*
          *and resume the parsing.
          */
-        cr_parser_try_to_skip_spaces_and_comments (a_this) ;
-
-        
-        status = cr_parser_parse_declaration (a_this, &property, 
-                                              &css_expression) ;
-
+        cr_parser_try_to_skip_spaces_and_comments (a_this) ;        
+        status = cr_parser_parse_declaration (a_this, &property,
+                                              &css_expression, 
+                                              &important) ;
         if (status == CR_OK)
         {
                 /*
                  *here, call the relevant SAC handler.
                  */
                 cr_term_ref (css_expression) ;
-
                 if (PRIVATE (a_this)->sac_handler &&
                     PRIVATE (a_this)->sac_handler->property)
                 {
                         PRIVATE (a_this)->sac_handler->property
                                 (PRIVATE (a_this)->sac_handler,
-                                 property, css_expression) ;
+                                 property, css_expression, 
+                                 important) ;
                 }
                 ENSURE_PARSING_COND (css_expression && property) ;
         }
-
         /*free the data structures allocated during last parsing.*/
         if (property)
         {
                 g_string_free (property, TRUE) ;
                 property = NULL ;
         }
-
         if (css_expression)
         {
                 cr_term_unref (css_expression) ;
                 css_expression = NULL ;
         }
-
         for (;;)
         {
                 PEEK_NEXT_CHAR (a_this, &next_char) ;
-
                 if (next_char == ';')
                 {
                         READ_NEXT_CHAR (a_this, &cur_char) ;
@@ -5021,26 +5049,22 @@ cr_parser_parse_font_face (CRParser *a_this)
                 {
                         break ;
                 }
-
                 cr_parser_try_to_skip_spaces_and_comments (a_this) ;
-
                 status = cr_parser_parse_declaration (a_this, &property, 
-                                                      &css_expression) ;
-
+                                                      &css_expression,
+                                                      &important) ;
                 if (status != CR_OK) break ;
-
                 /*
                  *here, call the relevant SAC handler.
                  */
                 cr_term_ref (css_expression) ;
-
                 if (PRIVATE (a_this)->sac_handler->property)
                 {
                         PRIVATE (a_this)->sac_handler->property
                                 (PRIVATE (a_this)->sac_handler,
-                                 property, css_expression) ;
+                                 property, css_expression,
+                                 important) ;
                 }
-
                 /*
                  *Then, free the data structures allocated during 
                  *last parsing.
@@ -5050,30 +5074,23 @@ cr_parser_parse_font_face (CRParser *a_this)
                         g_string_free (property, TRUE) ;
                         property = NULL ;
                 }
-
                 if (css_expression)
                 {
                         cr_term_unref (css_expression) ;
                         css_expression = NULL ;
                 }
         }
-
         cr_parser_try_to_skip_spaces_and_comments (a_this) ;
-
         READ_NEXT_CHAR (a_this, &cur_char) ;
-
         ENSURE_PARSING_COND (cur_char == '}') ;
-
         /*
          *here, call the relevant SAC handler.
          */
-
         if (PRIVATE (a_this)->sac_handler->end_font_face)
         {
                 PRIVATE (a_this)->sac_handler->end_font_face 
                         (PRIVATE (a_this)->sac_handler) ;
         }
-
         cr_parser_try_to_skip_spaces_and_comments (a_this) ;
 
         if (token)
@@ -5081,35 +5098,27 @@ cr_parser_parse_font_face (CRParser *a_this)
                 cr_token_destroy (token) ;
                 token = NULL ;
         }
-
         cr_parser_clear_errors (a_this) ;
-
         PRIVATE (a_this)->state = FONT_FACE_PARSED_STATE ;
-
         return CR_OK ;
 
  error:
-
         if (token)
         {
                 cr_token_destroy (token) ;
                 token = NULL ;
         }
-
         if (property)
         {
                 g_string_free (property, TRUE) ;
                 property = NULL ;
         }
-
         if (css_expression)
         {
                 cr_term_destroy (css_expression) ;
                 css_expression = NULL ;
         }
-
         cr_tknzr_set_cur_pos (PRIVATE (a_this)->tknzr, &init_pos) ;
-
         return status ;
 }
 

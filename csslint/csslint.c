@@ -141,7 +141,6 @@ parse_cmd_line (int a_argc, char **a_argv,
                                                 exit (-1);
                                         }
                                         a_options->user_sheet_path = a_argv[i] ;
-                                        i++ ;
                                 }
                                 else if (!strcmp (a_argv[i], "--ua-sheet"))
                                 {

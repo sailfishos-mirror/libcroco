@@ -282,7 +282,8 @@ test_end_selector (CRDocHandler *a_handler,
 
 
 static void
-test_property (CRDocHandler *a_handler, GString *a_name, CRTerm *a_expr)
+test_property (CRDocHandler *a_handler, GString *a_name, 
+               CRTerm *a_expr, gboolean a_important)
 {
 	g_return_if_fail (a_handler) ;
 

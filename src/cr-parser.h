@@ -113,8 +113,12 @@ enum CRStatus
 cr_parser_parse_expr (CRParser *a_this, CRTerm **a_expr) ;
 
 enum CRStatus
+cr_parser_parse_prio (CRParser *a_this, GString **a_prio) ;
+
+enum CRStatus
 cr_parser_parse_declaration (CRParser *a_this, GString **a_property,
-                             CRTerm **a_expr) ;
+                             CRTerm **a_expr, gboolean *a_important) ;
+
 enum CRStatus
 cr_parser_parse_statement_core (CRParser *a_this) ;
 

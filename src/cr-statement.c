@@ -96,7 +96,8 @@ parse_font_face_unrecoverable_error_cb (CRDocHandler *a_this)
 static void
 parse_font_face_property_cb (CRDocHandler *a_this,
 			     GString *a_name,
-			     CRTerm *a_value)
+			     CRTerm *a_value,
+                             gboolean a_important)
 {
 	enum CRStatus status = CR_OK ;
 	GString *name = NULL ;
@@ -197,7 +198,8 @@ parse_page_unrecoverable_error_cb (CRDocHandler *a_this)
 static void
 parse_page_property_cb (CRDocHandler *a_this,
 			GString *a_name, 
-			CRTerm *a_expression)
+			CRTerm *a_expression,
+                        gboolean a_important)
 {
 	GString *name = NULL ;
 	CRStatement *stmt = NULL ;
@@ -212,7 +214,7 @@ parse_page_property_cb (CRDocHandler *a_this,
 
 	decl = cr_declaration_new (stmt, name, a_expression) ;
 	g_return_if_fail (decl) ;
-
+        decl->important = a_important ;
 	stmt->kind.page_rule->decl_list = 
 		cr_declaration_append (stmt->kind.page_rule->decl_list,
 				       decl) ;
@@ -311,7 +313,8 @@ parse_at_media_start_selector_cb (CRDocHandler *a_this,
 
 static void
 parse_at_media_property_cb (CRDocHandler *a_this,
-			    GString *a_name, CRTerm *a_value)
+			    GString *a_name, CRTerm *a_value,
+                            gboolean a_important)
 {
 	enum CRStatus status = CR_OK ;
 	/*
@@ -319,6 +322,7 @@ parse_at_media_property_cb (CRDocHandler *a_this,
 	 *current at-media being parsed.
 	 */
 	CRStatement *stmt = NULL;
+        CRDeclaration *decl = NULL ;
 	GString *name = NULL ;
 
 	g_return_if_fail (a_this && a_name) ;
@@ -330,11 +334,12 @@ parse_at_media_property_cb (CRDocHandler *a_this,
 	g_return_if_fail (status == CR_OK && stmt) ;
 	g_return_if_fail (stmt->type == RULESET_STMT) ;
 
-	status = cr_statement_ruleset_append_decl2
-		(stmt, name, a_value) ;
-	g_return_if_fail (status == CR_OK) ;
-
-	
+        decl = cr_declaration_new (stmt, name, a_value) ;
+        g_return_if_fail (decl) ;
+        decl->important = a_important ;
+	status = cr_statement_ruleset_append_decl
+		(stmt, decl) ;
+	g_return_if_fail (status == CR_OK) ;	
 }
 
 static void
@@ -418,10 +423,13 @@ parse_ruleset_unrecoverable_error_cb (CRDocHandler *a_this)
 
 static void
 parse_ruleset_property_cb (CRDocHandler *a_this,
-			   GString *a_name, CRTerm *a_value)
+			   GString *a_name, 
+                           CRTerm *a_value,
+                           gboolean a_important)
 {
 	enum CRStatus status = CR_OK ;
 	CRStatement *ruleset = NULL ;
+        CRDeclaration *decl = NULL ;
 	GString * stringue = NULL ;
 
 	g_return_if_fail (a_this && a_this->priv && a_name) ;
@@ -433,8 +441,11 @@ parse_ruleset_property_cb (CRDocHandler *a_this,
 	g_return_if_fail (status == CR_OK
 			  && ruleset && ruleset->type == RULESET_STMT) ;
 
-	status = cr_statement_ruleset_append_decl2 
-		(ruleset, stringue, a_value) ;
+        decl = cr_declaration_new (ruleset, stringue, a_value) ;
+        g_return_if_fail (decl) ;
+        decl->important = a_important ;
+	status = cr_statement_ruleset_append_decl
+		(ruleset, decl) ;
 	g_return_if_fail (status == CR_OK) ;
 }
 
