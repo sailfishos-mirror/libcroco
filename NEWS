@@ -1,3 +1,15 @@
+libcroco 0.2.0
+    2003 Jun 29
+        libcroco 0.2.0 ChangeLog:
+	* Went forward in the layout engine. Can now render
+	  simple xml element along with simple CSS sheets.
+	  Supported layout is normal layout for box and inline
+          context.
+	* Cleaned up the parsing api. Fixed a lot of bugs.
+	* Added some new api calls to the parsing api.
+	* See the ChangeLog shipped within the tarball for
+	  more precise descriptions.
+
 libcroco 0.1.0
 
     2003 Mar 19
