@@ -44,31 +44,31 @@
  */
 enum CRPropertyID
 {
-        PROP_NOT_KNOWN,
-	PROP_PADDING_TOP,
-	PROP_PADDING_RIGHT,
-	PROP_PADDING_BOTTOM,
-	PROP_PADDING_LEFT,
-	PROP_BORDER_TOP_WIDTH,
-	PROP_BORDER_RIGHT_WIDTH,
-	PROP_BORDER_BOTTOM_WIDTH,
-	PROP_BORDER_LEFT_WIDTH,
-	PROP_BORDER_TOP_STYLE,
-	PROP_BORDER_RIGHT_STYLE,
-	PROP_BORDER_BOTTOM_STYLE,
-	PROP_BORDER_LEFT_STYLE,
-	PROP_MARGIN_TOP,
-	PROP_MARGIN_RIGHT,
-	PROP_MARGIN_BOTTOM,
-	PROP_MARGIN_LEFT,
-	PROP_DISPLAY,
-	PROP_POSITION,
-	PROP_TOP,
-	PROP_RIGHT,
-	PROP_BOTTOM,
-	PROP_LEFT,
-	PROP_FLOAT,
-	PROP_WIDTH	
+        PROP_ID_NOT_KNOWN,
+	PROP_ID_PADDING_TOP,
+	PROP_ID_PADDING_RIGHT,
+	PROP_ID_PADDING_BOTTOM,
+	PROP_ID_PADDING_LEFT,
+	PROP_ID_BORDER_TOP_WIDTH,
+	PROP_ID_BORDER_RIGHT_WIDTH,
+	PROP_ID_BORDER_BOTTOM_WIDTH,
+	PROP_ID_BORDER_LEFT_WIDTH,
+	PROP_ID_BORDER_TOP_STYLE,
+	PROP_ID_BORDER_RIGHT_STYLE,
+	PROP_ID_BORDER_BOTTOM_STYLE,
+	PROP_ID_BORDER_LEFT_STYLE,
+	PROP_ID_MARGIN_TOP,
+	PROP_ID_MARGIN_RIGHT,
+	PROP_ID_MARGIN_BOTTOM,
+	PROP_ID_MARGIN_LEFT,
+	PROP_ID_DISPLAY,
+	PROP_ID_POSITION,
+	PROP_ID_TOP,
+	PROP_ID_RIGHT,
+	PROP_ID_BOTTOM,
+	PROP_ID_LEFT,
+	PROP_ID_FLOAT,
+	PROP_ID_WIDTH
 } ;
 
 
@@ -77,38 +77,37 @@ typedef struct _CRPropertyDesc CRPropertyDesc ;
 struct _CRPropertyDesc
 {
 	const guchar * name ;
-	enum CRPropertyID prop_id ;	
+	enum CRPropertyID prop_id ;
 } ;
 
 static CRPropertyDesc gv_prop_table [] =
 
 {
-	{"padding-top", PROP_PADDING_TOP},
-	{"padding-right", PROP_PADDING_RIGHT},
-	{"padding-bottom", PROP_PADDING_BOTTOM},
-	{"padding-left", PROP_PADDING_LEFT},
-	{"border-top-width", PROP_BORDER_TOP_WIDTH},
-	{"border-right-width", PROP_BORDER_RIGHT_WIDTH},
-	{"border-bottom-width", PROP_BORDER_BOTTOM_WIDTH},
-	{"border-left-width", PROP_BORDER_LEFT_WIDTH},
-	{"border-top-style", PROP_BORDER_TOP_STYLE},
-	{"border-right-style", PROP_BORDER_RIGHT_STYLE},
-	{"border-bottom-style", PROP_BORDER_BOTTOM_STYLE},
-	{"border-left-style", PROP_BORDER_LEFT_STYLE},
-	{"margin-top", PROP_MARGIN_TOP},
-	{"margin-right", PROP_MARGIN_RIGHT},
-	{"margin-bottom", PROP_MARGIN_BOTTOM},
-	{"margin-left", PROP_MARGIN_LEFT},
-	{"display", PROP_DISPLAY},
-	{"position", PROP_POSITION},
-	{"top", PROP_TOP},
-	{"right", PROP_RIGHT},
-	{"bottom", PROP_BOTTOM},
-	{"left", PROP_LEFT},
-	{"float", PROP_FLOAT},
-	{"width", PROP_WIDTH},
-	{NULL, 0}
-		
+	{"padding-top", PROP_ID_PADDING_TOP},
+	{"padding-right", PROP_ID_PADDING_RIGHT},
+	{"padding-bottom", PROP_ID_PADDING_BOTTOM},
+	{"padding-left", PROP_ID_PADDING_LEFT},
+	{"border-top-width", PROP_ID_BORDER_TOP_WIDTH},
+	{"border-right-width", PROP_ID_BORDER_RIGHT_WIDTH},
+	{"border-bottom-width", PROP_ID_BORDER_BOTTOM_WIDTH},
+	{"border-left-width", PROP_ID_BORDER_LEFT_WIDTH},
+	{"border-top-style", PROP_ID_BORDER_TOP_STYLE},
+	{"border-right-style", PROP_ID_BORDER_RIGHT_STYLE},
+	{"border-bottom-style", PROP_ID_BORDER_BOTTOM_STYLE},
+	{"border-left-style", PROP_ID_BORDER_LEFT_STYLE},
+	{"margin-top", PROP_ID_MARGIN_TOP},
+	{"margin-right", PROP_ID_MARGIN_RIGHT},
+	{"margin-bottom", PROP_ID_MARGIN_BOTTOM},
+	{"margin-left", PROP_ID_MARGIN_LEFT},
+	{"display", PROP_ID_DISPLAY},
+	{"position", PROP_ID_POSITION},
+	{"top", PROP_ID_TOP},
+	{"right", PROP_ID_RIGHT},
+	{"bottom", PROP_ID_BOTTOM},
+	{"left", PROP_ID_LEFT},
+	{"float", PROP_ID_FLOAT},
+	{"width", PROP_ID_WIDTH},
+	{NULL, 0}		
 } ;
 
 /**
@@ -216,68 +215,60 @@ cr_style_init_properties (void)
 static enum CRStatus
 cr_style_set_props_to_defaults (CRStyle *a_this)
 {
+        glong i = 0 ;
+
         g_return_val_if_fail (a_this, CR_BAD_PARAM_ERROR) ;
 
-        cr_num_set (&a_this->padding_top,
-                    0, NUM_LENGTH_PX) ;
+        for (i = 0 ; i < NB_NUM_PROPS ; i++)
+        {
+                switch (i)
+                {
+                case NUM_PROP_WIDTH:
+                case NUM_PROP_TOP:
+                case NUM_PROP_RIGHT:
+                case NUM_PROP_BOTTOM:
+                case NUM_PROP_LEFT:
+                        cr_num_set (&a_this->num_props[i].sv,
+                                    0, NUM_AUTO) ;
+                        break ;
 
-        cr_num_set (&a_this->padding_top,
-                    0, NUM_LENGTH_PX) ;
-        cr_num_set (&a_this->padding_right,
-                    0, NUM_LENGTH_PX) ;
-        cr_num_set (&a_this->padding_bottom,
-                    0, NUM_LENGTH_PX) ;
-        cr_num_set (&a_this->padding_left,
-                    0, NUM_LENGTH_PX) ;
+                case NUM_PROP_PADDING_TOP:
+                case NUM_PROP_PADDING_RIGHT:
+                case NUM_PROP_PADDING_BOTTOM:
+                case NUM_PROP_PADDING_LEFT:
+                case NUM_PROP_BORDER_TOP:
+                case NUM_PROP_BORDER_RIGHT:
+                case NUM_PROP_BORDER_BOTTOM:
+                case NUM_PROP_BORDER_LEFT:
+                case NUM_PROP_MARGIN_TOP:
+                case NUM_PROP_MARGIN_RIGHT:
+                case NUM_PROP_MARGIN_BOTTOM:
+                case NUM_PROP_MARGIN_LEFT:
+                        cr_num_set (&a_this->num_props[i].sv,
+                                    0, NUM_LENGTH_PX) ;
+                        break ;
 
-        cr_num_set (&a_this->border_top,
-                    0, BORDER_MEDIUM) ;
-        cr_num_set (&a_this->border_right,
-                    0, BORDER_MEDIUM) ;
-        cr_num_set (&a_this->border_bottom,
-                    0, BORDER_MEDIUM) ;
-        cr_num_set (&a_this->border_left,
-                    0, BORDER_MEDIUM) ;
+                default:
+                        cr_utils_trace_info ("Unknown property") ;
+                        break ;
+                }
+        }
 
-        /*default foreground color is black*/
-        cr_rgb_set (&a_this->color, 0, 0, 0,
-                    FALSE) ;
-        cr_rgb_set_from_rgb (&a_this->border_top_color,
-                             &a_this->color) ;
-        cr_rgb_set_from_rgb (&a_this->border_right_color,
-                             &a_this->color) ;
-        cr_rgb_set_from_rgb (&a_this->border_bottom_color,
-                             &a_this->color) ;
-        cr_rgb_set_from_rgb (&a_this->border_left_color,
-                             &a_this->color) ;
+        for (i = 0 ; i < NB_RGB_PROPS ; i++)
+        {
+                /*default color is black*/
+                cr_rgb_set (&a_this->rgb_props[i].sv, 0, 0, 0,
+                            FALSE) ;
+        }
 
-        a_this->border_top_style = BORDER_STYLE_NONE ;
-        a_this->border_right_style = BORDER_STYLE_NONE ;
-        a_this->border_bottom_style = BORDER_STYLE_NONE ;
-        a_this->border_left_style = BORDER_STYLE_NONE ;
-
-        cr_num_set (&a_this->margin_top, 0, NUM_LENGTH_PX) ;
-        cr_num_set (&a_this->margin_right, 0, NUM_LENGTH_PX) ;
-        cr_num_set (&a_this->margin_bottom, 0, NUM_LENGTH_PX) ;
-        cr_num_set (&a_this->margin_left, 0, NUM_LENGTH_PX) ;
+        for (i = 0 ; i < NB_BORDER_STYLE_PROPS ; i++)
+        {
+                a_this->border_style_props[i] = BORDER_STYLE_NONE ;
+        }
 
         a_this->display = DISPLAY_INLINE ;
         a_this->position = POSITION_STATIC ;
-
-        a_this->top.type = OFFSET_AUTO;
-        cr_num_set (&a_this->top.num, 0, NUM_LENGTH_PX) ;
-        a_this->right.type = OFFSET_AUTO;
-        cr_num_set (&a_this->right.num, 0, NUM_LENGTH_PX) ;
-        a_this->bottom.type = OFFSET_AUTO;
-        cr_num_set (&a_this->bottom.num, 0, NUM_LENGTH_PX) ;
-        a_this->left.type = OFFSET_AUTO;
-        cr_num_set (&a_this->left.num, 0, NUM_LENGTH_PX) ;
-
         a_this->float_type = FLOAT_NONE ;
-
-        a_this->width.type = WIDTH_AUTO ;
-        cr_num_set (&a_this->width.num, 0, NUM_LENGTH_PX) ;
-
         a_this->parent_style = NULL ;
 
         return CR_OK ;
@@ -298,7 +289,7 @@ cr_style_get_prop_id (const guchar * a_prop)
                                       a_prop) ;
         if (!raw_id)
         {
-                return PROP_NOT_KNOWN ;
+                return PROP_ID_NOT_KNOWN ;
         }
         return GPOINTER_TO_INT (raw_id) ;
 }
@@ -311,9 +302,9 @@ set_prop_padding_x_from_value (CRStyle *a_style,
 {
         enum CRStatus status = CR_OK ;
         CRNum *num_val = NULL, *parent_num_val = NULL ;
-        
+
         g_return_val_if_fail (a_style && a_value, CR_BAD_PARAM_ERROR) ;
-        
+
         if (a_value->type != TERM_NUMBER
             && a_value->type != TERM_IDENT)
                 return CR_BAD_PARAM_ERROR ;
@@ -321,23 +312,37 @@ set_prop_padding_x_from_value (CRStyle *a_style,
         switch (a_dir)
         {
         case DIR_TOP:
-                num_val = &a_style->padding_top ;
-                parent_num_val = &a_style->parent_style->padding_top ;
+                num_val = &a_style->num_props[NUM_PROP_PADDING_TOP].sv ;
+                parent_num_val = 
+                        &a_style->parent_style->
+                        num_props[NUM_PROP_PADDING_TOP].sv ;
                 break ;
                 
         case DIR_RIGHT:
-                num_val = &a_style->padding_right ;
-                parent_num_val = &a_style->parent_style->padding_right ;
+                num_val = &a_style->num_props[NUM_PROP_PADDING_RIGHT].sv ;
+                parent_num_val = 
+                        &a_style->parent_style-> 
+                        num_props[NUM_PROP_PADDING_RIGHT].sv;
+
+                num_val = &a_style->num_props[NUM_PROP_PADDING_RIGHT].sv ;
+                parent_num_val =
+                        &a_style->parent_style->
+                        num_props[NUM_PROP_PADDING_RIGHT].sv ;
                 break ;
 
         case DIR_BOTTOM:
-                num_val = &a_style->padding_bottom ;
-                parent_num_val = &a_style->parent_style->padding_bottom ;
+                num_val = 
+                        &a_style->num_props[NUM_PROP_PADDING_BOTTOM].sv ;
+                parent_num_val = 
+                        &a_style->parent_style->
+                        num_props[NUM_PROP_PADDING_BOTTOM].sv ;
                 break ;
 
         case DIR_LEFT:
-                num_val = & a_style->padding_left ;
-                parent_num_val = &a_style->parent_style->padding_left ;
+                num_val = & a_style->num_props[NUM_PROP_PADDING_LEFT].sv ;
+                parent_num_val = 
+                        &a_style->parent_style->
+                        num_props[NUM_PROP_PADDING_LEFT].sv ;
                 break ;
 
         default:
@@ -400,30 +405,33 @@ set_prop_border_x_width_from_value (CRStyle *a_style,
         switch (a_dir)
         {
         case DIR_TOP:
-                num_val = &a_style->border_top ;
+                num_val = &a_style->num_props[NUM_PROP_BORDER_TOP].sv ;
                 parent_num_val = 
-                        &a_style->parent_style->border_top ;
+                        &a_style->parent_style->num_props[NUM_PROP_BORDER_TOP].sv ;
                 break ;
 
         case DIR_RIGHT:
                 num_val = 
-                        &a_style->border_right ;
+                        &a_style->num_props[NUM_PROP_BORDER_RIGHT].sv ;
 
                 parent_num_val = 
-                        &a_style->parent_style->border_right;
+                        &a_style->parent_style->
+                        num_props[NUM_PROP_BORDER_RIGHT].sv ;
 
                 break ;
 
         case DIR_BOTTOM:
-                num_val = &a_style->border_bottom ;
-                parent_num_val = 
-                        &a_style->parent_style->border_bottom;
+                num_val = &a_style->num_props[NUM_PROP_BORDER_BOTTOM].sv ;
+                parent_num_val =
+                        &a_style->parent_style->
+                        num_props[NUM_PROP_BORDER_BOTTOM].sv ;
                 break ;
 
         case DIR_LEFT:
-                num_val = &a_style->border_left ;
+                num_val = &a_style->num_props[NUM_PROP_BORDER_LEFT].sv ;
                 parent_num_val = 
-                        &a_style->parent_style->border_left;
+                        &a_style->parent_style->
+                        num_props[NUM_PROP_BORDER_LEFT].sv ;
                 break ;
 
         default:
@@ -509,30 +517,37 @@ set_prop_border_x_style_from_value (CRStyle *a_style,
         switch (a_dir)
         {
         case DIR_TOP:
-                border_style_ptr = &a_style->border_top_style ;
+                border_style_ptr = &a_style->
+                        border_style_props[BORDER_STYLE_PROP_TOP] ;
                 parent_border_style_ptr = 
-                        &a_style->parent_style->border_top_style ;
+                        &a_style->parent_style->
+                        border_style_props[BORDER_STYLE_PROP_TOP] ;
                 break ;
 
         case DIR_RIGHT:
                 border_style_ptr = 
-                        &a_style->border_right_style ;
+                        &a_style->border_style_props[BORDER_STYLE_PROP_RIGHT] ;
 
                 parent_border_style_ptr = 
-                        &a_style->parent_style->border_right_style;
+                        &a_style->parent_style->
+                        border_style_props[BORDER_STYLE_PROP_RIGHT] ;
 
                 break ;
 
         case DIR_BOTTOM:
-                border_style_ptr = &a_style->border_bottom_style ;
+                border_style_ptr = &a_style->
+                        border_style_props[BORDER_STYLE_PROP_BOTTOM] ;
                 parent_border_style_ptr = 
-                        &a_style->parent_style->border_bottom_style;
+                        &a_style->parent_style->
+                        border_style_props[BORDER_STYLE_PROP_BOTTOM] ;
                 break ;
 
         case DIR_LEFT:
-                border_style_ptr = &a_style->border_left_style ;
+                border_style_ptr = &a_style->
+                        border_style_props[BORDER_STYLE_PROP_LEFT] ;
                 parent_border_style_ptr = 
-                        &a_style->parent_style->border_left_style;
+                        &a_style->parent_style->
+                        border_style_props[BORDER_STYLE_PROP_LEFT] ;
                 break ;
 
         default:
@@ -632,29 +647,32 @@ set_prop_margin_x_from_value (CRStyle *a_style, CRTerm *a_value,
         switch (a_dir)
         {
         case DIR_TOP:
-                num_val = &a_style->margin_top ;
+                num_val = &a_style->num_props[NUM_PROP_MARGIN_TOP].sv ;
                 parent_num_val = 
-                        &a_style->parent_style->margin_top ;
+                        &a_style->parent_style->
+                        num_props[NUM_PROP_MARGIN_TOP].sv ;
                 break ;
 
         case DIR_RIGHT:
                 num_val = 
-                        &a_style->margin_right ;
+                        &a_style->num_props[NUM_PROP_MARGIN_RIGHT].sv ;
 
                 parent_num_val = 
-                        &a_style->parent_style->margin_right ;
+                        &a_style->parent_style->
+                        num_props[NUM_PROP_MARGIN_RIGHT].sv ;
                 break ;
 
         case DIR_BOTTOM:
-                num_val = &a_style->margin_bottom ;
+                num_val = &a_style->num_props[NUM_PROP_MARGIN_BOTTOM].sv ;
                 parent_num_val = 
-                        &a_style->parent_style->margin_bottom ;
+                        &a_style->parent_style->num_props[NUM_PROP_MARGIN_BOTTOM].sv ;
                 break ;
 
         case DIR_LEFT:
-                num_val = &a_style->margin_left ;
+                num_val = &a_style->num_props[NUM_PROP_MARGIN_LEFT].sv ;
                 parent_num_val = 
-                        &a_style->parent_style->margin_left ;
+                        &a_style->parent_style->
+                        num_props[NUM_PROP_MARGIN_LEFT].sv ;
                 break ;
 
         default:
@@ -848,8 +866,8 @@ static enum CRStatus
 set_prop_x_from_value (CRStyle *a_style, CRTerm *a_value,
                        enum CRDirection a_dir)
 {
-        CRBoxOffset *box_offset = NULL, *parent_box_offset = NULL ;
-        
+        CRNum *box_offset = NULL, *parent_box_offset = NULL ;
+
         g_return_val_if_fail (a_style && a_value, CR_BAD_PARAM_ERROR) ;
 
         
@@ -862,38 +880,45 @@ set_prop_x_from_value (CRStyle *a_style, CRTerm *a_value,
         switch (a_dir)
         {
         case DIR_TOP:
-                box_offset = &a_style->top ;
-                if (a_style->parent_style)
-                        parent_box_offset = &a_style->parent_style->top ;
-                break ;
-        case DIR_RIGHT: 
-                box_offset = &a_style->right ;
-                if (a_style->parent_style)
-                        parent_box_offset = &a_style->parent_style->right ;
-                break ;
-        case DIR_BOTTOM:
-                box_offset = &a_style->bottom ;
+                box_offset = &a_style->num_props[NUM_PROP_TOP].sv ;
                 if (a_style->parent_style)
                         parent_box_offset = 
-                                &a_style->parent_style->bottom;
+                                &a_style->parent_style->
+                                num_props[NUM_PROP_TOP].sv ;
+                break ;
+
+        case DIR_RIGHT: 
+                box_offset = &a_style->num_props[NUM_PROP_RIGHT].sv ;
+                if (a_style->parent_style)
+                        parent_box_offset = &a_style->parent_style->
+                                num_props[NUM_PROP_RIGHT].sv ;
+                break ;
+
+        case DIR_BOTTOM:
+                box_offset = &a_style->num_props[NUM_PROP_BOTTOM].sv ;
+                if (a_style->parent_style)
+                        parent_box_offset = 
+                                &a_style->parent_style->
+                                num_props[NUM_PROP_BOTTOM].sv ;
                 break ;
         case DIR_LEFT:
-                box_offset = &a_style->left ;
+                box_offset = &a_style->num_props[NUM_PROP_LEFT].sv ;
                 if (a_style->parent_style)
-                        parent_box_offset = &a_style->parent_style->left ;
+                        parent_box_offset = 
+                                &a_style->parent_style->
+                                num_props[NUM_PROP_LEFT].sv ;
                 break ;
 
         default:
                 break ;
         }
 
-        box_offset->type = OFFSET_AUTO ;
+        box_offset->type = NUM_AUTO ;
 
         if (a_value->type == TERM_NUMBER 
             && a_value->content.num)
         {
-                cr_num_copy (&box_offset->num, a_value->content.num) ;
-                box_offset->type = OFFSET_DEFINED ;
+                cr_num_copy (box_offset, a_value->content.num) ;
         }
         else if (a_value->type == TERM_IDENT
                  && a_value->content.str
@@ -903,19 +928,18 @@ set_prop_x_from_value (CRStyle *a_style, CRTerm *a_value,
                               a_value->content.str->str,
                               strlen ("inherit")))
                 {
-                        cr_num_copy (&box_offset->num, 
-                                     &parent_box_offset->num) ;
-                        box_offset->type = OFFSET_DEFINED ;
+                        cr_num_copy (box_offset, 
+                                     parent_box_offset) ;
                 }
                 else if (!strncmp ("auto", 
                                    a_value->content.str->str,
                                    strlen ("auto")))
                 {
-                        box_offset->type = OFFSET_AUTO ;
+                        box_offset->type = NUM_AUTO ;
                 }
         }
 
-        return CR_OK ;        
+        return CR_OK ;
 }
 
 
@@ -970,7 +994,7 @@ set_prop_width (CRStyle *a_style, CRTerm *a_value)
         g_return_val_if_fail (a_style && a_value, CR_BAD_PARAM_ERROR) ;
 
         
-        a_style->width.type = WIDTH_AUTO ;
+        a_style->num_props[NUM_PROP_WIDTH].sv.type = NUM_AUTO ;
         
         if (a_value->type == TERM_IDENT)
         {
@@ -981,18 +1005,17 @@ set_prop_width (CRStyle *a_style, CRTerm *a_value)
                                       a_value->content.str->str,
                                       strlen ("auto")))
                         {
-                                a_style->width.type = WIDTH_AUTO ;
+                                a_style->num_props[NUM_PROP_WIDTH].sv.type = NUM_AUTO ;
                         }
                         else if (!strncmp ("inherit",
                                            a_value->content.str->str,
                                            strlen ("inherit")))
                         {
-                                a_style->width.type = 
-                                        a_style->parent_style->width.type;
-
                                 cr_num_copy 
-                                        (&a_style->width.num,
-                                         &a_style->parent_style->width.num);
+                                        (&a_style->
+                                         num_props[NUM_PROP_WIDTH].sv,
+                                         &a_style->parent_style->
+                                         num_props[NUM_PROP_WIDTH].sv) ;
                         }
                 }
         }
@@ -1000,9 +1023,8 @@ set_prop_width (CRStyle *a_style, CRTerm *a_value)
         {
                 if (a_value->content.num)
                 {
-                        cr_num_copy (&a_style->width.num,
+                        cr_num_copy (&a_style->num_props[NUM_PROP_WIDTH].sv,
                                      a_value->content.num) ;
-                        a_style->width.type = WIDTH_DEFINED ;
                 }
         }
 
@@ -1117,7 +1139,7 @@ cr_style_set_style_from_decl (CRStyle *a_this, CRDeclaration *a_decl,
         CRTerm *value = NULL ;
         enum CRStatus status = CR_OK ;
 
-        enum CRPropertyID prop_id = PROP_NOT_KNOWN ;
+        enum CRPropertyID prop_id = PROP_ID_NOT_KNOWN ;
 
         g_return_val_if_fail (a_this && a_decl
                               && a_decl
@@ -1132,131 +1154,131 @@ cr_style_set_style_from_decl (CRStyle *a_this, CRDeclaration *a_decl,
         value = a_decl->value ;
         switch (prop_id)
         {
-        case PROP_PADDING_TOP:
+        case PROP_ID_PADDING_TOP:
                 status = set_prop_padding_x_from_value 
                         (a_this, value, DIR_TOP) ;
                 break ;
 
-        case PROP_PADDING_RIGHT:
+        case PROP_ID_PADDING_RIGHT:
                 status = set_prop_padding_x_from_value 
                         (a_this, value, DIR_RIGHT) ;
                 break ;
-        case PROP_PADDING_BOTTOM:
+        case PROP_ID_PADDING_BOTTOM:
                 status = set_prop_padding_x_from_value 
                         (a_this, value, DIR_RIGHT) ;
                 break ;
 
-        case PROP_PADDING_LEFT:
+        case PROP_ID_PADDING_LEFT:
                 status = set_prop_padding_x_from_value 
                         (a_this, value, DIR_LEFT) ;
                 break ;
                 
-        case PROP_BORDER_TOP_WIDTH:
+        case PROP_ID_BORDER_TOP_WIDTH:
                 status = 
                         set_prop_border_x_width_from_value (a_this, value,
                                                             DIR_TOP) ;
                 break ;
 
-        case PROP_BORDER_RIGHT_WIDTH:
+        case PROP_ID_BORDER_RIGHT_WIDTH:
                 status = 
                         set_prop_border_x_width_from_value (a_this, value,
                                                             DIR_RIGHT) ;
                 break ;
 
-        case PROP_BORDER_BOTTOM_WIDTH:
+        case PROP_ID_BORDER_BOTTOM_WIDTH:
                 status = 
                         set_prop_border_x_width_from_value (a_this, value,
                                                             DIR_BOTTOM) ;
                 break ;
 
-        case PROP_BORDER_LEFT_WIDTH:
+        case PROP_ID_BORDER_LEFT_WIDTH:
                 status = 
                         set_prop_border_x_width_from_value (a_this, value,
                                                             DIR_BOTTOM) ;
                 break ;
 
-        case PROP_BORDER_TOP_STYLE:
+        case PROP_ID_BORDER_TOP_STYLE:
                 status = 
                         set_prop_border_x_style_from_value (a_this, value,
                                                             DIR_TOP) ;
                 break ;
 
-        case PROP_BORDER_RIGHT_STYLE:
+        case PROP_ID_BORDER_RIGHT_STYLE:
                 status = 
                         set_prop_border_x_style_from_value (a_this, value,
                                                             DIR_RIGHT) ;
                 break ;
 
-        case PROP_BORDER_BOTTOM_STYLE:
+        case PROP_ID_BORDER_BOTTOM_STYLE:
                 status = 
                         set_prop_border_x_style_from_value (a_this, value,
                                                             DIR_BOTTOM) ;
                 break ;
 
-        case PROP_BORDER_LEFT_STYLE: 
+        case PROP_ID_BORDER_LEFT_STYLE: 
                 status = 
                         set_prop_border_x_style_from_value (a_this, value,
                                                             DIR_LEFT) ;
                 break ;
 
-        case PROP_MARGIN_TOP:
+        case PROP_ID_MARGIN_TOP:
                 status = 
                         set_prop_margin_x_from_value (a_this, value,
                                                       DIR_TOP) ;
                 break ;
 
-        case PROP_MARGIN_RIGHT:
+        case PROP_ID_MARGIN_RIGHT:
                 status = 
                         set_prop_margin_x_from_value (a_this, value,
                                                       DIR_RIGHT) ;
                 break ;
 
-        case PROP_MARGIN_BOTTOM:
+        case PROP_ID_MARGIN_BOTTOM:
                 status = 
                         set_prop_margin_x_from_value (a_this, value,
                                                       DIR_BOTTOM) ;
                 break ;
 
-        case PROP_MARGIN_LEFT:
+        case PROP_ID_MARGIN_LEFT:
                 status = 
                         set_prop_margin_x_from_value (a_this, value,
                                                       DIR_TOP) ;
                 break ;
 
-        case PROP_DISPLAY:
+        case PROP_ID_DISPLAY:
                 status = 
                         set_prop_display_from_value (a_this, value) ;
                 break ;
 
-        case PROP_POSITION:
+        case PROP_ID_POSITION:
                 status = set_prop_position_from_value (a_this, value) ;
                 break ;
 
-        case PROP_TOP:
+        case PROP_ID_TOP:
                 status = set_prop_x_from_value (a_this, value,
                                                 DIR_TOP) ;
                 break ;
 
-        case PROP_RIGHT:
+        case PROP_ID_RIGHT:
                 status = set_prop_x_from_value (a_this, value,
                                                 DIR_RIGHT) ;
                 break ;
 
-        case PROP_BOTTOM:
+        case PROP_ID_BOTTOM:
                 status = set_prop_x_from_value (a_this, value,
                                                 DIR_BOTTOM) ;
                 break ;
 
-        case PROP_LEFT:
+        case PROP_ID_LEFT:
                 status = set_prop_x_from_value (a_this, value,
                                                 DIR_LEFT) ;
                 break ;
 
-        case PROP_FLOAT:
+        case PROP_ID_FLOAT:
                 status = set_prop_float (a_this, value) ;
                 break ;
 
-        case PROP_WIDTH:
+        case PROP_ID_WIDTH:
                 status = set_prop_width (a_this, value) ;
                 break ;
 

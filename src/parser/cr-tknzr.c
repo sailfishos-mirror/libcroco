@@ -2564,7 +2564,7 @@ cr_tknzr_get_next_token (CRTknzr *a_this, CRToken **a_tk)
                         }
                         else if (next_bytes[0]    == 'k' 
                                  && next_bytes[1] == 'H'
-                                 && next_bytes[1] == 'z')
+                                 && next_bytes[2] == 'z')
                         {
                                 num->type = NUM_FREQ_KHZ ;
                                 status = cr_token_set_freq 

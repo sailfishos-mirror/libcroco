@@ -119,6 +119,142 @@ struct _CRWidth
 #define BORDER_MEDIUM 4
 #define BORDER_THICK 6
 
+typedef struct _CRWidthPropVal CRWidthPropVal ;
+struct _CRWidthPropVal
+{
+        /**specified value*/
+        CRWidth sv ;
+        /**computed value*/
+        CRWidth cv ;
+        /**actual value*/
+        CRWidth av ;
+} ;
+
+/**
+ *A numerical css property value.
+ *This data type is actually split in 3 parts:
+ *1/the specified value
+ *2/the computed value
+ *3/the actual value.
+ *To understand the semantic of these three parts,
+ *see css2 spec chap 6.1 ("Specified, computed and actual values.").
+ */
+typedef struct _CRNumPropVal CRNumPropVal ;
+struct _CRNumPropVal
+{
+        /**specified value*/
+        CRNum sv ;
+        /**computed value*/
+        CRNum cv ;
+        /**actual value*/
+        CRNum av ;
+} ;
+
+/**
+ *An rgb css property value.
+ *This data type is actually split in 3 parts:
+ *1/the specified value
+ *2/the computed value
+ *3/the actual value.
+ *To understand the semantic of these three parts,
+ *see css2 spec chap 6.1 ("Specified, computed and actual values.").
+ */
+typedef struct _CRRgbPropVal CRRgbPropVal ;
+struct _CRRgbPropVal
+{        
+        /**specified value*/
+        CRRgb sv ;
+        /**computed value*/
+        CRRgb cv ;
+        /**actual value*/
+        CRRgb av ;
+} ;
+
+/**
+ *A box offset css property value.
+ *This data type is actually split in 3 parts:
+ *1/the specified value
+ *2/the computed value
+ *3/the actual value.
+ *To understand the semantic of these three parts,
+ *see css2 spec chap 6.1 ("Specified, computed and actual values.").
+ */
+typedef struct _CRBoxOffsetPropVal CRBoxOffsetPropVal ;
+struct _CRBoxOffsetPropVal
+{
+        /**specified value*/
+        CRBoxOffset sv ;
+
+        /**computed value*/
+        CRRgb cv ;
+
+        /**actual value*/
+        CRRgb av ;
+} ;
+
+
+enum CRNumProp
+{
+        NUM_PROP_WIDTH = 0,
+
+        NUM_PROP_TOP,
+        NUM_PROP_RIGHT,
+        NUM_PROP_BOTTOM,
+        NUM_PROP_LEFT,
+
+        NUM_PROP_PADDING_TOP,
+        NUM_PROP_PADDING_RIGHT,
+        NUM_PROP_PADDING_BOTTOM,
+        NUM_PROP_PADDING_LEFT,
+
+        NUM_PROP_BORDER_TOP,
+        NUM_PROP_BORDER_RIGHT,
+        NUM_PROP_BORDER_BOTTOM,
+        NUM_PROP_BORDER_LEFT,
+
+        NUM_PROP_MARGIN_TOP,
+        NUM_PROP_MARGIN_RIGHT,
+        NUM_PROP_MARGIN_BOTTOM,
+        NUM_PROP_MARGIN_LEFT,
+
+        /*must be last*/
+        NB_NUM_PROPS
+} ;
+
+enum CRRgbProp
+{
+        RGB_PROP_TOP_COLOR = 0,
+        RGB_PROP_RIGHT_COLOR,
+        RGB_PROP_BOTTOM_COLOR,
+        RGB_PROP_LEFT_COLOR,
+
+        /*must be last*/
+        NB_RGB_PROPS
+} ;
+
+
+enum CRBorderStyleProp
+{
+        BORDER_STYLE_PROP_TOP = 0,
+        BORDER_STYLE_PROP_RIGHT,
+        BORDER_STYLE_PROP_BOTTOM,
+        BORDER_STYLE_PROP_LEFT,
+
+        /*must be last*/
+        NB_BORDER_STYLE_PROPS
+} ;
+
+enum CRBoxOffsetProp
+{
+        BOX_OFFSET_PROP_TOP = 0,
+        BOX_OFFSET_PROP_RIGHT,
+        BOX_OFFSET_PROP_BOTTOM,
+        BOX_OFFSET_PROP_LEFT,
+
+        /*must be last*/
+        NB_BOX_OFFSET_PROPS
+} ;
+
 /**
  *The css2 style class.
  *Contains computed and actual values
@@ -128,35 +264,24 @@ struct _CRWidth
  */
 struct _CRStyle
 {
+        /**
+         *numerical properties.
+         *the properties are indexed by
+         *enum #CRNumProp. 
+         */
+        CRNumPropVal num_props[NB_NUM_PROPS] ;
 
-	/**padding properties, in pixel*/
-	CRNum padding_top ;
-	CRNum padding_right ;
-	CRNum padding_bottom ;
-	CRNum padding_left ;
+        /**
+         *color properties.
+         *They are indexed by enum #CRRgbProp .
+         */
+        CRRgbPropVal rgb_props[NB_RGB_PROPS] ;
 
-	/**border properties*/
-	CRNum border_top ;
-	CRNum border_right ;
-	CRNum border_bottom ;
-	CRNum border_left ;
-
-        CRRgb color ;
-	CRRgb border_top_color ;
-	CRRgb border_right_color ;
-	CRRgb border_bottom_color ;
-	CRRgb border_left_color ;
-
-        enum CRBorderStyle border_top_style ;
-        enum CRBorderStyle border_right_style ;
-        enum CRBorderStyle border_bottom_style ;
-        enum CRBorderStyle border_left_style ;
-
-	/**margin properties, in pixel*/
-	CRNum margin_top ;
-	CRNum margin_right ;
-	CRNum margin_bottom;
-	CRNum margin_left ;
+        /**
+         *border style properties.
+         *They are indexed by enum #CRBorderStyleProp .
+         */
+        enum CRBorderStyle border_style_props[NB_BORDER_STYLE_PROPS] ;
 
         /**box display type*/
         enum CRDisplayType display ;
@@ -164,16 +289,9 @@ struct _CRStyle
         /**the positioning scheme*/
         enum CRPositionType position ;
 
-        /**box offset*/
-        CRBoxOffset top ;
-        CRBoxOffset right ;
-        CRBoxOffset bottom ;
-        CRBoxOffset left ;
-
         /**the float property*/
         enum CRFloatType float_type ;
 
-        CRWidth width ;
         CRStyle *parent_style ;
         gulong ref_count ;
 } ;

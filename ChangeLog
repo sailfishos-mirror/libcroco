@@ -1,3 +1,31 @@
+2003-05-04  Dodji  <dodji@seketeli.org>
+
+	* src/parser/cr-tknzr.c:
+	(cr_tknzr_get_next_token ()) fixed a small bug in here.
+	
+	* src/layeng/cr-style.[ch]: 
+	Deeply Modified the layout of the CRStyle structure for 
+	1/group all numerical properties together in a table.
+	2/group all color (rgb) properties together in another table.
+	3/group all border style properties together in another table.
+	That way, accessing those properties is more efficient.
+	4/make sure that each properties can have 3 values:
+	specified, computed and actual value as specified by the css2 spec. 
+	(I doubt actuall value is usefull
+	here though).
+	Modified the file to make this be coherent again.
+
+	* src/layeng/cr-lay-eng.c :
+	Made this coherent after the change of the CRStyle structure.
+	
+	(normalize_num ()):created this function to
+	normalize numerical properties.
+	(style_specified_2_computed_values ): 
+	new function to computed css2 "computed values" from specified values.
+	This is required by the css2 spec in chap 6.1.
+	(create_box_tree_real): updated this to make it call 
+	style_specified_2_computed_values () before actually building the box.
+
 2003-05-01  Dodji  <dodji@seketeli.org>
 
 	* configure.in, csslint/Makefile.am, src/parser/Makefile.am, src/seleng/Makefile.am, src/layeng/Makefile.am: 

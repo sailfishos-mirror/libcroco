@@ -27,6 +27,7 @@
  */
 
 #include <gnome.h>
+#include <gdk/gdk.h>
 #include <string.h>
 #include "cr-lay-eng.h"
 #include "cr-sel-eng.h"
@@ -45,15 +46,33 @@ struct _CRLayEngPriv
         gboolean update_parent_box_size ;
 	CRCascade *cascade ;
         CRSelEng *sel_eng ;
+        gulong xdpi ;/*x resolution*/
+        gulong ydpi ; /*y resolution*/
 } ;
 
 
+enum CRDirection
+{
+        DIR_UNKNOWN = 0,
+        DIR_VERTICAL,
+        DIR_HORIZONTAL
+} ;
+
 static gboolean gv_layeng_initialized = FALSE ;
+
+static void
+init_anonymous_text_box (CRBox *a_box) ;
+
+static enum CRStatus
+style_specified_2_computed_values (CRLayEng *a_this,
+                                   CRStyle *a_style, 
+                                   CRBox *a_parent_box) ;
 
 static CRBox *
 create_box_tree_real (CRLayEng * a_this,
                       xmlNode *a_root_node,
                       CRBox *a_parent_box) ;
+
 static glong
 get_box_bottommost_y (CRBox *a_this) ;
 
@@ -86,6 +105,12 @@ static enum CRStatus
 adjust_parent_inner_edge_size (CRLayEng *a_this,
                                CRBox *a_cur_box) ;
 
+static enum CRStatus
+normalize_num (CRLayEng *a_this,
+               CRNum *a_dest_num,
+               CRNum *a_src_num,
+               enum CRDirection a_dir) ;
+
 /**********************
  *Private methods.
  **********************/
@@ -100,38 +125,317 @@ adjust_parent_inner_edge_size (CRLayEng *a_this,
 static void
 init_anonymous_text_box (CRBox *a_box)
 {
+        glong i = 0 ;
+
         g_return_if_fail (a_box && a_box->style) ;
-        
-        cr_num_set (&a_box->style->padding_top, 0, NUM_LENGTH_PX) ;
-        cr_num_set (&a_box->style->padding_right, 0, NUM_LENGTH_PX) ;
-        cr_num_set (&a_box->style->padding_bottom, 0, NUM_LENGTH_PX) ;
-        cr_num_set (&a_box->style->padding_left, 0, NUM_LENGTH_PX) ;
-        
-        cr_num_set (&a_box->style->border_top, 0, NUM_LENGTH_PX) ;
-        cr_num_set (&a_box->style->border_right, 0, NUM_LENGTH_PX) ;
-        cr_num_set (&a_box->style->border_bottom, 0, NUM_LENGTH_PX) ;
-        cr_num_set (&a_box->style->border_left, 0, NUM_LENGTH_PX) ;
 
-        cr_num_set (&a_box->style->margin_top, 0, NUM_LENGTH_PX) ;
-        cr_num_set (&a_box->style->margin_right, 0, NUM_LENGTH_PX) ;
-        cr_num_set (&a_box->style->margin_bottom, 0, NUM_LENGTH_PX) ;
-        cr_num_set (&a_box->style->margin_left, 0, NUM_LENGTH_PX) ;
-        
-        a_box->style->border_top_style = BORDER_STYLE_NONE ;
-        a_box->style->border_right_style = BORDER_STYLE_NONE ;
-        a_box->style->border_bottom_style = BORDER_STYLE_NONE ;
-        a_box->style->border_left_style = BORDER_STYLE_NONE ;
+        for (i = 0 ; i< NB_NUM_PROPS ; i++)
+        {
+                switch (i)
+                {
+                case NUM_PROP_PADDING_TOP:
+                case NUM_PROP_PADDING_RIGHT:
+                case NUM_PROP_PADDING_BOTTOM:
+                case NUM_PROP_PADDING_LEFT:
+                case NUM_PROP_BORDER_TOP:
+                case NUM_PROP_BORDER_RIGHT:
+                case NUM_PROP_BORDER_BOTTOM:
+                case NUM_PROP_BORDER_LEFT:
+                case NUM_PROP_MARGIN_TOP:
+                case NUM_PROP_MARGIN_RIGHT:
+                case NUM_PROP_MARGIN_BOTTOM:
+                case NUM_PROP_MARGIN_LEFT:
+                        cr_num_set (&a_box->style->num_props[i].sv, 
+                                    0, NUM_LENGTH_PX) ;
+                        break ;
 
-        cr_num_set (&a_box->style->top.num, 0, NUM_LENGTH_PX) ;
-        a_box->style->top.type = OFFSET_DEFINED ;
-        cr_num_set (&a_box->style->right.num, 0, NUM_LENGTH_PX) ;
-        a_box->style->right.type = OFFSET_DEFINED ;
-        cr_num_set (&a_box->style->bottom.num, 0, NUM_LENGTH_PX) ;
-        a_box->style->bottom.type = OFFSET_DEFINED ;
-        cr_num_set (&a_box->style->left.num, 0, NUM_LENGTH_PX) ;
-        a_box->style->left.type = OFFSET_DEFINED ;
+                default:
+                        break ;
+                }
+                
+        }
+        
+        for (i = 0 ; i< NB_BORDER_STYLE_PROPS ; i++)
+        {
+                a_box->style->border_style_props[i] = BORDER_STYLE_NONE ;
+        }
         
         a_box->style->float_type = FLOAT_NONE ;
+}
+
+
+static enum CRStatus
+normalize_num (CRLayEng *a_this,
+               CRNum *a_dest_num,
+               CRNum *a_src_num,
+               enum CRDirection a_dir)
+{
+        g_return_val_if_fail (a_this && a_dest_num 
+                              && a_src_num,
+                              CR_BAD_PARAM_ERROR) ;
+
+        switch (a_src_num->type)
+        {
+        case NUM_LENGTH_PX:
+                cr_num_copy (a_dest_num, a_src_num) ;
+                /*a_dest_num->type = NUM_LENGTH_PX ;*/
+                break ;
+
+        case NUM_LENGTH_EM:
+        case NUM_LENGTH_EX:                
+                break ;
+
+        case NUM_LENGTH_IN:
+                if (a_dir == DIR_HORIZONTAL)
+                {
+                        a_dest_num->val = a_src_num->val 
+                                * PRIVATE (a_this)->xdpi ;
+                }
+                else if (a_dir == DIR_VERTICAL)
+                {
+                        a_dest_num->val = a_src_num->val 
+                                * PRIVATE (a_this)->ydpi ;
+                }
+                else
+                {
+                        cr_utils_trace_info ("Bad direction given") ;
+                        return CR_BAD_PARAM_ERROR ;
+                }
+                a_dest_num->type = NUM_LENGTH_PX ;
+                break ;
+
+        case NUM_LENGTH_CM:
+                /*1 inch == 25.4 mm*/
+                if (a_dir == DIR_HORIZONTAL)
+                {
+                        a_dest_num->val = a_src_num->val / 2.54 *
+                                PRIVATE (a_this)->xdpi ;
+                }
+                else if (a_dir == DIR_VERTICAL)
+                {
+                        a_dest_num->val = a_src_num->val / 2.54 *
+                                PRIVATE (a_this)->ydpi ;
+                }
+                else
+                {
+                        cr_utils_trace_info ("Bad direction given") ;
+                        return CR_BAD_PARAM_ERROR ;
+                }
+
+                a_dest_num->type = NUM_LENGTH_PX ;
+                break ;
+
+        case NUM_LENGTH_MM:
+                /*1 inch == 25.4 mm*/
+                if (a_dir == DIR_HORIZONTAL)
+                {
+                        a_dest_num->val = a_src_num->val / 25.4 *
+                                PRIVATE (a_this)->xdpi ;
+                }
+                else if (a_dir == DIR_VERTICAL)
+                {
+                        a_dest_num->val = a_src_num->val / 25.4 *
+                                PRIVATE (a_this)->ydpi ;
+                }
+                else
+                {
+                        cr_utils_trace_info ("Bad direction given") ;
+                        return CR_BAD_PARAM_ERROR ;
+                }
+                a_dest_num->type = NUM_LENGTH_PX ;
+                break ;
+
+        case NUM_LENGTH_PT:
+                /*1 point == 1/72 inch*/
+                if (a_dir == DIR_HORIZONTAL)
+                {
+                        a_dest_num->val = a_src_num->val *
+                                PRIVATE (a_this)->xdpi / 72 ;
+                }
+                else if (a_dir == DIR_VERTICAL)
+                {
+                        a_dest_num->val = a_src_num->val *
+                                PRIVATE (a_this)->ydpi / 72 ;
+                }
+                else
+                {
+                        cr_utils_trace_info ("Bad direction given") ;
+                        return CR_BAD_PARAM_ERROR ;
+                }
+
+                a_dest_num->type = NUM_LENGTH_PX ;
+                break ;
+
+        case NUM_LENGTH_PC:
+                /*1 pica == 12 points*/
+                if (a_dir == DIR_HORIZONTAL)
+                {
+                        a_dest_num->val = a_src_num->val *
+                                PRIVATE (a_this)->xdpi / 72 * 12 ;
+                }
+                else if (a_dir == DIR_VERTICAL)
+                {
+                        a_dest_num->val = a_src_num->val *
+                                PRIVATE (a_this)->ydpi / 72 * 12 ;
+                }
+                else
+                {
+                        cr_utils_trace_info ("Bad direction given") ;
+                        return CR_BAD_PARAM_ERROR ;
+                }
+
+                a_dest_num->type = NUM_LENGTH_PX ;
+                break ;
+
+        case NUM_ANGLE_DEG:
+                a_dest_num->val = a_src_num->val ;
+                
+                break ;
+        case NUM_ANGLE_RAD:
+                a_dest_num->val = a_src_num->val * 180 / 3.1415 ;
+                a_dest_num->type = NUM_ANGLE_DEG ;
+                break ;
+
+        case NUM_ANGLE_GRAD:
+                a_dest_num->val = a_src_num->val * 90 / 100 ;
+                a_dest_num->type = NUM_ANGLE_DEG ;
+                break ;
+
+        case NUM_TIME_MS:
+                a_dest_num->val = a_src_num->val ;
+                
+                break ;
+
+        case NUM_TIME_S:
+                a_dest_num->val = a_src_num->val * 1000 ;
+                a_dest_num->type = NUM_TIME_MS ;
+                break ;
+
+        case NUM_FREQ_HZ:
+                a_dest_num->val = a_src_num->val ;
+                break ;
+
+        case NUM_FREQ_KHZ:
+                a_dest_num->val = a_src_num->val * 1000 ;
+                a_dest_num->type = NUM_FREQ_HZ ;
+                break ;
+
+        case NUM_PERCENTAGE:
+                cr_utils_trace_info ("a PERCENTAGE cannot be normalized") ;
+                return CR_BAD_PARAM_ERROR ;
+
+        default:
+
+                cr_num_copy (a_dest_num, a_src_num) ;
+                break ;
+        }
+
+        return CR_OK ;
+}
+
+static enum CRStatus
+style_specified_2_computed_values (CRLayEng *a_this,
+                                   CRStyle *a_style, 
+                                   CRBox *a_parent_box)
+{
+        glong i = 0 ;
+        CRBoxEdge *parent_inner_edge = NULL;
+
+        g_return_val_if_fail (a_style && a_this,
+                              CR_BAD_PARAM_ERROR) ;
+
+        /*
+         *walk thru the numerical properties (num_props) and 
+         *compute their computed value.
+         */
+        for (i = 0 ; i < NB_NUM_PROPS ; i++)
+        {
+                switch (i)
+                {
+                case NUM_PROP_TOP:
+                case NUM_PROP_BOTTOM:
+                case NUM_PROP_PADDING_TOP:
+                case NUM_PROP_PADDING_BOTTOM:
+                case NUM_PROP_BORDER_TOP:
+                case NUM_PROP_BORDER_BOTTOM:
+                case NUM_PROP_MARGIN_TOP:
+                case NUM_PROP_MARGIN_BOTTOM:                
+                        if (a_style->num_props[i].sv.type == NUM_PERCENTAGE)
+                        {
+                                /*
+                                 *TODO: compute the computed value
+                                 *using the parent box size.
+                                 */
+                                if (a_parent_box)
+                                {
+                                        parent_inner_edge = 
+                                                &a_parent_box->inner_edge ;
+                                }
+
+                                g_return_val_if_fail (parent_inner_edge,
+                                                      CR_BAD_PARAM_ERROR) ;
+
+                                a_style->num_props[i].cv.val =
+                                        parent_inner_edge->height * 
+                                        a_style->num_props[i].sv.val / 100 ;
+                        }
+                        else
+                        {
+                                normalize_num (a_this,
+                                               &a_style->num_props[i].cv,
+                                               &a_style->num_props[i].sv,
+                                               DIR_VERTICAL) ;
+                        }
+
+                        break ;
+
+                case NUM_PROP_WIDTH:
+                case NUM_PROP_RIGHT:
+                case NUM_PROP_LEFT:
+                case NUM_PROP_PADDING_LEFT:
+                case NUM_PROP_PADDING_RIGHT:
+                case NUM_PROP_BORDER_LEFT:
+                case NUM_PROP_BORDER_RIGHT:
+                case NUM_PROP_MARGIN_LEFT:
+                case NUM_PROP_MARGIN_RIGHT:
+                        if (a_style->num_props[i].sv.type == NUM_PERCENTAGE)
+                        {
+                                /*
+                                 *TODO: compute the computed value
+                                 *using the parent box size.
+                                 */
+                                if (a_parent_box)
+                                {
+                                        parent_inner_edge = 
+                                                &a_parent_box->inner_edge ;
+                                }
+
+                                g_return_val_if_fail (parent_inner_edge,
+                                                      CR_BAD_PARAM_ERROR) ;
+
+                                a_style->num_props[i].cv.val =
+                                        parent_inner_edge->width * 
+                                        a_style->num_props[i].sv.val / 100 ;
+                        }
+                        else
+                        {
+                                normalize_num (a_this,
+                                               &a_style->num_props[i].cv,
+                                               &a_style->num_props[i].sv,
+                                               DIR_HORIZONTAL) ;
+                        }
+                        break ;
+
+                default:
+                        normalize_num (a_this,
+                                       &a_style->num_props[i].cv,
+                                       &a_style->num_props[i].sv,
+                                       DIR_UNKNOWN) ;
+                        break ;
+                }
+        }
+
+        return CR_OK ;
 }
 
 /**
@@ -202,6 +506,9 @@ create_box_tree_real (CRLayEng * a_this,
                          *the positioning. The positioning will
                          *be updated later via the cr_box_layout() method.
                          */
+                        style_specified_2_computed_values 
+                                (a_this, style, a_parent_box) ;
+
                         cur_box = cr_box_new (style) ;
                         if (!cur_box)
                         {
@@ -479,20 +786,21 @@ compute_box_size (CRLayEng *a_this,
         a_cur_box->border_edge.x =
                 a_cur_box->outer_edge.x
                 + 
-                a_cur_box->style->margin_left.val ;
+                a_cur_box->style->num_props[NUM_PROP_MARGIN_LEFT].cv.val ;
         a_cur_box->border_edge.y =
                 a_cur_box->outer_edge.y
                 +
-                a_cur_box->style->margin_top.val ;
+                a_cur_box->style->num_props[NUM_PROP_MARGIN_TOP].cv.val ;
 
         a_cur_box->padding_edge.x =
                 a_cur_box->border_edge.x 
                 +
-                a_cur_box->style->border_left.val ;
+                a_cur_box->style->num_props[NUM_PROP_BORDER_LEFT].cv.val ;
+
         a_cur_box->padding_edge.y =
                 a_cur_box->border_edge.y
                 +
-                a_cur_box->style->border_top.val ;
+                a_cur_box->style->num_props[NUM_PROP_BORDER_TOP].cv.val ;
 
         /*
          *Step 2/
@@ -500,11 +808,11 @@ compute_box_size (CRLayEng *a_this,
         a_cur_box->inner_edge.x =
                 a_cur_box->padding_edge.x
                 +
-                a_cur_box->style->padding_left.val ;
+                a_cur_box->style->num_props[NUM_PROP_PADDING_LEFT].cv.val ;
         a_cur_box->inner_edge.y =
                 a_cur_box->padding_edge.y
                 +
-                a_cur_box->style->padding_left.val ;
+                a_cur_box->style->num_props[NUM_PROP_PADDING_LEFT].cv.val ;
 
         /*
          *Step 3.
@@ -566,25 +874,25 @@ compute_box_size (CRLayEng *a_this,
          *(padding edge, border edge and outer edge)
          ******************************************/
         a_cur_box->padding_edge.width = a_cur_box->inner_edge.width +
-                a_cur_box->style->padding_right.val +
-                a_cur_box->style->padding_left.val ;
+                a_cur_box->style->num_props[NUM_PROP_PADDING_RIGHT].cv.val +
+                a_cur_box->style->num_props[NUM_PROP_PADDING_LEFT].cv.val ;
         a_cur_box->padding_edge.height = a_cur_box->inner_edge.height +
-                a_cur_box->style->padding_top.val +
-                a_cur_box->style->padding_bottom.val ;
+                a_cur_box->style->num_props[NUM_PROP_PADDING_TOP].cv.val +
+                a_cur_box->style->num_props[NUM_PROP_PADDING_BOTTOM].cv.val ;
 
         a_cur_box->border_edge.width = a_cur_box->padding_edge.width +
-                a_cur_box->style->border_right.val +
-                a_cur_box->style->border_left.val ;
+                a_cur_box->style->num_props[NUM_PROP_BORDER_RIGHT].cv.val +
+                a_cur_box->style->num_props[NUM_PROP_BORDER_LEFT].cv.val ;
         a_cur_box->border_edge.height = a_cur_box->padding_edge.height +
-                a_cur_box->style->border_top.val +
-                a_cur_box->style->border_bottom.val ;
+                a_cur_box->style->num_props[NUM_PROP_BORDER_TOP].cv.val +
+                a_cur_box->style->num_props[NUM_PROP_BORDER_BOTTOM].cv.val ;
 
         a_cur_box->outer_edge.width = a_cur_box->border_edge.width +
-                a_cur_box->style->margin_left.val +
-                a_cur_box->style->margin_right.val ;
+                a_cur_box->style->num_props[NUM_PROP_MARGIN_LEFT].cv.val +
+                a_cur_box->style->num_props[NUM_PROP_MARGIN_RIGHT].cv.val ;
         a_cur_box->outer_edge.height = a_cur_box->border_edge.height +
-                a_cur_box->style->margin_top.val +
-                a_cur_box->style->margin_bottom.val ;
+                a_cur_box->style->num_props[NUM_PROP_MARGIN_TOP].cv.val +
+                a_cur_box->style->num_props[NUM_PROP_MARGIN_BOTTOM].cv.val ;
 
         return CR_OK ;
 }
@@ -958,6 +1266,13 @@ cr_lay_eng_new (void)
 	}
 	memset (PRIVATE (result), 0, sizeof (CRLayEngPriv)) ;
 
+        
+
+        PRIVATE (result)->xdpi = gdk_screen_width () / 
+                gdk_screen_width_mm () * 25.4 ;
+        PRIVATE (result)->ydpi = gdk_screen_height () /
+                gdk_screen_height_mm () * 25.4 ;
+
 	return result ;
 }
 
@@ -973,7 +1288,7 @@ cr_lay_eng_new (void)
 enum CRStatus
 cr_lay_eng_create_box_model (CRLayEng *a_this,
                              xmlDoc *a_doc,
-                             CRCascade *a_cascade,                             
+                             CRCascade *a_cascade,
                              CRBoxModel **a_box_model)
 {
         xmlNode *root_node = NULL ;
