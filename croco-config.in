@@ -68,11 +68,11 @@ while test $# -gt 0; do
 	;;
 
     --cflags)
-	echo @CROCO_CFLAGS@
+	echo @CROCO_CFLAGS@ @GLIB2_CFLAGS@ @LIBXML2_CFLAGS@
        	;;
 
     --libs)
-	echo @CROCO_LIBS@
+	echo @CROCO_LIBS@ @GLIB2_LIBS@ @LIBXML2_LIBS@
        	;;
 
     *)

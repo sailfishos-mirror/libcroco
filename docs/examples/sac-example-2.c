@@ -20,7 +20,7 @@
  *
  *To compile this file, type:
  *
- *gcc -g  -o sac-example-2 `croco-config --cflags`  `croco-config --libs` sac-example-2.c
+ *gcc -g  -Wall -o sac-example-2 `croco-config --cflags`  `croco-config --libs` sac-example-2.c
  *
  *Make sure you have compiled and installed libcroco prior to trying to
  *compile this file :)
@@ -33,8 +33,9 @@
  *
  *Initial Author: Dodji Seketeli <Dodji 47 seketeli dot org>
  */
+#include <string.h>
 #include <stdlib.h>
-#include <libcroco.h>
+#include <libcroco/libcroco.h>
 
 /**
  *A Context that will hold the
@@ -45,10 +46,10 @@
 struct MyFooContext
 {
         /**the total number of rulesets in the stylesheet.*/
-        unsigned long nb_rulesets ;
+        int nb_rulesets ;
         
         /**the number of property per ruleset.*/
-        unsigned long nb_props_per_ruleset ;
+        int nb_props_per_ruleset ;
 } ;
 
 /**
@@ -131,7 +132,8 @@ start_selector_cb (CRDocHandler *a_handler,
 static void
 property_cb (CRDocHandler *a_handler,
              GString *a_name,
-             CRTerm *a_value)
+             CRTerm *a_value,
+             gboolean a_important)
 {
         struct MyFooContext *context = NULL ;
         
@@ -241,7 +243,7 @@ main (int argc, char **argv)
 			 *available now, so this is
 			 *a bit redundant...
 			 */
-			display_usage ((unsigned char*)argv[0]) ;
+			/*display_usage ((unsigned char*)argv[0]) ;*/
 		}
 	}
 
@@ -342,8 +344,6 @@ main (int argc, char **argv)
 	 *Time to free the resources we allocated.
 	 */
 	cr_parser_destroy (parser) ;
-
-	cr_doc_handler_unref (sac_handler) ;
 
 	return 0 ;
 }

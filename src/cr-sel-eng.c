@@ -1614,7 +1614,7 @@ cr_sel_eng_get_matched_properties_from_cascade (CRSelEng * a_this,
                         if (!stmts_tab) {
                                 cr_utils_trace_info ("Out of memory");
                                 status = CR_ERROR;
-                                goto error;
+                                goto cleanup;
                         }
                         tab_size += stmts_chunck_size;
                         /*
@@ -1632,7 +1632,7 @@ cr_sel_eng_get_matched_properties_from_cascade (CRSelEng * a_this,
                         if (!stmts_tab) {
                                 cr_utils_trace_info ("Out of memory");
                                 status = CR_ERROR;
-                                goto error;
+                                goto cleanup;
                         }
                         tab_size += stmts_chunck_size;
                         index += tab_len;
@@ -1645,7 +1645,7 @@ cr_sel_eng_get_matched_properties_from_cascade (CRSelEng * a_this,
                 if (status != CR_OK) {
                         cr_utils_trace_info ("Error while running "
                                              "selector engine");
-                        goto error;
+                        goto cleanup;
                 }
                 index += tab_len;
                 tab_len = tab_size - index;
@@ -1674,14 +1674,11 @@ cr_sel_eng_get_matched_properties_from_cascade (CRSelEng * a_this,
                 }
 
         }
-
-        return CR_OK;
-      error:
-
+        status = CR_OK ;
+ cleanup:
         if (stmts_tab) {
                 g_free (stmts_tab);
                 stmts_tab = NULL;
-
         }
 
         return status;
