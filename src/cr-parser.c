@@ -4541,6 +4541,7 @@ cr_parser_parse_stylesheet (CRParser *a_this)
                                  && token->unichar == ':')
                              || (token->type == DELIM_TK
                                  && token->unichar == '*')
+                             || (token->type == BO_TK)
                              || token->type == IDENT_TK))
                 {
                         /*
