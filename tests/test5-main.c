@@ -45,6 +45,7 @@ const guchar *xml_content=
 "<E0>text0</E0>"
 "<E1><E1-1>text1</E1-1></E1>"
 "<E2 attr2=\"val2\">text2</E2>"
+"<E3 attr2=\"val3.1 val3.2 val3.3\">text2</E3>"
 "</document>";
 
 static void 
