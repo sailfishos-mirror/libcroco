@@ -1,3 +1,31 @@
+0.6.0: June 9, 2004
+
+     Enhancements since 0.5.1
+     ========================
+
+     - add parsing location to all the CSS contructions at SAC level [Dodji Seketeli]
+     - add --dump-location option to csslint [Dodji Seketeli]
+     - enable several API/ABI incompatible versions of Libcroco to be
+     installed on the same box [Dodji Seketeli]
+     - CSS properties inheritance support [Benjamin Dauvergne]
+     - CRStyle struct gatehering code cleanup [Benjamin Dauvergne]     
+     - Better support for font selection [Dodji Seketeli]
+
+     Bugfixes since 0.5.1
+     ======================
+     
+     - #143308: fix parsing of non trivial functional #notations. [Dodji Seketeli]
+     - #143450: fix gcc 2.xx errors. [Dodji Seketeli]
+     - #139881: proper setting of parsing locations in urls. [Dodji Seketeli]
+     - #138267: remove C99-isms.
+     - #139889: fix an infinite loop in the parser [Dodji Seketeli]
+     - #139891: better @media rule reporting [Dodji Seketeli]
+     - #140317: fix class sel without class name crash [Dodji Seketeli]
+     - #140334: fix an infinite loop in the parser [Dodji Seketeli]
+     - attribute selectors evalution fixes. [Dodji Seketeli]     
+     - Better support of descendant selectors evaluation [Dodji Seketeli]
+     - Better regression tests framework [Dodji Seketeli]
+
 0.5.1: April 18 2004:
 
      - fixes: #140334, #140317, #139891, #139615. [Dodji Seketeli]
