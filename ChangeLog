@@ -1,5 +1,16 @@
 2003-06-17  dodji  <dodji@seketeli.org>
-			
+
+	* tests/test4-main.c: updated this to test
+	cr_statement_at_media_rule_parse_from_buf().
+	
+	* src/parser/cr-statement.[ch]:
+	debuged cr_statement_at_media_rule_parse_from_buf() and the functions
+	it relies on.
+	cr_statement_new_ruleset()=> fixed this so that it properly
+	handles the containing  "@media" rule.
+	cr_statement_new_at_media_rule =>fixed this so that it properly
+	handles the contained rulesets.
+	
 	* src/parser/cr-statement.[hc]:
 	coded  a first version of cr_statement_at_media_rule_parse_from_buf().
 	This took the writing of a couple a SAC callback. Pfffew, SAC is a rather

@@ -146,7 +146,7 @@ parse_at_media_end_selector_cb (CRDocHandler *a_this,
 	g_return_if_fail (a_this && a_sellist) ;
 
 	status = cr_doc_handler_get_ctxt (a_this, 
-					  (gpointer *)stmt) ;
+					  (gpointer *)&stmt) ;
 	g_return_if_fail (status == CR_OK && stmt 
 			  && stmt->type == RULESET_STMT) ;
 	g_return_if_fail (stmt->kind.ruleset->parent_media_rule) ;
@@ -714,6 +714,8 @@ cr_statement_new_ruleset (CRStyleSheet * a_sheet,
 		g_return_val_if_fail 
 			(a_parent_media_rule->type == AT_MEDIA_RULE_STMT,
 			 NULL) ;
+		g_return_val_if_fail (a_parent_media_rule->kind.media_rule,
+				      NULL) ;
 	}
 
 	result = g_try_malloc (sizeof (CRStatement)) ;
@@ -740,7 +742,17 @@ cr_statement_new_ruleset (CRStyleSheet * a_sheet,
 	if (a_sel_list)
 		cr_selector_ref (a_sel_list) ;
 	result->kind.ruleset->decl_list = a_decl_list;
-	result->kind.ruleset->parent_media_rule = a_parent_media_rule;
+
+	if (a_parent_media_rule)
+	{
+		result->kind.ruleset->parent_media_rule = 
+			a_parent_media_rule;
+		a_parent_media_rule->kind.media_rule->rulesets = 
+			cr_statement_append 
+			(a_parent_media_rule->kind.media_rule->rulesets,
+			 result) ;		
+	}
+	
 
 	cr_statement_set_parent_sheet (result, a_sheet) ;
 
@@ -836,7 +848,7 @@ cr_statement_new_at_media_rule (CRStyleSheet *a_sheet,
 				CRStatement *a_rulesets,
 				GList *a_media)
 {
-	CRStatement *result = NULL ;
+	CRStatement *result = NULL, *cur = NULL ;
 
 	if (a_rulesets)
 		g_return_val_if_fail (a_rulesets->type == RULESET_STMT,
@@ -862,14 +874,28 @@ cr_statement_new_at_media_rule (CRStyleSheet *a_sheet,
 	}
 	memset (result->kind.media_rule, 0, sizeof (CRAtMediaRule)) ;
 	result->kind.media_rule->rulesets = a_rulesets ;
-	result->kind.media_rule->media_list = a_media ;
+	for (cur = a_rulesets ; cur ; cur = cur->next)
+	{
+		if (cur->type != RULESET_STMT || !cur->kind.ruleset)
+		{
+			cr_utils_trace_info ("Bad parameter a_rulesets. "
+					     "It should be a list of "
+					     "correct ruleset statement only !");
+			goto error ;
+		}
+		cur->kind.ruleset->parent_media_rule = result ;
+	}
 
+	result->kind.media_rule->media_list = a_media ;	
 	if (a_sheet)
 	{
 		cr_statement_set_parent_sheet (result, a_sheet) ;
 	}
 
 	return result ;
+	
+ error:
+	return NULL ;
 }
 
 
