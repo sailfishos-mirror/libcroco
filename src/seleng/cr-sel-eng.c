@@ -1170,7 +1170,7 @@ cr_sel_eng_get_matched_properties_from_cascade  (CRSelEng *a_this,
  *the returned *a_style using cr_style_destroy().
  *@return CR_OK upon successfull completion, an error code otherwise.
  */
-#if 0
+#if 1
 enum CRStatus
 cr_sel_eng_get_matched_style (CRSelEng *a_this,
                               CRCascade *a_cascade,
@@ -1260,6 +1260,14 @@ cr_sel_eng_get_matched_style (CRSelEng *a_this,
                                       ((GHFunc)
                                        set_style_from_props_hash_hr_func),
                                       a_style) ;
+
+                
+        }
+
+        if (props_hash)
+        {
+                g_hash_table_destroy (props_hash) ;
+                props_hash = NULL ;
         }
 
         return CR_OK ;
