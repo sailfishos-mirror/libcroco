@@ -1,0 +1,70 @@
+Libcroco parser architecture
+-----------------------------
+
+Author: Dodji Seketeli <dodji@seketeli.org>
+
+$Id$
+
+I) Forethoughts.
+===================
+
+Libcroco's parser is a simple recursive descent parser.
+The major design focus has been simplicity, reliability and
+conformance.
+
+Simplicity
+-----------
+We want the code to be maintainable by anyone who knows the css spec
+and who knows how to code in C. Therefore, we avoid to overuse
+the C preprocessor magic and all the tricks that tends to turn C into
+a maintainance nightmare.
+
+We also try to adhere to the gnome coding guidelines specified
+at http://developer.gnome.org/doc/guides/programming-guidelines.
+
+
+Reliability
+-----------
+Each single function of the libcroco library should never crash, 
+and this, whatever the arguments it takes.
+As a consequence we tend to be paranoic when it comes to check
+pointers values before dereferencing them for example...
+
+Conformance
+-----------
+We try to stick to the css spec. We now this is almost impossible to achieve
+given the ressource we have but we think it is sane target to chase.
+
+II) Overall architecture
+=========================
+The parser is organized around two main classes :
+
+1/ CRInput
+2/ CRTknzr (Tokenizer or lexer)
+3/ CRParser
+
+II.1 The CRInput class
+-----------------------
+The CRInput class provides the abstraction of  
+an utf8-encoded character stream. 
+
+Ideally, it should abstracts local data sources 
+(local files and in-memory buffers)
+and remote data sources (sockets, url-identified ressources) but at the
+moment, it abstracts local data sources only.
+
+Adding a new type of data source should be transparent for the
+classes that already use CRInput. After all, it is what is abstraction about :)
+
+
+II.2 The CRTknzr class
+-------------------
+The main job of the tokenizer (or lexer) is to
+provide a get_next_token () method.
+This methods returns the next css token found in the input stream.
+(Note that the input stream here is an instance of CRInput).
+
+This provides an extremely usefull facility to the parser.
+
+II.3 The CRParser class
+-------------------------
