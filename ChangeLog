@@ -1,3 +1,9 @@
+2004-01-27  Dodji Seketeli  <dodji@gnome.org>
+
+	* src/cr-cascade.c: 
+	(cr_cascade_new) don't forget to set the UA sheet.
+	* src/cr-cascade.h: add void cr_cascade_ref() entry point.
+	
 2004-01-26  Dodji Seketeli  <dodji@gnome.org>
 
 	* src/cr-cascade.[ch]:

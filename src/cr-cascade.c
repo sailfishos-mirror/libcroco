@@ -94,7 +94,7 @@ cr_cascade_new (CRStyleSheet *a_author_sheet,
 	}
 	if (a_ua_sheet)
 	{
-                cr_cascade_set_sheet (result, a_user_sheet,
+                cr_cascade_set_sheet (result, a_ua_sheet,
                                       ORIGIN_UA) ;
 	}
 

@@ -44,10 +44,12 @@ typedef struct _CRCascadePriv CRCascadePriv ;
  *An abstraction of the "Cascade" defined
  *in the css2 spec, chapter 6.4.
  */
-typedef struct
+typedef struct _CRCascade CRCascade ;
+
+struct _CRCascade
 {
 	CRCascadePriv *priv ;
-} CRCascade ;
+};
 
 
 CRCascade *
@@ -62,6 +64,8 @@ cr_cascade_get_sheet (CRCascade *a_this,
 enum CRStatus cr_cascade_set_sheet (CRCascade *a_this,
                                     CRStyleSheet *a_sheet,
                                     enum CRStyleOrigin a_origin) ;
+
+void cr_cascade_ref (CRCascade *a_this) ;
 
 void cr_cascade_unref (CRCascade *a_this) ;
 
