@@ -24,6 +24,9 @@ cleantar:
 rpm: cleantar
 	@(mkdir -p $(top_srcdir)/rpmbuildroot ; $(MAKE) dist && rpmbuild  -ta --buildroot $(top_srcdir)/rpmbuildroot $(distdir).tar.gz)
 
+nr-tests:
+	if test -x $(top_srcdir)/tests/testctl ; then $(top_srcdir)/tests/testctl mkcleanup ; $(top_srcdir)/tests/testctl run ; fi 
+
 apidoc:
 	if ! test -d docs/apis ; then  mkdir -p docs/apis ;  fi ;
 	doxygen Doxyfile
