@@ -277,11 +277,11 @@ main (int argc, char ** argv)
 
         if (status == CR_OK)
         {
-                g_print ("\nOK\n") ;
+                g_printerr ("\nOK\n") ;
         }
         else
         {
-                g_print ("\nKO\n") ;
+                g_printerr ("\nKO\n") ;
         }
 
 	return 0 ;
