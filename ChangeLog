@@ -1,3 +1,9 @@
+2004-01-16  Dodji Seketeli  <dodji@gnome.org>
+
+	* src/seleng/cr-sel-eng.c: applied a patch from
+	Rob BUIS to fix the rwlbuis@xs4all.nl class selector
+	evaluation.
+
 2004-01-04  Dodji Seketeli  <dodji@gnome.org>
 
 	* src/parser/cr-declaration.c: 

@@ -166,7 +166,7 @@ class_add_sel_matches_node (CRAdditionalSel *a_add_sel,
                             xmlNode *a_node)
 {
         gboolean result = FALSE ;
-        xmlChar *class = NULL ;
+        xmlChar *klass = NULL, *cur = NULL ;
 
         g_return_val_if_fail (a_add_sel
                               && a_add_sel->type == CLASS_ADD_SELECTOR
@@ -176,18 +176,27 @@ class_add_sel_matches_node (CRAdditionalSel *a_add_sel,
 
         if (xmlHasProp (a_node, "class"))
         {
-                class = xmlGetProp (a_node, "class") ;
-                if (!strncmp (class, a_add_sel->content.class_name->str,
-                             a_add_sel->content.class_name->len))
+                klass = xmlGetProp (a_node, "class") ;
+                for (cur = klass ; *cur ; cur++)
                 {
-                        result = TRUE ;
+                        while (cr_utils_is_white_space (*cur) == TRUE && *cur)
+                                cur ++ ;
+                        if (!*cur)
+                                break ;
+                        if (!strncmp (cur, a_add_sel->content.class_name->str,
+                                      a_add_sel->content.class_name->len))
+                        {
+                                cur += a_add_sel->content.class_name->len;
+                                if (!*cur || cr_utils_is_white_space (*cur) == TRUE)
+                                        result = TRUE ;
+                        }
                 }
         }
 
-        if (class)
+        if (klass)
         {
-                xmlFree (class) ;
-                class = NULL ;
+                xmlFree (klass) ;
+                klass = NULL ;
         }
         return result ;
         
