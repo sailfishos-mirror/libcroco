@@ -21,7 +21,7 @@
 #ifndef __LIBCROCO_H__
 #define __LIBCROCO_H__
 
-#include "libcroco-config.h"
+#include "parser/libcroco-config.h"
 
 #include "parser/cr-utils.h"
 #include "parser/cr-pseudo.h"
@@ -38,11 +38,11 @@
 #include "parser/cr-stylesheet.h"
 #include "parser/cr-om-parser.h"
 
-#ifdef WITH_SELENG /*The selection engine headers*/
+#ifdef CROCO_SELENG_ENABLED /*The selection engine headers*/
 #include "seleng/cr-sel-eng.h"
-#endif /*WITH_SELENG*/
+#endif /*CROCO_SELENG_ENABLED*/
 
-#ifdef WITH_LAYENG /*the layout engine headers*/
+#ifdef CROCO_LAYENG_ENABLED /*the layout engine headers*/
 #include "layeng/cr-style.h"
 #include "layeng/cr-box.h"
 #include "layeng/cr-box-view.h"

@@ -107,15 +107,15 @@ csslint_parse_cmd_line (int a_argc, char **a_argv,
 static void 
 csslint_show_version (const char *name) 
 {
-    fprintf(stderr, "%s: using libcroco version %s\n", name, VERSION);
+    fprintf(stderr, "%s: using libcroco version %s\n", name, LIBCROCO_VERSION);
     fprintf(stderr, "   compiled with: ");
-#ifdef HAVE_LIBXML2
+#ifdef CROCO_HAVE_LIBXML2
 	fprintf(stderr, "LIBXML2 ");
 #endif
-#ifdef WITH_SELENG
+#ifdef CROCO_SELENG_ENABLED
 	fprintf(stderr, "SELENG ");
 #endif
-#ifdef WITH_TESTS
+#ifdef CROCO_TESTS_ENABLED
 	fprintf(stderr, "TESTS ");
 #endif
     fprintf(stderr, "\n");

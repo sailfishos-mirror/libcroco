@@ -5,8 +5,6 @@ pkgconfigdir=$(libdir)/pkgconfig
 pkgconfig_DATA=libcroco.pc
 
 extraincludedir=$(includedir)/@PACKAGE@
-extrainclude_HEADERS= libcroco-config.h
-
 
 bin_SCRIPTS=croco-config
 

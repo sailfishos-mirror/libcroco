@@ -28,11 +28,11 @@
 #include "cr-cascade.h"
 
 
-#ifdef HAVE_LIBXML2
+#ifdef CROCO_HAVE_LIBXML2
  #include <libxml/tree.h>
 #endif
 
-#ifdef WITH_SELENG
+#ifdef CROCO_SELENG_ENABLED
 
 
 /**
@@ -78,6 +78,6 @@ cr_sel_eng_destroy (CRSelEng *a_this) ;
 
 G_END_DECLS
 
-#endif /*WITH_SELENG*/
+#endif /*CROCO_SELENG_ENABLED*/
 
 #endif/*__CR_SEL_ENG_H__*/
