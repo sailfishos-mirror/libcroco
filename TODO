@@ -1,7 +1,7 @@
 
 *coding:)
 
-test/debug the new cr_statement_at_media_rule_parse_from_buf().
+test/debug cr_statement_at_page_rule_parse_from_buf().
 
 Provide support for font selection. (hard, started well underway.)
  First make sure to be able to gather all the font related property

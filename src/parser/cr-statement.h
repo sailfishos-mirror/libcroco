@@ -268,6 +268,10 @@ cr_statement_new_at_page_rule (CRStyleSheet *a_sheet,
                                CRDeclaration *a_decl_list,
 			       GString *a_name,
 			       GString *a_pseudo) ;
+CRStatement *
+cr_statement_at_page_rule_parse_from_buf (const guchar *a_buf,
+					  enum CREncoding a_encoding)  ;
+
 enum CRStatus
 cr_statement_set_parent_sheet (CRStatement *a_this, 
                                CRStyleSheet *a_sheet) ;

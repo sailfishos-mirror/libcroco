@@ -56,6 +56,63 @@ static void
 cr_statement_dump_import_rule (CRStatement *a_this, FILE *a_fp,
 			       gulong a_indent) ;
 
+
+static void
+parse_page_start_page_cb (CRDocHandler *a_this, 
+			  GString *a_name,
+			  GString *a_pseudo_page)
+{
+	CRStatement *stmt = NULL ;
+	enum CRStatus status = CR_OK ;
+	
+	stmt = cr_statement_new_at_page_rule (NULL, NULL, a_name, 
+					      a_pseudo_page) ;
+	g_return_if_fail (stmt) ;
+	status = cr_doc_handler_set_ctxt (a_this, stmt) ;
+	g_return_if_fail (status == CR_OK) ;
+}
+
+static void
+parse_page_property_cb (CRDocHandler *a_this,
+			GString *a_name, 
+			CRTerm *a_expression)
+{
+	GString *name = NULL ;
+	CRStatement *stmt = NULL ;
+	CRDeclaration *decl = NULL ;
+	enum CRStatus status = CR_OK ;
+
+	status = cr_doc_handler_get_ctxt (a_this, (gpointer*)&stmt) ;
+	g_return_if_fail (status == CR_OK && stmt->type == AT_PAGE_RULE_STMT) ;
+
+	name = g_string_new_len (a_name->str, a_name->len) ;	
+	g_return_if_fail (name) ;
+
+	decl = cr_declaration_new (stmt, name, a_expression) ;
+	g_return_if_fail (decl) ;
+
+	stmt->kind.page_rule->decls_list = 
+		cr_declaration_append (stmt->kind.page_rule->decls_list,
+				       decl) ;
+	g_return_if_fail (stmt->kind.page_rule->decls_list) ;
+}
+
+static void
+parse_page_end_page_cb (CRDocHandler *a_this, 
+			GString *a_name,
+			GString *a_pseudo_page)
+{
+	enum CRStatus status = CR_OK ;
+	CRStatement *stmt = NULL ;
+	
+	status = cr_doc_handler_get_ctxt (a_this, (gpointer*)&stmt) ;
+	g_return_if_fail (status == CR_OK && stmt);
+	g_return_if_fail (stmt->type == AT_PAGE_RULE_STMT);
+
+	status = cr_doc_handler_set_result (a_this, stmt) ;
+	g_return_if_fail (status == CR_OK) ;
+}
+
 static void
 parse_at_media_start_media_cb (CRDocHandler *a_this,
 			       GList *a_media_list)
@@ -965,7 +1022,6 @@ cr_statement_new_at_page_rule (CRStyleSheet *a_sheet,
 {
 	CRStatement *result = NULL ;
 
-	g_return_val_if_fail (a_sheet, NULL) ;
 
 	result = g_try_malloc (sizeof (CRStatement)) ;
 
@@ -988,12 +1044,90 @@ cr_statement_new_at_page_rule (CRStyleSheet *a_sheet,
 	}
 
 	memset (result->kind.page_rule, 0, sizeof (CRAtPageRule)) ;
-	result->kind.page_rule->decls_list = a_decl_list;
+	if (a_decl_list)
+	{
+		result->kind.page_rule->decls_list = a_decl_list;
+		cr_declaration_ref (a_decl_list) ;
+	}
 	result->kind.page_rule->name = a_name ;
 	result->kind.page_rule->name = a_pseudo ;
-	cr_statement_set_parent_sheet (result, a_sheet) ;
+	if (a_sheet)
+		cr_statement_set_parent_sheet (result, a_sheet) ;
 
 	return result ;
+}
+
+/**
+ *Parses a buffer that contains an "@page" production and,
+ *if the parsing succeeds, builds the page statement.
+ *@param a_buf the character buffer to parse.
+ *@param a_encoding the character encoding of a_buf.
+ *@return the newly built at page statement in case of successfull parsing,
+ *NULL otherwise.
+ */
+CRStatement *
+cr_statement_at_page_rule_parse_from_buf (const guchar *a_buf,
+					  enum CREncoding a_encoding) 
+{
+	enum CRStatus status = CR_OK ;
+	CRParser *parser = NULL ;
+	CRDocHandler *sac_handler = NULL ;
+	CRStatement *result = NULL ;
+
+	g_return_val_if_fail (a_buf, NULL) ;
+	
+	parser = cr_parser_new_from_buf (a_buf, strlen (a_buf),
+					 a_encoding, FALSE) ;
+	if (!parser)
+	{
+		cr_utils_trace_info ("Instanciation of the parser failed.") ;
+		goto cleanup ;
+	}
+
+	sac_handler = cr_doc_handler_new () ;
+	if (!sac_handler)
+	{
+		cr_utils_trace_info 
+			("Instanciation of the sac handler failed.") ;
+		goto cleanup ;
+	}
+
+	sac_handler->start_page = 
+		parse_page_start_page_cb ;
+	sac_handler->property =
+		parse_page_property_cb ;
+	sac_handler->end_page = 
+		parse_page_end_page_cb ;
+
+	status = cr_parser_set_sac_handler (parser, sac_handler) ;
+	if (status != CR_OK)
+		goto cleanup ;
+	
+	/*Now, invoke the parser to parse the "@page production"*/
+	cr_parser_try_to_skip_spaces_and_comments (parser) ;
+	if (status != CR_OK)
+		goto cleanup ;
+	status = cr_parser_parse_page (parser) ;
+	if (status != CR_OK)
+		goto cleanup ;
+	
+	status = cr_doc_handler_get_result (sac_handler,
+					    (gpointer*)&result) ;
+
+ cleanup:
+
+	if (parser)
+	{
+		cr_parser_destroy (parser) ;
+		parser = NULL ;
+	}
+	if (sac_handler)
+	{
+		cr_doc_handler_unref (sac_handler) ;
+		sac_handler = NULL ;
+	}
+	return result  ;
+	
 }
 
 /**

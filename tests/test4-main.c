@@ -48,6 +48,10 @@ const guchar *gv_at_media_buf =
 "  }"
 ;
 
+const guchar *gv_at_page_buf =
+"@page { size 8.5in 11in; margin: 2cm }"
+;
+
 static void 
 display_help (char *prg_name) ;
 
@@ -188,6 +192,25 @@ test_cr_statement_at_media_rule_parse (void)
         return CR_OK ;
 }
 
+static enum CRStatus
+test_cr_statement_at_page_rule_parse (void)
+{
+        CRStatement *stmt = NULL ;
+        
+        stmt = cr_statement_at_page_rule_parse_from_buf (gv_at_page_buf,
+                                                         CR_UTF_8) ;
+        
+        g_return_val_if_fail (stmt, CR_ERROR) ;
+        
+        if (stmt)
+        {
+                cr_statement_destroy (stmt) ;
+                stmt = NULL ;
+        }
+
+        return CR_OK ;
+}
+
 /**
  *The entry point of the testing routine.
  */
@@ -212,6 +235,13 @@ main (int argc, char ** argv)
         }
 
         status = test_cr_statement_at_media_rule_parse () ;
+        if (status != CR_OK)
+        {
+                g_print ("\nKO\n") ;
+                return 0 ;
+        }
+
+        test_cr_statement_at_page_rule_parse () ;
         if (status != CR_OK)
         {
                 g_print ("\nKO\n") ;

@@ -220,7 +220,7 @@ struct _CRDocHandler
 	 */
 	void (*start_page) (CRDocHandler *a_this,
 			    GString *a_name, 
-			    GString *pseudo_page) ;
+			    GString *a_pseudo_page) ;
 
 	/**
 	 *Is called to notify the end of a page statement.

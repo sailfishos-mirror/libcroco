@@ -1,5 +1,12 @@
 2003-06-17  dodji  <dodji@seketeli.org>
 
+	* tests/test4-main.c: added test_cr_statement_at_page_rule_parse ()
+	to test the new cr_statement_at_page_rule_parse_from_buf() function.
+	
+	* src/parser/cr-statement.[ch]:
+	added a first version of cr_statement_at_page_rule_parse_from_buf().
+	This doesn't work. I need to debug it first.
+	
 	* tests/test4-main.c: updated this to test
 	cr_statement_at_media_rule_parse_from_buf().
 	

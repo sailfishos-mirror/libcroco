@@ -469,8 +469,6 @@ start_media (CRDocHandler *a_this, GList *a_media_list)
 
         if (a_media_list)
         {
-                GList *cur = NULL ;
-
                 /*duplicate the media_list*/
                 media_list = cr_dup_glist_of_string (a_media_list) ;
         }
