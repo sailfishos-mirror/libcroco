@@ -1,5 +1,8 @@
 2003-03-03  Dodji  <dodji@tintin.mifon.org>
 
+	* tests/README-description.txt: 
+	added this test description file in the project.
+	
 	* src/cr-sel-eng.c (cr_sel_eng_get_matched_rulesets_real): 
 	renamed the function cr_sel_eng_get_rulesets_real() into
 	this new one. Modified it memory management model so that 
