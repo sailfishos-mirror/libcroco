@@ -1,0 +1,9 @@
+2003-03-23  Gaël Chamoulaud  <strider@freespiders.org>
+
+	* Makefile.am (AM_CFLAGS): added a man page for csslint program.
+
+	* csslint.1: added a man page for csslint program.
+
+	* csslint.c: initialized the csslint program. A command CSS 
+	parser tool for LIBCRCCO.
+
