@@ -36,6 +36,20 @@ G_BEGIN_DECLS
 
 typedef struct _CRStyle CRStyle ;
 
+enum CRLengthType
+{
+        LENGTH_NUMBER,
+        LENGTH_PX,
+        LENGTH_PERCENTAGE
+} ;
+
+typedef struct _CRLength CRLength;
+struct _CRLength
+{
+        enum CRLengthType type;
+        glong len ;
+} ;
+
 enum CRBorderStyle
 {
         BORDER_STYLE_NONE,
@@ -80,6 +94,15 @@ enum CRPositionType
         POSITION_FIXED,
 } ;
 
+enum CRFloatType
+{
+        FLOAT_NONE,
+        FLOAT_LEFT,
+        FLOAT_RIGHT,
+        FLOAT_INHERIT
+} ;
+
+
 /**
  *The css2 style class.
  *Contains computed and actual values
@@ -92,17 +115,17 @@ struct _CRStyle
 
 	/**padding properties, in pixel*/
 
-	gulong padding_top ;
-	gulong padding_right ;
-	gulong padding_bottom ;
-	gulong padding_left ;
+	CRLength padding_top ;
+	CRLength padding_right ;
+	CRLength padding_bottom ;
+	CRLength padding_left ;
 
 	/**border properties*/
 
-	gulong border_top_width ;
-	gulong border_right_width ;
-	gulong border_bottom_width ;
-	gulong border_left_width ;
+	CRLength border_top_width ;
+	CRLength border_right_width ;
+	CRLength border_bottom_width ;
+	CRLength border_left_width ;
 
 	gulong border_top_color ;
 	gulong border_right_color ;
@@ -116,10 +139,10 @@ struct _CRStyle
 
 	/**margin properties, in pixel*/
 
-	gulong margin_top ;
-	gulong margin_right ;
-	gulong margin_bottom;
-	gulong margin_left ;
+	CRLength margin_top ;
+	CRLength margin_right ;
+	CRLength margin_bottom;
+	CRLength margin_left ;
 
         /**box display type*/
         enum CRDisplayType display ;
@@ -128,10 +151,15 @@ struct _CRStyle
         enum CRPositionType position ;
 
         /**box offset*/
-        gulong top ;
-        gulong right ;
-        gulong bottom ;
-        gulong left ;
+        CRLength top ;
+        CRLength right ;
+        CRLength bottom ;
+        CRLength left ;
+
+        /**the float property*/
+        enum CRFloatType float_type ;
+
+        CRLength width ;
 } ;
 
 G_END_DECLS

@@ -29,6 +29,10 @@
 
 #include "cr-style.h"
 
+/*
+ *$Id$
+ */
+
 G_BEGIN_DECLS
 
 /**
@@ -37,9 +41,9 @@ G_BEGIN_DECLS
  */
 enum CRBoxContentType
 {
-	NO_CONTENT_TYPE ;
-	TEXT_CONTENT_TYPE ;
-	IMAGE_CONTENT_TYPE ;
+	NO_CONTENT_TYPE,
+	TEXT_CONTENT_TYPE,
+	IMAGE_CONTENT_TYPE
 } ;
 
 typedef struct _CRImageContentDesc CRImageContentDesc ;
@@ -57,7 +61,7 @@ struct _CRBoxContent
 	union 
 	{
 		guchar *text ;
-		ImageContentDesc *img_desc ;
+		CRImageContentDesc *img_desc ;
 	} kind ;
 } ;
 
@@ -67,28 +71,21 @@ typedef struct _CRBoxEdge CRBoxEdge ;
  *An internal data structure
  *used by #CRBox.
  *An edge is an rectangular area
- *defined by the coordinates of the two points
- *that delimit its bias (in french: bias = diagonale).
- *(x0,y0) is the top left delimiter point of the bias, and
- *(x1,y1) is the bottom right delimiter point of the bias.
+ *defined by the coordinates of the it top left corner,
+ *its width and height.
  */
 struct _CRBoxEdge
 {
-	gulong x0,y0,x1,y1 ;
+	gulong x, y, width, height ;
 } ;
 
-
-enum CRBoxType
-{
-
-} ;
 
 enum CRBoxType
 {
         BOX_TYPE_BLOCK,
         BOX_TYPE_ANONYMOUS_BLOCK,
         BOX_TYPE_INLINE,
-        BOX_TYPE_ANONYMOUS_INLINE
+        BOX_TYPE_ANONYMOUS_INLINE,
         BOX_TYPE_COMPACT,
         BOX_TYPE_RUN_IN
 } ;
@@ -187,6 +184,24 @@ struct _CRBox
 	CRBox *children ;
 };
 
+
+CRBox *
+cr_box_new (void) ;
+
+enum CRStatus
+cr_box_insert_sibling (CRBox *a_prev,
+                       CRBox *a_next,
+                       CRBox *a_to_insert) ;
+
+enum CRStatus
+cr_box_append_child (CRBox *a_this, CRBox *a_to_append) ;
+
+
+void
+cr_box_destroy (CRBox *a_this) ;
+
+
 G_END_DECLS
 
-#endif __CR_BOX_H__
+#endif /*__CR_BOX_H__*/
+

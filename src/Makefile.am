@@ -25,6 +25,7 @@ libcroco_la_SOURCES= \
 	cr-stylesheet.c \
 	cr-om-parser.c \
 	cr-sel-eng.c \
+	cr-box.c \
 	*.h
 
 INCLUDES=-I$(top_srcdir) -I$(top_srcdir)/intl `pkg-config --cflags glib-2.0` `pkg-config --cflags libxml-2.0` @LIBXML2_CFLAGS@
