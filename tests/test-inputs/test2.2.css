@@ -12,7 +12,7 @@ a:link {
     background: transparent;
     text-decoration: none;
 }    
-    
+
 a:visited {    
     color: #990099;    
     background: transparent;
@@ -25,7 +25,8 @@ a:active {
     background: #ADD8E6;
     text-decoration: none;
 }    
-    
+
+
 h1.rubrique_info {  
     color: #990033;  
     margin: 0px 0px 0px 0px;
@@ -33,6 +34,8 @@ h1.rubrique_info {
     border: 0px;
     font-size: 12px;
 }
+
+
 h1.connexe {
     font-size: 12px;
     padding: 0em;
