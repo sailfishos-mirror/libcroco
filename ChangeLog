@@ -1,5 +1,13 @@
 2004-01-26  Dodji Seketeli  <dodji@gnome.org>
 
+	* src/cr-cascade.[ch]:
+	(cr_cascade_ref),(cr_cascade_unref): new convenience function
+	* src/cr-om-parser.[ch]:
+	(cr_om_parser_parse_paths_to_cascade),
+	(cr_om_parser_simply_parse_paths_to_cascade): added these new parsing methods.
+
+2004-01-26  Dodji Seketeli  <dodji@gnome.org>
+
 	* src/cr-utils.h: added CR_FILE_NOT_FOUND_ERROR to
 	the CRStatus enum.
 

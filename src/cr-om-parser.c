@@ -1043,7 +1043,7 @@ cr_om_parser_simply_parse_file (const guchar *a_file_path,
         if (!parser)
         {
                 cr_utils_trace_info ("Could not allocate om parser") ;
-                cr_utils_trace_info ("System maybe out of memory") ;
+                cr_utils_trace_info ("System may be out of memory") ;
                 return CR_ERROR ;
         }
         
@@ -1058,6 +1058,106 @@ cr_om_parser_simply_parse_file (const guchar *a_file_path,
         return status ;
 }
 
+/**
+ *Parses three sheets located by their paths and build a cascade
+ *@param a_this the current instance of #CROMParser
+ *@param a_author_path the path to the author stylesheet
+ *@param a_user_path the path to the user stylesheet
+ *@param a_ua_path the path to the User Agent stylesheet
+ *@param a_result out parameter. The resulting cascade if the parsing
+ *was okay
+ *@return CR_OK upon successful completion, an error code otherwise
+ */
+enum CRStatus
+cr_om_parser_parse_paths_to_cascade (CROMParser *a_this,
+                                     const guchar *a_author_path,
+                                     const guchar *a_user_path,
+                                     const guchar *a_ua_path,
+                                     enum CREncoding a_encoding,
+                                     CRCascade ** a_result)
+{
+        enum CRStatus status = CR_OK ;
+        /*0->author sheet, 1->user sheet, 2->UA sheet*/
+        CRStyleSheet *sheets[3] ;
+        guchar * paths[3] ;
+        CRCascade *result = NULL ;
+        gint i = 0 ;
+
+        g_return_val_if_fail (a_this, CR_BAD_PARAM_ERROR) ;
+
+        memset (sheets, 0, sizeof (CRStyleSheet) * 3) ;
+        paths[0] = (guchar*) a_author_path ;
+        paths[1] = (guchar*) a_user_path ;
+        paths[2] = (guchar*) a_ua_path ;
+
+        for (i=0 ;i < 3; i++) 
+        {
+                status = cr_om_parser_parse_file (a_this, paths[i], 
+                                                  a_encoding,
+                                                  &sheets[i]) ;
+                if (status != CR_OK) 
+                {
+                        if (sheets[i]) 
+                        {
+                                cr_stylesheet_unref (sheets[i]) ;
+                                sheets[i] = NULL ;
+                        }
+                        continue ;
+                }
+        }
+        result = cr_cascade_new (sheets[0], sheets[1], sheets[2]) ;
+        if (!result) 
+        {
+                for (i=0 ; i < 3 ; i++) 
+                {
+                        cr_stylesheet_unref (sheets[i]) ;
+                        sheets[i] = 0 ;
+                }
+                return CR_ERROR ;
+        }
+        *a_result = result ;
+        return CR_OK ;
+}
+
+/**
+ *Parses three sheets located by their paths and build a cascade
+ *@param a_author_path the path to the author stylesheet
+ *@param a_user_path the path to the user stylesheet
+ *@param a_ua_path the path to the User Agent stylesheet
+ *@param a_result out parameter. The resulting cascade if the parsing
+ *was okay
+ *@return CR_OK upon successful completion, an error code otherwise
+ */
+enum CRStatus
+cr_om_parser_simply_parse_paths_to_cascade (const guchar *a_author_path,
+                                            const guchar *a_user_path,
+                                            const guchar *a_ua_path,
+                                            enum CREncoding a_encoding,
+                                            CRCascade ** a_result)
+{
+        enum CRStatus status = CR_OK ;
+        CROMParser *parser = NULL ;
+        
+        parser = cr_om_parser_new (NULL) ;
+        if (!parser)
+        {
+                cr_utils_trace_info ("could not allocated om parser") ;
+                cr_utils_trace_info ("System may be out of memory") ;
+                return CR_ERROR ;
+        }
+        status = cr_om_parser_parse_paths_to_cascade (parser, 
+                                                      a_author_path,
+                                                      a_user_path,
+                                                      a_ua_path,
+                                                      a_encoding,
+                                                      a_result) ;
+        if (parser) 
+        {
+                cr_om_parser_destroy (parser) ;
+                parser = NULL ;
+        }
+        return status ;
+}
 
 /**
  *Destructor of the #CROMParser.

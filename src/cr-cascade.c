@@ -41,6 +41,7 @@ struct _CRCascadePriv
 	 *of sheets[ORIGIN_UA] ;
 	 */
 	CRStyleSheet *sheets[3] ;
+        guint ref_count ;
 } ;
 
 
@@ -154,6 +155,40 @@ cr_cascade_set_sheet (CRCascade *a_this,
 	return CR_OK ;
 }
 
+/**
+ *Increases the reference counter of the current instance
+ *of #CRCascade.
+ *@param a_this the current instance of #CRCascade
+ *
+ */
+void
+cr_cascade_ref (CRCascade *a_this)
+{
+        g_return_if_fail (a_this && PRIVATE (a_this)) ;
+        
+        PRIVATE (a_this)->ref_count++ ;
+}
+
+/**
+ *Decrements the reference counter associated
+ *to this instance of #CRCascade. If the reference
+ *counter reaches zero, the instance is destroyed 
+ *using cr_cascade_destroy()
+ *@param a_this the current instance of 
+ *#CRCascade.
+ */
+void 
+cr_cascade_unref (CRCascade *a_this)
+{
+        g_return_if_fail (a_this && PRIVATE (a_this)) ;
+
+        if (PRIVATE (a_this)->ref_count)
+                PRIVATE (a_this)->ref_count -- ;
+        if (!PRIVATE (a_this)->ref_count) 
+        {
+                cr_cascade_destroy (a_this) ;
+        }
+}
 
 /**
  *Destructor of #CRCascade.
