@@ -1,5 +1,10 @@
 2004-03-07  Dodji Seketeli  <dodji@gnome.org>
 
+	* src/cr-style.c: applied a patch from
+	Benjamin Dauvergne to support the "color" property.
+
+2004-03-07  Dodji Seketeli  <dodji@gnome.org>
+
 	* src/cr-rgb.[ch]:
 	(cr_rgb_compute_from_percentage): added this new convenience 
 	function.

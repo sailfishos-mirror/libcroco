@@ -279,7 +279,7 @@ static enum CRStatus
 set_prop_width (CRStyle *a_style, CRTerm *a_value) ;
 
 static enum CRStatus
-set_prop_color_rgb (CRStyle *a_style, CRTerm *a_value) ;
+set_prop_color (CRStyle *a_style, CRTerm *a_value) ;
 
 static enum CRStatus
 set_prop_background_color (CRStyle *a_style, CRTerm *a_value) ;
@@ -1158,23 +1158,36 @@ set_prop_width (CRStyle *a_style, CRTerm *a_value)
 }
 
 static enum CRStatus
-set_prop_color_rgb (CRStyle *a_style, CRTerm *a_value)
+set_prop_color (CRStyle *a_style, CRTerm *a_value)
 {
+        enum CRStatus status = CR_OK ;
         g_return_val_if_fail (a_style && a_value,
                               CR_BAD_PARAM_ERROR) ;
 
-        if (a_value->type == TERM_RGB)
-        {
+	switch(a_value->type) {
+	case TERM_RGB:
                 if (a_value->content.rgb)
                 {
                         cr_rgb_set_from_rgb
                                 (&a_style->rgb_props[RGB_PROP_COLOR].sv,
                                  a_value->content.rgb) ;
                 }
+		break ;
+	case TERM_IDENT:
+	        status = cr_rgb_set_from_name 
+                        (&a_style->rgb_props[RGB_PROP_COLOR].sv,
+                         a_value->content.str->str) ;
+		break ;
+	case TERM_HASH:
+                status = cr_rgb_set_from_hex_str
+                        (&a_style->rgb_props[RGB_PROP_COLOR].sv, 
+                         a_value->content.str->str) ;
+                break ;
+	default:
+                status =  CR_UNKNOWN_TYPE_ERROR ;
+	}
 
-        }
-
-        return CR_OK ;
+        return status ;
 }
 
 static enum CRStatus
@@ -2214,7 +2227,7 @@ cr_style_set_style_from_decl (CRStyle *a_this, CRDeclaration *a_decl)
                 break ;
 
         case PROP_ID_COLOR:
-                status = set_prop_color_rgb (a_this, value) ;
+                status = set_prop_color (a_this, value) ;
                 break ;
 
         case PROP_ID_BACKGROUND_COLOR:
