@@ -1,5 +1,8 @@
 /* libcroco-config.h.in.  Generated from configure.in by autoheader.  */
 
+/* disable runtime asserts */
+#undef G_DISABLE_CHECKS
+
 /* Define to 1 if you have the <dlfcn.h> header file. */
 #undef HAVE_DLFCN_H
 

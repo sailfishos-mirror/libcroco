@@ -500,6 +500,7 @@ import_style (CRDocHandler *a_this, GList *a_media_list,
         GString *uri = NULL ;
         CRStatement *stmt = NULL, *stmt2 = NULL ;
         ParsingContext *ctxt = NULL ;
+        GList *media_list = NULL, *cur = NULL ;
 
         g_return_if_fail (a_this && a_this->context) ;
 
@@ -507,9 +508,23 @@ import_style (CRDocHandler *a_this, GList *a_media_list,
         g_return_if_fail (ctxt->stylesheet) ;
 
         uri = g_string_new_len (a_uri->str, a_uri->len) ;
-        stmt = cr_statement_new_at_import_rule (uri, 
-                                                a_media_list, 
-                                                NULL) ;        
+        
+        for (cur = a_media_list ; cur; cur = cur->next)
+        {
+                if (cur->data)
+                {
+                        GString *str1 = NULL, *str2 = NULL ;
+                        str1 = (GString*)cur->data ;
+                        str2 = g_string_new_len (str1->str, str1->len) ;
+                                                
+                        media_list = g_list_append (media_list,
+                                                   str2);
+                }
+        }
+
+        stmt = cr_statement_new_at_import_rule (uri,
+                                                media_list,
+                                                NULL) ;    
         if (!stmt) 
                 goto error ;
         

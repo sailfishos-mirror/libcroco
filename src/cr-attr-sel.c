@@ -162,7 +162,7 @@ cr_attr_sel_dump (CRAttrSel *a_this, FILE *a_fp)
                                         break ;
                                 }
                         
-                                fprintf (a_fp,value) ;
+                                fprintf (a_fp,"\"%s\"",value) ;
 
                                 g_free (value) ;
                                 value = NULL ;

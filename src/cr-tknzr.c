@@ -353,7 +353,7 @@ cr_tknzr_parse_nl (CRTknzr *a_this, guchar **a_start, guchar **a_end)
 {
         CRParserInputPos init_pos ;
         guchar next_chars[2]  = {0} ;
-        enum CRStatus status = CR_OK ;
+        enum CRStatus status = CR_PARSING_ERROR ;
         
         g_return_val_if_fail (a_this && PRIVATE (a_this)
                               && a_start && a_end,
@@ -383,11 +383,13 @@ cr_tknzr_parse_nl (CRTknzr *a_this, guchar **a_start, guchar **a_end)
                 *a_end = *a_start ;
                 status = CR_OK ;
         }
-        
-        if (status == CR_OK)
+        else
         {
-                return CR_OK ;
+                status = CR_PARSING_ERROR ;
+                goto error ;
         }
+
+        return CR_OK ;
 
  error:
 
@@ -586,7 +588,7 @@ cr_tknzr_parse_unicode_escape (CRTknzr *a_this,
                 goto error ;
         }
 
-        READ_NEXT_CHAR (a_this, &cur_char) ;
+        PEEK_NEXT_CHAR (a_this, &cur_char) ;
 
         for (occur = 0, unicode = 0 ;
              ((cur_char >= '0' && cur_char <= '9')
@@ -595,6 +597,8 @@ cr_tknzr_parse_unicode_escape (CRTknzr *a_this,
              occur ++)
         {
                 gint cur_char_val = 0 ;
+
+                READ_NEXT_CHAR (a_this, &cur_char) ;
 
                 if ((cur_char >= '0' && cur_char <= '9'))
                 {
@@ -611,7 +615,7 @@ cr_tknzr_parse_unicode_escape (CRTknzr *a_this,
 
                 unicode = unicode * 10 + cur_char_val ;
 
-                READ_NEXT_CHAR (a_this, &cur_char) ;
+                PEEK_NEXT_CHAR (a_this, &cur_char) ;
         }
 
 
@@ -687,8 +691,8 @@ cr_tknzr_parse_escape (CRTknzr *a_this, guint32 *a_esc_code)
         }
         
         if ((next_chars[1] >= '0' && next_chars[1] <= '9')
-            || (next_chars[1] >= 'a' && next_chars[1] <='z')
-            || (next_chars[1] >= 'A' && next_chars[1] <='Z'))
+            || (next_chars[1] >= 'a' && next_chars[1] <='f')
+            || (next_chars[1] >= 'A' && next_chars[1] <='F'))
         {
                 status =
                         cr_tknzr_parse_unicode_escape (a_this, 
@@ -773,15 +777,8 @@ cr_tknzr_parse_string (CRTknzr *a_this, GString **a_str)
 
                 PEEK_BYTE (a_this, 1, &next_chars[0]) ;
                 PEEK_BYTE (a_this, 2, &next_chars[1]) ;
-                
-                if (strchr ("\t !#$%&", next_chars[0])
-                    || (next_chars[0] >= '(' && next_chars[0] <= '~'))
-                {
-                        READ_NEXT_CHAR (a_this, &cur_char) ;
-                        g_string_append_unichar (str, cur_char) ;
-                        status = CR_OK ;
-                }
-                else if (next_chars[0] == '\\')
+
+                if (next_chars[0] == '\\')
                 {
                         guchar *tmp_char_ptr1 = NULL, 
                                 *tmp_char_ptr2 = NULL ;
@@ -790,10 +787,9 @@ cr_tknzr_parse_string (CRTknzr *a_this, GString **a_str)
                         if (next_chars[1] == '\''
                             || next_chars[1] == '"')
                         {
-                                READ_NEXT_CHAR (a_this, &cur_char) ;
-                                READ_NEXT_CHAR (a_this, &cur_char) ;
                                 g_string_append_unichar (str,
-                                                         cur_char) ;
+                                                         next_chars[1]) ;
+                                SKIP_BYTES (a_this, 2) ;
                                 status  = CR_OK ;
                         }
                         else
@@ -823,6 +819,14 @@ cr_tknzr_parse_string (CRTknzr *a_this, GString **a_str)
 
                         CHECK_PARSING_STATUS (status, FALSE) ;
                 }
+                else if (strchr ("\t !#$%&", next_chars[0])
+                    || (next_chars[0] >= '(' && next_chars[0] <= '~'))
+                {
+                        READ_NEXT_CHAR (a_this, &cur_char) ;
+                        g_string_append_unichar (str, cur_char) ;
+                        status = CR_OK ;
+                }
+                                
                 else if (cr_utils_is_nonascii (next_chars[0]))
                 {
                         READ_NEXT_CHAR (a_this, &cur_char) ;
@@ -1034,6 +1038,9 @@ cr_tknzr_parse_ident (CRTknzr *a_this, GString **a_str)
         RECORD_INITIAL_POS (a_this, &init_pos) ;
 
         status = cr_tknzr_parse_nmstart (a_this, &tmp_char) ;
+
+        if (status != CR_OK)
+                return CR_PARSING_ERROR ;
 
         if (*a_str == NULL)
         {
@@ -2759,8 +2766,11 @@ cr_tknzr_get_next_token (CRTknzr *a_this, CRToken ** a_tk)
                 }
                 else
                 {
-                        g_string_free (str, TRUE) ;
-                        str = NULL ;
+                        if (str)
+                        {
+                                g_string_free (str, TRUE) ;
+                                str = NULL ;
+                        }
                 }
         }
 
