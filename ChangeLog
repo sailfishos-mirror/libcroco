@@ -1,3 +1,18 @@
+2003-05-06  Dodji  <dodji@seketeli.org>
+
+	* src/layeng/cr-style.[ch]: started to add the support of
+	the "color" and "background-color" properties.
+
+	* src/layeng/cr-lay-eng.c:
+	(style_specified_2_computed_value()) updated this function to
+	compute also the new colors properties (color and background-color).
+	
+	* src/layeng/cr-box-view.c:
+	(set_background_color ()) 
+	(set_foreground_color ())added these functions to set the box 
+	inner/padding edge color.
+	also started to use these two functions to test them.
+	
 2003-05-05  Dodji  <dodji@seketeli.org>
 
 	* tests/test7-main.c: small update for debug purposes.

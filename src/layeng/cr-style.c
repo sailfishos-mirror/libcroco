@@ -36,15 +36,15 @@
 
 /**
  *A property ID.
- *Each css property has an ID which is
- *en entry into a property "population" jump table.
+ *Each supported css property has an ID which is
+ *an entry into a property "population" jump table.
  *each entry of the property population jump table
  *contains code to tranform the literal form of
  *a property value into a strongly typed value.
  */
 enum CRPropertyID
 {
-        PROP_ID_NOT_KNOWN,
+        PROP_ID_NOT_KNOWN = 0,
 	PROP_ID_PADDING_TOP,
 	PROP_ID_PADDING_RIGHT,
 	PROP_ID_PADDING_BOTTOM,
@@ -68,7 +68,12 @@ enum CRPropertyID
 	PROP_ID_BOTTOM,
 	PROP_ID_LEFT,
 	PROP_ID_FLOAT,
-	PROP_ID_WIDTH
+	PROP_ID_WIDTH,
+        PROP_ID_COLOR,
+        PROP_ID_BACKGROUND_COLOR,
+
+        /*should be the last one.*/
+        NB_PROP_IDS
 } ;
 
 
@@ -107,7 +112,11 @@ static CRPropertyDesc gv_prop_table [] =
 	{"left", PROP_ID_LEFT},
 	{"float", PROP_ID_FLOAT},
 	{"width", PROP_ID_WIDTH},
-	{NULL, 0}		
+        {"color", PROP_ID_COLOR},
+        {"background-color", PROP_ID_BACKGROUND_COLOR},
+
+        /*must be the last one*/
+	{NULL, 0}
 } ;
 
 /**
@@ -243,7 +252,7 @@ cr_style_set_props_to_defaults (CRStyle *a_this)
                 case NUM_PROP_MARGIN_TOP:
                 case NUM_PROP_MARGIN_RIGHT:
                 case NUM_PROP_MARGIN_BOTTOM:
-                case NUM_PROP_MARGIN_LEFT:
+                case NUM_PROP_MARGIN_LEFT:                
                         cr_num_set (&a_this->num_props[i].sv,
                                     0, NUM_LENGTH_PX) ;
                         break ;
@@ -256,9 +265,26 @@ cr_style_set_props_to_defaults (CRStyle *a_this)
 
         for (i = 0 ; i < NB_RGB_PROPS ; i++)
         {
-                /*default color is black*/
-                cr_rgb_set (&a_this->rgb_props[i].sv, 0, 0, 0,
-                            FALSE) ;
+                
+                switch (i)
+                {
+                        /*default foreground color is black*/
+                case RGB_PROP_COLOR:
+                        cr_rgb_set (&a_this->rgb_props[i].sv, 0, 0, 0,
+                                    FALSE) ;
+                        break ;
+                        
+                        /*default background color is white*/
+                case RGB_PROP_BACKGROUND_COLOR:
+                        cr_rgb_set (&a_this->rgb_props[i].sv, 
+                                    255, 255, 255, FALSE) ;
+                        break ;
+
+                default:
+                        cr_rgb_set (&a_this->rgb_props[i].sv, 0, 0, 0,
+                                    FALSE) ;
+                break ;
+                }
         }
 
         for (i = 0 ; i < NB_BORDER_STYLE_PROPS ; i++)
@@ -1005,7 +1031,8 @@ set_prop_width (CRStyle *a_style, CRTerm *a_value)
                                       a_value->content.str->str,
                                       strlen ("auto")))
                         {
-                                a_style->num_props[NUM_PROP_WIDTH].sv.type = NUM_AUTO ;
+                                a_style->num_props[NUM_PROP_WIDTH].sv.type = 
+                                        NUM_AUTO ;
                         }
                         else if (!strncmp ("inherit",
                                            a_value->content.str->str,
@@ -1031,6 +1058,50 @@ set_prop_width (CRStyle *a_style, CRTerm *a_value)
         return CR_OK ;
 }
 
+static enum CRStatus
+set_prop_color (CRStyle *a_style, CRTerm *a_value)
+{
+        g_return_val_if_fail (a_style && a_value,
+                              CR_BAD_PARAM_ERROR) ;
+
+        if (a_value->type == TERM_RGB)
+        {
+                if (a_value->content.rgb)
+                {
+                        cr_rgb_set_from_rgb
+                                (&a_style->rgb_props[RGB_PROP_COLOR].sv,
+                                 a_value->content.rgb) ;
+                }
+
+        }
+
+        return CR_OK ;
+}
+
+static enum CRStatus
+set_prop_background_color (CRStyle *a_style, CRTerm *a_value)
+{
+        g_return_val_if_fail (a_style && a_value,
+                              CR_BAD_PARAM_ERROR) ;
+
+        if (a_value->type == TERM_RGB)
+        {
+                if (a_value->content.rgb)
+                {
+                        cr_rgb_set_from_rgb
+                                (&a_style->
+                                 rgb_props[RGB_PROP_BACKGROUND_COLOR].sv,
+                                 a_value->content.rgb) ;
+                }
+        }
+
+        return CR_OK ;
+}
+
+
+/******************
+ *Public methods
+ ******************/
 
 /**
  *Default constructor of #CRStyle.
@@ -1282,8 +1353,16 @@ cr_style_set_style_from_decl (CRStyle *a_this, CRDeclaration *a_decl,
                 status = set_prop_width (a_this, value) ;
                 break ;
 
+        case PROP_ID_COLOR:
+                status = set_prop_color (a_this, value) ;
+                break ;
+
+        case PROP_ID_BACKGROUND_COLOR:
+                status = set_prop_background_color (a_this, value) ;
+
         default:
                 return CR_UNKNOWN_TYPE_ERROR ;
+
         }
 
         return status ;

@@ -164,10 +164,12 @@ enum CRNumProp
 
 enum CRRgbProp
 {
-        RGB_PROP_TOP_COLOR = 0,
-        RGB_PROP_RIGHT_COLOR,
-        RGB_PROP_BOTTOM_COLOR,
-        RGB_PROP_LEFT_COLOR,
+        RGB_PROP_BORDER_TOP_COLOR = 0,
+        RGB_PROP_BORDER_RIGHT_COLOR,
+        RGB_PROP_BORDER_BOTTOM_COLOR,
+        RGB_PROP_BORDER_LEFT_COLOR,
+        RGB_PROP_COLOR,
+        RGB_PROP_BACKGROUND_COLOR,
 
         /*must be last*/
         NB_RGB_PROPS
@@ -180,7 +182,7 @@ enum CRBorderStyleProp
         BORDER_STYLE_PROP_RIGHT,
         BORDER_STYLE_PROP_BOTTOM,
         BORDER_STYLE_PROP_LEFT,
-
+        
         /*must be last*/
         NB_BORDER_STYLE_PROPS
 } ;

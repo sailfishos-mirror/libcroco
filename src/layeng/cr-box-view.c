@@ -33,7 +33,18 @@
 struct _CRBoxViewPriv
 {
 	CRBoxModel *box_model ;
+        /*
+         *The default graphical context
+         *Function willing to modify this gc
+         *should save it firts, then modify it,
+         *draw what they have to draw and then restore it !!
+         */
         GdkGC *gc ;
+
+        /**
+         * a boolean used by some drawing functions.
+         *greping PRIVATE (a_this)->draw should tell you who uses it :)
+         */
         gboolean draw ;
 } ;
 
@@ -229,6 +240,76 @@ set_border_line_attrs (CRBoxView *a_this,
         return CR_OK ;
 }
 
+
+static enum CRStatus
+set_background_color (CRBoxView *a_this, CRBox *a_box)
+{
+        g_return_val_if_fail (a_this && a_box, CR_BAD_PARAM_ERROR) ;
+
+        /*
+         *this code is inspired by gtkhtml2's set_foreground_color()'s code
+         *in htmlgdkpainter.c
+         */
+        if (a_box->style)
+        {
+                GdkColor gdk_color ;
+                CRRgb *rgb_color = &a_box->style->
+                        rgb_props[RGB_PROP_BACKGROUND_COLOR].cv ;
+
+                gdk_color.red = (rgb_color->red << 8)   | rgb_color->red ;
+                gdk_color.green = (rgb_color->green << 8) | rgb_color->green ;
+                gdk_color.blue = (rgb_color->blue << 8)  | rgb_color->blue ;
+
+                gdk_rgb_find_color
+                        (gdk_drawable_get_colormap
+                         (GDK_DRAWABLE (GTK_LAYOUT (a_this)->bin_window)),
+                         &gdk_color) ;
+
+                gdk_gc_set_background (PRIVATE (a_this)->gc, &gdk_color) ;
+        }
+
+        return CR_OK ;
+}
+
+static enum CRStatus
+set_foreground_color (CRBoxView *a_this, CRBox *a_box)
+{
+        g_return_val_if_fail (a_this && a_box, CR_BAD_PARAM_ERROR) ;
+
+        /*
+         *this code is inspired by gtkhtml2's set_foreground_color()'s code
+         *in htmlgdkpainter.c
+         */
+        if (a_box->style)
+        {
+                GdkColor gdk_color ;
+                CRRgb *rgb_color = &a_box->style->
+                        rgb_props[RGB_PROP_COLOR].cv ;
+
+                gdk_color.red = (rgb_color->red << 8)   | rgb_color->red ;
+                gdk_color.green = (rgb_color->green << 8) | rgb_color->green ;
+                gdk_color.blue = (rgb_color->blue << 8)  | rgb_color->blue ;
+
+                gdk_rgb_find_color
+                        (gdk_drawable_get_colormap
+                         (GDK_DRAWABLE (GTK_LAYOUT (a_this)->bin_window)),
+                         &gdk_color) ;
+
+                gdk_gc_set_foreground (PRIVATE (a_this)->gc, &gdk_color) ;
+        }
+
+        return CR_OK ;
+}
+
+/**
+ *Draws the margin rectangle.
+ *Note: This is only for debug purpose because 
+ *margins are always transparent.
+ *@param a_this the bow view to draw on.
+ *@param a_box the box to draw.
+ *@return CR_OK upon successfull completion, an error code
+ *otherwise.
+ */
 static enum CRStatus
 draw_margins (CRBoxView *a_this,
               CRBox *a_box)
@@ -242,7 +323,7 @@ draw_margins (CRBoxView *a_this,
                               && CR_IS_BOX_VIEW (a_this)
                               && a_box,
                               CR_BAD_PARAM_ERROR) ;
-        
+
         widget = GTK_WIDGET (a_this) ;
         window = GTK_LAYOUT (a_this)->bin_window ;
         g_return_val_if_fail (window, CR_ERROR) ;
@@ -277,7 +358,6 @@ draw_margins (CRBoxView *a_this,
                  GTK_WIDGET (a_this)->style->base_gc[widget->state],
                  FALSE,
                  rect.x, rect.y, rect.width, rect.height) ;
-
 
         /*
          *draw top margin rectangle.
@@ -423,6 +503,9 @@ draw_paddings (CRBoxView *a_this,
         box = a_box ;
         g_return_val_if_fail (box, CR_ERROR) ;
 
+        set_background_color (a_this, a_box) ;
+        set_foreground_color (a_this, a_box) ;
+
         /*
          *draw the left padding
          */
@@ -554,7 +637,7 @@ draw_box (CRBoxView *a_this,
 
         for (cur_box = a_box; cur_box ; cur_box = cur_box->next)
         {
-                draw_margins (a_this, cur_box) ;
+                /*draw_margins (a_this, cur_box) ;*/
                 draw_borders (a_this, cur_box) ;
                 draw_paddings (a_this, cur_box) ;
                 draw_inner_box (a_this, cur_box) ;

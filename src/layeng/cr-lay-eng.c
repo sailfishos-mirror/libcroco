@@ -435,6 +435,12 @@ style_specified_2_computed_values (CRLayEng *a_this,
                 }
         }
 
+        for (i = 0 ; i < NB_RGB_PROPS; i++)
+        {
+                cr_rgb_set_from_rgb (&a_style->rgb_props[i].cv, 
+                                     &a_style->rgb_props[i].sv) ;
+        }
+
         /*************************************
          *Now compute the specific css2 specification recommendations.
          *This can seem ugly, but it needs to be done. I do it here untill

@@ -3,9 +3,11 @@
 
 Go forward in the box layout (positioning) code. (hard, very hard).
 This is gonna take me a coupe of months I think.
- Implement the style properties (of the 4 edges of the box model.
-  Start by implementing the border-color-x prop.
-  Make sure not to systematically hardwire the drawing of the 4 edges.
+ Implement the style properties (of the 4 edges of the box model).  
+  implementing the border-color-x prop.
+  Make sure not to systematically hardwire the sadly drawing of
+  padding edge.
+  
 
 *Doc:)
 
