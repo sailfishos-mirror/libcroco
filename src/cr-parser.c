@@ -1797,16 +1797,32 @@ cr_parser_parse_term (CRParser * a_this, CRTerm ** a_term)
 
         if (token->type == DELIM_TK && token->u.unichar == '+') {
                 result->unary_op = PLUS_UOP;
+                cr_token_destroy (token) ;
+                token = NULL ;
+                cr_parser_try_to_skip_spaces_and_comments (a_this);
+                status = cr_tknzr_get_next_token (PRIVATE (a_this)->tknzr, 
+                                                  &token);
+                if (status != CR_OK || !token)
+                        goto error;
         } else if (token->type == DELIM_TK && token->u.unichar == '-') {
                 result->unary_op = MINUS_UOP;
-        } else if (token->type == EMS_TK
-                   || token->type == EXS_TK
-                   || token->type == LENGTH_TK
-                   || token->type == ANGLE_TK
-                   || token->type == TIME_TK
-                   || token->type == FREQ_TK
-                   || token->type == PERCENTAGE_TK
-                   || token->type == NUMBER_TK) {
+                cr_token_destroy (token) ;
+                token = NULL ;
+                cr_parser_try_to_skip_spaces_and_comments (a_this);
+                status = cr_tknzr_get_next_token (PRIVATE (a_this)->tknzr, 
+                                                  &token);
+                if (status != CR_OK || !token)
+                        goto error;
+        }
+
+        if (token->type == EMS_TK
+            || token->type == EXS_TK
+            || token->type == LENGTH_TK
+            || token->type == ANGLE_TK
+            || token->type == TIME_TK
+            || token->type == FREQ_TK
+            || token->type == PERCENTAGE_TK
+            || token->type == NUMBER_TK) {
                 status = cr_term_set_number (result, token->u.num);
                 CHECK_PARSING_STATUS (status, TRUE);
                 token->u.num = NULL;
@@ -1868,7 +1884,7 @@ cr_parser_parse_term (CRParser * a_this, CRTerm ** a_term)
         cr_parser_clear_errors (a_this);
         return CR_OK;
 
-      error:
+ error:
 
         if (result) {
                 cr_term_destroy (result);
@@ -2353,16 +2369,7 @@ cr_parser_parse_function (CRParser * a_this,
         cr_token_destroy (token);
         token = NULL;
 
-        status = cr_tknzr_get_next_token (PRIVATE (a_this)->tknzr, &token);
-        if (status != CR_OK)
-                goto error;
-
-        ENSURE_PARSING_COND (token && token->type == PO_TK);
-
-        cr_token_destroy (token);
-        token = NULL;
-
-        status = cr_parser_parse_term (a_this, &expr);
+        status = cr_parser_parse_expr (a_this, &expr);
 
         CHECK_PARSING_STATUS (status, FALSE);
 

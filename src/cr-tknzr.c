@@ -879,8 +879,7 @@ cr_tknzr_parse_nmchar (CRTknzr * a_this, guint32 * a_char)
 
         return CR_OK;
 
-      error:
-
+ error:        
         cr_tknzr_set_cur_pos (a_this, &init_pos);
 
         return status;
@@ -953,6 +952,9 @@ cr_tknzr_parse_ident (CRTknzr * a_this, GString ** a_str)
         if (stringue) {
                 g_string_free (stringue, TRUE) ;
                 stringue = NULL ;
+        }
+        if (status != CR_OK ) {
+                cr_tknzr_set_cur_pos (a_this, &init_pos) ;
         }
         return status ;
 }

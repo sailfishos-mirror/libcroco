@@ -299,16 +299,16 @@ cr_term_to_string (CRTerm * a_this)
 
                 switch (cur->the_operator) {
                 case DIVIDE:
-                        g_string_append_printf (str_buf, " / ");
+                        g_string_append (str_buf, " / ");
                         break;
 
                 case COMMA:
-                        g_string_append_printf (str_buf, ", ");
+                        g_string_append (str_buf, ", ");
                         break;
 
                 case NO_OP:
                         if (cur->prev) {
-                                g_string_append_printf (str_buf, " ");
+                                g_string_append (str_buf, " ");
                         }
                         break;
                 default:
@@ -318,11 +318,11 @@ cr_term_to_string (CRTerm * a_this)
 
                 switch (cur->unary_op) {
                 case PLUS_UOP:
-                        g_string_append_printf (str_buf, "+");
+                        g_string_append (str_buf, "+");
                         break;
 
                 case MINUS_UOP:
-                        g_string_append_printf (str_buf, "-");
+                        g_string_append (str_buf, "-");
                         break;
 
                 default:
@@ -354,11 +354,11 @@ cr_term_to_string (CRTerm * a_this)
                                 g_string_append_printf (str_buf, "%s(",
                                                         content);
 
-                                if (a_this->ext_content.func_param) {
+                                if (cur->ext_content.func_param) {
                                         guchar *tmp_str = NULL;
 
                                         tmp_str = cr_term_to_string
-                                                (a_this->
+                                                (cur->
                                                  ext_content.func_param);
 
                                         if (tmp_str) {
@@ -367,12 +367,11 @@ cr_term_to_string (CRTerm * a_this)
                                                          "%s", tmp_str);
                                                 g_free (tmp_str);
                                                 tmp_str = NULL;
-                                        }
-
-                                        g_string_append_printf (str_buf, ")");
+                                        }           
                                         g_free (content);
                                         content = NULL;
                                 }
+                                g_string_append_printf (str_buf, ")");
                         }
 
                         break;

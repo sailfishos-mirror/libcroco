@@ -107,7 +107,7 @@ cr_stylesheet_dump (CRStyleSheet * a_this, FILE * a_fp)
 
 	str = cr_stylesheet_to_string (a_this) ;
 	if (str) {
-		fprintf (a_fp, str) ;
+		fprintf (a_fp, "%s", str) ;
 		g_free (str) ;
 		str = NULL ;
 	}

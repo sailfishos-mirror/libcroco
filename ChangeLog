@@ -1,3 +1,26 @@
+2004-05-29  Dodji Seketeli  <dodji@gnome.org>
+
+	* tests/test-functional-notation.sh,tests/test-inputs/functional-notation.css,
+	tests/test-output-refs/test-functional-notation.out:
+	Added regression tests for #143308
+	
+	* src/cr-parser.c:
+	(cr_parser_parse_term): better handling unary operator.
+	* src/cr-stylesheet.c :
+	(cr_stylesheet_dump): fprintf (fd, str) ; doesn't behave
+	correctly when str contains a '%' char. Do fprintf (fd, "%", str)
+	instead ;
+	* src/cr-term.c: 
+	(cr_term_to_string): use g_string_append() instead of 
+	g_string_append_printf() when possible.
+	Don't forget to close function parenthesis even when argument
+	list is NULL.
+	* src/cr-tknzr.c:
+	(cr_tknzr_parse_ident):
+	Properly roll back the input stream when an error occurs.
+	This ChangeLog entry fixes
+	http://bugzilla.gnome.org/show_bug.cgi?id=143308.
+
 2004-04-18  Dodji Seketeli  <dodji@gnome.org>
 
 ================== 0.5.1 release ========================
