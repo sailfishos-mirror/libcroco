@@ -143,11 +143,7 @@ main (int argc, char **argv)
 
 	status = test_cr_lay_eng_build_annotated_tree () ;
 
-	if (status == CR_OK)
-	{
-		g_print ("\nOK\n") ;
-	}
-	else
+	if (status != CR_OK)
 	{
 		g_print ("\nKO\n") ;
 	}

@@ -80,11 +80,7 @@ main (int argc, char ** argv)
 
         status = test_cr_parser_parse () ;
 
-        if (status == CR_OK)
-        {
-                g_print ("\nOK\n") ;
-        }
-        else
+        if (status != CR_OK)
         {
                 g_print ("\nKO\n") ;
         }

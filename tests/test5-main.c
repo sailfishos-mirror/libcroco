@@ -273,13 +273,9 @@ main (int argc, char ** argv)
 
         status = test_sel_eng (options.files_list[0]) ;
 
-        if (status == CR_OK)
+        if (status != CR_OK)
         {
-                g_printerr ("\nOK\n") ;
-        }
-        else
-        {
-                g_printerr ("\nKO\n") ;
+                g_print ("\nKO\n") ;
         }
 
 	return 0 ;

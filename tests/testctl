@@ -5,6 +5,8 @@
 #libcroco, saves their result, diff them
 #against a set of reference results and
 #displays OK/KO.
+#To use it as a tester, the best way is
+#just to run 'testctl run' and see the result.
 ####################################
 
 #the directory that contains the tests
@@ -17,10 +19,14 @@ TEST_PROG_LIST=
 TEST_INPUT_DIR=test-inputs
 
 #the reference test output dirs.
-TEST_OUTPUT_DIR=test-outputs
+TEST_OUT_REF_DIR=test-output-refs
 
 #temporary test result dir
-TEMP_RES_DIR_NAME=tmp-test-results
+TEST_OUTPUT_DIR=test-outputs
+
+ERROR_REPORT_FILE=tests-error.log
+COMMAND_LIST=
+COMMAND=
 
 EGREP=`which egrep`
 if test "empty$EGREP" = "empty" ; then
@@ -28,8 +34,69 @@ if test "empty$EGREP" = "empty" ; then
     echo "Please, install it first"
 fi
 
-COMMAND_LIST=
-COMMAND=
+DIFF=`which diff`
+if test "empty$DIFF" = "empty" ; then
+    echo "You don't have the diff program installed"
+    echo "Please, install is first"
+fi
+
+display_usage ()
+{
+    echo ""
+    echo "usage: $0 [options] <command>"
+    echo ""
+    echo "where options are:"
+    echo "===================="
+    echo "-h|--help     displays this help"
+    echo ""
+    echo "commands are:"
+    echo "=============="
+    echo "run           run the tests and display their result"
+    echo "mkref         run the tests but saves their output as a reference"
+    echo "mkcleanup     removes the tmp directories that may have been created"    
+}
+
+
+parse_command_line ()
+{
+    if test "empty$1" = "empty" ; then
+	display_usage ;
+	exit -1
+    fi
+
+    while true ; do
+	arg=$1
+
+	if test "empty$arg" = "empty" ; then
+	    break ;
+	fi
+
+	case "$arg" in
+	    -h|--help)
+		display_usage $@
+		exit 0
+		;;
+
+	    -*)
+		echo "$0: unknown option: $arg"
+		display_usage $@
+		exit 0
+		;;
+
+	    run|mkref|mkcleanup)
+		COMMAND_LIST=$arg
+		shift
+		break ;
+		;;
+
+	    *)
+		display_usage $@
+		exit 0
+		;;
+	esac
+    done
+}
+
 
 #builds the list of available test functions.
 build_tests_list ()
@@ -54,102 +121,107 @@ run_test_prog ()
     
     OUTPUT_DIR=
     OUTPUT_SUFFIX=
+    TEST_INPUT_LIST=
 
     for TEST_INPUT in `ls -1 $HERE/$TEST_INPUT_DIR | egrep ^${TEST_PROG}\([\.0-9]\)+\css\$` ; do
-	echo "test input: $TEST_INPUT"
 	TEST_INPUT_LIST="$TEST_INPUT_LIST $TEST_INPUT"
     done
 
-    if test "$REFERENCE" = "yes" ; then
-	OUTPUT_DIR=$HERE/$TEST_OUTPUT_DIR
-	OUTPUT_SUFFIX=.ref
+    if test "$REFERENCE" = "yes" ; then	
+	OUTPUT_DIR=$HERE/$TEST_OUT_REF_DIR
+	OUTPUT_SUFFIX=.out
+
+	if test ! -d $HERE/$OUTPUT_DIR ; then
+	    mkdir $HERE/$OUTPUT_DIR
+	fi
     else
-	if test ! -d $HERE/$TEMP_RES_DIR_NAME/ ; then
-	    echo "creating tmp directory $$HERE/$TEMP_RES_DIR_NAME ..."
-	    mkdir $HERE/$TEMP_RES_DIR_NAME ;
+	if test ! -d $HERE/$TEST_OUTPUT_DIR/ ; then
+	    echo "creating tmp directory $$HERE/$TEST_OUTPUT_DIR ..."
+	    mkdir $HERE/$TEST_OUTPUT_DIR ;
 	    echo "done"
 	fi
 
-	OUTPUT_DIR=$HERE/$TEMP_RES_DIR_NAME
+	OUTPUT_DIR=$HERE/$TEST_OUTPUT_DIR
 	OUTPUT_SUFFIX=.out
     fi    
 
     if test "empty$TEST_INPUT_LIST" != "empty" ; then
 	for TEST_INPUT in $TEST_INPUT_LIST ; do
-	    echo "$HERE/$TEST_PROG $HERE/$TEST_INPUT_DIR/$TEST_INPUT > $OUTPUT_DIR/${TEST_INPUT}${OUTPUT_SUFFIX}"
+	    #launch the test with the test input file, and save the output.
+	    echo "executing $HERE/$TEST_PROG $HERE/$TEST_INPUT_DIR/$TEST_INPUT > $OUTPUT_DIR/${TEST_INPUT}${OUTPUT_SUFFIX} ..."
 	    $HERE/$TEST_PROG $HERE/$TEST_INPUT_DIR/$TEST_INPUT > $OUTPUT_DIR/${TEST_INPUT}${OUTPUT_SUFFIX}
+	    echo "done"
+	    echo ""
 	done
+    else
+	echo "executing $HERE/$TEST_PROG  > $OUTPUT_DIR/${TEST_INPUT}${OUTPUT_SUFFIX} ..."
+	$HERE/$TEST_PROG > $OUTPUT_DIR/${TEST_PROG}${OUTPUT_SUFFIX}
+	echo "done"
     fi
 }
 
 cleanup_tests ()
 {
-    if test -d $HERE/$TEMP_RES_DIR_NAME ; then
-	echo "removing $HERE/$TEMP_RES_DIR_NAME"
-	rm -rf
+    if test -d $HERE/$TEST_OUTPUT_DIR ; then
+	echo "removing $HERE/$TEST_OUTPUT_DIR"
+	rm -rf $HERE/$TEST_OUTPUT_DIR/*
     fi
 }
 
-
-display_usage ()
+run_test_report ()
 {
-    echo ""
-    echo "usage: $0 [options] <command>"
-    echo ""
-    echo "where options are:"
-    echo "===================="
-    echo "-h|--help     displays this help"
-    echo ""
-    echo "commands are:"
-    echo "=============="
-    echo "run           run the tests and display their result"
-    echo "mkref         run the tests but saves their output as a reference"
-    echo "mkcleanup     removes the tmp directories that may have been created"    
+    diff -Nur --exclude=*CVS* $HERE/$TEST_OUT_REF_DIR $HERE/$TEST_OUTPUT_DIR > /tmp/toto$$
+    NB_DIFF=`cat /tmp/toto$$ | wc -l`
+
+    if test "$NB_DIFF" -eq 0 ; then
+	echo "/////////////ALL THE TESTS ARE OK :) //////////////////"
+	rm /tmp/toto$$
+    else
+	echo "SOME TESTS ARE KO :("
+	mv /tmp/toto$$ $HERE/$ERROR_REPORT_FILE
+	echo "See $HERE/$ERROR_REPORT_FILE to see what's going on"
+    fi
 }
 
-parse_command_line ()
-{
-    while true ; do
-
-	arg=$1 ;
-
-	case "$arg" in
-
-	    -h|--help)
-		display_usage $@
-		exit 0
-		;;
-	    -*)
-		echo "$0: unknown option: $arg"
-		display_usage $@
-		exit 0
-		;;
-
-	    run|mkref|mkcleanup)
-		COMMAND_LIST="$COMMAND_LIST $arg"
-		shift
-		;;
-
-	    *)
-		display_usage $@
-		exit 0
-		;;
-	esac
-    done
-}
 
 execute_command ()
 {
     arg=$1 ;
 
-    case "$arg"in
+    case "$arg" in
+
 	run)
+	    build_tests_list ;
+	    if test "empty$TEST_PROG_LIST" = "empty" ; then
+		echo "could not find any test to run"
+		exit
+	    fi
+
+	    for TEST in $TEST_PROG_LIST ; do
+		run_test_prog $TEST no;
+	    done
+
+	    run_test_report ;
 	    ;;
 
 	mkref)
+	    build_tests_list ;
+	    if test "empty$TEST_PROG_LIST" = "empty" ; then
+		echo "could not find any test to run"
+		exit
+	    fi
+
+	    for TEST in $TEST_PROG_LIST ; do
+		run_test_prog $TEST yes;
+	    done
 	    ;;
 
 	mkcleanup)
+	    rm -f $HERE/$TEST_OUTPUT_DIR/*
+
+	    if test -f $HERE/$ERROR_REPORT_FILE ; then
+		rm $HERE/$ERROR_REPORT_FILE
+	    fi
 	    ;;
 
 	*)
@@ -158,9 +230,17 @@ execute_command ()
     esac
     
 }
+
 main ()
 {
     parse_command_line $@
+
+    if test "empty$COMMAND_LIST" = "empty" ; then
+	echo "no test command to execute"
+	exit
+    fi
+
+    execute_command $COMMAND_LIST
 }
 
 main $@
