@@ -2127,7 +2127,7 @@ cr_style_set_style_from_decl (CRStyle *a_this, CRDeclaration *a_decl)
         case PROP_ID_BORDER_RIGHT:
                 status =
                         set_prop_border_x_from_value (a_this, value,
-                                                      DIR_TOP) ;
+                                                      DIR_RIGHT) ;
                 break ;
 
         case PROP_ID_BORDER_BOTTOM:
@@ -2139,7 +2139,7 @@ cr_style_set_style_from_decl (CRStyle *a_this, CRDeclaration *a_decl)
         case PROP_ID_BORDER_LEFT:
                 status =
                         set_prop_border_x_from_value (a_this, value,
-                                                      DIR_BOTTOM) ;
+                                                      DIR_LEFT) ;
                 break ;
 
         case PROP_ID_MARGIN_TOP:

@@ -3,8 +3,6 @@
 /*
  * This file is part of The Croco Library
  *
- * Copyright (C) 2002-2003 Dodji Seketeli <dodji at seketeli.org>
- *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of version 2.1 of the GNU Lesser General Public
  * License as published by the Free Software Foundation.
@@ -18,6 +16,8 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
  * USA
+ *
+ * Look at file COPYRIGHTS for copyright information
  */
 
 #ifndef __CR_DEFS_H__
@@ -64,7 +64,8 @@ enum CRStatus {
         CR_PSEUDO_CLASS_SEL_HANDLER_NOT_FOUND_ERROR,
         CR_BAD_PSEUDO_CLASS_SEL_HANDLER_ERROR,
         CR_ERROR,
-        CR_FILE_NOT_FOUND_ERROR
+        CR_FILE_NOT_FOUND_ERROR,
+        CR_VALUE_NOT_FOUND_ERROR
 } ;
 
 /**

@@ -1,3 +1,20 @@
+2004-02-29  Dodji Seketeli <dodji@gnome.org>
+
+	* src/cr-prop-list.[ch], src/Makefile.am,src/libcroco.h: 
+	Created this new CRPropList class.
+	* src/cr-sel-eng.c: 
+	(put_css_properties_in_props_list): added this new helper
+	function.
+	(cr_sel_eng_get_matched_properties_from_cascade):
+	Created a new version of this function to make it use
+	the new CRPropList instead of a hashtable. Putting
+	properties/declaration in a hashtable make us loose
+	the "order" in which declarations are present in the
+	ruleset. That's why I use a CRPropList instead.
+	* src/cr-style.c: 
+	(cr_style_set_style_from_decl): fix a silly error that
+	make border-right and border-top switch.
+
 2004-02-26  Dodji Seketeli  <dodji@gnome.org>
 
 	* src/cr-sel-eng.c: 

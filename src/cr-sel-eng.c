@@ -3,8 +3,6 @@
 /*
  * This file is part of The Croco Library
  *
- * Copyright (C) 2002-2003 Dodji Seketeli <dodji at seketeli.org>
- *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of version 2.1 of the GNU Lesser General Public
  * License as published by the Free Software Foundation.
@@ -19,11 +17,14 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
  * USA
+ *
+ * See  COPYRIGHTS file for copyright informations.
  */
 
 
 #include <string.h>
 #include "cr-sel-eng.h"
+
 
 /**
  *@file:
@@ -77,11 +78,17 @@ static enum CRStatus cr_sel_eng_get_matched_rulesets_real (CRSelEng *a_this,
                                                            CRStatement **a_rulesets, 
                                                            gulong *a_len) ;
 
+#ifndef NEW_PROPERTIES_GETTER
 static enum CRStatus put_css_properties_in_hashtable (GHashTable **a_props_hashtable,
                                                       CRStatement *a_ruleset) ;
-
 static void set_style_from_props_hash_hr_func (gpointer a_prop, gpointer a_decl,
                                                gpointer a_style) ;
+#else
+static enum CRStatus put_css_properties_in_props_list (CRPropList **a_props,
+                                                       CRStatement *a_ruleset) ;
+#endif
+
+
 
 static gboolean pseudo_class_add_sel_matches_node (CRSelEng * a_this,
                                                    CRAdditionalSel *a_add_sel,
@@ -927,6 +934,8 @@ cr_sel_eng_get_matched_rulesets_real (CRSelEng *a_this,
         return CR_OK ;
 }
 
+
+#ifndef NEW_PROPERTIES_GETTER
 /**
  *Walks through the property/value pairs of a ruleset
  *statement and put the properties found into a hashtable.
@@ -1049,8 +1058,6 @@ put_css_properties_in_hashtable (GHashTable **a_props_hashtable,
                                  cur_decl) ;
                 }
         }
-
-
         return CR_OK ;
 }
 
@@ -1065,6 +1072,136 @@ set_style_from_props_hash_hr_func (gpointer a_prop, gpointer a_decl,
 
         cr_style_set_style_from_decl (style, decl) ;
 }
+#else
+static enum CRStatus 
+put_css_properties_in_props_list (CRPropList **a_props,
+                                  CRStatement *a_stmt)
+{
+        CRPropList *props = NULL, *pair = NULL, *tmp_props = NULL ;
+        CRDeclaration *cur_decl = NULL ;
+
+        g_return_val_if_fail (a_props && a_stmt
+                              && a_stmt->type == RULESET_STMT
+                              && a_stmt->kind.ruleset,
+                              CR_BAD_PARAM_ERROR) ;
+
+        props = *a_props ;
+
+        for (cur_decl = a_stmt->kind.ruleset->decl_list ; 
+             cur_decl ; cur_decl = cur_decl->next)
+        {
+                CRDeclaration *decl = NULL ;
+
+                if (!cur_decl->property || !cur_decl->property->str)
+                        continue ;
+                /*
+                 *First, test if the property is not
+                 *already present in our properties list
+                 *If yes, apply the cascading rules to
+                 *compute the precedence. If not, insert
+                 *the property into the list
+                 */
+                cr_prop_list_lookup_prop
+                        (props, cur_decl->property,
+                         &pair) ;
+
+                if (!pair)
+                {                        
+                        tmp_props = cr_prop_list_append2 
+                                (props, 
+                                 cur_decl->property,
+                                 cur_decl) ;
+                        if (tmp_props)
+                        {
+                                props = tmp_props ;
+                                tmp_props = NULL ;
+                        }
+                        continue ;
+                }
+
+                /*
+                 *A property with the same name already exists.
+                 *We must apply here 
+                 *some cascading rules
+                 *to compute the precedence.
+                 */
+                cr_prop_list_get_decl (pair, &decl) ;
+                g_return_val_if_fail (decl, CR_ERROR) ;
+
+                /*
+                 *first, look at the origin.
+                 *6.4.1 says: 
+                 *"for normal declarations, 
+                 *author style sheets override user 
+                 *style sheets which override 
+                 *the default style sheet."
+                 */
+                if (decl->parent_statement 
+                    && decl->parent_statement->parent_sheet
+                    && (decl->parent_statement->parent_sheet->origin 
+                        <
+                        a_stmt->parent_sheet->origin))
+                {
+                        cr_prop_list_set_prop (pair,
+                                               cur_decl->property) ;
+                        cr_prop_list_set_decl (pair,
+                                               cur_decl) ;
+                        continue ;
+                }
+                else if (decl->parent_statement 
+                         && decl->parent_statement->parent_sheet
+                         && (decl->parent_statement->
+                             parent_sheet->origin 
+                             >
+                             a_stmt->parent_sheet->origin))
+                {
+                        /*TODO: support !important rule.*/
+                        continue ;
+                }
+
+                /*
+                 *A property with the same
+                 *name and the same origin already exists.
+                 *shit. This is lasting longer than expected ...
+                 *Luckily, the spec says in 6.4.1:
+                 *"more specific selectors will override 
+                 *more general ones"
+                 *and
+                 *"if two rules have the same weight, 
+                 *origin and specificity, 
+                 *the later specified wins"
+                 */
+                if (a_stmt->specificity
+                    >= decl->parent_statement->specificity)
+                {
+                        
+                        cr_prop_list_set_prop (pair,
+                                               cur_decl->property) ;
+                        cr_prop_list_set_decl (pair,
+                                               cur_decl) ;
+                }
+        }
+        /*TODO: this may leak. Check this out*/
+        *a_props = props ;
+
+        return CR_OK ;
+}
+
+static void
+set_style_from_props (CRStyle *a_style, CRPropList *a_props)
+{
+        CRPropList *cur = NULL ;
+        CRDeclaration *decl = NULL;
+
+        for (cur = a_props ; cur ; 
+             cur = cr_prop_list_get_next (cur))
+        {
+                cr_prop_list_get_decl (cur, &decl) ;
+                cr_style_set_style_from_decl (a_style, decl) ;
+                decl = NULL ;
+        }
+}
+#endif
 
 /****************************************
  *PUBLIC METHODS
@@ -1380,6 +1517,7 @@ cr_sel_eng_get_matched_rulesets (CRSelEng *a_this,
         return status ;
 }
 
+#ifndef NEW_PROPERTIES_GETTER
 enum CRStatus
 cr_sel_eng_get_matched_properties_from_cascade  (CRSelEng *a_this,
                                                  CRCascade *a_cascade,
@@ -1452,6 +1590,7 @@ cr_sel_eng_get_matched_properties_from_cascade  (CRSelEng *a_this,
                         goto error ;
                 }
                 index += tab_len ;
+                tab_len = tab_size - index ;
         }
 
         /*
@@ -1494,6 +1633,121 @@ cr_sel_eng_get_matched_properties_from_cascade  (CRSelEng *a_this,
         return status ;
 }
 
+#else
+enum CRStatus
+cr_sel_eng_get_matched_properties_from_cascade  (CRSelEng *a_this,
+                                                 CRCascade *a_cascade,
+                                                 xmlNode *a_node,
+                                                 CRPropList **a_props)
+{
+        CRStatement ** stmts_tab = NULL ;
+        enum CRStatus status = CR_OK ;
+        gulong tab_size = 0, tab_len = 0, i = 0, index = 0;
+        enum CRStyleOrigin origin = 0 ;
+        gushort stmts_chunck_size = 8 ;
+        CRStyleSheet *sheet = NULL ;
+
+        g_return_val_if_fail (a_this
+                              && a_cascade
+                              && a_node
+                              && a_props,
+                              CR_BAD_PARAM_ERROR) ;
+
+        for (origin = ORIGIN_UA ; origin < NB_ORIGINS ; origin++)
+        {
+                sheet = cr_cascade_get_sheet (a_cascade, origin) ;
+                if (!sheet)
+                        continue ;
+                if (tab_size - index < 1)
+                {
+                        stmts_tab = g_try_realloc
+                                (stmts_tab,
+                                 (tab_size + stmts_chunck_size)
+                                 * sizeof (CRStatement*)) ;
+                        if (!stmts_tab)
+                        {
+                                cr_utils_trace_info ("Out of memory") ;
+                                status = CR_ERROR ;
+                                goto error ;
+                        }
+                        tab_size += stmts_chunck_size ;
+                        /*
+                         *compute the max size left for
+                         *cr_sel_eng_get_matched_rulesets_real()'s output tab 
+                         */
+                        tab_len = tab_size - index ;
+                }
+                while ((status = cr_sel_eng_get_matched_rulesets_real
+                        (a_this, sheet, a_node, stmts_tab + index, &tab_len))
+                       == CR_OUTPUT_TOO_SHORT_ERROR)
+                {
+                        stmts_tab = g_try_realloc
+                                (stmts_tab,
+                                 (tab_size + stmts_chunck_size)
+                                 * sizeof (CRStatement*)) ;
+                        if (!stmts_tab)
+                        {
+                                cr_utils_trace_info ("Out of memory") ;
+                                status = CR_ERROR ;
+                                goto error ;
+                        }
+                        tab_size += stmts_chunck_size ;
+                        index += tab_len ;
+                        /*
+                         *compute the max size left for
+                         *cr_sel_eng_get_matched_rulesets_real()'s output tab 
+                         */
+                        tab_len = tab_size - index ;
+                }
+                if (status != CR_OK)
+                {
+                        cr_utils_trace_info ("Error while running "
+                                             "selector engine") ;
+                        goto error ;
+                }
+                index += tab_len ;
+                tab_len = tab_size - index ;
+        }
+
+        /*
+         *TODO, walk down the stmts_tab and build the
+         *property_name/declaration hashtable.
+         *Make sure one can walk from the declaration to
+         *the stylesheet.
+         */
+        for (i = 0 ; i < index ; i ++)
+        {
+                CRStatement *stmt = stmts_tab[i] ;
+
+                if (!stmt)
+                        continue ;                
+                switch (stmt->type)
+                {
+                case RULESET_STMT:
+                        if (!stmt->parent_sheet)
+                                continue ;
+                        status = put_css_properties_in_props_list
+                                (a_props, stmt) ;
+                        break ;
+                default:
+                        break ;
+                }
+                
+        }
+
+        return CR_OK ;
+ error:
+
+        if (stmts_tab)
+        {
+                g_free (stmts_tab) ;
+                stmts_tab = NULL ;
+                
+        }
+
+        return status ;
+}
+#endif
 
 enum CRStatus
 cr_sel_eng_get_matched_style (CRSelEng *a_this,
@@ -1503,16 +1757,26 @@ cr_sel_eng_get_matched_style (CRSelEng *a_this,
                               CRStyle **a_style)
 {
         enum CRStatus status = CR_OK ;
+#ifndef NEW_PROPERTIES_GETTER
         GHashTable *props_hash = NULL ;
+#else
+        CRPropList *props = NULL ;
+#endif
 
         g_return_val_if_fail (a_this && a_cascade
                               && a_node && a_style,
                               CR_BAD_PARAM_ERROR) ;
-        
+#ifndef NEW_PROPERTIES_GETTER        
         status = cr_sel_eng_get_matched_properties_from_cascade 
                 (a_this, a_cascade, a_node, &props_hash) ;
+#else
+        status = cr_sel_eng_get_matched_properties_from_cascade 
+                (a_this, a_cascade, a_node, &props) ;
+#endif
         g_return_val_if_fail (status == CR_OK, status) ;
 
+
+#ifndef NEW_PROPERTIES_GETTER
         if (props_hash && g_hash_table_size (props_hash))
         {
                 
@@ -1537,7 +1801,30 @@ cr_sel_eng_get_matched_style (CRSelEng *a_this,
                 g_hash_table_destroy (props_hash) ;
                 props_hash = NULL ;
         }
+#else
+        if (props)
+        {
+                
+                if (!*a_style)
+                {
+                        *a_style = cr_style_new () ;
+                        g_return_val_if_fail (*a_style, CR_ERROR) ;
+                }
+                else
+                {
+                        cr_style_set_props_to_defaults (*a_style) ;
+                }
+                (*a_style)->parent_style = a_parent_style ;
 
+                set_style_from_props (*a_style, props) ;
+                if (props)
+                {
+                        cr_prop_list_destroy (props) ;
+                        props = NULL ;
+                }
+        }
+
+#endif
         return CR_OK ;
 }
 

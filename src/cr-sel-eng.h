@@ -3,8 +3,6 @@
 /*
  * This file is part of The Croco Library
  *
- * Copyright (C) 2002-2003 Dodji Seketeli <dodji@seketeli.org>
- *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of version 2.1 of the GNU Lesser General Public
  * License as published by the Free Software Foundation.
@@ -18,19 +16,28 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
  * USA
+ *
+ * See COPYRIGHTS file for copyrights information.
  */
 
 #ifndef __CR_SEL_ENG_H__
 #define __CR_SEL_ENG_H__
 
+#define NEW_PROPERTIES_GETTER 1
+
 #include "cr-utils.h"
 #include "cr-stylesheet.h"
 #include "cr-cascade.h"
 #include "cr-style.h"
+#ifdef NEW_PROPERTIES_GETTER
+#include "cr-prop-list.h"
+#endif
 
 #ifdef CROCO_HAVE_LIBXML2
  #include <libxml/tree.h>
 #endif
+
+
 
 /**
  *@file:
@@ -55,6 +62,7 @@ struct _CRSelEng
 {
 	CRSelEngPriv *priv ;
 } ;
+
 
 typedef gboolean (*CRPseudoClassSelectorHandler) (CRSelEng* a_this,
                                                   CRAdditionalSel *a_add_sel,
@@ -88,10 +96,18 @@ enum CRStatus cr_sel_eng_get_matched_rulesets (CRSelEng *a_this,
                                                CRStatement ***a_rulesets,
                                                gulong *a_len) ;
 
+#ifndef NEW_PROPERTIES_GETTER
 enum CRStatus cr_sel_eng_get_matched_properties_from_cascade  (CRSelEng *a_this,
                                                                CRCascade *a_cascade,
                                                                xmlNode *a_node,
                                                                GHashTable **props_decls_dict) ;
+#else
+enum CRStatus
+cr_sel_eng_get_matched_properties_from_cascade  (CRSelEng *a_this,
+                                                 CRCascade *a_cascade,
+                                                 xmlNode *a_node,
+                                                 CRPropList **a_props) ;
+#endif
 
 enum CRStatus cr_sel_eng_get_matched_style (CRSelEng *a_this,
                                             CRCascade *a_cascade,
