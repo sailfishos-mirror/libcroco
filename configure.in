@@ -128,7 +128,8 @@ if test "$USE_LIBXML2" = "yes" ; then
 fi
 
 dnl By default compile in debug mode
-CFLAGS=-g -Wall -ansi
+CFLAGS="-g -Wunused -Wimplicit -Wreturn-type -Wswitch -Wcomment -Wtrigraphs -Wformat -Wchar-subscripts  -Wparentheses -Wpointer-arith -Wcast-align -Wwrite-strings -Waggregate-return -Wstrict-prototypes -Wmissing-prototypes -Wnested-externs -Winline -Wredundant-decls "
+#-pedantic -Wshadow -0 -Wuninitialized
 
 CROCO_LIBS="-L${libdir} -lcroco `pkg-config --libs glib-2.0`"
 CROCO_CFLAGS="-I${includedir}/libcroco `pkg-config --cflags glib-2.0`"

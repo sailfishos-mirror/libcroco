@@ -39,17 +39,26 @@
 
 CRDocHandler * gv_test_handler = {0} ;
 
+static void 
+display_help (char *prg_name) ;
+
+static void 
+display_about (char *prg_name) ;
+
+static enum CRStatus
+test_cr_parser_parse (guchar * a_file_uri) ;
+
 /**
  *Displays the usage of the test
  *facility.
  *@param a_argc the argc variable passed to the main function.
  *@param a_argv the argv variable passed to the main function.
  */
-void 
-display_help (int a_argc, char ** a_argv)
+static void 
+display_help (char *prg_name)
 {
         g_print ("\n\n") ;
-        g_print ("usage: %s <file-to-parse>\n", a_argv[0]) ;
+        g_print ("usage: %s <file-to-parse>\n", prg_name) ;
         g_print ("\t <file-to-parse>: the file to parse\n") ;
         g_print ("\n\n") ;
         g_print ("Tests the cr_parser_parse () method.\n") ;
@@ -63,14 +72,14 @@ display_help (int a_argc, char ** a_argv)
  *@param a_argc the argc variable passed to the main function.
  *@param a_argv the argv variable passed to the main function.
  */
-void 
-display_about (int a_argc, char ** a_argv)
+static void 
+display_about (char *prg_name)
 {
         g_print ("\n\n") ;
         g_print ("%s is a libcroco CROMParser class test program.\n", 
-		 a_argv[0]) ;
+		 prg_name) ;
 	g_print ("%s Parses a file and builds a CSS object model", 
-		 a_argv[0]) ;
+		 prg_name) ;
         g_print ("It should run on GNU compliants systems.\n") ;
         g_print ("\n\n") ;
         g_print ("Initial author: Dodji Seketeli <dodji@seketeli.org>.\n") ;
@@ -87,7 +96,7 @@ display_about (int a_argc, char ** a_argv)
  *@return CR_OK upon successfull completion of the
  *function, an error code otherwise.
  */
-enum CRStatus
+static enum CRStatus
 test_cr_parser_parse (guchar * a_file_uri)
 {
         enum CRStatus status = CR_OK ;
@@ -123,19 +132,19 @@ main (int argc, char ** argv)
 
         if (options.display_help == TRUE)
         {
-                display_help (argc, argv) ;
+                display_help (argv[0]) ;
                 return 0 ;
         }
 
         if (options.display_about == TRUE)
         {
-                display_about (argc, argv) ;
+                display_about (argv[0]) ;
                 return 0 ;
         }
 
         if (options.files_list == NULL)
         {
-                display_help (argc, argv) ;
+                display_help (argv[0]) ;
                 return 0 ;
         }
 

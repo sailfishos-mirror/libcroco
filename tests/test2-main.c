@@ -41,17 +41,26 @@
 
 CRDocHandler * gv_test_handler = {0} ;
 
+static void 
+display_help (char *prg_name) ;
+
+static void 
+display_about (char *prg_name) ;
+
+static enum CRStatus
+test_cr_parser_parse (guchar * a_file_uri) ;
+
 /**
  *Displays the usage of the test
  *facility.
  *@param a_argc the argc variable passed to the main function.
  *@param a_argv the argv variable passed to the main function.
  */
-void 
-display_help (int a_argc, char ** a_argv)
+static void 
+display_help (char *prg_name)
 {
         fprintf (stdout,"\n\n") ;
-        fprintf (stdout,"usage: %s <file-to-parse>\n", a_argv[0]) ;
+        fprintf (stdout,"usage: %s <file-to-parse>\n", prg_name) ;
         fprintf (stdout,"\t <file-to-parse>: the file to parse\n") ;
         fprintf (stdout,"\n\n") ;
         fprintf (stdout,"Tests the cr_parser_parse () method.\n") ;
@@ -64,11 +73,11 @@ display_help (int a_argc, char ** a_argv)
  *@param a_argc the argc variable passed to the main function.
  *@param a_argv the argv variable passed to the main function.
  */
-void 
-display_about (int a_argc, char ** a_argv)
+static void 
+display_about (char *prg_name)
 {
         fprintf (stdout,"\n\n") ;
-        fprintf (stdout,"%s is a libcroco CRParser class test program.\n", a_argv[0]) ;
+        fprintf (stdout,"%s is a libcroco CRParser class test program.\n", prg_name) ;
         fprintf (stdout,"It should run on GNU compliants systems.\n") ;
         fprintf (stdout,"\n\n") ;
         fprintf (stdout,"Initial author: Dodji Seketeli <dodji@seketeli.org>.\n") ;
@@ -129,7 +138,8 @@ test_import_style (CRDocHandler *a_handler,
 
 				if (str)
 				{
-					fprintf (stdout,str) ; fprintf (stdout,"\n") ;
+					fprintf (stdout,str) ; 
+                                        fprintf (stdout,"\n") ;
 					g_free (str) ;
 					str = NULL ;
 				}
@@ -146,7 +156,8 @@ test_import_style (CRDocHandler *a_handler,
 					   a_uri_default_ns->len) ;
 			if (str)
 			{
-				fprintf (stdout,str) ; fprintf (stdout,"\n") ;
+				fprintf (stdout,str) ; 
+                                fprintf (stdout,"\n") ;
 				g_free (str) ;
 				str = NULL ;
 			}
@@ -154,8 +165,7 @@ test_import_style (CRDocHandler *a_handler,
 	}
 
 	fprintf (stdout,"******************\n\n") ;
-
-	
+	a_uri = NULL; /*keep compiler happy*/
 }
 
 
@@ -565,7 +575,7 @@ init_test_sac_handler (CRDocHandler *a_handler)
  *@return CR_OK upon successfull completion of the
  *function, an error code otherwise.
  */
-enum CRStatus
+static enum CRStatus
 test_cr_parser_parse (guchar * a_file_uri)
 {
         enum CRStatus status = CR_OK ;
@@ -609,19 +619,19 @@ main (int argc, char ** argv)
 
         if (options.display_help == TRUE)
         {
-                display_help (argc, argv) ;
+                display_help (argv[0]) ;
                 return 0 ;
         }
 
         if (options.display_about == TRUE)
         {
-                display_about (argc, argv) ;
+                display_about (argv[0]) ;
                 return 0 ;
         }
 
         if (options.files_list == NULL)
         {
-                display_help (argc, argv) ;
+                display_help (argv[0]) ;
                 return 0 ;
         }
 

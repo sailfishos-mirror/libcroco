@@ -427,6 +427,8 @@ end_page (CRDocHandler *a_this, GString *a_page,
                 cr_statement_destroy (ctxt->cur_stmt) ;
                 ctxt->cur_stmt = NULL ;
         }
+        a_page = NULL ; /*keep compiler happy*/
+        a_pseudo_page = NULL ; /*keep compiler happy*/
 }
 
 static void
@@ -489,7 +491,8 @@ end_media (CRDocHandler *a_this, GList *a_media_list)
         
         ctxt->stylesheet->statements = stmts ;
         stmts = NULL ;
-                
+        
+        a_media_list = NULL ; /*compiler happy*/
 }
 
 
@@ -561,6 +564,7 @@ import_style (CRDocHandler *a_this, GList *a_media_list,
                 cr_statement_destroy (stmt) ;
                 stmt = NULL ;
         }
+        a_uri_default_ns = NULL ; /*keep compiler happy*/
 }
 
 static void
@@ -638,6 +642,7 @@ end_selector (CRDocHandler *a_this,
                 }
                 
         }
+        a_selector_list = NULL ; /*keep compiler happy*/
 }
 
 static void

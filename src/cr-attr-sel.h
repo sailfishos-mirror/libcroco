@@ -65,7 +65,9 @@ extern "C" {
         enum CRStatus
 	cr_attr_sel_append_attr_sel (CRAttrSel * a_this, 
                                      CRAttrSel *a_new) ;
-        
+        enum CRStatus
+        cr_attr_sel_prepend_attr_sel (CRAttrSel *a_this, 
+                                      CRAttrSel *a_attr_sel) ;
         void
         cr_attr_sel_dump (CRAttrSel *a_this, FILE *a_fp) ;
 

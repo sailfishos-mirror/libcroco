@@ -85,13 +85,13 @@ extern "C" {
 
         enum CRStatus
         cr_input_consume_chars (CRInput *a_this, guint32 a_char, 
-                                glong *a_nb_char) ;
+                                gulong *a_nb_char) ;
 
         enum CRStatus
         cr_input_consume_char (CRInput *a_this, guint32 a_char) ;
 
         enum CRStatus
-        cr_input_consume_white_spaces (CRInput *a_this, glong *a_nb_chars) ;
+        cr_input_consume_white_spaces (CRInput *a_this, gulong *a_nb_chars) ;
 
         enum CRStatus
         cr_input_peek_byte (CRInput *a_this, enum CRSeekPos a_origin,
@@ -158,6 +158,9 @@ extern "C" {
         
         glong
         cr_input_get_nb_bytes_left (CRInput *a_this) ;
+
+        enum CRStatus
+        cr_input_end_of_input (CRInput *a_this, gboolean *a_end_of_input) ;
 
 #ifdef __cplusplus
 } /*extern C*/

@@ -417,19 +417,13 @@ static enum CRStatus
 cr_parser_parse_expr (CRParser *a_this, CRTerm **a_expr) ;
 
 static CRParserError *
-cr_parser_error_new (guchar * a_msg, enum CRStatus) ;
-
-static guchar *
-cr_parser_error_get_msg (CRParserError *a_this) ;
+cr_parser_error_new (const guchar * a_msg, enum CRStatus) ;
 
 static void
-cr_parser_error_set_msg (CRParserError *a_this, guchar *a_msg) ;
+cr_parser_error_set_msg (CRParserError *a_this, const guchar *a_msg) ;
 
 static void
 cr_parser_error_dump (CRParserError *a_this) ;
-
-static enum CRStatus
-cr_parser_error_get_status (CRParserError *a_this) ;
 
 static void
 cr_parser_error_set_status (CRParserError *a_this,
@@ -445,20 +439,14 @@ cr_parser_error_destroy (CRParserError *a_this) ;
 
 static enum CRStatus
 cr_parser_push_error (CRParser *a_this,
-                      guchar * a_msg,
+                      const guchar * a_msg,
                       enum CRStatus a_status) ;
 
 static enum CRStatus
 cr_parser_dump_err_stack (CRParser *a_this,
                           gboolean a_clear_errs) ;
 static enum CRStatus
-cr_parser_pop_error (CRParser *a_this, CRParserError **a_error) ;
-
-static enum CRStatus
 cr_parser_clear_errors (CRParser *a_this) ;
-
-static gboolean
-cr_parser_errors_exist (CRParser *a_this) ;
 
 
 /*****************************
@@ -472,7 +460,7 @@ cr_parser_errors_exist (CRParser *a_this) ;
  *@return the newly built instance of #CRParserError.
  */
 static CRParserError *
-cr_parser_error_new (guchar * a_msg, enum CRStatus a_status)
+cr_parser_error_new (const guchar * a_msg, enum CRStatus a_status)
 {
         CRParserError * result = NULL ;
 
@@ -493,47 +481,12 @@ cr_parser_error_new (guchar * a_msg, enum CRStatus a_status)
 }
 
 /**
- *Gets the brute error message
- *sets by cr_parser_set_error_msg().
- *@param a_this the current instance of #CRParserError .
- *@return the error msg. Be carefull not to destroy the returned
- *pointer because it points to the internals of "a_this".
- */
-static guchar *
-cr_parser_error_get_msg (CRParserError *a_this)
-{
-        g_return_val_if_fail (a_this, NULL) ;
-
-        return a_this->msg ;
-}
-
-/**
- *Gets the 'formatted' error msg associated
- *to this instance of #CRParserError. The formatted
- *message is made of some generic info (like
- *the line and column number where
- *the error arised etc ...) followed by the "brute" 
- *message itself.
- *TODO: code this function.
- *@param a_this the current instance of #CRParserError.
- *@return the formatted msg. The caller *MUST* free
- *the returned pointer.
- */
-static guchar *
-cr_parser_error_get_f_msg (CRParserError *a_this)
-{
-        g_return_val_if_fail (a_this, NULL) ;
-
-        return a_this->msg ;
-}
-
-/**
  *Sets the message associated to this instance of #CRError.
  *@param a_this the current instance of #CRParserError.
  *@param a_msg the new message.
  */
 static void
-cr_parser_error_set_msg (CRParserError *a_this, guchar *a_msg)
+cr_parser_error_set_msg (CRParserError *a_this, const guchar *a_msg)
 {
         g_return_if_fail (a_this) ;
 
@@ -545,18 +498,6 @@ cr_parser_error_set_msg (CRParserError *a_this, guchar *a_msg)
         a_this->msg = g_strdup (a_msg) ;
 }
 
-/**
- *Gets the error status.
- *@param a_this the current instance of #CRParserError.
- *@return the error status.
- */
-static enum CRStatus
-cr_parser_error_get_status (CRParserError *a_this)
-{
-        g_return_val_if_fail (a_this, CR_BAD_PARAM_ERROR) ;
-
-        return a_this->status ;
-}
 
 /**
  *Sets the error status.
@@ -634,7 +575,7 @@ cr_parser_error_destroy (CRParserError *a_this)
  */
 static enum CRStatus
 cr_parser_push_error (CRParser *a_this,
-                      guchar * a_msg,
+                      const guchar * a_msg,
                       enum CRStatus a_status)
 {
         enum CRStatus status = CR_OK ;
@@ -675,46 +616,6 @@ cr_parser_push_error (CRParser *a_this,
         }
 
         return status ;
-}
-
-
-/**
- *Pops an error from the error stack.
- *@param a_this the current instance of #CRParser.
- *@param a_error out parameter. The error returned.
- *@return CR_OK upon successfull completion, an error 
- *code otherwise.
- */
-static enum CRStatus
-cr_parser_pop_error (CRParser *a_this, CRParserError **a_error)
-{
-        g_return_val_if_fail (a_this && PRIVATE (a_this)
-                              && a_error, 
-                              CR_BAD_PARAM_ERROR) ;
-
-        if (PRIVATE (a_this)->err_stack)
-        {
-                *a_error = (CRParserError *) 
-                        PRIVATE (a_this)->err_stack->data ;
-                
-                if (PRIVATE (a_this)->err_stack->data)
-                {
-                        cr_parser_error_destroy 
-                                ((CRParserError*)
-                                 PRIVATE (a_this)->err_stack->data) ;
-                }
-
-                 PRIVATE (a_this)->err_stack = g_list_delete_link 
-                        (PRIVATE (a_this)->err_stack,
-                         PRIVATE (a_this)->err_stack) ;
-
-        }
-        else
-        {
-                *a_error = NULL ;
-        }
-
-        return CR_OK ;
 }
 
 /**
@@ -784,25 +685,6 @@ cr_parser_clear_errors (CRParser *a_this)
         }
 
         return CR_OK ;
-}
-
-
-/**
- *Returns TRUE if there are some errors on the error
- *stack FALSE otherwise.
- *@param a_this the current instance of #CRParser.
- */
-static gboolean
-cr_parser_errors_exist (CRParser *a_this) 
-{
-        g_return_val_if_fail (a_this && PRIVATE (a_this),
-                              CR_BAD_PARAM_ERROR) ;
-
-        if (PRIVATE (a_this)->err_stack)
-                return TRUE ;
-        else
-                return FALSE ;
-
 }
 
 /**
@@ -1607,7 +1489,10 @@ cr_parser_parse_block_core (CRParser *a_this)
 
  parse_block_content:
 
-        cr_token_destroy (token) ; token = NULL ;
+        if (token)
+        {
+                cr_token_destroy (token) ; token = NULL ;
+        }
 
         cr_parser_try_to_skip_spaces_and_comments (a_this) ;
 

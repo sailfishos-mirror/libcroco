@@ -26,9 +26,10 @@
 #ifndef __CR_DEFS_H__
 #define __CR_DEFS_H__
 
+#include "libcroco-config.h"
 #include <stdio.h>
 #include <glib.h>
-#include "libcroco-config.h"
+
 
 G_BEGIN_DECLS
 
@@ -135,7 +136,7 @@ G_BEGIN_DECLS
                 
                 UNIT_DIMEN, /*custom dimension unit*/
                 
-                UNIT_PERCENTAGE,
+                UNIT_PERCENTAGE
         } ;
 
 	enum Operator

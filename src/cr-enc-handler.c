@@ -39,7 +39,7 @@
 #include <string.h>
 
 struct CREncAlias {
-	guchar * name ;
+	const gchar * name ;
 	enum CREncoding encoding ;
 } ;
 
@@ -62,7 +62,7 @@ static struct CREncAlias gv_default_aliases[] =
 	{"UCS-4", CR_UCS_4},
 	{"UCS_4", CR_UCS_4},
 	{"ASCII", CR_ASCII},
-	{0}
+	{0, 0}
 } ;
 
 
@@ -77,7 +77,7 @@ static CREncHandler gv_default_enc_handlers[] =
         {CR_ASCII, cr_utils_ucs1_to_utf8, cr_utils_utf8_to_ucs1,
          cr_utils_ucs1_str_len_as_utf8, cr_utils_utf8_str_len_as_ucs1},
 
-        {0}
+        {0, NULL, NULL, NULL, NULL}
 } ;
 
 

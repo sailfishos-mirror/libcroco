@@ -93,6 +93,20 @@ extern "C"
         CRAdditionalSel *
         cr_additional_sel_append (CRAdditionalSel *a_this, 
                                   CRAdditionalSel *a_sel) ;
+        void
+        cr_additional_sel_set_class_name (CRAdditionalSel *a_this,
+				  GString *a_class_name) ;
+        void
+        cr_additional_sel_set_id_name (CRAdditionalSel *a_this,
+                                       GString *a_id) ;
+
+        void
+        cr_additional_sel_set_pseudo (CRAdditionalSel *a_this,
+                                      CRPseudo *a_pseudo) ;
+
+        void
+        cr_additional_sel_set_attr_sel (CRAdditionalSel *a_this,
+                                        CRAttrSel *a_sel) ;
 
         CRAdditionalSel *
         cr_additional_sel_prepend (CRAdditionalSel *a_this, 

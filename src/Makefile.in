@@ -103,7 +103,6 @@ libcroco_la_SOURCES =  	cr-utils.c 	cr-input.c 	cr-parser-input.c 	cr-enc-handle
 
 INCLUDES = -I$(top_srcdir) -I$(top_srcdir)/intl `pkg-config --cflags glib-2.0` `pkg-config --cflags libxml-2.0` @LIBXML2_CFLAGS@
 libcroco_la_LDFLAGS = -version-info @LIBCROCO_VERSION_INFO@ @LIBXML2_FLAGS@
-AM_CFLAGS = -Wall
 mkinstalldirs = $(SHELL) $(top_srcdir)/mkinstalldirs
 CONFIG_HEADER = ../libcroco-config.h
 CONFIG_CLEAN_FILES = 

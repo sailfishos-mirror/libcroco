@@ -87,9 +87,6 @@ enum CRStatus
 cr_tknzr_get_cur_pos (CRTknzr *a_this, CRParserInputPos *a_pos) ;
 
 enum CRStatus
-cr_tknzr_get_cur_byte_addr (CRTknzr *a_this, guchar **a_addr) ;
-
-enum CRStatus
 cr_tknzr_seek_index (CRTknzr *a_this,
                      enum CRSeekPos a_origin,
                      gint a_pos) ;

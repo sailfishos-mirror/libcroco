@@ -34,6 +34,7 @@
  *This class abstracts the high level input of the
  *parser.
  */
+#include <string.h>
 #include "cr-parser-input.h"
 
 #define PRIVATE(obj) ((obj)->priv)
@@ -60,7 +61,7 @@ struct _CRParserInputPriv
 	 *of the input stack.
 	 *When the stack is empty, this value is set to -1.
 	 */
-	glong top_index ;
+	gulong top_index ;
 
 	/**
 	 *The memory size of
@@ -98,9 +99,22 @@ cr_parser_input_new_from_uri (gchar *a_uri, enum CREncoding a_enc)
 	CRParserInput * result = NULL ;
 	CRInput *input = NULL ;
 
-	result = g_malloc0 (sizeof (CRParserInput)) ;
-
-	PRIVATE (result) =  g_malloc0 (sizeof (CRParserInputPriv)) ;
+	result = g_try_malloc (sizeof (CRParserInput)) ;
+	if (!result)
+	{
+		cr_utils_trace_info ("Out of memory") ;
+		return NULL ;
+	}
+	memset (result, 0, sizeof (CRParserInput)) ;
+	
+	PRIVATE (result) =  g_try_malloc (sizeof (CRParserInputPriv)) ;
+	if (!result)
+	{
+		cr_utils_trace_info ("Out of memory") ;
+		g_free (result) ;
+		return NULL ;
+	}
+	memset (PRIVATE (result), 0, sizeof (CRParserInputPriv)) ;
 
 	if (a_uri)
 	{
@@ -249,7 +263,7 @@ cr_parser_input_push_input (CRParserInput *a_this, CRInput *a_input)
 			g_malloc0 (sizeof (CRInput*) 
 				   *
 				   CR_INPUT_STACK_SIZE_CHUNK) ;
-		PRIVATE (a_this)->top_index = -1 ;
+		PRIVATE (a_this)->top_index = 0 ;
 		PRIVATE (a_this)->input_stack_size = 0 ;
 	}
 	else if ( (PRIVATE (a_this)->top_index + 1 
@@ -302,7 +316,7 @@ cr_parser_input_pop_input (CRParserInput *a_this)
 	g_return_val_if_fail (a_this && PRIVATE (a_this),
 			      CR_BAD_PARAM_ERROR) ;
 
-	if (PRIVATE (a_this)->top_index > -1)
+	if (PRIVATE (a_this)->inputs[PRIVATE (a_this)->top_index])
 	{
 		cr_input_unref 
 			(PRIVATE 
@@ -334,7 +348,8 @@ cr_parser_input_peek_input (CRParserInput *a_this)
 {
 	g_return_val_if_fail (a_this && PRIVATE (a_this), NULL) ;
 
-	if (PRIVATE (a_this)->top_index > -1)
+	if (PRIVATE 
+	    (a_this)->inputs[PRIVATE (a_this)->top_index])
 	{
 		return PRIVATE 
 			(a_this)->inputs[PRIVATE (a_this)->top_index] ;
@@ -401,11 +416,6 @@ cr_parser_input_read_byte (CRParserInput *a_this, guchar * a_byte)
 	g_return_val_if_fail (a_this && PRIVATE (a_this) && a_byte,
 			      CR_BAD_PARAM_ERROR) ;
 
-	if (PRIVATE (a_this)->top_index < 0)
-	{
-		return CR_EMPTY_PARSER_INPUT_ERROR ;
-	}
-
 	top_input = cr_parser_input_peek_input (a_this) ;
 
 	if (top_input)
@@ -443,11 +453,6 @@ cr_parser_input_read_char (CRParserInput *a_this, guint32 * a_char)
 
 	g_return_val_if_fail (a_this && PRIVATE (a_this) && a_char,
 			      CR_BAD_PARAM_ERROR) ;
-
-	if (PRIVATE (a_this)->top_index < 0)
-	{
-		return CR_EMPTY_PARSER_INPUT_ERROR ;
-	}
 
 	top_input = cr_parser_input_peek_input (a_this) ;
 
@@ -596,11 +601,6 @@ cr_parser_input_peek_char (CRParserInput *a_this,
 	g_return_val_if_fail (a_this && PRIVATE (a_this) 
 			      && a_char, CR_BAD_PARAM_ERROR) ;	
 	
-	if (PRIVATE (a_this)->top_index < 0)
-	{
-		return CR_EMPTY_PARSER_INPUT_ERROR ;
-	}
-
 	top_input = cr_parser_input_peek_input (a_this) ;
 
 	if (top_input)
@@ -630,9 +630,6 @@ cr_parser_input_get_end_of_file (CRParserInput *a_this,
 {
 	g_return_val_if_fail (a_this && PRIVATE (a_this) && a_eof,
 			      CR_BAD_PARAM_ERROR) ;
-
-	if (PRIVATE (a_this)->top_index < 0)
-		return CR_OUT_OF_BOUNDS_ERROR ;
 
 	g_return_val_if_fail (PRIVATE (a_this)->inputs, 
 			      CR_BAD_PARAM_ERROR) ;
@@ -670,9 +667,6 @@ cr_parser_input_peek_byte (CRParserInput *a_this,
 
 	g_return_val_if_fail (a_this && PRIVATE (a_this) && a_byte,
 			      CR_BAD_PARAM_ERROR) ;
-
-	if (PRIVATE (a_this)->top_index < 0)
-		return CR_OUT_OF_BOUNDS_ERROR ;
 
 	g_return_val_if_fail (PRIVATE (a_this)->inputs, 
 			      CR_BAD_PARAM_ERROR) ;
@@ -712,9 +706,6 @@ cr_parser_input_seek_index (CRParserInput *a_this,
 {
 	g_return_val_if_fail (a_this && PRIVATE (a_this),
 			      CR_BAD_PARAM_ERROR) ;
-
-	if (PRIVATE (a_this)->top_index < 0)
-		return CR_OUT_OF_BOUNDS_ERROR ;
 	
 	g_return_val_if_fail (PRIVATE (a_this)->inputs, 
 			      CR_BAD_PARAM_ERROR) ;
@@ -739,9 +730,6 @@ cr_parser_input_set_line_num (CRParserInput *a_this, glong a_line)
 	g_return_val_if_fail (a_this && PRIVATE (a_this),
 			      CR_BAD_PARAM_ERROR) ;
 
-	if (PRIVATE (a_this)->top_index < 0)
-		return CR_OUT_OF_BOUNDS_ERROR ;
- 
 	g_return_val_if_fail (PRIVATE (a_this)->inputs, 
 			      CR_BAD_PARAM_ERROR) ;
 
@@ -765,10 +753,7 @@ cr_parser_input_incr_line_num (CRParserInput *a_this,
 {
 	g_return_val_if_fail (a_this && PRIVATE (a_this),
 			      CR_BAD_PARAM_ERROR) ;
-	
-	if (PRIVATE (a_this)->top_index < 0)
-		return CR_OUT_OF_BOUNDS_ERROR ;
- 
+	 
 	g_return_val_if_fail (PRIVATE (a_this)->inputs, 
 			      CR_BAD_PARAM_ERROR) ;
 
@@ -794,9 +779,6 @@ cr_parser_input_incr_col_num (CRParserInput *a_this,
 	g_return_val_if_fail (a_this && PRIVATE (a_this),
 			      CR_BAD_PARAM_ERROR) ;
 	
-	if (PRIVATE (a_this)->top_index < 0)
-		return CR_OUT_OF_BOUNDS_ERROR ;
- 
 	g_return_val_if_fail (PRIVATE (a_this)->inputs, 
 			      CR_BAD_PARAM_ERROR) ;
 
@@ -820,9 +802,6 @@ cr_parser_input_set_col_num (CRParserInput *a_this, glong a_col)
 {
 	g_return_val_if_fail (a_this && PRIVATE (a_this),
 			      CR_BAD_PARAM_ERROR) ;
-
-	if (PRIVATE (a_this)->top_index < 0)
-		return CR_OUT_OF_BOUNDS_ERROR ;
  
 	g_return_val_if_fail (PRIVATE (a_this)->inputs, 
 			      CR_BAD_PARAM_ERROR) ;
@@ -846,9 +825,6 @@ cr_parser_input_get_col_num (CRParserInput *a_this, glong *a_col)
 	g_return_val_if_fail (a_this && PRIVATE (a_this) && a_col,
 			      CR_BAD_PARAM_ERROR) ;
 
-	if (PRIVATE (a_this)->top_index < 0)
-		return CR_OUT_OF_BOUNDS_ERROR ;
- 
 	g_return_val_if_fail (PRIVATE (a_this)->inputs, 
 			      CR_BAD_PARAM_ERROR) ;
 
@@ -871,9 +847,6 @@ cr_parser_input_get_line_num (CRParserInput *a_this, glong *a_line)
 	g_return_val_if_fail (a_this && PRIVATE (a_this) && a_line,
 			      CR_BAD_PARAM_ERROR) ;
 
-	if (PRIVATE (a_this)->top_index < 0)
-		return CR_OUT_OF_BOUNDS_ERROR ;
-	
 	g_return_val_if_fail (PRIVATE (a_this)->inputs, 
 			      CR_BAD_PARAM_ERROR) ;
 
@@ -906,9 +879,6 @@ cr_parser_input_get_cur_pos (CRParserInput *a_this,
 	g_return_val_if_fail (a_this && PRIVATE (a_this) && a_pos,
 			      CR_BAD_PARAM_ERROR) ;
 
-	if (PRIVATE (a_this)->top_index < 0)
-		return CR_OUT_OF_BOUNDS_ERROR ;
-	
 	g_return_val_if_fail (PRIVATE (a_this)->inputs, 
 			      CR_BAD_PARAM_ERROR) ;
 
@@ -933,9 +903,6 @@ cr_parser_input_set_cur_pos (CRParserInput *a_this,
 	g_return_val_if_fail (a_this && PRIVATE (a_this) && a_pos,
 			      CR_BAD_PARAM_ERROR) ;
 
-	if (PRIVATE (a_this)->top_index < 0)
-		return CR_OUT_OF_BOUNDS_ERROR ;
-	
 	g_return_val_if_fail (PRIVATE (a_this)->inputs, 
 			      CR_BAD_PARAM_ERROR) ;
 	
@@ -961,9 +928,6 @@ cr_parser_input_get_cur_index (CRParserInput *a_this, glong *a_index)
 	g_return_val_if_fail (a_this && PRIVATE (a_this) && a_index,
 			      CR_BAD_PARAM_ERROR) ;
 
-	if (PRIVATE (a_this)->top_index < 0)
-		return CR_OUT_OF_BOUNDS_ERROR ;
-	
 	g_return_val_if_fail (PRIVATE (a_this)->inputs, 
 			      CR_BAD_PARAM_ERROR) ;
 

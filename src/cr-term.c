@@ -702,7 +702,7 @@ cr_term_dump (CRTerm *a_this, FILE *a_fp)
 
                         if (content)
                         {
-                                fprintf (a_fp, "uri(%s)",content) ;
+                                fprintf (a_fp, "url(%s)",content) ;
                                 g_free (content) ;
                                 content = NULL ;
                         }                        

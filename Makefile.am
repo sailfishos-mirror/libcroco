@@ -11,7 +11,8 @@ extrainclude_DATA= libcroco-config.h
 bin_SCRIPTS=croco-config
 
 
-EXTRA_DIST= croco-config.in libcroco.pc.in TODO Doxyfile HACKING
+EXTRA_DIST= croco-config.in libcroco.pc.in TODO Doxyfile HACKING \
+docs/examples/*.[ch] docs/usage.txt
 
 apidoc:
 	if ! test -d docs/apis ; then  mkdir -p docs/apis ;  fi ;

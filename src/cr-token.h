@@ -212,9 +212,6 @@ extern "C"
 	cr_token_set_uri (CRToken *a_this, GString *a_uri) ;
 
         enum CRStatus
-        cr_token_set_delim (CRToken *a_this, guint32 a_char) ;
-
-        enum CRStatus
         cr_token_set_function (CRToken *a_this, GString *a_fun_name) ;
 
         enum CRStatus

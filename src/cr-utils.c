@@ -1398,7 +1398,7 @@ cr_utils_is_hexa_char (guint32 a_char)
 gboolean
 cr_utils_is_nonascii (guint32 a_char)
 {
-        if ((a_char >= 0) && (a_char <= 177))
+        if (a_char <= 177)
         {
                 return FALSE ;
         }

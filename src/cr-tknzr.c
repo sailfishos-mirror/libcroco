@@ -2209,10 +2209,9 @@ cr_tknzr_get_next_token (CRTknzr *a_this, CRToken **a_tk)
 
         case 'u':
 
-                if (BYTE (input, 2, NULL)    ==  'u'
-                    && BYTE (input, 3, NULL) ==  'r'
-                    && BYTE (input, 4, NULL) ==  'l'
-                    && BYTE (input, 5, NULL) ==  '(')
+                if (BYTE (input, 2, NULL)    ==  'r'
+                    && BYTE (input, 3, NULL) ==  'l'
+                    && BYTE (input, 4, NULL) ==  '(')
                 {
                         GString *str = NULL ;
                         status = cr_tknzr_parse_uri (a_this, &str) ;
