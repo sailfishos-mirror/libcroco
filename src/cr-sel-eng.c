@@ -353,12 +353,18 @@ sel_matches_node_real (CRSelEng *a_this, CRSimpleSel *a_sel,
         if (a_node->type != XML_ELEMENT_NODE)
                 return CR_OK ;
 
-	/*go and get the last simple selector of the list*/
-	for (cur_sel = a_sel ; 
-	     cur_sel && cur_sel->next ; 
-	     cur_sel = cur_sel->next) ;
-
-        
+	
+        if (a_recurse == TRUE)
+        {
+                /*go and get the last simple selector of the list*/
+                for (cur_sel = a_sel ; 
+                     cur_sel && cur_sel->next ; 
+                     cur_sel = cur_sel->next) ;
+        }
+        else
+        {
+                cur_sel = a_sel ;
+        }        
 
 	for (cur_node = a_node ; cur_sel ; cur_sel = cur_sel->prev)
 	{
