@@ -66,6 +66,13 @@ cr_sel_eng_new (void) ;
 enum CRStatus
 cr_sel_eng_sel_matches_node (CRSelEng *a_this, CRSimpleSel *a_sel,
 			     xmlNode *a_node, gboolean *a_result) ;
+
+enum CRStatus
+cr_sel_eng_sel_get_matched_rulesets (CRSelEng *a_this,
+                                     CRStyleSheet *a_sheet,
+                                     xmlNode *a_node,
+                                     CRStatement ***a_rulesets,
+                                     glong *a_len) ;
 void
 cr_sel_eng_destroy (CRSelEng *a_this) ;
 

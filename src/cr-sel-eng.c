@@ -48,11 +48,17 @@ static gboolean
 attr_add_sel_matches_node (CRAdditionalSel *a_add_sel,
                            xmlNode *a_node) ;
 
-static gboolean
+static enum CRStatus
 sel_matches_node_real (CRSelEng *a_this, CRSimpleSel *a_sel,
                        xmlNode *a_node, gboolean *a_result,
                        gboolean a_recurse) ;
 
+static enum CRStatus
+cr_sel_eng_get_matched_rulesets_real (CRSelEng *a_this, 
+                                      CRStyleSheet *a_stylesheet,
+                                      xmlNode *a_node,
+                                      CRStatement **a_rulesets, 
+                                      glong *a_len) ;
 struct _CRSelEngPriv
 {
         /*not used yet*/
@@ -68,6 +74,12 @@ struct _CRSelEngPriv
         CRStatement *cur_stmt ;
 };
 
+/**
+ *@param a_add_sel the class additional selector to consider.
+ *@param a_node the xml node to consider.
+ *@return TRUE if the class additional selector matches
+ *the xml node given in argument, FALSE otherwise.
+ */
 static gboolean
 class_add_sel_matches_node (CRAdditionalSel *a_add_sel,
                             xmlNode *a_node)
@@ -100,6 +112,12 @@ class_add_sel_matches_node (CRAdditionalSel *a_add_sel,
         
 }
 
+/**
+ *@return TRUE if the additional attribute selector matches
+ *the current xml node given in argument, FALSE otherwise.
+ *@param a_add_sel the additional attribute selector to consider.
+ *@param a_node the xml node to consider.
+ */
 static gboolean
 id_add_sel_matches_node (CRAdditionalSel *a_add_sel,
                          xmlNode *a_node)
@@ -303,8 +321,21 @@ attr_add_sel_matches_node (CRAdditionalSel *a_add_sel,
         return TRUE ;
 }
 
-
-static gboolean
+/**
+ *Evaluate a selector (a simple selectors list) and says
+ *if it matches the xml node given in parameter.
+ *
+ *@param a_this the selection engine.
+ *@param a_sel the simple selection list.
+ *@param a_node the xml node.
+ *@param a_result out parameter. Set to true if the
+ *selector matches the xml node, FALSE otherwise.
+ *@param a_recurse if set to TRUE, the function will walk to
+ *the next simple selector (after the evaluation of the current one) 
+ *and recursively evaluate it. Must be usually set to TRUE unless you
+ *know what you are doing.
+ */
+static enum CRStatus
 sel_matches_node_real (CRSelEng *a_this, CRSimpleSel *a_sel,
                        xmlNode *a_node, gboolean *a_result,
                        gboolean a_recurse)
@@ -514,14 +545,22 @@ sel_matches_node_real (CRSelEng *a_this, CRSimpleSel *a_sel,
  *The caller must set it to the length of a_ruleset prior to calling this
  *function. In return, the function sets it to the length 
  *(in sizeof (#CRStatement)) of the actually returned CRStatement array.
- *@return CR_OK if everything went well, an error code otherwise.
+ *@return CR_OUTPUT_TOO_SHORT_ERROR if found more rulesets than the size
+ *of the a_rulesets array. In this case, the first *a_len rulesets found
+ *are put in a_rulesets, and a further call will return the following
+ *ruleset(s) following the same principle.
+ *@return CR_OK if all the rulesets found have been returned. In this
+ *case, *a_len is set to the actual number of ruleset found.
+ *@return CR_BAD_PARAM_ERROR in case any of the given parameter are
+ *bad (e.g null pointer).
+ *@return CR_ERROR if any other error occured.
  */
 static enum CRStatus
-cr_sel_eng_get_rulesets_real (CRSelEng *a_this, 
-                              CRStyleSheet *a_stylesheet,
-                              xmlNode *a_node,
-                              CRStatement **a_rulesets, 
-                              glong *a_len)
+cr_sel_eng_get_matched_rulesets_real (CRSelEng *a_this, 
+                                      CRStyleSheet *a_stylesheet,
+                                      xmlNode *a_node,
+                                      CRStatement **a_rulesets, 
+                                      glong *a_len)
 {
         CRStatement *cur_stmt = NULL ;
         CRSelector *sel_list = NULL, *cur_sel = NULL ;
@@ -553,7 +592,7 @@ cr_sel_eng_get_rulesets_real (CRSelEng *a_this,
          *selectors lists.
          */
         for (cur_stmt = PRIVATE (a_this)->cur_stmt, i = 0 ;
-             (PRIVATE (a_this)->cur_stmt = cur_stmt) && i < *a_len ; 
+             (PRIVATE (a_this)->cur_stmt = cur_stmt); 
              cur_stmt = cur_stmt->next)
         {
                 /*
@@ -630,21 +669,24 @@ cr_sel_eng_get_rulesets_real (CRSelEng *a_this,
                                         a_rulesets[i] = cur_stmt ;
                                         i++ ;
                                 }
+                                else
+                                        
+                                {
+                                        *a_len = i ;
+                                        return CR_OUTPUT_TOO_SHORT_ERROR ;
+                                }
                         }
                 }
         }
 
-        if (!PRIVATE (a_this)->cur_stmt)
-        {
-                /*
-                 *we reached the end of stylesheet
-                 *no need to store any info.
-                 */
-                PRIVATE (a_this)->sheet = NULL ;
-        }
-
-        *a_len = i ;
-
+        /*
+         *if we reached this point, it means
+         *we reached the end of stylesheet.
+         *no need to store any info about the stylesheet
+         *anymore.
+         */
+        g_return_val_if_fail (!PRIVATE (a_this)->cur_stmt, CR_ERROR) ;
+        PRIVATE (a_this)->sheet = NULL ;
         return CR_OK ;
 }
 
@@ -708,6 +750,88 @@ cr_sel_eng_sel_matches_node (CRSelEng *a_this, CRSimpleSel *a_sel,
                                       a_result, TRUE) ;
 }
 
+/**
+ *Returns an array of pointers to selectors that matches
+ *the xml node given in parameter.
+ *
+ *@param a_this the current instance of the selection engine.
+ *@param a_sheet the stylesheet that holds the selectors.
+ *@param a_node the xml node to consider during the walk thru
+ *the stylesheet.
+ *@param a_rulesets out parameter. A pointer to an array of
+ *rulesets statement pointers. *a_rulesets is allocated by
+ *this function and must be freed by the caller. However, the caller
+ *must not alter the rulesets statements pointer because they
+ *point to statements that are still in the css stylesheet.
+ *@param a_len the length of *a_ruleset.
+ *@return CR_OK upon sucessfull completion, an error code otherwise.
+ */
+enum CRStatus
+cr_sel_eng_sel_get_matched_rulesets (CRSelEng *a_this,
+                                     CRStyleSheet *a_sheet,
+                                     xmlNode *a_node,
+                                     CRStatement ***a_rulesets,
+                                     glong *a_len)
+{
+        CRStatement ** stmts_tab = NULL ;
+        enum CRStatus status = CR_OK ;
+        glong tab_size = 0, tab_len = 0 ;
+        gshort stmts_chunck_size = 8 ;
+
+        g_return_val_if_fail (a_this
+                              && a_sheet
+                              && a_node
+                              && a_rulesets && *a_rulesets == NULL
+                              && a_len,
+                              CR_BAD_PARAM_ERROR) ;
+
+        stmts_tab = g_try_malloc (stmts_chunck_size *
+                                  sizeof (CRStatement *)) ;
+
+        if (!stmts_tab)
+        {
+                cr_utils_trace_info ("Out of memory") ;
+                status = CR_ERROR ;
+                goto error ;
+        }
+
+        tab_size = stmts_chunck_size ;
+        tab_len = tab_size ;
+
+        while ((status = cr_sel_eng_get_matched_rulesets_real 
+                (a_this, a_sheet, a_node, stmts_tab, &tab_len))
+               == CR_OUTPUT_TOO_SHORT_ERROR)
+        {
+                tab_size += tab_len ;
+                stmts_tab = g_try_realloc (stmts_tab,
+                                           (tab_size + stmts_chunck_size)
+                                           * sizeof (CRStatement*)) ;
+                if (!stmts_tab)
+                {
+                        cr_utils_trace_info ("Out of memory") ;
+                        status = CR_ERROR ;
+                        goto error ;
+                }
+        }
+
+        tab_len = tab_size - stmts_chunck_size +tab_len ;
+        *a_rulesets = stmts_tab ;
+        *a_len = tab_len ;
+
+        return CR_OK ;
+
+ error:
+
+        if (stmts_tab)
+        {
+                g_free (stmts_tab) ;
+                stmts_tab = NULL ;
+                
+        }
+
+        *a_len = 0 ;
+        return status ;
+}
 
 /**
  *The destructor of #CRSelEng

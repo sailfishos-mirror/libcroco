@@ -1,3 +1,16 @@
+2003-03-03  Dodji  <dodji@tintin.mifon.org>
+
+	* src/cr-sel-eng.c (cr_sel_eng_get_matched_rulesets_real): 
+	renamed the function cr_sel_eng_get_rulesets_real() into
+	this new one. Modified it memory management model so that 
+	1/ it does not allocate it output array
+	2/ caller can use it in a incremental way and get the rulesets
+	chunck by chunk.
+	(cr_sel_eng_sel_get_matched_rulesets): 
+	added this public interface based on the private interface
+	cr_sel_eng_get_matched_rulesets_real().
+	
+
 2003-03-02  Dodji  <dodji@seketeli.org>
 
 	* src/cr-sel-eng.c (cr_sel_eng_get_rulesets_real): 
