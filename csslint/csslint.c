@@ -116,16 +116,10 @@ csslint_show_version (const char *name)
 #ifdef CROCO_HAVE_LIBXML2
 	fprintf(stderr, "LIBXML2 ");
 #endif
-#ifdef CROCO_SELENG_ENABLED
+	fprintf(stderr, "GLIB2 ");
 	fprintf(stderr, "SELENG ");
-#endif
-#ifdef CROCO_LAYENG_ENABLED
-	fprintf(stderr, "LAYENG ");
-#endif
-#ifdef CROCO_TESTS_ENABLED
 	fprintf(stderr, "TESTS ");
-#endif
-    fprintf(stderr, "\n");
+    	fprintf(stderr, "\n");
 }
 
 /**

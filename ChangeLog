@@ -1,3 +1,8 @@
+2004-01-27  Gael CHAMOULAUD  <strider@gnome.org>
+
+	* configure.in: Removed the old references with libgnomeui and pango !
+	* csslint/csslint.c: (csslint_show_version): Made smallish cleanup
+
 2004-01-27  Dodji Seketeli  <dodji@gnome.org>
 
 	* src/cr-cascade.c: 
