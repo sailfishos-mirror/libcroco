@@ -348,7 +348,7 @@ cr_box_append_child (CRBox *a_this, CRBox *a_to_append)
 
 	cur->next = a_to_append ;
         a_to_append->prev = cur ;
-        a_to_append->parent = cur ;
+        a_to_append->parent = a_this ;
         a_to_append->box_model = a_this->box_model ;
 
 	return CR_OK ;

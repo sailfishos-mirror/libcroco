@@ -83,6 +83,10 @@ static enum CRStatus
 compute_text_box_inner_edge_size (CRBox *a_this) ;
 
 static enum CRStatus
+adjust_parent_inner_edge_size (CRLayEng *a_this,
+                               CRBox *a_cur_box) ;
+
+static enum CRStatus
 adjust_edges_on_inner_edge (CRBox *a_this) ;
 
 /**********************
@@ -199,7 +203,7 @@ create_box_tree_real (CRLayEng * a_this,
                          *append it to the box tree
                          *and update all it attributes but
                          *the positioning. The positioning will
-                         *be updated later via the cr_box_reflow() method.
+                         *be updated later via the cr_box_layout() method.
                          */
                         cur_box = cr_box_new (style) ;
                         if (!cur_box)
@@ -269,6 +273,12 @@ create_box_tree_real (CRLayEng * a_this,
                                 }
                                 cur_box->content = box_content ;
                                 box_content = NULL ;
+
+                                /*
+                                 *by default, text/img boxes are inline.
+                                 */
+                                cur_box->type = BOX_TYPE_INLINE ;
+
                                 /*
                                  *the anonymous box
                                  *must have no margin,
@@ -448,20 +458,16 @@ compute_box_size (CRLayEng *a_this,
                               CR_BAD_PARAM_ERROR) ;
 
         /*******************************************
-         *Now, compute the inner edge of this box;
-         *which means 
          *1/set the left border and 
          *left padding edges.
          *2/compute the left most x and topmost y of
-         *the inner box and.
+         *the inner box.
          *3/Compute the outer edge of the contained
          *box; this is recursive.
          *******************************************/
 
         /*
-         *1/ => left side of outer edge is separated from
-         *left side of border edge by "margin-left"... same
-         *principle applies for padding edge and inner edge.
+         *step 1/
          */
 
         /*
@@ -487,7 +493,7 @@ compute_box_size (CRLayEng *a_this,
                 a_cur_box->style->border_top.val ;
 
         /*
-         *Now 2/
+         *Step 2/
          */
         a_cur_box->inner_edge.x =
                 a_cur_box->padding_edge.x
@@ -499,11 +505,14 @@ compute_box_size (CRLayEng *a_this,
                 a_cur_box->style->padding_left.val ;
 
         /*
-         *And now, 3/
+         *Step 3.
          */
         if (a_cur_box->children)
         {
-                /*layout the children boxes*/
+                /*
+                 *layout the children boxes. This function call will
+                 *also update the current inner_edge size.
+                 */
                 status = layout_box (a_this, a_cur_box->children) ;
                 g_return_val_if_fail (status == CR_OK, status) ;
 
@@ -544,12 +553,13 @@ compute_box_size (CRLayEng *a_this,
                                 break ;
                         }
                 }
-        }
-
+        }        
+        
+        
         /*******************************************
-         *Inner edge position (x,y) computing is 
-         *finished. (we have it's width).
-         *So now, we can compute the widths of the
+         *Inner edge position (x,y) and size computing is 
+         *finished.
+         *Now, we can compute the widths of the
          *remaining three other boxes 
          *(padding edge, border edge and outer edge)
          ******************************************/
@@ -578,11 +588,76 @@ compute_box_size (CRLayEng *a_this,
 }
 
 /**
+ *Adjusts the size of the inner edge of this box's parent.
+ *That is, increases (if needed) the parent inner edge's width/height.
+ *@param a_this the current instance of #CRBox.
+ */
+static enum CRStatus
+adjust_parent_inner_edge_size (CRLayEng *a_this,
+                               CRBox *a_cur_box)
+{        
+        g_return_val_if_fail (a_cur_box 
+                              && a_this
+                              && PRIVATE (a_this),
+                              CR_BAD_PARAM_ERROR) ;
+
+        if (PRIVATE (a_this)->update_parent_box_size == TRUE
+            && a_cur_box->parent)
+        {
+                gulong parent_inner_edge_right_bound = 
+                        a_cur_box->parent->inner_edge.x +
+                        a_cur_box->parent->inner_edge.width ;
+                gulong outer_edge_right_bound = 
+                        a_cur_box->outer_edge.x + 
+                        a_cur_box->outer_edge.width ;
+   
+                if (parent_inner_edge_right_bound
+                    <
+                    outer_edge_right_bound)
+                {
+                        /*
+                         *parent inner edge is too short to
+                         *contain this box outer edge.
+                         *So, we just enlarge it.
+                         */
+                        a_cur_box->parent->inner_edge.width = 
+                                outer_edge_right_bound - 
+                                a_cur_box->parent->inner_edge.x ;
+                }
+        }
+
+        /*
+         *Make sure the parent inner_edge.heigth is big enough
+         *to contain the current box.
+         */
+        if (a_cur_box->parent)
+        {
+                gulong parent_inner_edge_bottom_bound =
+                        a_cur_box->parent->inner_edge.y +
+                        a_cur_box->parent->inner_edge.height ;
+                gulong outer_edge_bottom_bound =
+                        a_cur_box->outer_edge.y +
+                        a_cur_box->outer_edge.height ;
+
+                if (parent_inner_edge_bottom_bound <
+                    outer_edge_bottom_bound)
+                {
+                        a_cur_box->parent->inner_edge.height =
+                                outer_edge_bottom_bound -
+                                a_cur_box->parent->inner_edge.y ;
+                }
+        }
+
+        return CR_OK ;
+}
+
+
+/**
  *Given an inner edge size, adjust the padding, border and outer edges
- *so that they correctly contain the inner edge.
- *TODO: should also take the (x,y) position of the top leftmost corner
- *of the outer edge as a reference and position all the other edges, including
- *the inner edge.
+ *so that they correctly contain the inner edge. That is, make the 3 first
+ *edges bigger or smaller to correctly contain the inner edge
+ *Note :Before calling this function, make sure the inner edge has been correctly
+ *computed. This function does not compute the inner edge.
  */
 static enum CRStatus
 adjust_edges_on_inner_edge (CRBox *a_this)
@@ -864,65 +939,14 @@ layout_box (CRLayEng *a_this,
                 case POSITION_INHERIT:
                         break ;
                 }
+                /*
+                 *make sure the parent inner_edge is big enough to contain
+                 *the current box.
+                 */
+                adjust_parent_inner_edge_size (a_this,
+                                               cur_box) ;
         }
-
-        /*
-         *make sure the parent inner_edge.width is big enough to contain
-         *the current box.
-         */
-        if (PRIVATE (a_this)->update_parent_box_size == TRUE
-            && a_cur_box->parent)
-        {
-                gulong parent_inner_edge_right_bound = 
-                     a_cur_box->parent->inner_edge.x +
-                        a_cur_box->parent->inner_edge.width ;
-                gulong outer_edge_right_bound = 
-                        a_cur_box->outer_edge.x + 
-                        a_cur_box->outer_edge.width ;
-   
-                if (parent_inner_edge_right_bound
-                    <
-                    outer_edge_right_bound)
-                {
-                        /*
-                         *parent inner edge is too short to
-                         *contain this box outer edge.
-                         *So, we just enlarge it.
-                         */
-                        a_cur_box->parent->inner_edge.width = 
-                                outer_edge_right_bound - 
-                                a_cur_box->parent->inner_edge.x ;
-
-                        /*
-                         *make sure the edges surrounding the inner_edge
-                         *grow to contain the newly sized inner_edge.
-                         */
-                        adjust_edges_on_inner_edge (a_cur_box->parent) ;
-                }
-        }
-
-        /*
-         *Make sure the parent inner_edge.heigth is big enough
-         *to contain the current box.
-         */
-        if (a_cur_box->parent)
-        {
-                gulong parent_inner_edge_bottom_bound =
-                        a_cur_box->parent->inner_edge.y +
-                        a_cur_box->parent->inner_edge.height ;
-                gulong outer_edge_bottom_bound =
-                        a_cur_box->outer_edge.y +
-                        a_cur_box->outer_edge.height ;
-
-                if (parent_inner_edge_bottom_bound <
-                        outer_edge_bottom_bound)
-                {
-                        a_cur_box->parent->inner_edge.height =
-                                outer_edge_bottom_bound -
-                                a_cur_box->parent->inner_edge.y ;
-                }
-        }
-
+        
         return CR_OK ;
 }
 
