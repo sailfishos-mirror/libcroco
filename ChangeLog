@@ -1,3 +1,7 @@
+2004-04-18  Dodji Seketeli  <dodji@gnome.org>
+
+	* src/libcroco-config.h: removed this from CVS.
+
 2004-03-07  Dodji Seketeli  <dodji@gnome.org>
 
 	* src/cr-statement.c: 
