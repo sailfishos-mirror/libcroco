@@ -128,7 +128,7 @@ channel
 {
  display:block;
  /*height:300px;*/
- /*width:200px;*/
+ width:200px;
  border:1px solid #000;
  overflow:auto;
  background-color:#eee;
