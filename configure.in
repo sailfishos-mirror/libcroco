@@ -152,6 +152,7 @@ Makefile
 libcroco.pc
 croco-config
 src/Makefile
+csslint/Makefile
 tests/Makefile
 ])
 

@@ -1,4 +1,4 @@
-SUBDIRS = src
+SUBDIRS = src csslint
 SUBDIRS += tests
 
 pkgconfigdir=$(libdir)/pkgconfig
