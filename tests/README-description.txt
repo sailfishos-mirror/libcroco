@@ -95,3 +95,31 @@ description: parses the file located at the path given in
 parameter and dumps the result of the parsing (the object model)
 on stdout.
 """""""""""""""""""""""""""""""""""""""""""""""""
+
+"""""""""""""""""""""""""""""""""""""""""""""""""
+binary: test5
+
+source-file: test5-main.c
+
+purpose: tests the selector cr-sel-eng.c basic functionalities.
+
+description: parses an in memory xml document hardwired in the
+test5-main.c file; parses the stylesheet given in parameter to
+the test5 binary.
+Walks down the xml document tree and runs the selector engine
+on each xml documument node to get the css rule that matches it.
+Displays a report that basically say: "this xml node was matched
+by this set of css rules"
+"""""""""""""""""""""""""""""""""""""""""""""""""
+
+"""""""""""""""""""""""""""""""""""""""""""""""""
+binary: test6
+
+source-file: test6-main.c
+
+purpose: tests the "in memory" css2 parsing capabilites. (cr_om_parser_parse_buf)
+
+
+description: parses an "in memory" hardwired css2 stylesheet
+and dumps it on stdout.
+"""""""""""""""""""""""""""""""""""""""""""""""""
