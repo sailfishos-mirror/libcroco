@@ -1,3 +1,14 @@
+2003-03-18  Dom Lachowicz <cinamod@hotmail.com>
+
+	* autogen.sh: Use gnome-autogen (cvs co gnome-common). Creates libtool
+	and other things properly
+
+	* configure.in: better check for LIBXML2, conditional compilation of
+	the SELENG module
+
+	* tests/Makefile.am: disable test5 until I can think of a better 
+	work-around
+	
 2003-03-16  dodji  <dodji@seketeli.org>
 
 	* src/cr-style.c (set_border_x_style_from_value): 

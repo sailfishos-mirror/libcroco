@@ -1,20 +1,21 @@
 #!/bin/sh
+# Run this to generate all the initial makefiles, etc.
 
-#Author: Dodji Seketeli.
+srcdir=`dirname $0`
+test -z "$srcdir" && srcdir=.
 
+PKG_NAME="libcroco"
 
-echo "autogen.sh: Running aclocal ..."
-aclocal
-echo "autogen.sh: aclocal: done"
+(test -f $srcdir/configure.in \
+  && test -f $srcdir/README \
+  && test -f $srcdir/src/cr-parser.h) || {
+    echo -n "**Error**: Directory "\`$srcdir\'" does not look like the"
+    echo " top-level $PKG_NAME directory"
+    exit 1
+}
 
-echo "autogen.sh: Running autoconf -f ..."
-autoconf
-echo "autogen.sh: autoconf: done"
-
-echo "autogen.sh: Running automake -a -c ..."
-automake --gnu -a -c 
-echo "autogen.sh: automake: done"
-
-echo "autogen.sh: Running configure ..."
-./configure $@
-echo "autogen.sh: configure: done"
+which gnome-autogen.sh || {
+    echo "You need to install gnome-common from the GNOME CVS"
+    exit 1
+}
+USE_GNOME2_MACROS=1 . gnome-autogen.sh
