@@ -43,7 +43,7 @@ typedef struct _CRSelector CRSelector ;
  *of the 'ruleset" production in the appendix D.1 of the
  *css2 spec.
  *It is actually the abstraction of a comma separated list
- *of a simple selectors list.
+ *of simple selectors list.
  *In a css2 file, a selector is a list of simple selectors
  *separated by a comma.
  *e.g: sel0, sel1, sel2 ...

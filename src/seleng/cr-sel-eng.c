@@ -750,38 +750,80 @@ put_css_properties_in_hashtable (GHashTable **a_props_hashtable,
                 for (cur_decl = cur_stmt->kind.ruleset->decl_list ; 
                      cur_decl ; cur_decl = cur_decl->next)
                 {
-                        if (cur_decl->property && cur_decl->property->str)
+                        if (!cur_decl->property || !cur_decl->property->str)
+                                continue ;
+
+                        CRStatement *stmt = NULL ;
+
+                        /*
+                         *First, test if the property is not
+                         *already present in our properties hashtable.
+                         *If yes, apply the cascading rules to
+                         *compute the precedence. If not, insert
+                         *the property into the hashtable.
+                         */
+                        stmt = g_hash_table_lookup 
+                                (props_hash, cur_decl->property->str) ;
+
+                        if (!stmt)
                         {
-                                GString *prop = NULL ;
-                                gboolean insert_property = FALSE ;
-
-                                /*
-                                 *First, test if the property is not
-                                 *already present in our properties hashtable.
-                                 *If yes, apply the cascading rules to
-                                 *compute the precedence. If not, insert
-                                 *the property into the hashtable.
-                                 */
-                                prop = g_hash_table_lookup 
-                                        (props_hash, cur_decl->property->str) ;
-
-                                if (prop)
-                                {
-                                        /*
-                                         *the property already exists.
-                                         *TODO: We must apply here some cascading rule
-                                         *to compute the precedence.
-                                         */
-                                        
-                                }
-
-
-                                if (insert_property == TRUE)
-                                        g_hash_table_replace 
-                                                (props_hash,
-                                                 cur_decl->property,
-                                                 a_ruleset) ;
+                                g_hash_table_replace 
+                                        (props_hash,
+                                         cur_decl->property,
+                                         a_ruleset) ;
+                                continue ;
                         }
+
+                        /*
+                         *A property with the same name already exists.
+                         *We must apply here 
+                         *some cascading rules
+                         *to compute the precedence.
+                         */
+
+                        /*
+                         *first, look at the origin.
+                         *6.4.1 says: 
+                         *"for normal declarations, 
+                         *author style sheets override user 
+                         *style sheets which override 
+                         *the default style sheet."
+                         */
+                        if (stmt->parent_sheet 
+                            && (stmt->parent_sheet->origin 
+                                <
+                                cur_stmt->parent_sheet->origin))
+                        {
+                                g_hash_table_replace 
+                                        (props_hash,
+                                         cur_decl->property,
+                                         a_ruleset) ;
+                                continue ;
+                        }
+                        else if (stmt->parent_sheet 
+                                 && (stmt->parent_sheet->origin 
+                                     >
+                                     cur_stmt->parent_sheet->origin))
+                        {
+                                /*TODO: support !important rule.*/
+                                continue ;
+                        }
+
+                        /*
+                         *A property with the same
+                         *name and the same origin already exist.
+                         *shit. This lasting longer than expect ...
+                         *Luckily, the spec says in 6.4.1:
+                         *"more specific selectors will override 
+                         *more general ones"
+                         */
+
+                        /*
+                         *to take the specificity in account,
+                         *make sure that the matcher updated stmt->specificity.
+                         */
+
+                        /* status = cr_simple_sel_compute_specificity () ;*/
                 }
         }
 

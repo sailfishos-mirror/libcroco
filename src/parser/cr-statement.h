@@ -197,6 +197,14 @@ struct _CRStatement
 	} kind ;
 
         /*
+         *the specificity of the selector
+         *that matched this statement.
+         *This is only used by the cascading
+         *order determination algorithm.
+         */
+        gulong specificity ;
+
+        /*
          *the style sheet that contains
          *this css statement.
          */

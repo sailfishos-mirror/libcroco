@@ -51,8 +51,6 @@ enum SimpleSelectorType
         NO_SELECTOR_TYPE = 0,
         UNIVERSAL_SELECTOR = 1,
         TYPE_SELECTOR = 1 << 1,
-        DESCENDANT_SELECTOR = 1 << 2,
-        CHILD_SELECTOR = 1 << 3
 } ;
 
 typedef struct _CRSimpleSel CRSimpleSel ;
@@ -78,8 +76,7 @@ struct _CRSimpleSel
 {
         enum SimpleSelectorType type_mask ;
         gboolean is_case_sentive ;
-        GString * name ;
-
+        GString * name ;        
         /**
          *The combinator that separates
          *this simple selector from the previous
@@ -96,6 +93,12 @@ struct _CRSimpleSel
          *Note that this field is a linked list.
          */
         CRAdditionalSel *add_sel ;
+
+        /*
+         *the specificity as specified by
+         *chapter 6.4.3 of the spec.
+         */
+        gulong specificity ;
 
         CRSimpleSel *next ;
         CRSimpleSel *prev ;
@@ -120,6 +123,9 @@ cr_simple_sel_dump (CRSimpleSel *a_this, FILE *a_fp) ;
 
 enum CRStatus
 cr_simple_sel_dump_attr_sel_list (CRSimpleSel *a_this) ;
+
+enum CRStatus
+cr_simple_sel_compute_specificity (CRSimpleSel *a_this) ;
 
 void
 cr_simple_sel_destroy (CRSimpleSel *a_this) ;

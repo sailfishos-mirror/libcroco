@@ -197,6 +197,64 @@ cr_simple_sel_dump (CRSimpleSel *a_this, FILE *a_fp)
         return CR_OK ;
 }
 
+/**
+ *Computes the selector (combinator separated list of simple selectors)
+ *as defined in the css2 spec in chapter 6.4.3
+ *@param a_this the current instance of #CRSimpleSel
+ *@return CR_OK upon successfull completion, an error code otherwise.
+ */
+enum CRStatus
+cr_simple_sel_compute_specificity (CRSimpleSel *a_this)
+{
+        CRAdditionalSel *cur_add_sel = NULL ;
+        CRSimpleSel *cur_sel = NULL ;
+        gulong a, b, c;
+
+        g_return_val_if_fail (a_this, CR_BAD_PARAM_ERROR) ;
+
+        for (cur_sel = a_this ; cur_sel ; cur_sel = cur_sel->next)
+        {
+                if (cur_sel->type_mask | TYPE_SELECTOR)
+                {
+                        c++ ;/*hmmh, is this a new language ?*/
+                }
+                else if (!cur_sel->name || ! cur_sel->name->str)
+                {
+                        if (cur_sel->add_sel->type == PSEUDO_CLASS_ADD_SELECTOR)
+                        {
+                                /*
+                                 *this is a pseudo element, and
+                                 *the spec says, "ignore pseudo elements".
+                                 */
+                                continue ;
+                        }
+                }
+
+                for (cur_add_sel = cur_sel->add_sel ; 
+                     cur_add_sel ;
+                     cur_add_sel = cur_add_sel->next)
+                {
+                        switch (cur_add_sel->type)
+                        {
+                        case ID_ADD_SELECTOR:
+                                a++ ;
+                                break ;
+
+                        case NO_ADD_SELECTOR:
+                                continue ;
+
+                        default:
+                                b++ ;
+                                break ;
+                        }
+                }
+        }
+
+        /*we suppose a, b and c have 1 to 3 digits*/
+        a_this->specificity = a * 1000000 + b * 1000 + c;
+
+        return CR_OK ;
+}
 
 /**
  *The destructor of the current instance of
