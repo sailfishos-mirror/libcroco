@@ -21,4 +21,4 @@ if test "empty$1" != "empty" ; then
     OUTPUT_FILE="$1".vg
 fi
 
-exec $VG $VG_OPTIONS $@ 2>$OUTPUT_FILE
+exec $VG $VG_OPTIONS $@ 2>"$OUTPUT_FILE"

@@ -53,55 +53,55 @@ cr_token_clear (CRToken *a_this)
 	case MEDIA_SYM_TK:
 	case FONT_FACE_SYM_TK:
 	case CHARSET_SYM_TK:
-    case IMPORT_SYM_TK:
+        case IMPORT_SYM_TK:
 	case IMPORTANT_SYM_TK:        
-        break ;
+                break ;
 
 	case STRING_TK:
-    case IDENT_TK:
-    case HASH_TK:
-    case URI_TK:
-    case FUNCTION_TK:
-    case COMMENT_TK:
-        if (a_this->u.str)
-        {
-            g_string_free (a_this->u.str, TRUE) ;
-            a_this->u.str = NULL ;
-        }
+        case IDENT_TK:
+        case HASH_TK:
+        case URI_TK:
+        case FUNCTION_TK:
+        case COMMENT_TK:
+                if (a_this->u.str)
+                {
+                        g_string_free (a_this->u.str, TRUE) ;
+                        a_this->u.str = NULL ;
+                }
 		break ;
         
 	case EMS_TK:
-    case EXS_TK:
-    case LENGTH_TK:
-    case ANGLE_TK:
-    case TIME_TK:
-    case FREQ_TK:
-    case PERCENTAGE_TK:
-    case NUMBER_TK:
-        if (a_this->u.num)
-        {
-            cr_num_destroy (a_this->u.num) ;
-            a_this->u.num = NULL ;
-        }
+        case EXS_TK:
+        case LENGTH_TK:
+        case ANGLE_TK:
+        case TIME_TK:
+        case FREQ_TK:
+        case PERCENTAGE_TK:
+        case NUMBER_TK:
+                if (a_this->u.num)
+                {
+                        cr_num_destroy (a_this->u.num) ;
+                        a_this->u.num = NULL ;
+                }
 		break ;
         
 	case DIMEN_TK:
-        if (a_this->u.num)
-        {
-            cr_num_destroy (a_this->u.num) ;
-            a_this->u.num = NULL ;
-        }
+                if (a_this->u.num)
+                {
+                        cr_num_destroy (a_this->u.num) ;
+                        a_this->u.num = NULL ;
+                }
         
-        if (a_this->dimen)
-        {
-            g_string_free (a_this->dimen, TRUE) ;
-            a_this->dimen = NULL ;
-        }
+                if (a_this->dimen)
+                {
+                        g_string_free (a_this->dimen, TRUE) ;
+                        a_this->dimen = NULL ;
+                }
         
 		break ;
 		
 	case UNICODERANGE_TK:
-        /*not supported yet.*/
+                /*not supported yet.*/
 		break ;	
         
 	default:

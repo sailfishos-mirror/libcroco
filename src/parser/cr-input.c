@@ -114,8 +114,9 @@ cr_input_new_real (void)
                 cr_utils_trace_info ("Out of memory") ;
                 g_free (result) ;
                 return NULL ;
-        }
+        }        
         memset (PRIVATE (result), 0, sizeof (CRInputPriv)) ;
+        PRIVATE (result)->free_in_buf = TRUE ;
         return result ;
 }
 
@@ -176,6 +177,8 @@ cr_input_new_from_buf (guchar *a_buf, gulong a_len,
                 PRIVATE (result)->nb_bytes = a_len ;
         }
 
+        PRIVATE (result)->free_in_buf = a_free_buf ;
+
         return result ;
 
  error:
@@ -199,8 +202,7 @@ cr_input_new_from_buf (guchar *a_buf, gulong a_len,
  *this method couldn read the file and create it,
  *NULL otherwise.
  */
-#define NEW0 = 1
-#ifdef NEW0
+
 CRInput *
 cr_input_new_from_uri (gchar *a_file_uri, enum CREncoding a_enc)
 {
@@ -249,7 +251,7 @@ cr_input_new_from_uri (gchar *a_file_uri, enum CREncoding a_enc)
                                 cr_utils_trace_debug 
                                         ("an io error occured") ;
                                 status = CR_ERROR ;
-                                goto error ;
+                                goto cleanup ;
                         }
                 }
 
@@ -264,11 +266,6 @@ cr_input_new_from_uri (gchar *a_file_uri, enum CREncoding a_enc)
                 }
         }
 
-        if (file_ptr)
-        {
-                fclose (file_ptr) ;
-                file_ptr = NULL ;
-        }
 
         if (status == CR_OK) 
         {
@@ -276,12 +273,11 @@ cr_input_new_from_uri (gchar *a_file_uri, enum CREncoding a_enc)
                                                 TRUE) ;
                 if (!result)
                 {
-                        goto error ;
-                }
-                return result ;
+                        goto cleanup ;
+                }                
         }
 
- error:
+cleanup:
 
         if (file_ptr)
         {
@@ -295,162 +291,8 @@ cr_input_new_from_uri (gchar *a_file_uri, enum CREncoding a_enc)
                 buf = NULL ;
         }
 
-        return NULL ;
-}
-#else
-CRInput *
-cr_input_new_from_uri (gchar *a_file_uri, enum CREncoding a_enc)
-{
-        CRInput * result = NULL ;
-        enum CRStatus status = CR_OK ;
-        FILE * file_ptr = NULL ;
-        guchar tmp_buf[CR_INPUT_MEM_CHUNK_SIZE] = {0} ;
-        gint nb_read = 0 ;
-        gboolean loop = TRUE ;
-        CREncHandler * enc_handler = NULL ;
-        guchar *utf8_buf = NULL ;
-        gulong len = 0 ;
-
-        g_return_val_if_fail (a_file_uri, NULL) ;
-
-        file_ptr = fopen (a_file_uri, "r") ;
-
-        if (file_ptr == NULL) 
-        {
-
-#ifdef CR_DEBUG
-                cr_utils_trace_debug ("could not open file") ;
-#endif
-                g_warning ("Could not open file %s\n", a_file_uri) ;
-                
-                return NULL ;
-        }
-
-        result = g_try_malloc (sizeof (CRInput)) ;
-        if (!result)
-        {
-                cr_utils_trace_info ("Out of memory") ;
-                return NULL ;
-        }
-        memset (result, 0, sizeof (CRInput)) ;
-
-        PRIVATE (result) = g_try_malloc (sizeof (CRInputPriv)) ;
-        if (!PRIVATE (result))
-        {
-                cr_utils_trace_info ("Out of memory") ;
-                g_free (result) ;
-                return NULL ;
-        }
-        memset (PRIVATE (result), 0, sizeof (CRInputPriv)) ;
-
-        /*load the file*/
-        while (loop) 
-        {
-
-                nb_read =
-                        fread (tmp_buf, 1/*read bytes*/,
-                               CR_INPUT_MEM_CHUNK_SIZE/*nb of bytes*/,
-                               file_ptr) ;
-
-                if (nb_read != CR_INPUT_MEM_CHUNK_SIZE) 
-                {                        
-                        /*we read less chars than we wanted*/
-                        if (feof (file_ptr)) 
-                        {
-                                /*we reached eof*/
-                                loop = FALSE ;
-                        } 
-                        else 
-                        {  
-                                /*a pb occured !!*/
-#ifdef CR_DEBUG
-                                cr_utils_trace_debug 
-                                        ("an io error occured") ;
-#endif                                                    
-                                status = CR_ERROR ;
-                        }
-                }
-
-                if (status == CR_OK) 
-                {
-                        /*read went well*/
-
-                        PRIVATE (result)->in_buf =
-                                g_realloc (PRIVATE (result)->in_buf,
-                                           PRIVATE (result)->in_buf_size
-                                           + CR_INPUT_MEM_CHUNK_SIZE) ;
-
-                        memcpy (PRIVATE (result)->in_buf
-                                + PRIVATE (result)->in_buf_size ,
-                                tmp_buf, nb_read) ;
-                
-                        PRIVATE (result)->in_buf_size += 
-                                nb_read ;
-                }
-        }
-
-        PRIVATE (result)->nb_bytes = PRIVATE (result)->in_buf_size ;
-
-        if (file_ptr) 
-        {
-                fclose (file_ptr) ;
-                file_ptr = NULL ;
-        }
-
-        if (status == CR_OK) 
-        {
-                /*
-                 *Make sure the input's internal buffer
-                 *is encoded in utf-8.
-                 */
-                if (a_enc != CR_UTF_8)
-                {
-                        enc_handler = cr_enc_handler_get_instance (a_enc);
-                        if (enc_handler == NULL)
-                        {
-                                goto error ;
-                        }
-                        else
-                        {
-                                /*encode the buffer in utf8.*/
-                                status = cr_enc_handler_convert_input 
-                                        (enc_handler,
-                                         PRIVATE (result)->in_buf,
-                                         &PRIVATE (result)->in_buf_size,
-                                         &utf8_buf, &len) ;
-
-                                if (status != CR_OK)
-                                {
-                                        goto error ;
-                                }
-                                
-                                g_free (PRIVATE (result)->in_buf) ;
-                                PRIVATE (result)->in_buf = utf8_buf ;
-                                PRIVATE (result)->in_buf_size = len ;
-                                PRIVATE (result)->line = 1 ;
-                        }
-                }
-        }        
-        else
-        {
-                cr_utils_trace_debug ("Input loading failed") ;
-                goto error ;
-        }
-
         return result ;
-
- error:
-        if (result) 
-            {
-
-                /*free result*/
-                cr_input_destroy (result) ;
-                result = NULL ;
-            }
-
-        return NULL ;
 }
-#endif
 
 /**
  *The destructor of the #CRInput class.
