@@ -38,7 +38,7 @@ CRDocHandler * gv_test_handler = {0} ;
 
 const guchar *xml_content=
 "<document>"
-"<E0>text0</E0>"
+"<E0>text0</E0> "
 "<E1><E1-1>text1</E1-1></E1>"
 "<E2 attr2=\"val2\">text2</E2>"
 "<E3 attr3=\"val3_1 val3_2 val3_3\">text3</E3>"
@@ -133,14 +133,13 @@ walk_xml_tree_and_lookup_rules (CRSelEng *a_sel_eng,
                         g_print ("\n\nxml end element: %s\n",
                                  cur_node->name);
                         g_print ("'''''''''''''''''''''''''\n") ;
-
-                        if (stmts_tab)
-                        {
-                                g_free (stmts_tab) ;
-                                stmts_tab= NULL ;
-                        }
                 }
 
+                if (stmts_tab)
+                {
+                        g_free (stmts_tab) ;
+                        stmts_tab= NULL ;
+                }
                 if (cur_node->children)
                 {
                         walk_xml_tree_and_lookup_rules 

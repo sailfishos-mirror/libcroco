@@ -35,3 +35,7 @@ entry[type=notice] note[id=bar]
 { 
   padding : 5px;
 }
+
+note + notea {
+     color: notea-color ;
+}

@@ -389,6 +389,52 @@ additional_selector_matches_node (CRAdditionalSel *a_add_sel,
         return FALSE ;
 }
 
+static xmlNode *
+get_next_element_node (xmlNode *a_node)
+{
+        xmlNode *cur_node = NULL ;
+
+        g_return_val_if_fail (a_node, NULL) ;
+
+        cur_node = a_node->next ;
+        while (cur_node && cur_node->type != XML_ELEMENT_NODE) 
+        {
+                cur_node = cur_node->next ;
+        }
+        return cur_node ;
+}
+
+
+static xmlNode *
+get_prev_element_node (xmlNode *a_node)
+{
+        xmlNode *cur_node = NULL ;
+
+        g_return_val_if_fail (a_node, NULL) ;
+        
+        cur_node = a_node->prev ;
+        while (cur_node && cur_node->type != XML_ELEMENT_NODE) 
+        {
+                cur_node = cur_node->prev ;
+        }
+        return cur_node ;
+}
+
+static xmlNode *
+get_next_parent_element_node (xmlNode *a_node)
+{
+        xmlNode *cur_node = NULL ;
+
+        g_return_val_if_fail (a_node, NULL) ;
+        
+        cur_node = a_node->parent ;
+        while (cur_node && cur_node->type != XML_ELEMENT_NODE) 
+        {
+                cur_node = cur_node->parent ;
+        }
+        return cur_node ;
+}
+
 /**
  *Evaluate a selector (a simple selectors list) and says
  *if it matches the xml node given in parameter.
@@ -467,7 +513,7 @@ sel_matches_node_real (CRSelEng *a_this, CRSimpleSel *a_sel,
                                                 }
                                         } else {
                                                 goto walk_a_step_in_expr ;
-                                        }					
+                                        }
 				}
                                 goto done ;
 			}
@@ -487,7 +533,7 @@ sel_matches_node_real (CRSelEng *a_this, CRSimpleSel *a_sel,
                 } else {
                         goto done ;
                 }
-                        
+
 	walk_a_step_in_expr:
                 if (a_recurse == FALSE)
                 {
@@ -521,14 +567,11 @@ sel_matches_node_real (CRSelEng *a_this, CRSimpleSel *a_sel,
                         for (n = cur_node->parent ; n ; n = n->parent)
                         {
                                 status = 
-                                        sel_matches_node_real (a_this,
-                                                               cur_sel->prev,
-                                                               n,
-                                                               &matches,
-                                                               FALSE) ;
+                                        sel_matches_node_real 
+                                        (a_this, cur_sel->prev,
+                                         n, &matches, FALSE) ;
                                 if (status != CR_OK)
                                         goto done ;
-
                                 if (matches == TRUE)
                                 {
                                         cur_node = n ;
@@ -554,28 +597,26 @@ sel_matches_node_real (CRSelEng *a_this, CRSimpleSel *a_sel,
                          */
                         break ;
                 }
-     
+
                 case COMB_PLUS:
-                {
-                        if (!cur_node->prev)
+                        cur_node = get_prev_element_node (cur_node);
+                        if (!cur_node)
                                 goto done ;
-                        cur_node = cur_node->prev ;
-                }
                 break ;
 
                 case COMB_GT:
-                        if (!cur_node->parent)
+                        cur_node = get_next_parent_element_node 
+                                (cur_node) ;
+                        if (!cur_node)
                                 goto done ;
-                        cur_node = cur_node->parent ;
                         break ;
 
                 default:
                         goto done ;
                 }
                 continue ;
-		
 	}
-        
+
         /*
          *if we reached this point, it means the selector matches
          *the xml node.

@@ -1,3 +1,18 @@
+2003-12-14  Dodji Seketeli <dodji@gnome.org>
+
+	* docs/examples/selection-example-1.c:
+	* docs/examples/selection-example-1.xml:
+	* docs/examples/selection-example-1.css: added a test case
+	for the A + B type of selectors.
+	 added
+	* src/seleng/cr-sel-eng.c: 
+	(get_next_element_node)
+	(get_prev_element_node)
+	(get_next_parent_element_node): added these helper functions
+	to help ignore non element nodes in the selector matcher.
+	(sel_matches_node_real): Do not consider non element nodes
+	when evaluating a selector.
+	
 2003-12-13  Dodji Seketeli <dodji@gnome.org>
 ============= 0.4 release ================
 	* README: updated this.
