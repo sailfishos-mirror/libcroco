@@ -49,6 +49,11 @@ attr_add_sel_matches_node (CRAdditionalSel *a_add_sel,
                            xmlNode *a_node) ;
 
 static gboolean
+sel_matches_node_real (CRSelEng *a_this, CRSimpleSel *a_sel,
+                       xmlNode *a_node, gboolean *a_result,
+                       gboolean a_recurse) ;
+
+static gboolean
 class_add_sel_matches_node (CRAdditionalSel *a_add_sel,
                             xmlNode *a_node)
 {
@@ -283,6 +288,193 @@ attr_add_sel_matches_node (CRAdditionalSel *a_add_sel,
         return TRUE ;
 }
 
+
+static gboolean
+sel_matches_node_real (CRSelEng *a_this, CRSimpleSel *a_sel,
+                       xmlNode *a_node, gboolean *a_result,
+                       gboolean a_recurse)
+{
+        CRSimpleSel *cur_sel = NULL ;
+	xmlNode *cur_node = NULL ;
+
+	g_return_val_if_fail (a_this && PRIVATE (a_this)
+			      && a_this && a_node 
+			      && a_node->type == XML_ELEMENT_NODE
+			      && a_result,
+			      CR_BAD_PARAM_ERROR) ;
+
+	/*go and get the last simple selector of the list*/
+	for (cur_sel = a_sel ; 
+	     cur_sel && cur_sel->next ; 
+	     cur_sel = cur_sel->next) ;
+
+	for (cur_node = a_node ; cur_sel ; cur_sel = cur_sel->prev)
+	{
+		if (cur_sel->type_mask & UNIVERSAL_SELECTOR)
+		{
+                        goto walk_a_step_in_expr ;
+		}
+		else if (cur_sel->type_mask & TYPE_SELECTOR)
+		{
+			if (cur_sel && cur_sel->name && cur_sel->name->str)
+			{
+				if (!strcmp (cur_sel->name->str,
+                                             cur_node->name))
+				{
+					goto walk_a_step_in_expr ;
+				}
+                                goto done ;
+			}
+			else
+			{
+                                goto done ;
+			}
+		}
+
+		if (!cur_sel->add_sel)
+                {
+                        goto done ;
+                }
+
+		if (cur_sel->add_sel->type == NO_ADD_SELECTOR)
+                {
+			goto done ;
+                }
+		
+		if (cur_sel->add_sel->type == CLASS_ADD_SELECTOR
+		    && cur_sel->add_sel->content.class_name
+		    && cur_sel->add_sel->content.class_name->str)
+		{
+                        if (class_add_sel_matches_node 
+                            (cur_sel->add_sel, cur_node) == FALSE)
+                        {
+                                goto done ;
+                        }
+                        goto walk_a_step_in_expr ;
+		}
+		else if (cur_sel->add_sel->type == ID_ADD_SELECTOR
+			 && cur_sel->add_sel->content.id_name
+			 && cur_sel->add_sel->content.id_name->str)
+		{
+                        if (id_add_sel_matches_node 
+                            (cur_sel->add_sel, cur_node) == FALSE)
+                        {
+                               goto done;
+                        }
+                        goto walk_a_step_in_expr ;
+
+		}
+		else if (cur_sel->add_sel->type == ATTRIBUTE_ADD_SELECTOR
+			 && cur_sel->add_sel->content.attr_sel)
+		{
+                        /*
+			 *here, call a function that does the match
+			 *against an attribute additionnal selector
+			 *and an xml node.
+			 */
+                        if (attr_add_sel_matches_node 
+                            (cur_sel->add_sel, cur_node)
+                            == FALSE)
+                        {
+                                goto done ;
+                        }
+                        goto walk_a_step_in_expr ;
+		}
+
+	walk_a_step_in_expr:
+                if (a_recurse == FALSE)
+                {
+                        *a_result = TRUE ;
+                        goto done ;
+                }
+
+                /*
+		 *here, depending on the combinator of cur_sel
+		 *choose the axis of the xml tree traversing
+		 *and walk one step in the xml tree.
+		 */
+                if (!cur_sel->prev)
+                        break ;
+
+                switch (cur_sel->prev->combinator)
+                {
+                case NO_COMBINATOR:
+                        break ;
+
+                case COMB_WS:/*descendant selector*/
+                {
+                        xmlNode *n = NULL ;
+                        enum CRStatus status = CR_OK ;
+                        gboolean matches= FALSE ;
+
+                        /*
+                         *walk the xml tree upward looking for a parent
+                         *node that matches the preceding selector.
+                         */
+                        for (n = cur_node->parent ; n ; n = n->parent)
+                        {
+                                status = 
+                                        sel_matches_node_real (a_this,
+                                                               cur_sel->prev,
+                                                               n,
+                                                               &matches,
+                                                               FALSE) ;
+                                if (status != CR_OK)
+                                        goto done ;
+
+                                if (matches == TRUE)
+                                {
+                                        cur_node = n ;
+                                        break ;
+                                }
+                        }
+
+                        if (!n)
+                        {
+                                /*
+                                 *didn't find any ancestor that matches
+                                 *the previous simple selector.
+                                 */
+                                goto done ;
+                        }
+                        /*
+                         *in this case, the preceding simple sel
+                         *will have been interpreted twice, which
+                         *is a cpu and mem waste ... I need to find
+                         *another way to do this. Anyway, this is
+                         *my first attempt to write this function and
+                         *I am a bit clueless.
+                         */
+                        break ;
+                }
+     
+                case COMB_PLUS:
+                {
+                        if (!cur_node->prev)
+                                goto done ;
+                        cur_node = cur_node->prev ;
+                }
+                break ;
+
+                case COMB_GT:
+                        if (!cur_node->parent)
+                                goto done ;
+                        cur_node = cur_node->parent ;
+                        break ;
+
+                default:
+                        goto done ;
+                }
+                continue ;
+		
+	}
+
+        *a_result = TRUE ;
+
+ done:
+        return CR_OK ;
+}
+
 struct _CRSelEngPriv
 {
 
@@ -319,97 +511,14 @@ enum CRStatus
 cr_sel_eng_sel_matches_node (CRSelEng *a_this, CRSimpleSel *a_sel,
 			     xmlNode *a_node, gboolean *a_result)
 {
-	CRSimpleSel *cur_sel = NULL ;
-	xmlNode *cur_node = NULL ;
-
 	g_return_val_if_fail (a_this && PRIVATE (a_this)
 			      && a_this && a_node 
 			      && a_node->type == XML_ELEMENT_NODE
 			      && a_result,
 			      CR_BAD_PARAM_ERROR) ;
 
-	/*go and get the last simple selector of the list*/
-	for (cur_sel = a_sel ; 
-	     cur_sel && cur_sel->next ; 
-	     cur_sel = cur_sel->next) ;
-
-	for (; cur_sel ; cur_sel = cur_sel->prev)
-	{
-
-		if (cur_sel->type_mask & UNIVERSAL_SELECTOR)
-		{
-			return TRUE ;
-		}
-		else if (cur_sel->type_mask & TYPE_SELECTOR)
-		{
-			if (cur_sel && cur_sel->name && cur_sel->name->str)
-			{
-				if (!strcmp (cur_sel->name->str,
-					    cur_node->name))
-				{
-					return TRUE ;
-				}
-				goto walk_a_step_in_expr ;
-			}
-			else
-			{
-				return FALSE ;
-			}
-		}
-
-		if (!cur_sel->add_sel)
-			return FALSE ;
-
-		if (cur_sel->add_sel->type == NO_ADD_SELECTOR)
-			return FALSE ;
-		
-		if (cur_sel->add_sel->type == CLASS_ADD_SELECTOR
-		    && cur_sel->add_sel->content.class_name
-		    && cur_sel->add_sel->content.class_name->str)
-		{
-                        if (class_add_sel_matches_node 
-                            (cur_sel->add_sel, a_node) == FALSE)
-                                return FALSE ;
-                        goto walk_a_step_in_expr ;
-		}
-		else if (cur_sel->add_sel->type == ID_ADD_SELECTOR
-			 && cur_sel->add_sel->content.id_name
-			 && cur_sel->add_sel->content.id_name->str)
-		{
-                        if (id_add_sel_matches_node 
-                            (cur_sel->add_sel, a_node) == FALSE)
-                                return FALSE ;
-                        goto walk_a_step_in_expr ;
-
-		}
-		else if (cur_sel->add_sel->type == ATTRIBUTE_ADD_SELECTOR
-			 && cur_sel->add_sel->content.attr_sel)
-		{
-                        /*
-			 *here, call a function that does the match
-			 *against an attribute additionnal selector
-			 *and an xml node.
-			 */
-                        if (attr_add_sel_matches_node 
-                            (cur_sel->add_sel, a_node)
-                                == FALSE)
-                        {
-                                return FALSE ;
-                        }
-                        goto walk_a_step_in_expr ;
-		}
-
-	walk_a_step_in_expr:
-                /*
-		 *here, depending on the combinator of cur_sel
-		 *choose the axis of the xml tree traversing
-		 *and walk one step in the xml tree.
-		 */
-                continue ;
-		
-	}
-
-	return TRUE ;
+        return sel_matches_node_real (a_this, a_sel, a_node,
+                                      a_result, TRUE) ;
 }
 
 /**
