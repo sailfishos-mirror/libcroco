@@ -212,11 +212,15 @@ if test "$WITH_LAYENG" = "yes" ; then
 fi
 
 dnl By default compile in debug mode
-CFLAGS="-g -Wunused -Wimplicit -Wreturn-type -Wswitch \
+if test "x$GCC" = "xyes" ; then
+	CFLAGS="$CFLAGS -g -Wunused -Wimplicit -Wreturn-type -Wswitch \
 	-Wcomment -Wtrigraphs -Wformat -Wchar-subscripts \
         -Wparentheses -Wpointer-arith -Wcast-align \
         -Wwrite-strings -Waggregate-return -Wstrict-prototypes \
-        -Wmissing-prototypes -Wnested-externs -Winline -Wredundant-decls "
+        -Wmissing-prototypes -Wnested-externs -Winline -Wredundant-decls "		
+fi
+
+
 #-pedantic -Wshadow -0 -Wuninitialized
 
 dnl

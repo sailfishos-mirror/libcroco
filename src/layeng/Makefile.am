@@ -10,10 +10,10 @@ endif
 
 libcrlayeng_la_SOURCES=$(LAYENG_SRCS)
 INCLUDES=-I$(top_srcdir) -I$(top_srcdir)/src/parser -I$(top_srcdir)/src/seleng -I$(top_srcdir)/intl \
-`pkg-config --cflags libgnomeui-2.0` \
-`pkg-config --cflags glib-2.0` `pkg-config --cflags libxml-2.0` @LIBXML2_CFLAGS@
+@GLIB2_CFLAGS@ @LIBXML2_CFLAGS@ @LIBGNOMEUI2_CFLAGS@
+
 
 LDADD=$(top_srcdir)/src/parser/libcroco.la $(top_srcdir)/src/parser/libcrseleng.la
 
 libcrlayeng_la_LDFLAGS=-version-info @LIBCROCO_VERSION_INFO@ @LIBXML2_LIBS@ \
-`pkg-config --libs libgnomeui-2.0`
+@LIBGNOMEUI2_LIBS@

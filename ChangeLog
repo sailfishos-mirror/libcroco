@@ -1,3 +1,8 @@
+2003-05-01  Dodji  <dodji@seketeli.org>
+
+	* configure.in, csslint/Makefile.am, src/parser/Makefile.am, src/seleng/Makefile.am, src/layeng/Makefile.am: 
+	fixed #111895
+
 2003-04-28  Dodji  <dodji@seketeli.org>
 
 	* tests/test7-main.c: woohoo, this now shows some text. 
