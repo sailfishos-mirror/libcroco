@@ -80,9 +80,9 @@ enum CRPropertyID
 	PROP_ID_LEFT,
 	PROP_ID_FLOAT,
 	PROP_ID_WIDTH,
-        PROP_ID_COLOR,
+        PROP_ID_COLOR,        
         PROP_ID_BACKGROUND_COLOR,
-
+        PROP_ID_FONT_FAMILY,
         /*should be the last one.*/
         NB_PROP_IDS
 } ;
@@ -132,6 +132,7 @@ static CRPropertyDesc gv_prop_table [] =
 	{"width", PROP_ID_WIDTH},
         {"color", PROP_ID_COLOR},
         {"background-color", PROP_ID_BACKGROUND_COLOR},
+        {"font-family", PROP_ID_FONT_FAMILY},
 
         /*must be the last one*/
 	{NULL, 0}
@@ -228,6 +229,9 @@ set_prop_padding_from_value (CRStyle *a_style, CRTerm *a_value) ;
 
 static enum CRStatus
 set_prop_margin_from_value (CRStyle *a_style, CRTerm *a_value) ;
+
+static enum CRStatus
+set_prop_font_family_from_value (CRStyle *a_style, CRTerm *a_value) ;
 
 static enum CRStatus
 cr_style_init_properties (void)
@@ -1353,6 +1357,108 @@ set_prop_margin_from_value (CRStyle *a_style, CRTerm *a_value)
         return status ;
 }
 
+static enum CRStatus
+set_prop_font_family_from_value (CRStyle *a_style, CRTerm *a_value)
+{
+        CRTerm *cur_term = NULL ;
+        CRFontFamily *font_family = NULL, *cur_ff = NULL, *cur_ff2 = NULL;
+
+        g_return_val_if_fail (a_style && a_value, CR_BAD_PARAM_ERROR) ;
+
+        
+        for (cur_term = a_value ; cur_term ; cur_term = cur_term->next)
+        {
+                switch (cur_term->type)
+                {
+                case TERM_IDENT:
+                {
+                        enum CRFontFamilyType font_type ;
+
+                        if (cur_term->content.str
+                            && cur_term->content.str->str
+                            && ! strcmp (cur_term->content.str->str,
+                                         "sans-serif"))
+                        {
+                                font_type = FONT_FAMILY_SANS_SERIF ;
+                        }
+                        else if (cur_term->content.str
+                                 && cur_term->content.str->str
+                                 && ! strcmp (cur_term->content.str->str,
+                                              "serif"))
+                        {
+                                font_type = FONT_FAMILY_SERIF ;
+                        }
+                        else if (cur_term->content.str
+                                 && cur_term->content.str->str
+                                 && ! strcmp (cur_term->content.str->str,
+                                              "cursive"))
+                        {
+                                font_type = FONT_FAMILY_CURSIVE ;
+                        }
+                        else if (cur_term->content.str
+                                 && cur_term->content.str->str
+                                 && ! strcmp (cur_term->content.str->str,
+                                              "fantasy"))
+                        {
+                                font_type = FONT_FAMILY_FANTASY ;
+                        }
+                        else if (cur_term->content.str
+                                 && cur_term->content.str->str
+                                 && ! strcmp (cur_term->content.str->str,
+                                              "monospace"))
+                        {
+                                font_type = FONT_FAMILY_MONOSPACE ;
+                        }
+                        else
+                        {
+                                /*
+                                 *unknown property value.
+                                 *ignore it.
+                                 */
+                                continue ;
+                        }
+
+                        cur_ff = 
+                                cr_font_family_new (font_type, NULL) ;
+                }                   
+                break ;
+
+                case TERM_STRING:
+                {
+                        if (cur_term->content.str
+                            && cur_term->content.str->str)
+                        {
+                                cur_ff = cr_font_family_new 
+                                        (FONT_FAMILY_NON_GENERIC,
+                                         cur_term->content.str->str) ;
+                        }
+                }
+                break ;
+
+                default:
+                        break ;
+                }
+
+                cur_ff2 = cr_font_family_append (font_family,
+                                                 cur_ff) ;
+                if (cur_ff2)
+                {
+                        font_family = cur_ff2 ;
+                }
+        }
+        
+        if (font_family)
+        {
+                if (a_style->font_family)
+                {
+                        cr_font_family_destroy (a_style->font_family) ;
+                        a_style->font_family = font_family ;
+                }
+        }
+
+        return CR_OK ;
+}
+
 /******************
  *Public methods
  ******************/
@@ -1606,6 +1712,12 @@ cr_style_set_style_from_decl (CRStyle *a_this, CRDeclaration *a_decl)
 
         case PROP_ID_BACKGROUND_COLOR:
                 status = set_prop_background_color (a_this, value) ;
+                break ;
+                
+        case PROP_ID_FONT_FAMILY:
+                status = 
+                        set_prop_font_family_from_value (a_this, value) ;
+                break ;
 
         default:
                 return CR_UNKNOWN_TYPE_ERROR ;

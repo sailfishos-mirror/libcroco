@@ -25,6 +25,7 @@
 
 #include "cr-utils.h"
 #include "cr-statement.h"
+#include "cr-fonts.h"
 
 /**
  *@file
@@ -241,7 +242,7 @@ struct _CRStyle
          *guchar* each element of the list is
          *the name of a font family.
          */
-        /*CRFontFamily *font-family ;*/
+        CRFontFamily *font_family ;
 
         CRStyle *parent_style ;
         gulong ref_count ;
