@@ -118,7 +118,7 @@ cr_cascade_get_sheet (CRCascade *a_this,
                       enum CRStyleOrigin a_origin)
 {
 	g_return_val_if_fail (a_this
-			      && a_origin >= ORIGIN_AUTHOR
+			      && a_origin >= ORIGIN_UA
 			      && a_origin < NB_ORIGINS,
 			      NULL) ;
 
@@ -141,7 +141,7 @@ cr_cascade_set_sheet (CRCascade *a_this,
 {
 	g_return_val_if_fail (a_this
 			      && a_sheet
-			      && a_origin >= ORIGIN_AUTHOR
+			      && a_origin >= ORIGIN_UA
 			      && a_origin < NB_ORIGINS,
 			      CR_BAD_PARAM_ERROR) ;
 

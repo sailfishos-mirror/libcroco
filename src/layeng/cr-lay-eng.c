@@ -778,8 +778,9 @@ compute_text_box_inner_edge_size (CRBox *a_this)
 
         text = a_this->content->u.text ;
 
-        label = gtk_label_new (NULL) ;      
+        label = gtk_label_new (NULL) ;
         g_return_val_if_fail (label, CR_ERROR) ;
+
         gtk_misc_set_alignment (GTK_MISC (label),0, 0) ;
         gtk_misc_set_padding (GTK_MISC (label), 0, 0) ;        
 
@@ -790,16 +791,10 @@ compute_text_box_inner_edge_size (CRBox *a_this)
         a_this->inner_edge.width = logical_rect.width ;
         a_this->inner_edge.height = logical_rect.height ;
         gtk_label_set_text (GTK_LABEL (label), text) ;
-        a_this->content->content_cache = label ;
-        label = NULL ;
+        a_this->content->content_cache = label ;        
 
 /* cleanup:*/
 
-        if (label)
-        {
-                gtk_widget_destroy (label) ;
-                label = NULL ;
-        }
 
         if (pgo_layout)
         {
@@ -1289,8 +1284,7 @@ cr_lay_eng_init (glong a_argc, gchar ** a_argv)
 
         if (gv_layeng_initialized == FALSE)
         {
-                gnome_init ("croco layout engine", "0.0" ,
-                            a_argc, a_argv) ;
+                gtk_init ((int*)&a_argc, &a_argv) ;
                 gv_layeng_initialized = TRUE ;
         }
 }

@@ -62,9 +62,10 @@ cr_sel_eng_get_matched_rulesets_real (CRSelEng *a_this,
 static enum CRStatus
 put_css_properties_in_hashtable (GHashTable **a_props_hashtable,
                                  CRStatement *a_ruleset) ;
+
 static void
-set_style_from_props_hash_hr_func (guchar *a_prop, CRStatement *a_stmt,
-                                   CRStyle *a_style) ;
+set_style_from_props_hash_hr_func (gpointer a_prop, gpointer a_stmt,
+                                   gpointer a_style) ;
 
 struct _CRSelEngPriv
 {
@@ -721,6 +722,8 @@ cr_sel_eng_get_matched_rulesets_real (CRSelEng *a_this,
 
                                         g_return_val_if_fail (status == CR_OK,
                                                               CR_ERROR) ;
+                                        cur_stmt->specificity = 
+                                                cur_sel->simple_sel->specificity;
                                 }
                                 else
                                         
@@ -806,9 +809,9 @@ put_css_properties_in_hashtable (GHashTable **a_props_hashtable,
 
                         if (!stmt)
                         {
-                                g_hash_table_replace 
+                                g_hash_table_insert 
                                         (props_hash,
-                                         cur_decl->property,
+                                         cur_decl->property->str,
                                          a_ruleset) ;
                                 continue ;
                         }
@@ -833,9 +836,9 @@ put_css_properties_in_hashtable (GHashTable **a_props_hashtable,
                                 <
                                 cur_stmt->parent_sheet->origin))
                         {
-                                g_hash_table_replace 
+                                g_hash_table_insert 
                                         (props_hash,
-                                         cur_decl->property,
+                                         cur_decl->property->str,
                                          a_ruleset) ;
                                 continue ;
                         }
@@ -862,9 +865,9 @@ put_css_properties_in_hashtable (GHashTable **a_props_hashtable,
                          */
                         if (cur_stmt->specificity >= stmt->specificity)
                         {
-                                g_hash_table_replace 
+                                g_hash_table_insert
                                         (props_hash,
-                                         cur_decl->property,
+                                         cur_decl->property->str,
                                          a_ruleset) ;      
                         }
                 }
@@ -874,21 +877,36 @@ put_css_properties_in_hashtable (GHashTable **a_props_hashtable,
 }
 
 static void
-set_style_from_props_hash_hr_func (guchar *a_prop, CRStatement *a_stmt,
-                                   CRStyle *a_style)
+set_style_from_props_hash_hr_func (gpointer a_prop, gpointer a_stmt,
+                                   gpointer a_style)
 {
         CRDeclaration *cur_decl = NULL ;
+        CRStatement *stmt = a_stmt ;
+        CRStyle *style = a_style ;
+        guchar *prop = a_prop ;
 
-        g_return_if_fail (a_prop && a_stmt 
-                          && a_stmt->type == RULESET_STMT
-                          && a_stmt->kind.ruleset
-                          && a_style) ;
+        g_return_if_fail (prop && stmt 
+                          && stmt->type == RULESET_STMT
+                          && stmt->kind.ruleset
+                          && style) ;
 
-        for (cur_decl = a_stmt->kind.ruleset->decl_list ;
-             cur_decl ; cur_decl = cur_decl->next)
+        for (cur_decl = stmt->kind.ruleset->decl_list;
+             cur_decl && cur_decl->next ; cur_decl = cur_decl->next) ;
+
+
+        for (;
+             cur_decl ; cur_decl = cur_decl->prev)
         {
-                cr_style_set_style_from_decl (a_style, cur_decl) ;
+                if (cur_decl->property 
+                    && cur_decl->property->str
+                    && !strcmp (cur_decl->property->str, prop) )
+                {
+                        break ;
+                }
         }
+
+        if (cur_decl)
+                cr_style_set_style_from_decl (style, cur_decl) ;
 }
 
 
@@ -1153,79 +1171,6 @@ cr_sel_eng_get_matched_properties_from_cascade  (CRSelEng *a_this,
         return status ;
 }
 
-/**
- *Retrieves the style structure that matches the xml node
- *from the cascade.
- *NOTE: this does not implement the complex cascade algorithms
- *described in the css2 spec from chapter 6.4 on, but instead,
- *is just an empty design sketch so that other hackers (yeah, we can dream) 
- *can come an implement it. I don't have the time for this right now.
- *@param a_this the current instance of #CRLayEng.
- *@param a_cascade the cascade from which the request is to be made.
- *@param a_node the xml node to match
- *@param a_parent_style the style of the parent xml node.
- *@param a_style out parameter. a pointer to the style 
- *structure to be returned. *a_style must be set to NULL, otherwise
- *a CR_BAD_PARAM_ERROR is returned. The caller must free the
- *the returned *a_style using cr_style_destroy().
- *@return CR_OK upon successfull completion, an error code otherwise.
- */
-#if 1
-enum CRStatus
-cr_sel_eng_get_matched_style (CRSelEng *a_this,
-                              CRCascade *a_cascade,
-                              xmlNode *a_node,
-                              CRStyle *a_parent_style,
-                              CRStyle **a_style)
-{
-        CRStatement **rulesets = NULL ;
-        CRStyleSheet *author_sheet = NULL ;
-        gulong len = 0 ;
-        CRStyle *result_style = NULL ;
-        enum CRStatus status = CR_OK ;
-
-        g_return_val_if_fail (a_this && a_cascade
-                              && a_node && a_style
-                              && (*a_style == NULL),
-                              CR_BAD_PARAM_ERROR) ;
-
-        author_sheet = cr_cascade_get_sheet (a_cascade, 
-                                             ORIGIN_AUTHOR) ;
-        if (!author_sheet)
-        {
-                cr_utils_trace_info ("Could not get author sheet "
-                                     "from cascade") ;
-                return CR_ERROR ;
-        }
-
-        status = cr_sel_eng_get_matched_rulesets
-                (a_this, author_sheet,
-                 a_node, &rulesets, &len) ;
-
-        if (len && rulesets[len - 1])
-        {
-                status = cr_style_new_from_ruleset 
-                        (rulesets[len - 1], a_parent_style,
-                         &result_style) ;
-                
-        }
-
-        if (result_style)
-        {
-                *a_style = result_style ;
-                result_style = NULL ;
-        }
-
-        if (rulesets)
-        {
-                g_free (rulesets) ;
-                rulesets = NULL ;
-        }
-
-        return status ;
-}
-#else
-
 
 enum CRStatus
 cr_sel_eng_get_matched_style (CRSelEng *a_this,
@@ -1259,9 +1204,7 @@ cr_sel_eng_get_matched_style (CRSelEng *a_this,
                 g_hash_table_foreach (props_hash,
                                       ((GHFunc)
                                        set_style_from_props_hash_hr_func),
-                                      a_style) ;
-
-                
+                                      *a_style) ;                
         }
 
         if (props_hash)
@@ -1272,8 +1215,6 @@ cr_sel_eng_get_matched_style (CRSelEng *a_this,
 
         return CR_OK ;
 }
-
-#endif
 
 /**
  *The destructor of #CRSelEng

@@ -208,7 +208,7 @@ cr_simple_sel_compute_specificity (CRSimpleSel *a_this)
 {
         CRAdditionalSel *cur_add_sel = NULL ;
         CRSimpleSel *cur_sel = NULL ;
-        gulong a, b, c;
+        gulong a=0, b=0, c=0;
 
         g_return_val_if_fail (a_this, CR_BAD_PARAM_ERROR) ;
 

@@ -161,7 +161,9 @@ test_layout_box (void)
         {
                 cr_lay_eng_layout_box_tree (layout_engine,
                                             ((CRBox*)box_model)->children) ;
+
                 cr_box_dump_to_file ((CRBox*)box_model, 0, stdout) ;
+
 
                 window = gtk_window_new (GTK_WINDOW_TOPLEVEL) ;
                 if (!window) 

@@ -37,9 +37,6 @@ static enum CRStatus
 cr_box_construct (CRBox *a_this, CRStyle *a_style,
                   gboolean a_set_default_style) ;
 
-static void
-cr_box_shutdown (CRBox *a_this) ;
-
 static enum CRStatus
 cr_box_edge_to_string (CRBoxEdge *a_this,
                        gulong a_nb_indent,
@@ -141,33 +138,6 @@ cr_box_construct (CRBox *a_this, CRStyle *a_style,
 }
 
 
-static void
-cr_box_shutdown (CRBox *a_this)
-{
-        if (a_this->content)
-        {
-                cr_box_content_destroy (a_this->content) ;
-                a_this->content = NULL ;
-        }
-
-        if (a_this->style)
-        {
-                cr_style_unref (a_this->style) ;
-                a_this->style = NULL ;
-        }
-
-	if (a_this->children)
-	{
-		CRBox *cur = NULL;
-
-		for (cur = a_this->children ; cur ; cur = cur->next)
-		{
-			cr_box_destroy (cur) ;
-		}
-
-		a_this->children = NULL ;
-	}
-}
 
 static enum CRStatus
 cr_box_edge_to_string (CRBoxEdge *a_this,
@@ -346,7 +316,7 @@ cr_box_model_destroy (CRBoxModel *a_this)
 {
         g_return_if_fail (a_this) ;
 
-        cr_box_shutdown (&a_this->box) ;
+        cr_box_destroy (&a_this->box) ;
 
         g_free (a_this) ;
 }
@@ -725,10 +695,39 @@ void
 cr_box_destroy (CRBox *a_this)
 
 {
+        CRBox *cur_box = NULL ;
+
 	g_return_if_fail (a_this) ;
+        
+        for (cur_box = a_this; cur_box && cur_box->next ; 
+             cur_box = cur_box->next) ;
 
-        cr_box_shutdown (a_this) ;
+        for (; cur_box ; cur_box = cur_box->prev)
+        {
+                if (cur_box->content)
+                {
+                        cr_box_content_destroy (cur_box->content) ;
+                        cur_box->content = NULL ;
+                }
 
-	g_free (a_this) ;
+                if (cur_box->style)
+                {
+                        cr_style_unref (cur_box->style) ;
+                        cur_box->style = NULL ;
+                }
+
+                if (cur_box->next)
+                {
+                        g_free (cur_box->next) ;
+                        cur_box->next = NULL ;
+                }
+
+                if (cur_box->children)
+                {
+                        cr_box_destroy (cur_box->children) ;
+                        g_free (cur_box->children) ;
+                        cur_box->children = NULL ;
+                }
+        }
 }
 
