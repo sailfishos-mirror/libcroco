@@ -392,23 +392,23 @@ cr_rgb_set_from_hex_str (CRRgb *a_this, const guchar * a_hex)
         {                
                 for (i = 0 ;i < 3 ; i++)
                 {
-                        switch (a_hex[i])
+                        if (a_hex[i] >= '0' && a_hex[i] <= '9') 
                         {
-                        case '0' ... '9':
                                 colors[i] = a_hex[i] - '0';
                                 colors[i] = (colors[i] << 4) | colors[i] ;
-                                break ;
-
-                        case 'a' ... 'z':
+                        } 
+                        else if (a_hex[i] >= 'a' && a_hex[i] <= 'z')
+                        {
                                 colors[i] = 10 + a_hex[i] - 'a';
                                 colors[i] = (colors[i] << 4) | colors[i] ;
-                                break ;
-
-                        case 'A' ... 'Z':
+                        }
+                        else if (a_hex[i] >= 'A' && a_hex[i] <= 'Z')
+                        {
                                 colors[i] = 10 + a_hex[i] - 'A';
                                 colors[i] = (colors[i] << 4) | colors[i] ;
-                                break ;
-                        default:
+                        }
+                        else
+                        {
                                 status = CR_UNKNOWN_TYPE_ERROR ;
                         }
                 }
@@ -416,31 +416,29 @@ cr_rgb_set_from_hex_str (CRRgb *a_this, const guchar * a_hex)
         else if (strlen (a_hex) == 6)
         {
                 for (i = 0 ; i < 6 ; i++)
-                {
-                        
-                        switch (a_hex[i])
+                {                        
+                        if (a_hex[i] >='0' && a_hex[i] <= '9')
                         {
-                        case '0' ... '9':
                                 colors[i/2] <<= 4 ;
                                 colors[i/2] |= a_hex[i] - '0';
                                 status = CR_OK ;
-                                break ;
-
-                        case 'a' ... 'z':
+                        }
+                        else if (a_hex[i] >= 'a' && a_hex[i] <= 'z')
+                        {
                                 colors[i/2] <<= 4 ;
                                 colors[i/2] |= 10 + a_hex[i] - 'a';
                                 status = CR_OK ;
-                                break ;
-
-                        case 'A' ... 'Z':
+                        }
+                        else if (a_hex[i] >= 'A' && a_hex[i] <= 'Z')
+                        {
                                 colors[i/2] <<= 4 ;
                                 colors[i/2] |= 10 + a_hex[i] - 'A';
-                                status = CR_OK ;
-                                break ;
-
-                        default:
+                                status = CR_OK ;       
+                        }
+                        else
+                        {
                                 status = CR_UNKNOWN_TYPE_ERROR ;
-                        }                        
+                        }
                 }
         }
         else

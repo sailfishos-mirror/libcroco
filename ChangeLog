@@ -1,5 +1,10 @@
 2004-02-29  Dodji Seketeli  <dodji@gnome.org>
 
+	* src/cr-rgb.c,src/cr-tknzr.c: remove the usage of '...' in switch/case statements
+	as this is not portable across c89 compilers.
+	
+2004-02-29  Dodji Seketeli  <dodji@gnome.org>
+
 	* src/cr-rgb.c: 
 	(cr_rgb_set): fixed a stupid bug here.
 
