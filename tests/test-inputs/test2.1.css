@@ -1,15 +1,17 @@
 
 /*simple Attribute set selectors*/
-s1[foo] {prop1 : "\\73 tring"}
+s1[foo] {prop1 : "\83 tring"}
+
+s2[foo] {prop1 : "\\73 tring"}
 
 /*simple exact attribute selector, simple ruleset*/
-s1[foo="warning"] {prop1 : value1}
+s3[foo="warning"] {prop1 : value1}
 
 /**
  *"space separated value list"
  *attribute selector, simple ruleset
  */
-s1[foo~="warning"] {prop1 :value1}
+s4[foo~="warning"] {prop1 :value1}
 
 /**
  *"hyphen separated value list" attribute selector,
@@ -17,7 +19,7 @@ s1[foo~="warning"] {prop1 :value1}
  */
 
  /*simple class selector, simple ruleset*/
- s1.warning {prop1 : value}
+ s5.warning {prop1 : value}
 
  E#myid {prop1 : value1}
 
@@ -25,11 +27,11 @@ s1[foo~="warning"] {prop1 :value1}
 /*below are tests that we know are working*/
 
 /*simple ident pseudo class selector, simple ruleset test*/
-S1:first-child {prop1 : value1 ; prop2 : value2}
+S6:first-child {prop1 : value1 ; prop2 : value2}
 
 /*function pseudo class selector, simple ruleset test*/
-S1:lang(c) {prop1 : value1}
+S7:lang(c) {prop1 : value1}
 
 /*Adjacent selectors, simple ruleset test*/
-S1 + s2 {prop1: value1}
+S8 + s2 {prop1: value1}
 
