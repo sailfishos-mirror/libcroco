@@ -1231,7 +1231,7 @@ cr_tknzr_parse_uri (CRTknzr *a_this, GString **a_str)
                         PEEK_NEXT_CHAR (a_this, &next_char) ;
 
                         if (strchr ("!#$%&", next_char) 
-                            || (cur_char >= '*' && next_char <= '~')
+                            || (next_char >= '*' && next_char <= '~')
                             || (cr_utils_is_nonascii (next_char) == TRUE))
                         {
                                 READ_NEXT_CHAR (a_this, &cur_char) ;
@@ -1735,6 +1735,24 @@ cr_tknzr_new (CRInput *a_input)
 	return result ;
 }
 
+
+CRTknzr *
+cr_tknzr_new_from_buf (guchar *a_buf, gulong a_len,
+                       enum CREncoding a_enc,
+                       gboolean a_free_at_destroy)
+{
+        CRTknzr * result = NULL ;
+        CRInput *input = NULL ;
+
+        input = cr_input_new_from_buf (a_buf, a_len, a_enc,
+                                       a_free_at_destroy) ;
+
+        g_return_val_if_fail (input != NULL, NULL) ;
+
+        result = cr_tknzr_new (input) ;
+
+        return result ;
+}
 
 CRTknzr *
 cr_tknzr_new_from_uri (guchar *a_file_uri,

@@ -14,7 +14,8 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
- * You should have received a copy of the GNU Lesser General Public License
+ * You should have received a copy of the 
+ * GNU Lesser General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
  * USA
@@ -61,6 +62,14 @@ cr_om_parser_parse_file (CROMParser *a_this,
                          guchar *a_file_uri,
                          enum CREncoding a_enc,
                          CRStyleSheet **a_result) ;
+
+enum CRStatus
+cr_om_parser_parse_buf (CROMParser *a_this,
+                        guchar *a_buf,
+                        gulong a_len,
+                        enum CREncoding a_enc,
+                        CRStyleSheet **a_result) ;
+
 void
 cr_om_parser_destroy (CROMParser *a_this) ;
 

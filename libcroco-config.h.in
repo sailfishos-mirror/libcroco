@@ -65,3 +65,6 @@
 
 /* use css2 selection engine */
 #undef WITH_SELENG
+
+/* enable the unit tests */
+#undef WITH_TESTS

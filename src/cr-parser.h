@@ -92,8 +92,12 @@ enum CRStatus
 cr_parser_parse (CRParser *a_this) ;
         
 enum CRStatus
-cr_parser_parse_from_file (CRParser *a_this, guchar *a_file_uri, 
-                           enum CREncoding a_enc) ;
+cr_parser_parse_file (CRParser *a_this, guchar *a_file_uri, 
+                      enum CREncoding a_enc) ;
+
+enum CRStatus
+cr_parser_parse_buf (CRParser *a_this, guchar *a_buf, 
+                     gulong a_len, enum CREncoding a_enc) ;
 
 enum CRStatus
 cr_parser_set_default_sac_handler (CRParser *a_this) ;

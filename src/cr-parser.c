@@ -4930,6 +4930,29 @@ cr_parser_set_tknzr (CRParser *a_this, CRTknzr *a_tknzr)
 
 
 
+enum CRStatus
+cr_parser_parse_buf (CRParser *a_this, guchar *a_buf, 
+                     gulong a_len, enum CREncoding a_enc)
+{
+        enum CRStatus status = CR_ERROR ;
+        CRTknzr *tknzr = NULL ;
+
+        g_return_val_if_fail (a_this && PRIVATE (a_this)
+                              && a_buf,
+                              CR_BAD_PARAM_ERROR) ;
+
+        tknzr = cr_tknzr_new_from_buf (a_buf,a_len,
+                                       a_enc, FALSE) ;
+
+        g_return_val_if_fail (tknzr != NULL, CR_ERROR) ;
+
+        status = cr_parser_set_tknzr (a_this, tknzr) ;
+        g_return_val_if_fail (status == CR_OK, CR_ERROR) ;
+
+        status = cr_parser_parse (a_this) ;
+
+        return status ;
+}
 
 /**
  *Parses a the given in parameter.
@@ -4939,7 +4962,7 @@ cr_parser_set_tknzr (CRParser *a_this, CRTknzr *a_tknzr)
  *@return CR_OK upon successfull completion, an error code otherwise.
  */
 enum CRStatus
-cr_parser_parse_from_file (CRParser *a_this, guchar *a_file_uri, 
+cr_parser_parse_file (CRParser *a_this, guchar *a_file_uri, 
                            enum CREncoding a_enc)
 {
         enum CRStatus status = CR_ERROR ;

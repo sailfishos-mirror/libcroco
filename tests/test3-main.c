@@ -594,7 +594,7 @@ test_cr_parser_parse (guchar * a_file_uri)
         }        
 
         status = cr_parser_set_use_core_grammar (parser, TRUE) ;
-        status = cr_parser_parse_from_file (parser, a_file_uri, CR_ASCII) ;
+        status = cr_parser_parse_file (parser, a_file_uri, CR_ASCII) ;
 
         cr_parser_destroy (parser) ;       
 
