@@ -18,4 +18,9 @@
 #include "cr-stylesheet.h"
 #include "cr-om-parser.h"
 
+#ifdef WITH_SELENG
+#include "cr-sel-eng.h"
+#endif
+
+
 #endif /*__LIBCROCO_H__*/
