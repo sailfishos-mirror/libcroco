@@ -115,7 +115,15 @@ id_add_sel_matches_node (CRAdditionalSel *a_add_sel,
         return result ;
 }
 
-
+/**
+ *Returns TRUE if the instance of #CRAdditional selector matches
+ *the node given in parameter, FALSE otherwise.
+ *@param a_add_sel the additional selector to evaluate.
+ *@param a_node the xml node against whitch the selector is to
+ *be evaluated
+ *return TRUE if the additional selector matches the current xml node
+ *FALSE otherwise.
+ */
 static gboolean
 attr_add_sel_matches_node (CRAdditionalSel *a_add_sel,
                            xmlNode *a_node) 
@@ -164,36 +172,106 @@ attr_add_sel_matches_node (CRAdditionalSel *a_add_sel,
 
                 case INCLUDES:
                  {
-                        xmlChar *value = NULL ;
-                        
+                         xmlChar *value = NULL, *ptr1 = NULL, *ptr2 = NULL,
+                                 *cur = NULL;
+                         gboolean found = FALSE ;
+
                         if (!xmlHasProp (a_node, cur_sel->name->str))
                                 return FALSE ;
                         value = xmlGetProp (a_node, cur_sel->name->str) ;
+                        
+                        if (!value)                        
+                                return FALSE;
                         
                         /*
                          *here, make sure value is a space
                          *separated list of "words", where one
                          *value is exactly cur_sel->value->str
                          */
-                        
+                        for (cur = value ; *cur ; cur++)
+                        {
+                                /*
+                                 *set ptr1 to the first non white space
+                                 *char addr.
+                                 */
+                                while (cr_utils_is_white_space 
+                                       (*cur) == TRUE && *cur)
+                                        cur ++ ;
+                                if (!*cur)
+                                        break ;
+                                ptr1 = cur ;
+
+                                /*
+                                 *set ptr2 to the end the word.
+                                 */
+                                while (cr_utils_is_white_space 
+                                       (*cur) == FALSE && *cur)
+                                        cur++ ;
+                                if (!*cur)
+                                        break ;
+                                cur-- ;
+                                ptr2 = cur ;
+
+                                if (!strncmp (ptr1, cur_sel->value->str,
+                                              ptr2 - ptr1 + 1))
+                                {
+                                        found = TRUE ;
+                                        break ;
+                                }
+                                ptr1 = ptr2 = NULL ;
+                        }
+
+                        if (found == FALSE)
+                        {
+                                xmlFree (value) ;
+                                return FALSE ;
+                        }
                         xmlFree (value) ;
-                }       
+                }
                  break ;
+
                 case DASHMATCH:
                 {
-                        xmlChar *value = NULL ;
+                        xmlChar *value = NULL, *ptr1 = NULL, *ptr2 = NULL,
+                                 *cur = NULL;
+                         gboolean found = FALSE ;
                         
                         if (!xmlHasProp (a_node, cur_sel->name->str))
                                 return FALSE ;
                         value = xmlGetProp (a_node, cur_sel->name->str) ;
-                        
+
                         /*
                          *here, make sure value is an hyphen
                          *separated list of "words", each of which
                          *starting with "cur_sel->value->str"
                          */
+                        for (cur = value ; *cur ; cur++)
+                        {
+                                if (*cur == '-')
+                                        cur ++ ;
+                                ptr1 = cur ;
+                                
+                                while (*cur != '-' && *cur)
+                                        cur ++ ;
+                                if (!*cur)
+                                        break ;
+                                cur-- ;
+                                ptr2 = cur ;
+                                
+                                if (g_strstr_len (ptr1, ptr1 - ptr2 + 1,
+                                                  cur_sel->value->str)
+                                        == (gchar*)ptr1)
+                                {
+                                        found = TRUE ;
+                                        break ;
+                                }
+                        }
 
-                        
+                        if (found == FALSE)
+                        {
+                                xmlFree (value) ;
+                                return FALSE ;
+                        }
                         xmlFree (value) ;
                 }
                 break ;
@@ -211,7 +289,6 @@ struct _CRSelEngPriv
 };
 
 
-
 /**
  *Creates a new instance of #CRSelEng.
  *@return the newly built instance of #CRSelEng of
@@ -220,8 +297,8 @@ struct _CRSelEngPriv
 CRSelEng *
 cr_sel_eng_new (void)
 {
-	CRSelEng *result ;
-	
+	CRSelEng *result = NULL;
+
 	result = g_try_malloc (sizeof (CRSelEng)) ;
 	if (!result)
 	{
@@ -308,21 +385,28 @@ cr_sel_eng_sel_matches_node (CRSelEng *a_this, CRSimpleSel *a_sel,
 		else if (cur_sel->add_sel->type == ATTRIBUTE_ADD_SELECTOR
 			 && cur_sel->add_sel->content.attr_sel)
 		{
-                        
-			/*
+                        /*
 			 *here, call a function that does the match
 			 *against an attribute additionnal selector
-			 *and a list of attribute xml node.
+			 *and an xml node.
 			 */
+                        if (attr_add_sel_matches_node 
+                            (cur_sel->add_sel, a_node)
+                                == FALSE)
+                        {
+                                return FALSE ;
+                        }
+                        goto walk_a_step_in_expr ;
 		}
 
-	walk_a_step_in_expr:		
-                continue ;
-		/*
+	walk_a_step_in_expr:
+                /*
 		 *here, depending on the combinator of cur_sel
 		 *choose the axis of the xml tree traversing
 		 *and walk one step in the xml tree.
 		 */
+                continue ;
+		
 	}
 
 	return TRUE ;
