@@ -25,40 +25,20 @@
 #ifndef __CR_LAY_ENG_H__
 #define __CR_LAY_ENG_H__
 
-#include <libxml/tree.h>
 #include "cr-utils.h"
-#include "cr-cascade.h"
-#include "cr-box.h"
-
-/**
- *@file
- *the declaration of the #CRLayEng class.
- */
-
-G_BEGIN_DECLS
 
 typedef struct _CRLayEngPriv CRLayEngPriv ;
 
-/**
- *The abstraction of the Layout engine of libcroco.
- */
 typedef struct
 {
-	CRLayEngPriv *priv ;
-} CRLayEng ;
+	CRLayoutEngPriv *priv ;
+} CRLayoutEng ;
 
 
 CRLayEng *
 cr_lay_eng_new (void) ;
 
-enum CRStatus
-cr_lay_eng_build_box_tree (CRLayEng *a_this,
-                           xmlDoc *a_xml_doc,
-                           CRCascade *a_cascade,
-                           CRBox **a_box_tree) ;
 void
 cr_lay_eng_destroy (CRLayEng *a_this) ;
-
-G_END_DECLS
 
 #endif /*__CR_LAYOUT_ENG_H__*/

@@ -161,8 +161,8 @@ cr_lay_eng_create_box_tree_real (CRLayEng * a_this,
                 if (cur->type == XML_ELEMENT_NODE)
                 {
                         status =
-                                cr_sel_eng_get_matched_style
-                                (PRIVATE (a_this)->sel_eng,
+                                cr_lay_eng_get_matched_style
+                                (a_this,
                                  PRIVATE (a_this)->cascade,
                                  cur, parent_style, &style) ;
 
@@ -585,6 +585,93 @@ cr_lay_eng_build_box_tree (CRLayEng *a_this,
         return CR_OK ;
 }
 
+
+/**
+ *Retrieves the style structure that matches the xml node
+ *from the cascade.
+ *NOTE: this does not implement the complex cascade algorithms
+ *described in the css2 spec from chapter 6.4 on, but instead,
+ *is just an empty design sketch so that other hackers (yeah, we can dream) 
+ *can come an implement it. I don't have the time for this right now.
+ *@param a_this the current instance of #CRLayEng.
+ *@param a_cascade the cascade from which the request is to be made.
+ *@param a_node the xml node to match
+ *@param a_parent_style the style of the parent xml node.
+ *@param a_style out parameter. a pointer to the style 
+ *structure to be returned. *a_style must be set to NULL, otherwise
+ *a CR_BAD_PARAM_ERROR is returned. The caller must free the
+ *the returned *a_style using cr_style_destroy().
+ *@return CR_OK upon successfull completion, an error code otherwise.
+ */
+enum CRStatus
+cr_lay_eng_get_matched_style (CRLayEng *a_this,
+                              CRCascade *a_cascade,
+                              xmlNode *a_node,
+                              CRStyle *a_parent_style,
+                              CRStyle **a_style)
+{       
+        CRStatement **rulesets = NULL ;
+        CRStyleSheet *author_sheet = NULL ;
+        gulong len = 0 ;
+        CRStyle *result_style = NULL ;
+        CRSelEng * sel_eng = NULL ;
+        enum CRStatus status = CR_OK ;
+
+        g_return_val_if_fail (a_this && a_cascade
+                              && a_node && a_style
+                              && (*a_style == NULL),
+                              CR_BAD_PARAM_ERROR) ;
+
+        author_sheet = cr_cascade_get_sheet (a_cascade, 
+                                             ORIGIN_AUTHOR) ;
+        if (!author_sheet)
+        {
+                cr_utils_trace_info ("Could not get author sheet "
+                                     "from cascade") ;
+                return CR_ERROR ;
+        }
+
+        sel_eng = cr_sel_eng_new () ;
+        if (!sel_eng)
+        {
+                cr_utils_trace_info ("Failed to instanciate "
+                                     "The Selection Engine") ;
+                return CR_ERROR ;
+        }
+
+        status = cr_sel_eng_get_matched_rulesets (sel_eng, author_sheet,
+                                                  a_node, &rulesets,
+                                                  &len) ;
+        if (len && rulesets[len - 1])
+        {
+                status = cr_style_new_from_ruleset 
+                        (rulesets[len - 1], a_parent_style,
+                         &result_style) ;
+                
+        }
+
+        if (result_style)
+        {
+                *a_style = result_style ;
+                result_style = NULL ;
+        }
+
+        if (rulesets)
+        {
+                g_free (rulesets) ;
+                rulesets = NULL ;
+        }
+
+/* cleanup:*/
+
+        if (sel_eng)
+        {
+                cr_sel_eng_destroy (sel_eng) ;
+                sel_eng = NULL ;
+        }
+
+        return status ;
+}
 
 /**
  *Destuctor of #CRLayEng.

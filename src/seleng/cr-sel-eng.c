@@ -14,7 +14,8 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
- * You should have received a copy of the GNU Lesser General Public License
+ * You should have received a copy of the GNU Lesser 
+ * General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
  * USA
@@ -849,76 +850,6 @@ cr_sel_eng_get_matched_rulesets (CRSelEng *a_this,
         return status ;
 }
 
-
-/**
- *Retrieves the style structure that matches the xml node
- *from the cascade.
- *NOTE: this does not implement the complex cascade algorithms
- *described in the css2 spec from chapter 6.4 on, but instead,
- *is just an empty design sketch so that other hackers (yeah, we can dream) 
- *can come an implement it. I don't have the time for this right now.
- *@param a_this the current instance of #CRSelEng.
- *@param a_cascade the cascade from which the request is to be made.
- *@param a_node the xml node to match
- *@param a_parent_style the style of the parent xml node.
- *@param a_style out parameter. a pointer to the style 
- *structure to be returned. *a_style must be set to NULL, otherwise
- *a CR_BAD_PARAM_ERROR is returned. The caller must free the
- *the returned *a_style using cr_style_destroy().
- *@return CR_OK upon successfull completion, an error code otherwise.
- */
-enum CRStatus
-cr_sel_eng_get_matched_style (CRSelEng *a_this,
-                              CRCascade *a_cascade,
-                              xmlNode *a_node,
-                              CRStyle *a_parent_style,
-                              CRStyle **a_style)
-{       
-        CRStatement **rulesets = NULL ;
-        CRStyleSheet *author_sheet = NULL ;
-        gulong len = 0 ;
-        CRStyle *result_style = NULL ;
-
-        enum CRStatus status = CR_OK ;
-
-        g_return_val_if_fail (a_this && a_cascade
-                              && a_node && a_style
-                              && (*a_style == NULL),
-                              CR_BAD_PARAM_ERROR) ;
-
-        author_sheet = cr_cascade_get_sheet (a_cascade, 
-                                             ORIGIN_AUTHOR) ;
-        if (!author_sheet)
-        {
-                cr_utils_trace_info ("Could not get author sheet from cascade") ;
-                return CR_ERROR ;
-        }
-
-        status = cr_sel_eng_get_matched_rulesets (a_this, author_sheet,
-                                                  a_node, &rulesets,
-                                                  &len) ;
-        if (len && rulesets[len - 1])
-        {
-                status = cr_style_new_from_ruleset 
-                        (rulesets[len - 1], a_parent_style,
-                         &result_style) ;
-                
-        }
-
-        if (result_style)
-        {
-                *a_style = result_style ;
-                result_style = NULL ;
-        }
-
-        if (rulesets)
-        {
-                g_free (rulesets) ;
-                rulesets = NULL ;
-        }
-
-        return CR_OK ;
-}
 
 
 /**
