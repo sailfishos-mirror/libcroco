@@ -35,13 +35,17 @@ cr_font_family_to_string_real (CRFontFamily *a_this,
         guchar * name = NULL ;
         enum CRStatus result = CR_OK ;
 
-        g_return_val_if_fail (a_this, CR_BAD_PARAM_ERROR) ;
-
         if (!*a_string)
         {
                 *a_string = g_string_new (NULL) ;
                 g_return_val_if_fail (*a_string,
                                       CR_INSTANCIATION_FAILED_ERROR) ;
+        }
+        
+        if (!a_this)
+        {
+                g_string_append_printf (*a_string, "NULL") ;
+                return CR_OK ;
         }
 
         switch (a_this->type)
@@ -177,9 +181,12 @@ cr_font_family_to_string (CRFontFamily *a_this,
         guchar *result = NULL ;
         GString *stringue = NULL ;
 
-        g_return_val_if_fail (a_this,
-                              NULL) ;
-
+        if (!a_this)
+        {
+                result = g_strdup ("NULL") ;
+                g_return_val_if_fail (result, NULL) ;
+                return result ;
+        }        
         status = cr_font_family_to_string_real (a_this,
                                                 a_walk_font_family_list,
                                                 &stringue) ;
@@ -389,8 +396,13 @@ gchar*
 cr_font_size_to_string (CRFontSize *a_this)
 {
         gchar *str = NULL ;
-        g_return_val_if_fail (a_this, NULL) ;
-
+        
+        if (!a_this)
+        {
+                str = g_strdup ("NULL") ;
+                g_return_val_if_fail (str, NULL) ;
+                return str ;
+        }
         switch (a_this->type)
         {
         case PREDEFINED_ABSOLUTE_FONT_SIZE:
@@ -419,7 +431,12 @@ cr_font_size_adjust_to_string (CRFontSizeAdjust *a_this)
 {
         gchar *str = NULL ;
 
-        g_return_val_if_fail (a_this, NULL) ;
+        if (!a_this)
+        {
+                str = g_strdup ("NULL") ;
+                g_return_val_if_fail (str, NULL) ;
+                return str ;
+        }
 
         switch (a_this->type)
         {

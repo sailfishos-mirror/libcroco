@@ -2356,7 +2356,7 @@ cr_style_num_prop_val_to_string (CRNumPropVal *a_prop_val,
 
         str = g_string_new (NULL) ;
         cr_utils_dump_n_chars2 (' ', str, a_nb_indent) ;
-        g_string_append_printf (str, "NumPropVal {") ;
+        g_string_append_printf (str, "%s", "NumPropVal {") ;
         tmp_str = cr_num_to_string (&a_prop_val->sv) ;
         if (!tmp_str)
         {
@@ -2375,10 +2375,8 @@ cr_style_num_prop_val_to_string (CRNumPropVal *a_prop_val,
         g_string_append_printf (str, "av: %s ", tmp_str) ;
         g_free (tmp_str) ;
         tmp_str = NULL ;                
-        g_string_append_printf (str, "}") ;
-        g_string_append (str, str->str) ;
-
-        g_string_append (a_str, str->str) ;
+        g_string_append_printf (str, "%s", "}") ;
+        g_string_append_printf (a_str, "%s", str->str) ;
         status = CR_OK ;
  cleanup:
 
@@ -2439,8 +2437,7 @@ cr_style_rgb_prop_val_to_string (CRRgbPropVal *a_prop_val,
         tmp_str = NULL ;
 
         g_string_append_printf (str, "}") ;
-        g_string_append (str, str->str) ;
-        g_string_append (a_str, str->str) ;
+        g_string_append_printf (a_str, "%s", str->str) ;
         status = CR_OK ;
  cleanup:
 
@@ -2678,7 +2675,7 @@ cr_style_to_string (CRStyle *a_this,
                 str = *a_str ;
         }
         cr_utils_dump_n_chars2 (' ', str, a_nb_indent) ;
-        g_string_append_printf (str, "style {") ;
+        g_string_append_printf (str, "style {\n") ;
         
         /*loop over the num_props and to_string() them*/
         for (i = NUM_PROP_TOP ; i < NB_NUM_PROPS ; i++) {
@@ -2695,7 +2692,7 @@ cr_style_to_string (CRStyle *a_this,
                 }
                 else 
                 {
-                        g_string_append_printf (str, "NULL:") ;
+                        g_string_append_printf (str, "%s", "NULL") ;
                 }
                 tmp_str = NULL ;
                 cr_style_num_prop_val_to_string (&a_this->num_props[i], str,
@@ -2713,7 +2710,7 @@ cr_style_to_string (CRStyle *a_this,
                 }
                 else
                 {
-                        g_string_append_printf (str, "NULL: ") ;
+                        g_string_append_printf (str, "%s", "NULL: ") ;
                 }
                 tmp_str = NULL ;
                 cr_style_rgb_prop_val_to_string (&a_this->rgb_props[i], str,
