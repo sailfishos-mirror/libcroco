@@ -296,7 +296,7 @@ attr_add_sel_matches_node (CRAdditionalSel *a_add_sel,
                                 cur-- ;
                                 ptr2 = cur ;
                                 
-                                if (g_strstr_len (ptr1, ptr1 - ptr2 + 1,
+                                if (g_strstr_len (ptr1, ptr2 - ptr1 + 1,
                                                   cur_sel->value->str)
                                         == (gchar*)ptr1)
                                 {
@@ -420,7 +420,6 @@ sel_matches_node_real (CRSelEng *a_this, CRSimpleSel *a_sel,
                                goto done;
                         }
                         goto walk_a_step_in_expr ;
-
 		}
 		else if (cur_sel->add_sel->type == ATTRIBUTE_ADD_SELECTOR
 			 && cur_sel->add_sel->content.attr_sel)
