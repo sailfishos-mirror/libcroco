@@ -1,3 +1,10 @@
+0.5.2: June 14 2004
+       
+       Fixes since 0.5.1
+       ==================
+       - #143308: parsing non trivial functional notation [Dodji Seketeli]
+       - fix C99-ism at compile time. [Dodji Seketeli]
+
 0.5.1: April 18 2004:
 
      - fixes: #140334, #140317, #139891, #139615. [Dodji Seketeli]
