@@ -1,6 +1,6 @@
 dnl Process this file with autoconf to produce a configure script.
 AC_PREREQ(2.5)
-AC_INIT(src/parser/cr-input.c)
+AC_INIT(src/cr-input.c)
 
 PACKAGE=libcroco
 LIBCROCO_MAJOR_VERSION=0
@@ -11,22 +11,12 @@ LIBCROCO_CURRENT=1
 LIBCROCO_REVISION=1
 LIBCROCO_AGE=0
 
-LIBCRSELENG_CURRENT=2
-LIBCRSELENG_REVISION=0
-LIBCRSELENG_AGE=0
-
-LIBCRLAYENG_CURRENT=2
-LIBCRLAYENG_REVISION=0
-LIBCRLAYENG_AGE=1
-
 #LIBCROCO_VERSION_INFO=`expr $LIBCROCO_MAJOR_VERSION + $LIBCROCO_MINOR_VERSION`:$LIBCROCO_MICRO_VERSION:$LIBCROCO_MINOR_VERSION
 LIBCROCO_VERSION_INFO="$LIBCROCO_CURRENT:$LIBCROCO_REVISION:$LIBCROCO_AGE"
 LIBCROCO_VERSION=$LIBCROCO_MAJOR_VERSION.$LIBCROCO_MINOR_VERSION.$LIBCROCO_MICRO_VERSION
 LIBCROCO_VERSION_NUMBER=`expr $LIBCROCO_MAJOR_VERSION \* 10000 + $LIBCROCO_MINOR_VERSION \* 100 + $LIBCROCO_MICRO_VERSION`
 VERSION=$LIBCROCO_VERSION
 
-LIBCRSELENG_VERSION_INFO="$LIBCRSELENG_CURRENT:$LIBCRSELENG_REVISION:$LIBCRSELENG_AGE"
-LIBCRLAYENG_VERSION_INFO="$LIBCRLAYENG_CURRENT:$LIBCRLAYENG_REVISION:$LIBCRLAYENG_AGE"
 
 AC_SUBST(LIBCROCO_MAJOR_VERSION)
 AC_SUBST(LIBCROCO_MINOR_VERSION)
@@ -35,8 +25,6 @@ AC_SUBST(LIBCROCO_VERSION)
 AC_SUBST(LIBCROCO_VERSION_INFO)
 AC_SUBST(LIBCROCO_VERSION_NUMBER)
 AC_SUBST(VERSION)
-AC_SUBST(LIBCRLAYENG_VERSION_INFO)
-AC_SUBST(LIBCRSELENG_VERSION_INFO)
 
 AM_INIT_AUTOMAKE($PACKAGE, $LIBCROCO_VERSION)
 AM_CONFIG_HEADER(config.h)
@@ -107,7 +95,6 @@ AC_SUBST(GLIB2_VERSION)
 AC_SUBST(CROCO_HAVE_GLIB2)
 
 dnl check libxml2 version
-
 have_libxml2=no
 CROCO_HAVE_LIBXML2=0
 PKG_CHECK_MODULES(LIBXML2, [libxml-2.0 >= $LIBXML2_VERSION],
@@ -117,155 +104,10 @@ PKG_CHECK_MODULES(LIBXML2, [libxml-2.0 >= $LIBXML2_VERSION],
 AC_SUBST(LIBXML2_VERSION)
 AC_SUBST(CROCO_HAVE_LIBXML2)
 
-CROCO_PARSER_LIB=libcroco.la
-AC_SUBST(CROCO_PARSER_LIB)
+CROCO_LIB=libcroco.la
+AC_SUBST(CROCO_LIB)
 
-dnl
-dnl check glib-2.0 version
-dnl
-have_pango=no
-PKG_CHECK_MODULES(PANGO, 
-		  [pango >= $PANGO_VERSION],
-		  [have_pango=yes
-	 	  CROCO_HAVE_PANGO=1],
-		  have_pango=no)
-if test "$have_pango" = no ; then
-	AC_MSG_ERROR([*** pango not found. See http://www.pango.org])
-fi
 
-AC_SUBST(PANGO_VERSION)
-AC_SUBST(CROCO_HAVE_PANGO)
-
-dnl --enable-tests
-dnl this option enables compilation of the unit tests built in to .c files
-dnl and also some stuff in the test/ subdir
-CROCO_TESTS_ENABLED=0
-AC_ARG_ENABLE(tests, 
-	       AC_HELP_STRING([--enable-tests=yes|no], 
-	                      [Enables unit test code, Default=no]),
-	       WITH_TESTS=$enableval,
-	       WITH_TESTS=no)
-
-if test "$WITH_TESTS" = "yes" ; then
-	CROCO_TESTS_ENABLED=1
-else
-	WITH_TESTS="no"
-fi
-
-AC_SUBST(WITH_TESTS)
-AC_SUBST(CROCO_TESTS_ENABLED)
-AM_CONDITIONAL(HAVE_TESTS, test "$WITH_TESTS" = "yes")
-
-dnl --enable-seleng
-dnl this option enables compilation of the selection engine
-CROCO_SELENG_ENABLED=0
-AC_ARG_ENABLE(seleng, 
-	       AC_HELP_STRING([--enable-seleng=yes|no|auto], 
-	                      [Enables the css2 selector engine based on libxml2. Default=no]),
-	       WITH_SELENG=$enableval,
-	       WITH_SELENG="no")
-
-if test "$WITH_SELENG" = "auto" ; then
-	if test "x$have_libxml2" != "xno" -a "x$have_pango" != "xno" ; then
-		CROCO_SELENG_ENABLED=1			
-		WITH_SELENG="yes"
-	else
-		WITH_SELENG="no"
-   	fi
-
-	if test "x$WITH_SELENG" = "yes" ; then
-		if test "x$have_libxml2" != "yes" ; then
-			AC_MSG_ERROR([*** libxml2 is not present, so you cannot have seleng enabled. Go to http://xmlsoft.org to get libxml2 version $LIBXML2_VERSION ***])
-		fi
-
-		if test "x$have_pango" != "yes" ; then
-			AC_MSG_ERROR([*** pango is not present, so you cannot have seleng enabled. Go to http://www.pango.org to get pango version $PANGO_VERSION ***])
-		fi
-	fi
-
-elif test "$WITH_SELENG" = "yes" ; then
-	CROCO_SELENG_ENABLED=1
-else
-  	WITH_SELENG="no"
-fi
-if test "$WITH_SELENG" = "yes" ; then
-	CROCO_SELENG_LIB_NAME=crseleng
-	CROCO_SELENG_LIB="lib${CROCO_SELENG_LIB_NAME}.la"
-fi
-
-AC_SUBST(CROCO_SELENG_ENABLED)
-AC_SUBST(WITH_SELENG)
-AC_SUBST(CROCO_SELENG_LIB)
-AM_CONDITIONAL(HAVE_SELENG, test "$WITH_SELENG" = "yes")
-
-dnl --enable-layeng
-dnl this option enable the layout engine/box model/style stuffs.
-CROCO_LAYENG_ENABLED=0
-AC_ARG_ENABLE(layeng,
-	AC_HELP_STRING([--enable-layeng=yes|no|auto],
-	[Enables the layout engine. Default=no]),
-	WITH_LAYENG=$enableval,
-	WITH_LAYENG="no")
-
-if test "$WITH_LAYENG" = "auto" ; then
-	if test "$WITH_SELENG" = "yes" ; then
-		CROCO_LAYENG_ENABLED=1
-		WITH_LAYENG="yes"
-	else
-		WITH_LAYENG="no"
-	fi
-
-elif test "$WITH_LAYENG" = "yes" ; then
-	CROCO_LAYENG_ENABLED=1
-else
-	WITH_LAYENG="no"
-fi
-
-if test "$WITH_LAYENG" = "yes" ; then
-	CROCO_LAYENG_LIB_NAME=crlayeng
-	CROCO_LAYENG_LIB="lib${CROCO_LAYENG_LIB_NAME}.la"
-fi
-
-AC_SUBST(WITH_LAYENG)
-AC_SUBST(CROCO_LAYENG_ENABLED)
-AC_SUBST(CROCO_LAYENG_LIB)
-AM_CONDITIONAL(HAVE_LAYENG, test "$WITH_LAYENG" = "yes")
-
-dnl choose which tests to launch and in which condition
-dnl okay, this should not go here but it seems like 
-dnl AM_CONDITIONAL() and it peer if/endif construction
-dnl is bugged and does not properly support a serie 
-dnl of several non nested if/endif. So, I will handle this
-dnl this way until I find a better way.
-CORE_TESTS=
-SELENG_TESTS=
-LAYENG_TESTS=
-
-if test "$WITH_TESTS" = "yes" ; then
-	CORE_TESTS="test0 test1 test2 test3 test4 test6"
-	if test "$WITH_SELENG" = yes ; then
-		SELENG_TESTS="test5"
-	fi
-	if test "$WITH_LAYENG" = "yes" ; then
-		LAYENG_TESTS="test7" ;
-	fi
-fi
-
-AC_SUBST(CORE_TESTS)
-AC_SUBST(SELENG_TESTS)
-AC_SUBST(LAYENG_TESTS)
-
-CROCO_HAVE_LIBGNOMEUI2=0
-if test "$WITH_LAYENG" = "yes" ; then
-	PKG_CHECK_MODULES(LIBGNOMEUI2,
-			 [libgnomeui-2.0 >= $LIBGNOMEUI_VERSION],
-			 [have_libgnomeui2=yes CROCO_HAVE_LIBGNOMEUI2=1],
-			 have_libgnomeui2=no)
-	if test "$have_libgnomeui2" = "no" ; then
-		AC_MSG_ERROR([*** libgnomeui2 not found. See http://www.gnome.org])
-	fi	
-fi
-AC_SUBST(CROCO_HAVE_LIBGNOMEUI2)
 dnl **********************************
 dnl *By default compile in debug mode
 dnl **********************************
@@ -288,16 +130,13 @@ if test "x$LOGNAME" = "xdodji" -a "x$GCC" = "xyes" ; then
 	
 fi
 
-#-pedantic  -0 -Wshadow -Wuninitialized
-
 dnl
 dnl Define the CROCO_LIBS and CROCO_CFLAGS variables. These will be used
 dnl by client application to know where to find croco include files and libs.
 dnl
-CROCO_LIBS=" $GLIB2_LIBS $LIBXML2_LIBS -L${libdir} -lcroco"
+CROCO_LIBS="$GLIB2_LIBS $LIBXML2_LIBS -L${libdir} -lcroco"
 
-CROCO_CFLAGS="-I${includedir}/libcroco -I${includedir}/libcroco/parser \
--I${includedir}/libcroco/seleng -I${includedir}/libcroco/layeng \
+CROCO_CFLAGS="-I${includedir}/libcroco -I${includedir}/libcroco \
 $GLIB2_CFLAGS $LIBXML2_CFLAGS"
 
 if test "$USE_LIBXML2" = "yes" ; then
@@ -310,14 +149,6 @@ else
 	REQUIRE_LIBXML2=
 fi
 
-if test "$WITH_SELENG" = "yes" ; then
-	CROCO_LIBS="$CROCO_LIBS -l$CROCO_SELENG_LIB_NAME"
-fi
-
-if test "$WITH_LAYENG" = "yes" ; then
-	CROCO_LIBS="$CROCO_LIBS $LIBGNOMEUI2_LIBS -l$CROCO_LAYENG_LIB_NAME"
-	CROCO_CFLAGS="$CROCO_CFLAGS $LIBGNOMEUI2_CFLAGS"
-fi
 
 AC_SUBST(LIBXML2_LIBS)
 AC_SUBST(LIBXML2_CFLAGS)
@@ -340,10 +171,7 @@ tests/Makefile
 tests/test-inputs/Makefile
 tests/test-output-refs/Makefile
 src/Makefile
-src/parser/Makefile
-src/parser/libcroco-config.h
-src/seleng/Makefile
-src/layeng/Makefile
+src/libcroco-config.h
 csslint/Makefile
 
 ])
@@ -360,8 +188,4 @@ echo "
 	cflags:				      :	${CFLAGS}
 
 	Maintainer mode:		      :	${USE_MAINTAINER_MODE}
-	Building unit tests:		      :	${WITH_TESTS}
-	Building with selection engine:	      :	${WITH_SELENG}
-	Building with layout engine:	      : ${WITH_LAYENG}
-
 "

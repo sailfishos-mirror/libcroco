@@ -21,31 +21,22 @@
 #ifndef __LIBCROCO_H__
 #define __LIBCROCO_H__
 
-#include "parser/libcroco-config.h"
+#include "libcroco-config.h"
 
-#include "parser/cr-utils.h"
-#include "parser/cr-pseudo.h"
-#include "parser/cr-term.h"
-#include "parser/cr-attr-sel.h"
-#include "parser/cr-simple-sel.h"
-#include "parser/cr-selector.h"
-#include "parser/cr-enc-handler.h"
-#include "parser/cr-doc-handler.h"
-#include "parser/cr-input.h"
-#include "parser/cr-parser.h"
-#include "parser/cr-statement.h"
-#include "parser/cr-stylesheet.h"
-#include "parser/cr-om-parser.h"
-
-#ifdef CROCO_SELENG_ENABLED /*The selection engine headers*/
-#include "seleng/cr-sel-eng.h"
-#include "seleng/cr-style.h"
-#endif /*CROCO_SELENG_ENABLED*/
-
-#ifdef CROCO_LAYENG_ENABLED /*the layout engine headers*/
-#include "layeng/cr-box.h"
-#include "layeng/cr-box-view.h"
-#include "layeng/cr-lay-eng.h"
-#endif
+#include "cr-utils.h"
+#include "cr-pseudo.h"
+#include "cr-term.h"
+#include "cr-attr-sel.h"
+#include "cr-simple-sel.h"
+#include "cr-selector.h"
+#include "cr-enc-handler.h"
+#include "cr-doc-handler.h"
+#include "cr-input.h"
+#include "cr-parser.h"
+#include "cr-statement.h"
+#include "cr-stylesheet.h"
+#include "cr-om-parser.h"
+#include "cr-sel-eng.h"
+#include "cr-style.h"
 
 #endif /*__LIBCROCO_H__*/

@@ -32,9 +32,6 @@
  #include <libxml/tree.h>
 #endif
 
-#ifdef CROCO_SELENG_ENABLED
-
-
 /**
  *@file:
  *The declaration of the  #CRSelEng class.
@@ -106,6 +103,5 @@ void cr_sel_eng_destroy (CRSelEng *a_this) ;
 
 G_END_DECLS
 
-#endif /*CROCO_SELENG_ENABLED*/
 
 #endif/*__CR_SEL_ENG_H__*/

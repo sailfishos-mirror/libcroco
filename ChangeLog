@@ -1,7 +1,16 @@
+2004-01-24  Dodji Seketeli  <dodji@gnome.org>
+
+	* all: separated the library into two projects. Libcroco
+	is now the combination of the parser and the selection engine.
+	A new project is born: sewfox. It is basically the 
+	xml rendering/layout engine.
+	Libcroco now needs libxml2 and glib only.
+	Sewfox need libgnomecanvas2.
+
 2004-01-16  Dodji Seketeli  <dodji@gnome.org>
 
 	* src/seleng/cr-sel-eng.c: applied a patch from
-	Rob BUIS to fix the rwlbuis@xs4all.nl class selector
+	Rob BUIS<rwlbuis@xs4all.nl> for a better class selector
 	evaluation.
 
 2004-01-04  Dodji Seketeli  <dodji@gnome.org>
