@@ -1,5 +1,14 @@
 2003-12-24  Dodji Seketeli  <dodji@gnome.org>
 
+	* src/parser/cr-additional-sel.h,src/parser/cr-pseudo.h,
+	src/parser/cr-utils.h: some light cosmetic changes.
+	* src/seleng/cr-sel-eng.c: several fixes. Managed to
+	make the pluggable handler for pseudo class selectors
+	evaluation work. Wrote a handler for the ":first-child"
+	pseudo class selector. This class is now officially supported.
+
+2003-12-24  Dodji Seketeli  <dodji@gnome.org>
+
 	* src/parser/cr-additional-sel.h: small cosmetic changes.
 	* src/seleng/cr-sel-eng.c: started to work on the
 	support of a pluggable handler for pseudo class selectors

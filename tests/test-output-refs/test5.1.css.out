@@ -1,6 +1,22 @@
 '''''''''''''''''''''''''
+xml start element: document
+
+
+
+  :first-child {
+    first-child-prop : first-child-value
+  }
+
+xml end element: document
+'''''''''''''''''''''''''
+'''''''''''''''''''''''''
 xml start element: E0
 
+
+
+  :first-child {
+    first-child-prop : first-child-value
+  }
 
 
   E0 {
@@ -23,6 +39,11 @@ xml end element: E1
 '''''''''''''''''''''''''
 xml start element: E1-1
 
+
+
+  :first-child {
+    first-child-prop : first-child-value
+  }
 
 
   E1 E1-1 {

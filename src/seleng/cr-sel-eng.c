@@ -39,7 +39,7 @@ struct CRPseudoClassSelHandlerEntry
 {
         guchar *name ;
         enum CRPseudoType type ;
-        CRPseudoClassSelectorHandler *handler ;
+        CRPseudoClassSelectorHandler handler ;
 } ;
 
 struct _CRSelEngPriv
@@ -48,7 +48,6 @@ struct _CRSelEngPriv
         gboolean case_sensitive ;
 
         CRStyleSheet *sheet ;
-
         /**
          *where to store the next statement
          *to be visited so that we can remember
@@ -59,39 +58,76 @@ struct _CRSelEngPriv
         gint pcs_handlers_size ;
 };
 
+static gboolean class_add_sel_matches_node (CRAdditionalSel *a_add_sel,
+                                            xmlNode *a_node) ;
 
+static gboolean id_add_sel_matches_node (CRAdditionalSel *a_add_sel,
+                                         xmlNode *a_node) ;
 
-static gboolean
-class_add_sel_matches_node (CRAdditionalSel *a_add_sel,
-                            xmlNode *a_node) ;
+static gboolean attr_add_sel_matches_node (CRAdditionalSel *a_add_sel,
+                                           xmlNode *a_node) ;
 
-static gboolean
-id_add_sel_matches_node (CRAdditionalSel *a_add_sel,
-                         xmlNode *a_node) ;
+static enum CRStatus sel_matches_node_real (CRSelEng *a_this, CRSimpleSel *a_sel,
+                                            xmlNode *a_node, gboolean *a_result,
+                                            gboolean a_recurse) ;
 
-static gboolean
-attr_add_sel_matches_node (CRAdditionalSel *a_add_sel,
-                           xmlNode *a_node) ;
+static enum CRStatus cr_sel_eng_get_matched_rulesets_real (CRSelEng *a_this, 
+                                                           CRStyleSheet *a_stylesheet,
+                                                           xmlNode *a_node,
+                                                           CRStatement **a_rulesets, 
+                                                           gulong *a_len) ;
 
-static enum CRStatus
-sel_matches_node_real (CRSelEng *a_this, CRSimpleSel *a_sel,
-                       xmlNode *a_node, gboolean *a_result,
-                       gboolean a_recurse) ;
+static enum CRStatus put_css_properties_in_hashtable (GHashTable **a_props_hashtable,
+                                                      CRStatement *a_ruleset) ;
 
-static enum CRStatus
-cr_sel_eng_get_matched_rulesets_real (CRSelEng *a_this, 
-                                      CRStyleSheet *a_stylesheet,
-                                      xmlNode *a_node,
-                                      CRStatement **a_rulesets, 
-                                      gulong *a_len) ;
+static void set_style_from_props_hash_hr_func (gpointer a_prop, gpointer a_decl,
+                                               gpointer a_style) ;
 
-static enum CRStatus
-put_css_properties_in_hashtable (GHashTable **a_props_hashtable,
-                                 CRStatement *a_ruleset) ;
+static gboolean pseudo_class_add_sel_matches_node (CRSelEng * a_this,
+                                                   CRAdditionalSel *a_add_sel,
+                                                   xmlNode *a_node) ;
 
-static void
-set_style_from_props_hash_hr_func (gpointer a_prop, gpointer a_decl,
-                                   gpointer a_style) ;
+static gboolean first_child_pseudo_class_handler (CRSelEng *a_this,
+                                                  CRAdditionalSel *a_sel,
+                                                  xmlNode *a_node) ;
+
+static xmlNode * get_next_element_node (xmlNode *a_node) ;
+
+static xmlNode * get_next_child_element_node (xmlNode *a_node) ;
+
+static xmlNode * get_prev_element_node (xmlNode *a_node) ;
+
+static xmlNode * get_next_parent_element_node (xmlNode *a_node) ;
+
+static gboolean 
+first_child_pseudo_class_handler (CRSelEng *a_this,
+                                  CRAdditionalSel *a_sel,
+                                  xmlNode *a_node)
+{
+        xmlNode *node = NULL ;
+
+        g_return_val_if_fail (a_this && PRIVATE (a_this)
+                              && a_sel && a_sel->content.pseudo
+                              && a_sel->content.pseudo
+                              && a_sel->content.pseudo->name
+                              && a_node,
+                              CR_BAD_PARAM_ERROR) ;
+
+        if (strcmp (a_sel->content.pseudo->name->str,
+                    "first-child") 
+            || !a_sel->content.pseudo->type == IDENT_PSEUDO)
+        {
+                cr_utils_trace_info 
+                        ("This handler is for :first-child only") ;
+                return CR_BAD_PSEUDO_CLASS_SEL_HANDLER_ERROR ;
+        }
+        if (!a_node->parent)
+                return FALSE ;
+        node = get_next_child_element_node (a_node->parent) ;
+        if (node == a_node)
+                return TRUE ;
+        return FALSE ;
+}
 
 static gboolean
 pseudo_class_add_sel_matches_node (CRSelEng * a_this,
@@ -99,7 +135,7 @@ pseudo_class_add_sel_matches_node (CRSelEng * a_this,
                                    xmlNode *a_node)
 {
         enum CRStatus status = CR_OK ;
-        CRPseudoClassSelectorHandler *handler = NULL ;
+        CRPseudoClassSelectorHandler handler = NULL ;
         
         g_return_val_if_fail (a_this && PRIVATE (a_this)
                               && a_add_sel 
@@ -116,7 +152,7 @@ pseudo_class_add_sel_matches_node (CRSelEng * a_this,
         if (status != CR_OK || !handler)
                 return FALSE ;
 
-        return (*handler) (a_this, a_add_sel, a_node) ;
+        return handler (a_this, a_add_sel, a_node) ;
 }
 
 /**
@@ -451,6 +487,20 @@ get_next_element_node (xmlNode *a_node)
         return cur_node ;
 }
 
+static xmlNode *
+get_next_child_element_node (xmlNode *a_node)
+{
+        xmlNode *cur_node = NULL ;
+
+        g_return_val_if_fail (a_node, NULL) ;
+        
+        cur_node = a_node->children ;
+        if (!cur_node)
+                return cur_node ;
+        if (a_node->children->type == XML_ELEMENT_NODE)
+                return a_node->children ;
+        return get_next_element_node (a_node->children) ;
+}
 
 static xmlNode *
 get_prev_element_node (xmlNode *a_node)
@@ -1037,6 +1087,11 @@ cr_sel_eng_new (void)
 		return NULL ;
 	}
         memset (PRIVATE (result), 0, sizeof (CRSelEngPriv)) ;
+        cr_sel_eng_register_pseudo_class_sel_handler 
+                (result, (guchar*)"first-child",
+                 IDENT_PSEUDO,
+                 (CRPseudoClassSelectorHandler)
+                 first_child_pseudo_class_handler) ;
 
 	return result ;
 }
@@ -1051,10 +1106,10 @@ cr_sel_eng_new (void)
  *@return CR_OK, upon successful completion, an error code otherwise.
  */
 enum CRStatus
-cr_sel_eng_add_pseudo_class_selector_handler (CRSelEng *a_this,
+cr_sel_eng_register_pseudo_class_sel_handler (CRSelEng *a_this,
                                               guchar *a_name,
                                               enum CRPseudoType a_type,
-                                              CRPseudoClassSelectorHandler *a_handler)
+                                              CRPseudoClassSelectorHandler a_handler)
 {
         struct CRPseudoClassSelHandlerEntry *handler_entry = NULL ;
         GList *list = NULL ;
@@ -1087,9 +1142,9 @@ cr_sel_eng_add_pseudo_class_selector_handler (CRSelEng *a_this,
 }
 
 enum CRStatus
-cr_sel_eng_remove_pseudo_class_selector_handler (CRSelEng *a_this,
-                                                 guchar *a_name,
-                                                 enum CRPseudoType a_type)
+cr_sel_eng_unregister_pseudo_class_sel_handler (CRSelEng *a_this,
+                                                guchar *a_name,
+                                                enum CRPseudoType a_type)
 {
         GList *elem = NULL, *deleted_elem = NULL ;
         gboolean found = FALSE ;
@@ -1101,8 +1156,9 @@ cr_sel_eng_remove_pseudo_class_selector_handler (CRSelEng *a_this,
 
         for (elem = PRIVATE (a_this)->pcs_handlers ;
              elem ;
-             elem = g_list_next (elem),entry = elem->data)
+             elem = g_list_next (elem))
         {
+                entry = elem->data ;
                 if (!strcmp (entry->name, a_name)
                     && entry->type == a_type)
                 {
@@ -1124,11 +1180,49 @@ cr_sel_eng_remove_pseudo_class_selector_handler (CRSelEng *a_this,
         return CR_OK ;
 }
 
+/**
+ *Unregisters all the pseudo class sel handlers
+ *and frees all the associated allocated datastructures.
+ *@param a_this the current instance of #CRSelEng .
+ *@return CR_OK upon succesful completion, an error code
+ *otherwise.
+ */
+enum CRStatus
+cr_sel_eng_unregister_all_pseudo_class_sel_handlers (CRSelEng *a_this)
+{
+        GList *elem = NULL ;
+        struct CRPseudoClassSelHandlerEntry *entry = NULL ;
+
+        g_return_val_if_fail (a_this && PRIVATE (a_this),
+                              CR_BAD_PARAM_ERROR) ;
+
+        if (!PRIVATE (a_this)->pcs_handlers)
+                return CR_OK ;
+        for (elem = PRIVATE (a_this)->pcs_handlers ;
+             elem;
+             elem = g_list_next (elem))
+        {
+                entry = elem->data ;
+                if (!entry)
+                        continue ;
+                if (entry->name)
+                {
+                        g_free (entry->name) ;
+                        entry->name = NULL ;
+                }
+                g_free (entry) ;
+                elem->data = NULL ;
+        }
+        g_list_free (PRIVATE (a_this)->pcs_handlers) ;
+        PRIVATE (a_this)->pcs_handlers = NULL ;
+        return CR_OK ;
+}
+
 enum CRStatus
 cr_sel_eng_get_pseudo_class_selector_handler (CRSelEng *a_this,
                                               guchar *a_name,
                                               enum CRPseudoType a_type,
-                                              CRPseudoClassSelectorHandler **a_handler)
+                                              CRPseudoClassSelectorHandler *a_handler)
 {
         GList *elem = NULL ;
         struct CRPseudoClassSelHandlerEntry *entry = NULL ;
@@ -1141,8 +1235,9 @@ cr_sel_eng_get_pseudo_class_selector_handler (CRSelEng *a_this,
         
         for (elem = PRIVATE (a_this)->pcs_handlers ;
              elem ;
-             elem = g_list_next (elem), entry = elem->data)
+             elem = g_list_next (elem))
         {
+                entry = elem->data ;
                 if (!strcmp (a_name, entry->name) 
                     && entry->type == a_type)
                 {
@@ -1442,7 +1537,10 @@ cr_sel_eng_destroy (CRSelEng *a_this)
 		g_free (PRIVATE (a_this)) ;
 		PRIVATE (a_this) = NULL ;
 	}
-
+        /*
+         *FIXME:
+         *unregister all the pseudo class sel handlers.
+         */
 	if (a_this)
 	{
 		g_free (a_this) ;

@@ -62,52 +62,47 @@ struct _CRSelEng
 typedef gboolean (*CRPseudoClassSelectorHandler) (CRSelEng* a_this,
                                                   CRAdditionalSel *a_add_sel,
                                                   xmlNode *a_node) ;
-CRSelEng *
-cr_sel_eng_new (void) ;
+CRSelEng * cr_sel_eng_new (void) ;
 
-enum CRStatus
-cr_sel_eng_add_pseudo_class_selector_handler (CRSelEng *a_this,
-                                              guchar *a_pseudo_class_sel_name,
-                                              enum CRPseudoType a_pseudo_class_type,
-                                              CRPseudoClassSelectorHandler *a_handler) ;
+enum CRStatus cr_sel_eng_register_pseudo_class_sel_handler (CRSelEng *a_this,
+                                                            guchar *a_pseudo_class_sel_name,
+                                                            enum CRPseudoType a_pseudo_class_type,
+                                                            CRPseudoClassSelectorHandler a_handler) ;
 
-enum CRStatus
-cr_sel_eng_remove_pseudo_class_selector_handler (CRSelEng *a_this,
-                                                 guchar *a_pseudo_class_sel_name,
-                                                 enum CRPseudoType a_pseudo_class_type) ;
+enum CRStatus cr_sel_eng_unregister_pseudo_class_sel_handler (CRSelEng *a_this,
+                                                              guchar *a_pseudo_class_sel_name,
+                                                              enum CRPseudoType a_pseudo_class_type) ;
 
-enum CRStatus
-cr_sel_eng_get_pseudo_class_selector_handler (CRSelEng *a_this,
-                                              guchar *a_pseudo_class_sel_name,
-                                              enum CRPseudoType a_pseudo_class_type,
-                                              CRPseudoClassSelectorHandler **a_handler) ;
+enum CRStatus cr_sel_eng_unregister_all_pseudo_class_sel_handlers (CRSelEng *a_this) ;
 
-enum CRStatus
-cr_sel_eng_matches_node (CRSelEng *a_this, CRSimpleSel *a_sel,
-                         xmlNode *a_node, gboolean *a_result) ;
+enum CRStatus cr_sel_eng_get_pseudo_class_selector_handler (CRSelEng *a_this,
+                                                            guchar *a_pseudo_class_sel_name,
+                                                            enum CRPseudoType a_pseudo_class_type,
+                                                            CRPseudoClassSelectorHandler *a_handler) ;
 
-enum CRStatus
-cr_sel_eng_get_matched_rulesets (CRSelEng *a_this,
-                                 CRStyleSheet *a_sheet,
-                                 xmlNode *a_node,
-                                 CRStatement ***a_rulesets,
-                                 gulong *a_len) ;
+enum CRStatus cr_sel_eng_matches_node (CRSelEng *a_this, 
+                                       CRSimpleSel *a_sel,
+                                       xmlNode *a_node, 
+                                       gboolean *a_result) ;
 
-enum CRStatus
-cr_sel_eng_get_matched_properties_from_cascade  (CRSelEng *a_this,
-                                                 CRCascade *a_cascade,
-                                                 xmlNode *a_node,
-                                                 GHashTable **props_decls_dict) ;
+enum CRStatus cr_sel_eng_get_matched_rulesets (CRSelEng *a_this,
+                                               CRStyleSheet *a_sheet,
+                                               xmlNode *a_node,
+                                               CRStatement ***a_rulesets,
+                                               gulong *a_len) ;
 
-enum CRStatus
-cr_sel_eng_get_matched_style (CRSelEng *a_this,
-                              CRCascade *a_cascade,
-                              xmlNode *a_node,
-                              CRStyle *a_parent_style,
-                              CRStyle **a_style) ;
+enum CRStatus cr_sel_eng_get_matched_properties_from_cascade  (CRSelEng *a_this,
+                                                               CRCascade *a_cascade,
+                                                               xmlNode *a_node,
+                                                               GHashTable **props_decls_dict) ;
 
-void
-cr_sel_eng_destroy (CRSelEng *a_this) ;
+enum CRStatus cr_sel_eng_get_matched_style (CRSelEng *a_this,
+                                            CRCascade *a_cascade,
+                                            xmlNode *a_node,
+                                            CRStyle *a_parent_style,
+                                            CRStyle **a_style) ;
+
+void cr_sel_eng_destroy (CRSelEng *a_this) ;
 
 G_END_DECLS
 

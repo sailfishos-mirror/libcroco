@@ -3,7 +3,7 @@
 /*
  * This file is part of The Croco Library
  *
- * Copyright (C) 2002-2003 Dodji Seketeli <dodji@seketeli.org>
+ * Copyright (C) 2002-2003 Dodji Seketeli <dodji at seketeli.org>
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of version 2.1 of the GNU Lesser General Public
@@ -62,6 +62,7 @@ enum CRStatus {
         CR_NO_TOKEN,
         CR_OUT_OF_MEMORY_ERROR,
         CR_PSEUDO_CLASS_SEL_HANDLER_NOT_FOUND_ERROR,
+        CR_BAD_PSEUDO_CLASS_SEL_HANDLER_ERROR,
         CR_ERROR
 } ;
 
