@@ -35,6 +35,9 @@
 
 CRDocHandler * gv_test_handler = {0} ;
 
+const guchar * gv_decl=
+"toto: tutu, tata" ;
+
 static void 
 display_help (char *prg_name) ;
 
@@ -114,6 +117,21 @@ test_cr_parser_parse (guchar * a_file_uri)
         return status ;
 }
 
+static enum CRStatus
+test_cr_declaration_parse (void)
+{
+        CRDeclaration * decl = NULL ;
+
+        decl = cr_declaration_parse (NULL, gv_decl,
+                                     CR_UTF_8) ;
+
+        if (decl)
+        {
+                cr_declaration_destroy (decl) ;
+                return CR_OK ;
+        }
+        return CR_ERROR ;
+}
 
 /**
  *The entry point of the testing routine.
@@ -123,6 +141,14 @@ main (int argc, char ** argv)
 {
         struct Options options ;
         enum CRStatus status = CR_OK ;
+        
+        status = test_cr_declaration_parse () ;
+
+        if (status != CR_OK)
+        {
+                g_print ("\nKO\n") ;
+                return 0 ;
+        }
 
         cr_test_utils_parse_cmd_line (argc, argv, &options) ;
 
@@ -143,7 +169,7 @@ main (int argc, char ** argv)
                 display_help (argv[0]) ;
                 return 0 ;
         }
-
+        
         status = test_cr_parser_parse (options.files_list[0]) ;
 
         

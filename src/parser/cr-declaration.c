@@ -115,14 +115,17 @@ cr_declaration_new (CRStatement *a_statement,
 {
 	CRDeclaration *result = NULL ;
 
-	g_return_val_if_fail (a_statement 
-			      && ((a_statement->type 
-				   == RULESET_STMT) 
-				  || (a_statement->type 
-				      == AT_FONT_FACE_RULE_STMT)
-				  || (a_statement->type 
-				      == AT_PAGE_RULE_STMT)),
-			      NULL) ;
+	g_return_val_if_fail (a_property, NULL) ;
+
+	if (a_statement)
+		g_return_val_if_fail (a_statement 
+				      && ((a_statement->type 
+					   == RULESET_STMT) 
+					  || (a_statement->type 
+					      == AT_FONT_FACE_RULE_STMT)
+					  || (a_statement->type 
+					      == AT_PAGE_RULE_STMT)),
+				      NULL) ;
 
 	result = g_try_malloc (sizeof (CRDeclaration)) ;
 	if (!result)
@@ -165,9 +168,10 @@ cr_declaration_parse (CRStatement *a_statement,
 	CRDeclaration *result = NULL ;
 	CRParser * parser = NULL ;
 
-	g_return_val_if_fail (a_statement 
-			      && a_statement->type == RULESET_STMT
-			      && a_str, NULL);
+	g_return_val_if_fail (a_str, NULL) ;
+	if (a_statement)
+		g_return_val_if_fail (a_statement->type == RULESET_STMT, 
+				      NULL);
 
 	parser = cr_parser_new_from_buf (a_str, 
 					 strlen (a_str),

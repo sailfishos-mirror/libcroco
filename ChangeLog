@@ -1,5 +1,9 @@
 2003-06-09  Dodji  <dodji@seketeli.org>
 
+	* src/parser/cr-parser.c (cr_parser_parse_declaration): 
+	fixed a bug that prevented this parsing function to be called outside
+	the stylesheet parsing context.
+
 	* src/seleng/cr-style.[ch]: went forward in the font properties 
 	gathering.
 	
