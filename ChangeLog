@@ -1,3 +1,16 @@
+2004-03-06  Dodji Seketeli  <dodji@gnome.org>
+
+	* csslint/csslint.c: applied a patch from Rob BUIS
+	to fix some bugs/memleaks here.
+	Did some cleanups too.
+	* src/cr-sel-eng.c:
+	(cr_sel_eng_get_matched_rulesets_real):
+	handle the case where the sheet is empty (has no rules). That
+	can happen ! (it actually happened to me during some tests).
+	(put_css_properties_in_props_list):
+	handle the !important keyword in the cascading algorithm.
+	Rob BUIS (again) started this.
+
 2004-03-05  Dodji Seketeli  <dodji@gnome.org>
 
 	* csslint/csslint.c: 

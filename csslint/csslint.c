@@ -101,21 +101,15 @@ parse_cmd_line (int a_argc, char **a_argv,
                 else if ( !strcmp (a_argv[i], "--evaluate") ||
                         !strcmp (a_argv[i], "-e"))
                 {
-                        gchar *xml_doc_path = NULL,
-                                *author_sheet_path = NULL,
-                                *user_sheet_path = NULL,
-                                *ua_sheet_path = NULL ;
-
                         for (i++ ; i < a_argc ; i++)
                         {
                                 if (!strcmp (a_argv[i], "--author-sheet"))
                                 {
-                                        if (author_sheet_path)
+                                        if (a_options->author_sheet_path)
                                         {
                                                 display_usage () ;
                                                 exit (-1);
                                         }
-                                        author_sheet_path = a_argv[i] ;
                                         i++ ;
                                         if (i >= a_argc || a_argv[i][0] == '-')
                                         {
@@ -127,12 +121,11 @@ parse_cmd_line (int a_argc, char **a_argv,
                                 }
                                 else if (!strcmp (a_argv[i], "--user-sheet"))
                                 {
-                                        if (user_sheet_path)
+                                        if (a_options->user_sheet_path)
                                         {
                                                 display_usage () ;
                                                 exit (-1);
                                         }
-                                        user_sheet_path = a_argv[i] ;
                                         i++ ;
                                         if (i >= a_argc || a_argv[i][0] == '-')
                                         {
@@ -144,12 +137,12 @@ parse_cmd_line (int a_argc, char **a_argv,
                                 }
                                 else if (!strcmp (a_argv[i], "--ua-sheet"))
                                 {
-                                        if (ua_sheet_path)
+                                        if (a_options->ua_sheet_path)
                                         {
                                                 display_usage () ;
                                                 exit (-1);
                                         }
-                                        ua_sheet_path = a_argv[i] ;
+                                        i++ ;
                                         if (i >= a_argc || a_argv[i][0] == '-')
                                         {
                                                 g_print ("--ua-sheet should be followed by a path to the sheet\n") ;
@@ -185,7 +178,9 @@ parse_cmd_line (int a_argc, char **a_argv,
                                         break ;
                                 }
                         }
-                        if (!author_sheet_path  && !user_sheet_path && !ua_sheet_path)
+                        if (!a_options->author_sheet_path  
+                            && !a_options->user_sheet_path && 
+                            !a_options->ua_sheet_path)
                         {
                                 g_print ("Error: you must specify at least one stylesheet\n") ;
                                 display_usage () ;
@@ -248,7 +243,7 @@ display_usage (void)
 {
     g_print ("Usage: csslint <path to a css file>\n");
     g_print ("\t| csslint -v|--version\n") ;
-    g_print ("\t| csslint <--evaluate | -e> [--author-sheet <path> --user-sheet <path> --ua-sheet <path>\n] --xml <path> --xpath <xpath expression>") ;
+    g_print ("\t| csslint <--evaluate | -e> [--author-sheet <path> --user-sheet <path> --ua-sheet <path>\n] --xml <path> --xpath <xpath expression>\n") ;
 }
 
 /**
@@ -427,6 +422,26 @@ evaluate_selectors (gchar *a_xml_path,
                         status = get_and_dump_node_style (cur_node, sel_eng,
                                                           cascade) ;
                 }
+        }
+
+        if (xpath_context)
+        {
+                xmlXPathFreeContext (xpath_context);
+                xpath_context = NULL ;
+        }
+        if (xpath_context)
+        {
+                xmlXPathFreeObject (xpath_object);
+                xpath_object = NULL ;
+        }
+        if (sel_eng)
+        {
+                cr_sel_eng_destroy (sel_eng);
+                sel_eng = NULL ;
+        }
+        if (cascade)
+        {
+                cr_cascade_destroy (cascade) ;
         }
         return CR_OK ;
 }

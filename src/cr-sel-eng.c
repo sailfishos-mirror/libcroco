@@ -845,10 +845,16 @@ cr_sel_eng_get_matched_rulesets_real (CRSelEng *a_this,
 
         g_return_val_if_fail (a_this
                               && a_stylesheet
-                              && a_stylesheet->statements
                               && a_node
                               && a_rulesets,
                               CR_BAD_PARAM_ERROR) ;
+
+        if (!a_stylesheet->statements)
+        {
+                *a_rulesets = NULL ;
+                *a_len = 0 ;
+                return CR_OK ;
+        }
 
         /*
          *if this stylesheet is "new one"
@@ -1195,9 +1201,25 @@ put_css_properties_in_props_list (CRPropList **a_props,
                         <
                         a_stmt->parent_sheet->origin))
                 {
+                        /*
+                         *if the already selected declaration
+                         *is marked as being !important the current
+                         *declaration must not overide it 
+                         *(unless the already selected declaration 
+                         *has an UA origin)
+                         */
+                        if (decl->important == TRUE
+                            && decl->parent_statement->parent_sheet->origin 
+                            != ORIGIN_UA)
+                        {
+                                continue ;
+                        }
                         tmp_props = cr_prop_list_unlink
                                 (props, pair) ;
-                        /*TODO: pair leaks here, fix it!!*/
+                        if (props)
+                        {
+                                cr_prop_list_destroy (pair) ;
+                        }
                         props = tmp_props ;
                         tmp_props = NULL ;
                         props = cr_prop_list_append2
@@ -1214,7 +1236,8 @@ put_css_properties_in_props_list (CRPropList **a_props,
                              >
                              a_stmt->parent_sheet->origin))
                 {
-                        /*TODO: support !important rule.*/
+                        cr_utils_trace_info 
+                                ("We should not reach this line\n") ;
                         continue ;
                 }
 
