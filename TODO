@@ -1,7 +1,12 @@
 
 *coding:)
 
-Code the cr_style_new_from_ruleset() fonction.
+!!Fix a bug in cr_parser_parse_ruleset(): make sure
+  to backup every cr_parser_parse_declaration() that fails
+  by a cr_parser_parse_declaration_core(). This is a stupid
+  bug. => not easy, not started.
+
+Code the cr_style_new_from_ruleset() fonction. => hard, in progress.
  
 *Doc:)
 

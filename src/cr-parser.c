@@ -1562,6 +1562,7 @@ cr_parser_parse_declaration_core (CRParser *a_this)
         RECORD_INITIAL_POS (a_this, &init_pos) ;
 
         status = cr_parser_parse_property (a_this, &prop) ;
+        CHECK_PARSING_STATUS (status, FALSE) ;
         cr_parser_clear_errors (a_this) ;
         ENSURE_PARSING_COND (status == CR_OK && prop) ;
         g_string_free (prop, TRUE) ; prop = NULL ;
@@ -1716,7 +1717,8 @@ cr_parser_parse_any_core (CRParser *a_this)
         switch (token1->type)
         {
         case IDENT_TK:
-        case NUMBER_TK:        
+        case NUMBER_TK:
+        case RGB_TK:
         case PERCENTAGE_TK:
         case DIMEN_TK:
         case EMS_TK:
@@ -3721,6 +3723,7 @@ cr_parser_parse_ruleset (CRParser *a_this)
         CRTerm *expr = NULL ;
         CRSimpleSel * simple_sels = NULL ;
         CRSelector *selector = NULL ;
+        gboolean start_selector = FALSE ;
 
         RECORD_INITIAL_POS (a_this, &init_pos) ;
 
@@ -3793,6 +3796,7 @@ cr_parser_parse_ruleset (CRParser *a_this)
 
                 PRIVATE (a_this)->sac_handler->start_selector 
                         (PRIVATE (a_this)->sac_handler, selector) ;
+                start_selector = TRUE ;
         }
 
         cr_parser_try_to_skip_spaces_and_comments (a_this) ;
@@ -3806,7 +3810,9 @@ cr_parser_parse_ruleset (CRParser *a_this)
                 cr_term_ref (expr) ;
         }
 
-        if ( status == CR_OK && PRIVATE (a_this)->sac_handler->property)
+        if ( status == CR_OK 
+             && PRIVATE (a_this)->sac_handler
+             && PRIVATE (a_this)->sac_handler->property)
         {
                 PRIVATE (a_this)->sac_handler->property 
                         (PRIVATE (a_this)->sac_handler, property, expr) ;
@@ -3849,14 +3855,14 @@ cr_parser_parse_ruleset (CRParser *a_this)
 
                 status = cr_parser_parse_declaration (a_this, &property,
                                                       &expr) ;
-
                 if (expr)
                 {
                         cr_term_ref (expr) ;
                 }
 
-                if (status == CR_OK && 
-                    PRIVATE (a_this)->sac_handler->property)
+                if (status == CR_OK 
+                    && PRIVATE (a_this)->sac_handler
+                    && PRIVATE (a_this)->sac_handler->property)
                 {
                         PRIVATE (a_this)->sac_handler->property 
                                 (PRIVATE (a_this)->sac_handler, 
@@ -3885,10 +3891,12 @@ cr_parser_parse_ruleset (CRParser *a_this)
                  "while parsing rulset: current char must be a '}'",
                  CR_SYNTAX_ERROR) ;
 
-        if (PRIVATE (a_this)->sac_handler->end_selector)
+        if (PRIVATE (a_this)->sac_handler
+            && PRIVATE (a_this)->sac_handler->end_selector)
         {
                 PRIVATE (a_this)->sac_handler->end_selector 
                         (PRIVATE (a_this)->sac_handler, selector) ;
+                start_selector = FALSE ;
         }
 
         if (expr)
@@ -3915,6 +3923,14 @@ cr_parser_parse_ruleset (CRParser *a_this)
         return CR_OK ;
 
  error:
+
+        if (start_selector == TRUE
+            && PRIVATE (a_this)->sac_handler
+            && PRIVATE (a_this)->sac_handler->error)
+        {
+                PRIVATE (a_this)->sac_handler->error 
+                        (PRIVATE (a_this)->sac_handler) ;                
+        }
 
         if (expr)
         {
