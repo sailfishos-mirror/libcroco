@@ -49,7 +49,7 @@ const guchar *gv_at_media_buf =
 ;
 
 const guchar *gv_at_page_buf =
-"@page { size 8.5in 11in; margin: 2cm }"
+"@page { size :8.5in 11in; margin: 2cm }"
 ;
 
 static void 

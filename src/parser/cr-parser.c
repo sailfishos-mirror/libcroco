@@ -4606,14 +4606,17 @@ cr_parser_parse_page (CRParser *a_this)
 
         status = cr_parser_parse_declaration (a_this, &property,
                                               &css_expression) ;
-        
+        ENSURE_PARSING_COND (status == CR_OK)
+
         /*
          *call the relevant SAC handler here...
          */
         if (PRIVATE (a_this)->sac_handler
             && PRIVATE (a_this)->sac_handler->property)
         {
-                cr_term_ref (css_expression) ;
+                if (css_expression)
+                        cr_term_ref (css_expression) ;
+
                 PRIVATE (a_this)->sac_handler->property 
                         (PRIVATE (a_this)->sac_handler, 
                          property,
