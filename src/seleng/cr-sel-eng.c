@@ -93,13 +93,30 @@ static void
 set_style_from_props_hash_hr_func (gpointer a_prop, gpointer a_decl,
                                    gpointer a_style) ;
 
-
 static gboolean
 pseudo_class_add_sel_matches_node (CRSelEng * a_this,
                                    CRAdditionalSel *a_add_sel,
                                    xmlNode *a_node)
 {
-        return FALSE ;
+        enum CRStatus status = CR_OK ;
+        CRPseudoClassSelectorHandler *handler = NULL ;
+        
+        g_return_val_if_fail (a_this && PRIVATE (a_this)
+                              && a_add_sel 
+                              && a_add_sel->content.pseudo
+                              && a_add_sel->content.pseudo->name
+                              && a_add_sel->content.pseudo->name->str
+                              && a_node,
+                              CR_BAD_PARAM_ERROR) ;
+
+        status = cr_sel_eng_get_pseudo_class_selector_handler
+                (a_this, a_add_sel->content.pseudo->name->str,
+                 a_add_sel->content.pseudo->type,
+                 &handler) ;
+        if (status != CR_OK || !handler)
+                return FALSE ;
+
+        return (*handler) (a_this, a_add_sel, a_node) ;
 }
 
 /**

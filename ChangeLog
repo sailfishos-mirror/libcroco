@@ -5,6 +5,11 @@
 	support of a pluggable handler for pseudo class selectors
 	evaluation. Wrote facilities to register/unregister/lookup
 	the handler.
+	* src/seleng/cr-sel-eng.c: 
+	(pseudo_class_add_sel_matches_node)  pluggable pseudo class selection
+	evaluation architecture is in place. I still have to
+	writte a real "handle" to handle say ":first-child" pseudo
+	class so that I can test/debug the whole code.
 
 2003-12-21  Dodji Seketeli  <dodji@gnome.org>
 
