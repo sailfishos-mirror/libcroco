@@ -120,3 +120,14 @@ xml start element: E6
 
 xml end element: E6
 '''''''''''''''''''''''''
+'''''''''''''''''''''''''
+xml start element: E7
+
+
+
+  :lang(fr) {
+    lang-prop : lang-value
+  }
+
+xml end element: E7
+'''''''''''''''''''''''''

@@ -94,6 +94,10 @@ static gboolean pseudo_class_add_sel_matches_node (CRSelEng * a_this,
                                                    CRAdditionalSel *a_add_sel,
                                                    xmlNode *a_node) ;
 
+static gboolean lang_pseudo_class_handler (CRSelEng *a_this,
+                                           CRAdditionalSel *a_sel,
+                                           xmlNode *a_node) ;
+
 static gboolean first_child_pseudo_class_handler (CRSelEng *a_this,
                                                   CRAdditionalSel *a_sel,
                                                   xmlNode *a_node) ;
@@ -105,6 +109,52 @@ static xmlNode * get_next_child_element_node (xmlNode *a_node) ;
 static xmlNode * get_prev_element_node (xmlNode *a_node) ;
 
 static xmlNode * get_next_parent_element_node (xmlNode *a_node) ;
+
+static gboolean 
+lang_pseudo_class_handler (CRSelEng *a_this,
+                           CRAdditionalSel *a_sel,
+                           xmlNode *a_node)
+{
+        xmlNode *node = a_node ;
+	xmlChar *val = NULL;
+        gboolean result = FALSE ;
+
+        g_return_val_if_fail (a_this && PRIVATE (a_this)
+                              && a_sel && a_sel->content.pseudo
+                              && a_sel->content.pseudo
+                              && a_sel->content.pseudo->name
+                              && a_node,
+                              CR_BAD_PARAM_ERROR) ;
+
+        if (strncmp (a_sel->content.pseudo->name->str,
+                    "lang", 4) 
+            || !a_sel->content.pseudo->type == FUNCTION_PSEUDO)
+        {
+                cr_utils_trace_info 
+                        ("This handler is for :lang only") ;
+                return CR_BAD_PSEUDO_CLASS_SEL_HANDLER_ERROR ;
+        }
+        /*lang code should exist and be at least of length 2*/
+        if (!a_sel->content.pseudo->extra || a_sel->content.pseudo->extra->len < 2)
+                return FALSE ;
+	for (;node;node = get_next_parent_element_node (node))
+	{
+		val = xmlGetProp (node, "lang");
+		if (val
+                    && !strncmp (val, 
+                                 a_sel->content.pseudo->extra->str, 
+                                 a_sel->content.pseudo->extra->len))
+                {
+			result = TRUE ;
+                }
+	}
+        if (val)
+        {
+                xmlFree (val) ;
+                val = NULL ;
+        }
+	return result ;
+}
 
 static gboolean 
 first_child_pseudo_class_handler (CRSelEng *a_this,
@@ -1241,6 +1291,11 @@ cr_sel_eng_new (void)
                  IDENT_PSEUDO,
                  (CRPseudoClassSelectorHandler)
                  first_child_pseudo_class_handler) ;
+        cr_sel_eng_register_pseudo_class_sel_handler 
+                (result, (guchar*)"lang",
+                 FUNCTION_PSEUDO,
+                 (CRPseudoClassSelectorHandler)
+                 lang_pseudo_class_handler) ;
 
 	return result ;
 }

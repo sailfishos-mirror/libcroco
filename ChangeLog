@@ -1,5 +1,14 @@
 2004-02-29  Dodji Seketeli  <dodji@gnome.org>
 
+	* src/cr-sel-eng.c: applied a patch of Rob BUIS
+	to add the support of the :lang() pseudo class using
+	the pluggable pseudo class system.
+	* tests/test5-main.c,tests/test-inputs/test5.1.css,tests/test-output-refs/test5.1.css.out:
+	Updated the non regression tests suite to test the :lang() pseudo
+	class.
+
+2004-02-29  Dodji Seketeli  <dodji@gnome.org>
+
 	* src/cr-statement.[ch],src/cr-stylesheet.[ch]:
 	applied a patch from Rob BUIS that provides new apis
 	to manipulate CSS statements.
