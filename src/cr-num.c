@@ -217,6 +217,18 @@ cr_num_copy (CRNum *a_dest, CRNum *a_src)
         return CR_OK ;
 }
 
+
+enum CRStatus
+cr_num_set (CRNum *a_this, gdouble a_val, enum CRNumType a_type)
+{
+        g_return_val_if_fail (a_this, CR_BAD_PARAM_ERROR) ;
+
+        a_this->val= a_val ;
+        a_this->type = a_type ;
+
+        return CR_OK ;
+}
+
 /**
  *The destructor of #CRNum.
  *@param a_this the this pointer of

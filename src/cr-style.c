@@ -153,6 +153,11 @@ set_border_x_width_from_value (CRStyle *a_style,
                                enum CRDirection a_dir) ;
 
 static enum CRStatus
+set_border_x_style_from_value (CRStyle *a_style,
+                               CRTerm *a_value,
+                               enum CRDirection a_dir) ;
+
+static enum CRStatus
 cr_style_init_properties (void)
 {
 
@@ -337,19 +342,22 @@ set_border_x_width_from_value (CRStyle *a_style,
                                       a_value->content.str->str,
                                       strlen ("thin")))
                         {
-                                
+                                cr_num_set (num_val, BORDER_THIN,
+                                            NUM_LENGTH_PX) ;
                         }
                         else if (!strncmp ("medium",
                                            a_value->content.str->str,
                                            strlen ("medium")))
                         {
-                                
+                                cr_num_set (num_val, BORDER_MEDIUM,
+                                            NUM_LENGTH_PX) ;
                         }
                         else if (!strncmp ("thick",
                                            a_value->content.str->str,
                                            strlen ("thick")))
                         {
-                                
+                                cr_num_set (num_val, BORDER_THICK,
+                                            NUM_LENGTH_PX) ;
                         }
                         else
                         {
@@ -358,12 +366,153 @@ set_border_x_width_from_value (CRStyle *a_style,
                 }
         }
 
-        switch (a_value->type)
+        switch (a_value->content.num->type)
         {
+        case NUM_GENERIC:
+        case NUM_LENGTH_EM:
+        case NUM_LENGTH_EX:
+        case NUM_LENGTH_PX:
+        case NUM_LENGTH_IN:
+        case NUM_LENGTH_CM:
+        case NUM_LENGTH_MM:
+        case NUM_LENGTH_PT:
+        case NUM_LENGTH_PC:
+                status = cr_num_copy (num_val, a_value->content.num) ;
+                break ;
         default :
                 status = CR_ERROR ;
                 break ;
         }
+
+        return status ;
+}
+
+
+static enum CRStatus
+set_border_x_style_from_value (CRStyle *a_style,
+                               CRTerm *a_value,
+                               enum CRDirection a_dir)
+{
+        g_return_val_if_fail (a_style && a_value, 
+                              CR_BAD_PARAM_ERROR) ;
+
+        enum CRStatus status = CR_OK ;
+        enum CRBorderStyle *border_style_ptr, *parent_border_style_ptr ;
+
+        g_return_val_if_fail (a_value
+                              && a_style->parent_style, 
+                              CR_BAD_PARAM_ERROR) ;
+
+        switch (a_dir)
+        {
+        case DIR_TOP:
+                border_style_ptr = &a_style->border_top_style ;
+                parent_border_style_ptr = 
+                        &a_style->parent_style->border_top_style ;
+                break ;
+
+        case DIR_RIGHT:
+                border_style_ptr = 
+                        &a_style->border_right_style ;
+
+                parent_border_style_ptr = 
+                        &a_style->parent_style->border_right_style;
+
+                break ;
+
+        case DIR_BOTTOM:
+                border_style_ptr = &a_style->border_bottom_style ;
+                parent_border_style_ptr = 
+                        &a_style->parent_style->border_bottom_style;
+                break ;
+
+        case DIR_LEFT:
+                border_style_ptr = &a_style->border_left_style ;
+                parent_border_style_ptr = 
+                        &a_style->parent_style->border_left_style;
+                break ;
+
+        default:
+                break ;
+        }
+        
+        if (a_value->type != TERM_IDENT
+            || !a_value->content.str)
+        {
+                return CR_UNKNOWN_TYPE_ERROR ;
+        }
+
+        if (!strncmp ("none", 
+                      a_value->content.str->str, 
+                      strlen ("none")))
+        {
+                *border_style_ptr = BORDER_STYLE_NONE ;
+        }
+        else if (!strncmp ("hidden", 
+                           a_value->content.str->str, 
+                           strlen ("hidden")))
+        {
+                *border_style_ptr = BORDER_STYLE_HIDDEN ;
+        }
+        else if (!strncmp ("dotted", 
+                           a_value->content.str->str, 
+                           strlen ("dotted")))
+        {
+                *border_style_ptr = BORDER_STYLE_DOTTED ;
+        }
+        else if (!strncmp ("dashed", 
+                           a_value->content.str->str, 
+                           strlen ("dashed")))
+        {
+                *border_style_ptr = BORDER_STYLE_DASHED ;
+        }
+        else if (!strncmp ("solid", 
+                           a_value->content.str->str, 
+                           strlen ("solid")))
+        {
+                *border_style_ptr = BORDER_STYLE_SOLID ;
+        }
+        else if (!strncmp ("double", 
+                           a_value->content.str->str, 
+                           strlen ("double")))
+        {
+                *border_style_ptr = BORDER_STYLE_DOUBLE ;
+        }
+        else if (!strncmp ("groove", 
+                           a_value->content.str->str, 
+                           strlen ("groove")))
+        {
+                *border_style_ptr = BORDER_STYLE_GROOVE ;
+        }
+        else if (!strncmp ("ridge", 
+                           a_value->content.str->str, 
+                           strlen ("ridge")))
+        {
+                *border_style_ptr = BORDER_STYLE_RIDGE ;
+        }
+        else if (!strncmp ("inset", 
+                           a_value->content.str->str, 
+                           strlen ("inset")))
+        {
+                *border_style_ptr = BORDER_STYLE_INSET ;
+        }
+        else if (!strncmp ("outset", 
+                           a_value->content.str->str, 
+                           strlen ("outset")))
+        {
+                *border_style_ptr = BORDER_STYLE_OUTSET ;
+        }
+        else if (!strncmp ("inherit", 
+                           a_value->content.str->str, 
+                           strlen ("inherit")))
+        {
+                *border_style_ptr = *parent_border_style_ptr ;
+        }
+        else
+        {
+                status = CR_UNKNOWN_TYPE_ERROR ;
+        }
+
         return status ;
 }
 
@@ -460,28 +609,43 @@ cr_style_set_style_from_decl (CRStyle *a_this, CRDeclaration *a_decl,
                 break ;
                 
         case PROP_BORDER_TOP_WIDTH:
-                
+                status = set_border_x_width_from_value (a_this, value,
+                                                        DIR_TOP) ;
                 break ;
 
         case PROP_BORDER_RIGHT_WIDTH:
+                status = set_border_x_width_from_value (a_this, value,
+                                                        DIR_RIGHT) ;
                 break ;
 
         case PROP_BORDER_BOTTOM_WIDTH:
+                status = set_border_x_width_from_value (a_this, value,
+                                                        DIR_BOTTOM) ;
                 break ;
 
         case PROP_BORDER_LEFT_WIDTH:
+                status = set_border_x_width_from_value (a_this, value,
+                                                        DIR_BOTTOM) ;
                 break ;
 
         case PROP_BORDER_TOP_STYLE:
+                status = set_border_x_style_from_value (a_this, value,
+                                                        DIR_TOP) ;
                 break ;
 
         case PROP_BORDER_RIGHT_STYLE:
+                status = set_border_x_style_from_value (a_this, value,
+                                                        DIR_RIGHT) ;
                 break ;
 
         case PROP_BORDER_BOTTOM_STYLE:
+                status = set_border_x_style_from_value (a_this, value,
+                                                        DIR_BOTTOM) ;
                 break ;
 
         case PROP_BORDER_LEFT_STYLE: 
+                status = set_border_x_style_from_value (a_this, value,
+                                                        DIR_LEFT) ;
                 break ;
 
         case PROP_MARGIN_TOP:

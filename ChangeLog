@@ -1,3 +1,15 @@
+2003-03-16  dodji  <dodji@seketeli.org>
+
+	* src/cr-style.c (set_border_x_style_from_value): 
+	new method added to gather 'border_top_style' ... 'border_left_style'
+	properties value from the css stylesheet.
+	
+	(set_border_x_width_from_value): completed this function
+	to properly gather 'border_top_width' ... 'border_left_width'
+	properties values from the css stylesheet.
+
+	* src/cr-num.c (cr_num_set): new method added.
+
 2003-03-15  dodji  <dodji@seketeli.org>
 
 	* src/cr-utils.[ch]
