@@ -42,6 +42,12 @@ const guchar *gv_ruleset_buf =
 "s1 > s2 {toto: tutu, tata} "
 ;
 
+const guchar *gv_at_media_buf =
+"@media print, toto {"
+"  BODY { font-size: 10pt }"
+"  }"
+;
+
 static void 
 display_help (char *prg_name) ;
 
@@ -164,6 +170,24 @@ test_cr_statement_ruleset_parse (void)
         return CR_OK ;
 }
 
+static enum CRStatus
+test_cr_statement_at_media_rule_parse (void)
+{
+        CRStatement *stmt = NULL ;
+
+        stmt = cr_statement_at_media_rule_parse_from_buf (gv_at_media_buf,
+                                                          CR_UTF_8) ;
+        g_return_val_if_fail (stmt, CR_ERROR) ;
+        
+        if (stmt)
+        {
+                cr_statement_destroy (stmt) ;
+                stmt = NULL ;
+        }
+
+        return CR_OK ;
+}
+
 /**
  *The entry point of the testing routine.
  */
@@ -181,6 +205,13 @@ main (int argc, char ** argv)
         }
 
         status = test_cr_statement_ruleset_parse () ;
+        if (status != CR_OK)
+        {
+                g_print ("\nKO\n") ;
+                return 0 ;
+        }
+
+        status = test_cr_statement_at_media_rule_parse () ;
         if (status != CR_OK)
         {
                 g_print ("\nKO\n") ;
