@@ -4,7 +4,8 @@
  *This test example shows how to use the SAC api.
  *
  *This features a simple parser that says "hey" when
- *it encounters a css ruleset :)
+ *it encounters the beginning of a CSS ruleset, and "woohoo"
+ *at the end of a CSS ruleset.
  *
  *To compile this file, type:
  *
@@ -12,6 +13,12 @@
  *
  *Make sure you have compiled and installed libcroco prior to trying to
  *compile this file :)
+ *
+ *Once you have compiled it, type:
+ *
+ *./sac-example-1 <a-path-to-a-css-file>
+ *
+ *to try it on a CSS file of your choice.
  *
  *Initial Author: Dodji Seketeli <Dodji 47 seketeli dot org>
  */
@@ -42,7 +49,7 @@ static void
 end_selector_cb (CRDocHandler *a_handler,
 		 CRSelector *a_selector)
 {
-	printf ("Hey, this is the end of a ruleset\n") ;
+	printf ("Woohoo, this is the end of a ruleset\n") ;
 	printf ("======================================\n\n") ;
 }
 
