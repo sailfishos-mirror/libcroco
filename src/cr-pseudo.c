@@ -45,28 +45,32 @@ cr_pseudo_new (void)
 	return result ;
 }
 
-/**
- *Dumps the pseudo to a file.
- *@param a_this the current instance of pseudo
- *@param a_fp the destination file pointer.
- */
-void
-cr_pseudo_dump (CRPseudo *a_this, FILE *a_fp)
+
+guchar *
+cr_pseudo_to_string (CRPseudo *a_this)
 {
-        g_return_if_fail (a_this) ;
+        guchar *result = NULL ;
+        GString *str_buf = NULL ;
+
+        g_return_val_if_fail (a_this, NULL) ;
+
+        str_buf = g_string_new (NULL) ;
 
         if (a_this->type == IDENT_PSEUDO)
         {
                 guchar * name = NULL ;
 
                 if (a_this->name == NULL)
-                        return ;
+                {
+                        goto error ;
+                }
 
                 name = g_strndup (a_this->name->str,
                                   a_this->name->len) ;
+
                 if (name)
                 {
-                        fprintf (a_fp,"%s", name) ;
+                        g_string_append_printf (str_buf,"%s", name) ;
                         g_free (name) ;
                         name = NULL ;
                 }
@@ -76,10 +80,11 @@ cr_pseudo_dump (CRPseudo *a_this, FILE *a_fp)
                 guchar * name = NULL, *arg = NULL ;
 
                 if (a_this->name == NULL) 
-                        return ;
+                        goto error ;
                 
                 name = g_strndup (a_this->name->str,
                                   a_this->name->len) ;
+
                 if (a_this->extra)
                 {
                         arg = g_strndup (a_this->extra->str,
@@ -88,21 +93,60 @@ cr_pseudo_dump (CRPseudo *a_this, FILE *a_fp)
 
                 if (name)
                 {
-                        fprintf (a_fp,"%s(", name) ;
+                        g_string_append_printf (str_buf, 
+                                                "%s(",  name) ;
                         g_free (name) ;
                         name = NULL ;
 
                         if (arg)
                         {
-                                fprintf (a_fp,arg) ;
+                                g_string_append_printf (str_buf, 
+                                                        "%s", arg) ;
                                 g_free (arg) ;
                                 arg = NULL ;
                         }
 
-                        fprintf (a_fp,")") ;
+                        g_string_append_printf (str_buf, ")") ;
                 } 
         }
+
+        if (str_buf)
+        {
+                result = str_buf->str ;
+                g_string_free (str_buf, FALSE) ;
+                str_buf = NULL ;
+        }
+
+        return result ;
+
+ error:
+        g_string_free (str_buf, TRUE) ;
+        return NULL ;
 }
+
+
+/**
+ *Dumps the pseudo to a file.
+ *@param a_this the current instance of pseudo
+ *@param a_fp the destination file pointer.
+ */
+void
+cr_pseudo_dump (CRPseudo *a_this, FILE *a_fp)
+{
+        guchar *tmp_str = NULL ;
+
+        if (a_this)
+        {
+                tmp_str = cr_pseudo_to_string (a_this) ;
+                if (tmp_str)
+                {
+                        fprintf (a_fp, "%s", tmp_str) ;
+                        g_free (tmp_str) ;
+                        tmp_str = NULL ;
+                }
+        }
+}
+
 
 /**
  *destructor of the #CRPseudo class.

@@ -87,7 +87,7 @@ cr_attr_sel_append_attr_sel (CRAttrSel *a_this, CRAttrSel *a_attr_sel)
 enum CRStatus
 cr_attr_sel_prepend_attr_sel (CRAttrSel *a_this, CRAttrSel *a_attr_sel)
 {
-        g_return_val_if_fail (a_this && a_attr_sel, CR_BAD_PARAM_ERROR) ;
+        g_return_val_if_fail (a_this && a_attr_sel, CR_BAD_PARAM_ERROR);
 
         a_attr_sel->next = a_this ;
         a_this->prev = a_attr_sel ;
@@ -95,25 +95,22 @@ cr_attr_sel_prepend_attr_sel (CRAttrSel *a_this, CRAttrSel *a_attr_sel)
         return CR_OK ;
 }
 
-/**
- *Dumps the current instance of #CRAttrSel to a file.
- *@param a_this the "this pointer" of the current instance of
- *#CRAttrSel.
- *@param a_fp the destination file.
- */
-void
-cr_attr_sel_dump (CRAttrSel *a_this, FILE *a_fp)
+guchar *
+cr_attr_sel_to_string (CRAttrSel *a_this)
 {
         CRAttrSel *cur = NULL ;
+        guchar * result = NULL ;
+        GString *str_buf = NULL ;
 
-        g_return_if_fail (a_this) ;
+        g_return_val_if_fail (a_this, NULL) ;
 
+        str_buf = g_string_new (NULL) ;
 
         for (cur = a_this ; cur ; cur = cur->next)
         {
                 if (cur->prev)
                 {
-                        fprintf (a_fp," ") ;
+                        g_string_append_printf (str_buf," ") ;
                 }
 
                 if (cur->name)
@@ -124,7 +121,8 @@ cr_attr_sel_dump (CRAttrSel *a_this, FILE *a_fp)
                                           cur->name->len) ;
                         if (name)
                         {
-                                fprintf (a_fp,name) ;
+                                g_string_append_printf (str_buf, 
+                                                        "%s", name) ;
                                 g_free (name) ;
                                 name = NULL ;
                         }
@@ -144,27 +142,62 @@ cr_attr_sel_dump (CRAttrSel *a_this, FILE *a_fp)
                                         break ;
 
                                 case EQUALS:
-                                        fprintf (a_fp,"=") ;
+                                        g_string_append_printf 
+                                                (str_buf,"=") ;
                                         break ;
 
                                 case INCLUDES:
-                                        fprintf (a_fp,"~=") ;
+                                        g_string_append_printf 
+                                                (str_buf,"~=") ;
                                         break ;
 
                                 case DASHMATCH:
-                                        fprintf (a_fp,"|=") ;
+                                        g_string_append_printf 
+                                                (str_buf,"|=") ;
                                                 break ;
 
                                 default:
                                         break ;
                                 }
                         
-                                fprintf (a_fp,"\"%s\"",value) ;
+                                g_string_append_printf 
+                                        (str_buf,"\"%s\"",value) ;
 
                                 g_free (value) ;
                                 value = NULL ;
                         }
                 }
+        }
+
+        if (str_buf)
+        {
+                result = str_buf->str ;
+                g_string_free (str_buf, FALSE) ;                
+        }
+
+        return result ;
+}
+
+/**
+ *Dumps the current instance of #CRAttrSel to a file.
+ *@param a_this the "this pointer" of the current instance of
+ *#CRAttrSel.
+ *@param a_fp the destination file.
+ */
+void
+cr_attr_sel_dump (CRAttrSel *a_this, FILE *a_fp)
+{
+        guchar * tmp_str = NULL ;
+
+        g_return_if_fail (a_this) ;
+
+        tmp_str = cr_attr_sel_to_string (a_this) ;
+
+        if (tmp_str)
+        {
+                fprintf (a_fp, "%s", tmp_str) ;
+                g_free (tmp_str) ;
+                tmp_str = NULL ;
         }
 }
 

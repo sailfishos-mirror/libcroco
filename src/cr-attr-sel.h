@@ -31,49 +31,49 @@
 #ifndef __CR_ATTR_SEL_H__
 #define __CR_ATTR_SEL_H__
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+G_BEGIN_DECLS
 
-	struct _CRAttrSel ;
-	typedef struct _CRAttrSel CRAttrSel ;
 
-	enum AttrMatchWay
-	{
-                NO_MATCH = 0,
-		SET,
-		EQUALS,
-		INCLUDES,
-		DASHMATCH
-	} ;
+struct _CRAttrSel ;
+typedef struct _CRAttrSel CRAttrSel ;
 
-	struct _CRAttrSel
-	{
-		GString             *name ;
-		GString             *value ;
-		enum AttrMatchWay  match_way ;
-		CRAttrSel          *next ;
-		CRAttrSel          *prev ;
-	} ;
+enum AttrMatchWay
+{
+        NO_MATCH = 0,
+        SET,
+        EQUALS,
+        INCLUDES,
+        DASHMATCH
+} ;
 
-	CRAttrSel *
-	cr_attr_sel_new (void) ;
+struct _CRAttrSel
+{
+        GString             *name ;
+        GString             *value ;
+        enum AttrMatchWay  match_way ;
+        CRAttrSel          *next ;
+        CRAttrSel          *prev ;
+} ;
 
-        enum CRStatus
-	cr_attr_sel_append_attr_sel (CRAttrSel * a_this, 
-                                     CRAttrSel *a_new) ;
-        enum CRStatus
-        cr_attr_sel_prepend_attr_sel (CRAttrSel *a_this, 
-                                      CRAttrSel *a_attr_sel) ;
-        void
-        cr_attr_sel_dump (CRAttrSel *a_this, FILE *a_fp) ;
+CRAttrSel *
+cr_attr_sel_new (void) ;
 
-        void
-	cr_attr_sel_destroy (CRAttrSel *a_this) ;
+enum CRStatus
+cr_attr_sel_append_attr_sel (CRAttrSel * a_this, 
+                             CRAttrSel *a_new) ;
+enum CRStatus
+cr_attr_sel_prepend_attr_sel (CRAttrSel *a_this, 
+                              CRAttrSel *a_attr_sel) ;
+        
+guchar *
+cr_attr_sel_to_string (CRAttrSel *a_this) ;
 
-#ifdef __cplusplus
-} /*extern C*/
-#endif
+void
+cr_attr_sel_dump (CRAttrSel *a_this, FILE *a_fp) ;
 
+void
+cr_attr_sel_destroy (CRAttrSel *a_this) ;
+
+G_END_DECLS
 
 #endif /*__CR_ATTR_SEL_H__*/

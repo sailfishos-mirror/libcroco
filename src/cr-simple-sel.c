@@ -95,6 +95,77 @@ cr_simple_sel_prepend_simple_sel (CRSimpleSel *a_this, CRSimpleSel *a_sel)
         return a_sel ;
 }
 
+guchar *
+cr_simple_sel_to_string (CRSimpleSel *a_this)
+{
+        GString * str_buf = NULL ;
+        guchar *result = NULL ;
+
+        CRSimpleSel *cur = NULL ;
+
+        g_return_val_if_fail (a_this,  NULL) ;
+
+        str_buf = g_string_new (NULL) ;
+        for (cur = a_this ; cur ; cur = cur->next)
+        {
+                if (cur->name)
+                {
+                        guchar * str = g_strndup (cur->name->str, 
+                                                  cur->name->len) ;
+                        if (str)
+                        {
+                                switch (cur->combinator)
+                                {
+                                case COMB_WS:
+                                        g_string_append_printf 
+                                                (str_buf, " ") ;
+                                        break ;
+
+                                case COMB_PLUS:
+                                        g_string_append_printf 
+                                                (str_buf, "+") ;
+                                        break ;
+
+                                case COMB_GT:
+                                        g_string_append_printf 
+                                                (str_buf, ">") ;
+                                        break ;
+
+                                default:
+                                        break ;
+                                }
+                       
+                                g_string_append_printf (str_buf,"%s",str) ;
+                                g_free (str) ;
+                                str = NULL ;
+                        }                        
+                }
+
+                if (cur->add_sel)
+                {
+                        guchar *tmp_str = NULL ;
+                        
+                        tmp_str = cr_additional_sel_to_string 
+                                (cur->add_sel) ;
+                        if (tmp_str)
+                        {
+                                g_string_append_printf 
+                                        (str_buf, "%s", tmp_str) ;
+                                g_free (tmp_str) ;
+                                tmp_str = NULL ;
+                        }
+                }
+        }
+
+        if (str_buf)
+        {
+                result = str_buf->str ;
+                g_string_free (str_buf, FALSE) ;
+                str_buf = NULL ;
+        }
+
+        return result ;
+}
 
 /**
  *Dumps the selector to a file.
@@ -108,43 +179,18 @@ cr_simple_sel_prepend_simple_sel (CRSimpleSel *a_this, CRSimpleSel *a_sel)
 enum CRStatus
 cr_simple_sel_dump (CRSimpleSel *a_this, FILE *a_fp)
 {
-        CRSimpleSel *cur = NULL ;
+        guchar *tmp_str = NULL ;
 
-        g_return_val_if_fail (a_this, CR_BAD_PARAM_ERROR) ;
+        g_return_val_if_fail (a_fp, CR_BAD_PARAM_ERROR) ;
 
-        for (cur = a_this ; cur ; cur = cur->next)
+        if (a_this)
         {
-                if (cur->name)
+                tmp_str = cr_simple_sel_to_string (a_this) ;
+                if (tmp_str)
                 {
-                        guchar * str = g_strndup (cur->name->str, 
-                                                   cur->name->len) ;
-                        if (str)
-                        {
-                                switch (cur->combinator)
-                                {
-                                case COMB_WS:
-                                        fprintf (a_fp," ") ;
-                                        break ;
-                                case COMB_PLUS:
-                                        fprintf (a_fp,"+") ;
-                                        break ;
-                                case COMB_GT:
-                                        fprintf (a_fp,">") ;
-                                        break ;
-                                default:
-                                        break ;
-                                }
-                       
-                                fprintf (a_fp,str) ;
-
-                                g_free (str) ;
-                                str = NULL ;
-                        }                        
-                }
-
-                if (cur->add_sel)
-                {
-                        cr_additional_sel_dump (cur->add_sel, a_fp) ;
+                        fprintf (a_fp, "%s", tmp_str) ;
+                        g_free (tmp_str) ;
+                        tmp_str = NULL ;
                 }
         }
 

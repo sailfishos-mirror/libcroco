@@ -31,41 +31,40 @@
 #include <glib.h>
 #include "cr-attr-sel.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+G_BEGIN_DECLS
 
-        enum CRPseudoType
-        {
-                IDENT_PSEUDO = 0,
-                FUNCTION_PSEUDO
-        } ;
+enum CRPseudoType
+{
+        IDENT_PSEUDO = 0,
+        FUNCTION_PSEUDO
+} ;
 
-        typedef struct _CRPseudo CRPseudo ;
+typedef struct _CRPseudo CRPseudo ;
 
-	/**
-	 *The CRPseudo Class.
-	 *Abstract a "pseudo" as defined by the css2 spec
-	 *in appendix D.1 .
-	 */
-        struct _CRPseudo
-        {
-                enum CRPseudoType type ;
-                GString *name ;
-                GString *extra ;
-        } ;
+/**
+ *The CRPseudo Class.
+ *Abstract a "pseudo" as defined by the css2 spec
+ *in appendix D.1 .
+ */
+struct _CRPseudo
+{
+        enum CRPseudoType type ;
+        GString *name ;
+        GString *extra ;
+} ;
 
-	CRPseudo *
-	cr_pseudo_new (void) ;
+CRPseudo *
+cr_pseudo_new (void) ;
 
-        void
-        cr_pseudo_dump (CRPseudo *a_this, FILE *a_fp) ;
+guchar *
+cr_pseudo_to_string (CRPseudo *a_this) ;
 
-	void
-	cr_pseudo_destroy (CRPseudo *a_this) ;
+void
+cr_pseudo_dump (CRPseudo *a_this, FILE *a_fp) ;
 
-#ifdef __cplusplus
-} /*extern "C" {*/
-#endif
+void
+cr_pseudo_destroy (CRPseudo *a_this) ;
+
+G_END_DECLS
 
 #endif /*__CR_PSEUDO_H__*/

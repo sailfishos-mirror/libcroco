@@ -61,7 +61,9 @@ cr_selector_append (CRSelector *a_this, CRSelector *a_new)
 	CRSelector *cur = NULL ;
 	
 	if (!a_this)
+	{
 		return a_new ;
+	}
 
 	/*walk forward the list headed by a_this to get the list tail*/
 	for (cur = a_this ; cur && cur->next ; cur = cur->next) ;
@@ -69,7 +71,7 @@ cr_selector_append (CRSelector *a_this, CRSelector *a_new)
 	cur->next = a_new ;
 	a_new->prev = cur ;
 
-	return	a_this ;
+	return  a_this ;
 }
 
 /**
@@ -98,8 +100,7 @@ cr_selector_prepend (CRSelector *a_this, CRSelector *a_new)
  *@return the new list or NULL in case of failure.
  */
 CRSelector*
-cr_selector_append_simple_sel (CRSelector *a_this,
-			       CRSimpleSel *a_simple_sel)
+cr_selector_append_simple_sel (CRSelector *a_this, CRSimpleSel *a_simple_sel)
 {
 	CRSelector * selector = NULL ;
 
@@ -109,14 +110,16 @@ cr_selector_append_simple_sel (CRSelector *a_this,
 	return cr_selector_append (a_this, selector) ;
 }
 
-/**
- *Serializes the current instance of #CRSelector to a file.
- *@param a_this the current instance of #CRSelector.
- *@param a_fp the destination file.
- */
-void
-cr_selector_dump (CRSelector *a_this, FILE *a_fp)
+
+guchar *
+cr_selector_to_string (CRSelector *a_this)
 {
+	guchar *result = NULL ;
+	GString *str_buf = NULL ;
+
+	str_buf = g_string_new (NULL) ;
+	g_return_val_if_fail (str_buf, NULL) ;
+
 	if (a_this)
 	{
 		CRSelector *cur = NULL ;
@@ -125,11 +128,57 @@ cr_selector_dump (CRSelector *a_this, FILE *a_fp)
 		{
 			if (cur->simple_sel)
 			{
-                                if (cur->prev)
-                                        fprintf (a_fp,", ") ;
+				guchar *tmp_str = NULL ;
 
-                                cr_simple_sel_dump (cur->simple_sel, a_fp) ;
+				tmp_str = cr_simple_sel_to_string 
+					(cur->simple_sel) ;
+				
+				if (tmp_str)
+				{
+					if (cur->prev)
+						g_string_append_printf 
+							(str_buf,", ") ;
+
+					g_string_append_printf 
+						(str_buf, "%s", 
+						 tmp_str) ;
+
+					g_free (tmp_str) ;
+					tmp_str = NULL ;
+				}
 			}
+		}
+	}
+
+	if (str_buf)
+	{
+		result = str_buf->str ;
+		g_string_free (str_buf, FALSE) ;
+		str_buf = NULL ;
+	}
+
+	return result ;
+}
+
+
+/**
+ *Serializes the current instance of #CRSelector to a file.
+ *@param a_this the current instance of #CRSelector.
+ *@param a_fp the destination file.
+ */
+void
+cr_selector_dump (CRSelector *a_this, FILE *a_fp)
+{
+	guchar *tmp_buf = NULL ;
+	
+	if (a_this)
+	{
+		tmp_buf = cr_selector_to_string (a_this) ;
+		if (tmp_buf)
+		{
+			fprintf (a_fp, "%s", tmp_buf) ;
+			g_free (tmp_buf) ;
+			tmp_buf = NULL ;
 		}
 	}
 }

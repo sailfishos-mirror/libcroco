@@ -80,6 +80,9 @@ cr_selector_append_simple_sel (CRSelector *a_this,
 CRSelector*
 cr_selector_prepend (CRSelector *a_this, CRSelector *a_new) ;
 
+guchar *
+cr_selector_to_string (CRSelector *a_this) ;
+
 void
 cr_selector_dump (CRSelector *a_this, FILE *a_fp) ;
 

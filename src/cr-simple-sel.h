@@ -112,6 +112,9 @@ CRSimpleSel *
 cr_simple_sel_prepend_simple_sel (CRSimpleSel *a_this, 
                                   CRSimpleSel *a_sel) ;
 
+guchar *
+cr_simple_sel_to_string (CRSimpleSel *a_this) ;
+
 enum CRStatus
 cr_simple_sel_dump (CRSimpleSel *a_this, FILE *a_fp) ;
 

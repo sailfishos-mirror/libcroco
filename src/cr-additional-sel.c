@@ -221,18 +221,16 @@ cr_additional_sel_prepend (CRAdditionalSel *a_this,
 }
 
 
-/**
- *Dumps the current instance of #CRAdditionalSel to a file
- *@param a_this the "this pointer" of the current instance of
- *#CRAdditionalSel.
- *@param a_fp the destination file.
- */
-void
-cr_additional_sel_dump (CRAdditionalSel *a_this, FILE *a_fp)
+guchar *
+cr_additional_sel_to_string (CRAdditionalSel *a_this)
 {
+        guchar * result = NULL ;
+        GString * str_buf = NULL ;
         CRAdditionalSel *cur = NULL ;
 
-        g_return_if_fail (a_this) ;
+        g_return_val_if_fail (a_this, NULL) ;
+
+        str_buf = g_string_new (NULL) ;
 
         for (cur = a_this ;cur ; cur = cur->next) 
         {
@@ -249,7 +247,8 @@ cr_additional_sel_dump (CRAdditionalSel *a_this, FILE *a_fp)
 
                                 if (name)
                                 {
-                                        fprintf (a_fp, ".%s", name) ;
+                                        g_string_append_printf 
+                                                (str_buf, ".%s", name) ;
                                         g_free (name) ;
                                         name = NULL ;
                                 }
@@ -268,7 +267,8 @@ cr_additional_sel_dump (CRAdditionalSel *a_this, FILE *a_fp)
 
                                 if (name)
                                 {
-                                        fprintf (a_fp, "#%s", name) ;
+                                        g_string_append_printf 
+                                                (str_buf, "#%s", name) ;
                                         g_free (name) ;
                                         name = NULL ;
                                 }
@@ -281,29 +281,79 @@ cr_additional_sel_dump (CRAdditionalSel *a_this, FILE *a_fp)
                 {
                         if (cur->content.pseudo)
                         {
-                                fprintf (a_fp, ":") ;
-                                cr_pseudo_dump (cur->content.pseudo, a_fp) ;
+                                guchar *tmp_str = NULL ;
+                                
+                                tmp_str = cr_pseudo_to_string 
+                                        (cur->content.pseudo) ;
+                                if (tmp_str)
+                                {
+                                        g_string_append_printf 
+                                                (str_buf, ":%s", 
+                                                 tmp_str) ;
+                                        g_free (tmp_str) ;
+                                        tmp_str = NULL ;
+                                }
                         }
                 }
-                        break ;
+                break ;
                 
                 case ATTRIBUTE_ADD_SELECTOR:
                         if (cur->content.attr_sel)
                         {
-                                fprintf (a_fp,"[") ;
+                                guchar *tmp_str = NULL ;
 
-                                cr_attr_sel_dump (cur->content.attr_sel, 
-                                                  a_fp) ;
-
-                                fprintf (a_fp,"]") ;
+                                g_string_append_printf (str_buf,"[") ;
+                                tmp_str = cr_attr_sel_to_string 
+                                        (cur->content.attr_sel) ;
+                                if (tmp_str)
+                                {
+                                        g_string_append_printf 
+                                                (str_buf, "%s]", 
+                                                 tmp_str) ;
+                                        g_free (tmp_str) ;
+                                        tmp_str = NULL ;
+                                }
                         }
-
                         break ;
 
                 default:
                         break ;
                 }
-        }        
+        }
+
+        if (str_buf)
+        {
+                result = str_buf->str ;
+                g_string_free (str_buf, FALSE) ;
+                str_buf = NULL ;
+        }
+
+        return result ;
+}
+
+/**
+ *Dumps the current instance of #CRAdditionalSel to a file
+ *@param a_this the "this pointer" of the current instance of
+ *#CRAdditionalSel.
+ *@param a_fp the destination file.
+ */
+void
+cr_additional_sel_dump (CRAdditionalSel *a_this, FILE *a_fp)
+{
+        guchar *tmp_str = NULL ;
+
+        g_return_if_fail (a_fp) ;
+
+        if (a_this)
+        {
+                tmp_str = cr_additional_sel_to_string (a_this) ;
+                if (tmp_str)
+                {
+                        fprintf (a_fp, "%s", tmp_str) ;
+                        g_free (tmp_str) ;
+                        tmp_str = NULL ;
+                }
+        }
 }
 
 /**

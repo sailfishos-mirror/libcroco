@@ -38,84 +38,83 @@
 #include "cr-attr-sel.h"
 #include "cr-pseudo.h"
 
-#ifdef __cplusplus
-extern "C"
+G_BEGIN_DECLS
+
+enum AddSelectorType
 {
-#endif
-        enum AddSelectorType
-        {
-                NO_ADD_SELECTOR = 0 ,
-                CLASS_ADD_SELECTOR = 1 ,
-                PSEUDO_CLASS_ADD_SELECTOR = 1 << 1,
-                ID_ADD_SELECTOR = 1 << 3,
-                ATTRIBUTE_ADD_SELECTOR = 1 << 4
-        } ;
+        NO_ADD_SELECTOR = 0 ,
+        CLASS_ADD_SELECTOR = 1 ,
+        PSEUDO_CLASS_ADD_SELECTOR = 1 << 1,
+        ID_ADD_SELECTOR = 1 << 3,
+        ATTRIBUTE_ADD_SELECTOR = 1 << 4
+} ;
 
-        union CRAdditionalSelectorContent
-        {
-                GString *class_name ;
-                GString *id_name ;
-                CRPseudo *pseudo ;
-                CRAttrSel *attr_sel ;
-        } ;
+union CRAdditionalSelectorContent
+{
+        GString *class_name ;
+        GString *id_name ;
+        CRPseudo *pseudo ;
+        CRAttrSel *attr_sel ;
+} ;
 
-        typedef struct _CRAdditionalSel CRAdditionalSel ;
+typedef struct _CRAdditionalSel CRAdditionalSel ;
 
-        /**
-         *#CRAdditionalSel abstracts
-         *an additionnal selector.
-         *An additional selector is the selector part
-         *that comes after the combination of type selectors.
-         *It can be either "a class selector (the .class part),
-         *a pseudo class selector, an attribute selector 
-         *or an id selector.
-         */
-        struct _CRAdditionalSel
-        {
-                enum AddSelectorType type ;
-                union CRAdditionalSelectorContent content ;
+/**
+ *#CRAdditionalSel abstracts
+ *an additionnal selector.
+ *An additional selector is the selector part
+ *that comes after the combination of type selectors.
+ *It can be either "a class selector (the .class part),
+ *a pseudo class selector, an attribute selector 
+ *or an id selector.
+ */
+struct _CRAdditionalSel
+{
+        enum AddSelectorType type ;
+        union CRAdditionalSelectorContent content ;
 
-                CRAdditionalSel * next ;
-                CRAdditionalSel * prev ;
-        } ;
+        CRAdditionalSel * next ;
+        CRAdditionalSel * prev ;
+} ;
 
-        CRAdditionalSel *
-        cr_additional_sel_new (void) ;
+CRAdditionalSel *
+cr_additional_sel_new (void) ;
 
-        CRAdditionalSel *
-        cr_additional_sel_new_with_type 
-        (enum AddSelectorType a_sel_type) ;
+CRAdditionalSel *
+cr_additional_sel_new_with_type 
+(enum AddSelectorType a_sel_type) ;
 
-        CRAdditionalSel *
-        cr_additional_sel_append (CRAdditionalSel *a_this, 
-                                  CRAdditionalSel *a_sel) ;
-        void
-        cr_additional_sel_set_class_name (CRAdditionalSel *a_this,
-				  GString *a_class_name) ;
-        void
-        cr_additional_sel_set_id_name (CRAdditionalSel *a_this,
-                                       GString *a_id) ;
+CRAdditionalSel *
+cr_additional_sel_append (CRAdditionalSel *a_this, 
+                          CRAdditionalSel *a_sel) ;
+void
+cr_additional_sel_set_class_name (CRAdditionalSel *a_this,
+                                  GString *a_class_name) ;
+void
+cr_additional_sel_set_id_name (CRAdditionalSel *a_this,
+                               GString *a_id) ;
 
-        void
-        cr_additional_sel_set_pseudo (CRAdditionalSel *a_this,
-                                      CRPseudo *a_pseudo) ;
+void
+cr_additional_sel_set_pseudo (CRAdditionalSel *a_this,
+                              CRPseudo *a_pseudo) ;
 
-        void
-        cr_additional_sel_set_attr_sel (CRAdditionalSel *a_this,
-                                        CRAttrSel *a_sel) ;
+void
+cr_additional_sel_set_attr_sel (CRAdditionalSel *a_this,
+                                CRAttrSel *a_sel) ;
 
-        CRAdditionalSel *
-        cr_additional_sel_prepend (CRAdditionalSel *a_this, 
-                                   CRAdditionalSel *a_sel) ;
+CRAdditionalSel *
+cr_additional_sel_prepend (CRAdditionalSel *a_this, 
+                           CRAdditionalSel *a_sel) ;
 
-        void
-        cr_additional_sel_dump (CRAdditionalSel *a_this, FILE *a_fp) ;
+guchar *
+cr_additional_sel_to_string (CRAdditionalSel *a_this) ;
 
-        void
-        cr_additional_sel_destroy (CRAdditionalSel *a_this) ;
+void
+cr_additional_sel_dump (CRAdditionalSel *a_this, FILE *a_fp) ;
 
-#ifdef __cplusplus
-} /*extern "C"*/
-#endif /*__cplusplus*/
+void
+cr_additional_sel_destroy (CRAdditionalSel *a_this) ;
+
+G_END_DECLS
 
 #endif /*__CR_ADD_SEL_H*/
