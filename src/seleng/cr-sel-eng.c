@@ -64,7 +64,7 @@ put_css_properties_in_hashtable (GHashTable **a_props_hashtable,
                                  CRStatement *a_ruleset) ;
 
 static void
-set_style_from_props_hash_hr_func (gpointer a_prop, gpointer a_stmt,
+set_style_from_props_hash_hr_func (gpointer a_prop, gpointer a_decl,
                                    gpointer a_style) ;
 
 struct _CRSelEngPriv
@@ -765,13 +765,14 @@ cr_sel_eng_get_matched_rulesets_real (CRSelEng *a_this,
  */
 static enum CRStatus
 put_css_properties_in_hashtable (GHashTable **a_props_hashtable,
-                                 CRStatement *a_ruleset)
+                                 CRStatement *a_stmt)
 {
-        CRStatement *cur_stmt = NULL ;
         GHashTable *props_hash = NULL ;
+        CRDeclaration *cur_decl = NULL ;
 
-        g_return_val_if_fail (a_props_hashtable && a_ruleset
-                              && a_ruleset->type == RULESET_STMT,
+        g_return_val_if_fail (a_props_hashtable && a_stmt
+                              && a_stmt->type == RULESET_STMT
+                              && a_stmt->kind.ruleset,
                               CR_BAD_PARAM_ERROR) ;
 
         if (!*a_props_hashtable)
@@ -781,132 +782,109 @@ put_css_properties_in_hashtable (GHashTable **a_props_hashtable,
         }
         props_hash = *a_props_hashtable ;
 
-        for (cur_stmt = a_ruleset ; cur_stmt ; cur_stmt = cur_stmt->next)
+        for (cur_decl = a_stmt->kind.ruleset->decl_list ; 
+             cur_decl ; cur_decl = cur_decl->next)
         {
-                CRDeclaration *cur_decl = NULL ;
-
-                if (cur_stmt->type != RULESET_STMT
-                    || !cur_stmt->kind.ruleset)
+                if (!cur_decl->property || !cur_decl->property->str)
                         continue ;
 
-                for (cur_decl = cur_stmt->kind.ruleset->decl_list ; 
-                     cur_decl ; cur_decl = cur_decl->next)
+                CRDeclaration *decl = NULL ;
+
+                /*
+                 *First, test if the property is not
+                 *already present in our properties hashtable.
+                 *If yes, apply the cascading rules to
+                 *compute the precedence. If not, insert
+                 *the property into the hashtable.
+                 */
+                decl = g_hash_table_lookup 
+                        (props_hash, cur_decl->property->str) ;
+
+                if (!decl)
                 {
-                        if (!cur_decl->property || !cur_decl->property->str)
-                                continue ;
+                        g_hash_table_replace 
+                                (props_hash,
+                                 cur_decl->property->str,
+                                 cur_decl) ;
+                        continue ;
+                }
 
-                        CRStatement *stmt = NULL ;
+                /*
+                 *A property with the same name already exists.
+                 *We must apply here 
+                 *some cascading rules
+                 *to compute the precedence.
+                 */
 
-                        /*
-                         *First, test if the property is not
-                         *already present in our properties hashtable.
-                         *If yes, apply the cascading rules to
-                         *compute the precedence. If not, insert
-                         *the property into the hashtable.
-                         */
-                        stmt = g_hash_table_lookup 
-                                (props_hash, cur_decl->property->str) ;
+                /*
+                 *first, look at the origin.
+                 *6.4.1 says: 
+                 *"for normal declarations, 
+                 *author style sheets override user 
+                 *style sheets which override 
+                 *the default style sheet."
+                 */
+                if (decl->parent_statement 
+                    && decl->parent_statement->parent_sheet
+                    && (decl->parent_statement->parent_sheet->origin 
+                        <
+                        a_stmt->parent_sheet->origin))
+                {
+                        g_hash_table_insert 
+                                (props_hash,
+                                 cur_decl->property->str,
+                                 cur_decl) ;
+                        continue ;
+                }
+                else if (decl->parent_statement 
+                         && decl->parent_statement->parent_sheet
+                         && (decl->parent_statement->
+                             parent_sheet->origin 
+                             >
+                             a_stmt->parent_sheet->origin))
+                {
+                        /*TODO: support !important rule.*/
+                        continue ;
+                }
 
-                        if (!stmt)
-                        {
-                                g_hash_table_insert 
-                                        (props_hash,
-                                         cur_decl->property->str,
-                                         a_ruleset) ;
-                                continue ;
-                        }
-
-                        /*
-                         *A property with the same name already exists.
-                         *We must apply here 
-                         *some cascading rules
-                         *to compute the precedence.
-                         */
-
-                        /*
-                         *first, look at the origin.
-                         *6.4.1 says: 
-                         *"for normal declarations, 
-                         *author style sheets override user 
-                         *style sheets which override 
-                         *the default style sheet."
-                         */
-                        if (stmt->parent_sheet 
-                            && (stmt->parent_sheet->origin 
-                                <
-                                cur_stmt->parent_sheet->origin))
-                        {
-                                g_hash_table_insert 
-                                        (props_hash,
-                                         cur_decl->property->str,
-                                         a_ruleset) ;
-                                continue ;
-                        }
-                        else if (stmt->parent_sheet 
-                                 && (stmt->parent_sheet->origin 
-                                     >
-                                     cur_stmt->parent_sheet->origin))
-                        {
-                                /*TODO: support !important rule.*/
-                                continue ;
-                        }
-
-                        /*
-                         *A property with the same
-                         *name and the same origin already exist.
-                         *shit. This is lasting longer than expected ...
-                         *Luckily, the spec says in 6.4.1:
-                         *"more specific selectors will override 
-                         *more general ones"
-                         *and
-                         *"if two rules have the same weight, 
-                         *origin and specificity, 
-                         *the latter specified wins"
-                         */
-                        if (cur_stmt->specificity >= stmt->specificity)
-                        {
-                                g_hash_table_insert
-                                        (props_hash,
-                                         cur_decl->property->str,
-                                         a_ruleset) ;      
-                        }
+                /*
+                 *A property with the same
+                 *name and the same origin already exist.
+                 *shit. This is lasting longer than expected ...
+                 *Luckily, the spec says in 6.4.1:
+                 *"more specific selectors will override 
+                 *more general ones"
+                 *and
+                 *"if two rules have the same weight, 
+                 *origin and specificity, 
+                 *the latter specified wins"
+                 */
+                if (a_stmt->specificity
+                    >= decl->parent_statement->specificity)
+                {
+                        g_hash_table_insert
+                                (props_hash,
+                                 cur_decl->property->str,
+                                 cur_decl) ;
                 }
         }
+
 
         return CR_OK ;
 }
 
+
+
 static void
-set_style_from_props_hash_hr_func (gpointer a_prop, gpointer a_stmt,
+set_style_from_props_hash_hr_func (gpointer a_prop, gpointer a_decl,
                                    gpointer a_style)
 {
-        CRDeclaration *cur_decl = NULL ;
-        CRStatement *stmt = a_stmt ;
+        CRDeclaration *decl = a_decl ;
         CRStyle *style = a_style ;
-        guchar *prop = a_prop ;
 
-        g_return_if_fail (prop && stmt 
-                          && stmt->type == RULESET_STMT
-                          && stmt->kind.ruleset
-                          && style) ;
+        g_return_if_fail (a_decl && a_prop && a_style) ;
 
-        for (cur_decl = stmt->kind.ruleset->decl_list;
-             cur_decl && cur_decl->next ; cur_decl = cur_decl->next) ;
-
-
-        for (;
-             cur_decl ; cur_decl = cur_decl->prev)
-        {
-                if (cur_decl->property 
-                    && cur_decl->property->str
-                    && !strcmp (cur_decl->property->str, prop) )
-                {
-                        break ;
-                }
-        }
-
-        if (cur_decl)
-                cr_style_set_style_from_decl (style, cur_decl) ;
+        cr_style_set_style_from_decl (style, decl) ;
 }
 
 
