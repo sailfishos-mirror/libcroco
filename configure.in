@@ -128,28 +128,26 @@ if test "$USE_LIBXML2" = "yes" ; then
 fi
 
 dnl By default compile in debug mode
-CFLAGS=-g
+CFLAGS=-g -Wall -ansi
 
-CROCO_LIBS='-L${libdir}'
-CROCO_CFLAGS='-I${includedir}'
+CROCO_LIBS="-L${libdir} -lcroco `pkg-config --libs glib-2.0`"
+CROCO_CFLAGS="-I${includedir}/libcroco `pkg-config --cflags glib-2.0`"
 
 if test "$USE_LIBXML2" = "yes" ; then
 	LIBXML2_LIBS=`pkg-config --libs libxml-2.0`
 	CROCO_LIBS="$CROCO_LIBS $LIBXML2_LIBS"
-	LIBXML2_CFLAGS=`pk-config --cflags libxml-2.0`
+	LIBXML2_CFLAGS=`pkg-config --cflags libxml-2.0`
 	CROCO_CFLAGS="$CROCO_CFLAGS $LIBXML2_CFLAGS"
 	REQUIRE_LIBXML2=libxml-2.0
 else
-	CROCO_LIBS=
-	CROCO_FLAGS=
 	REQUIRE_LIBXML2=
 fi
 
-AC_SUBST(CROCO_CFLAGS)
-AC_SUBST(CROCO_LIBS)
 AC_SUBST(LIBXML2_LIBS)
 AC_SUBST(LIBXML2_CFLAGS)
 AC_SUBST(REQUIRE_LIBXML2)
+AC_SUBST(CROCO_CFLAGS)
+AC_SUBST(CROCO_LIBS)
 
 AC_SUBST(LDFLAGS)
 AC_SUBST(CFLAGS)
