@@ -46,6 +46,15 @@ static void
 cr_box_view_init (CRBoxView *a_this) ;
 
 
+static gboolean
+expose_event_cb (GtkWidget *a_this,
+                 GdkEventExpose *a_event,
+                 gpointer a_user_data) ;
+
+static enum CRStatus
+draw_box (CRBoxView *a_this) ;
+
+
 static void
 cr_box_view_class_init (CRBoxViewClass *a_klass)
 {
@@ -73,6 +82,31 @@ cr_box_view_init (CRBoxView *a_this)
 }
 
 
+static gboolean
+expose_event_cb (GtkWidget *a_this,
+                 GdkEventExpose *a_event,
+                 gpointer a_user_data)
+{
+        g_return_val_if_fail (a_event
+                              && a_this 
+                              && GTK_IS_LAYOUT (a_this)
+                              && CR_IS_BOX_VIEW (a_this),
+                              CR_BAD_PARAM_ERROR) ;
+
+        switch (a_event->type)
+        {
+        case GDK_EXPOSE:
+                break ;
+                
+        default:
+                cr_utils_trace_info ("Unexpected event received, "
+                                     "Only GDK_EXPOSE was expected.") ;
+                return FALSE ;
+        }
+
+        return FALSE ;
+        
+}
 /**********************************
  *Public funtions
  **********************************/
@@ -102,14 +136,55 @@ cr_box_view_get_type (void)
 	return type ;
 }
 
+
 CRBoxView *
-cr_box_view_new (void)
+cr_box_view_new (CRBox *a_box)
 {
 	CRBoxView *result = NULL ;
 
 	result = g_object_new (CR_TYPE_BOX_VIEW, NULL) ;
+        g_return_val_if_fail (result, NULL) ;
+
+        cr_box_view_set_box (result, a_box) ;
+
+        g_signal_connect (G_OBJECT (result),
+                          "expose-event",
+                          (GCallback)expose_event_cb,
+                          NULL) ;
 
 	return result ;
+}
+
+
+enum CRStatus
+cr_box_view_set_box (CRBoxView *a_this,
+                     CRBox *a_box)
+{
+        g_return_val_if_fail (a_this, CR_BAD_PARAM_ERROR) ;
+
+        if (PRIVATE (a_this)->box)
+        {
+                if (cr_box_unref (PRIVATE (a_this)->box) == TRUE)
+                        PRIVATE (a_this) = NULL ;
+        }
+
+        PRIVATE (a_this)->box = a_box ;
+        if (a_box)
+                cr_box_ref (a_box) ;
+
+        return TRUE ;
+}
+
+
+enum CRStatus
+cr_box_view_get_box (CRBoxView *a_this, CRBox **a_box)
+{
+        g_return_val_if_fail (a_this
+                              && PRIVATE (a_this), 
+                              CR_BAD_PARAM_ERROR) ;
+
+        *a_box = PRIVATE (a_this)->box ;
+        return TRUE ;
 }
 
 

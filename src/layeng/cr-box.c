@@ -177,6 +177,7 @@ cr_box_data_new (xmlNode *a_node)
         return result ;
 }
 
+
 /**
  *Destructor of #CRBoxData.
  *@param a_this the current instance 
@@ -542,6 +543,45 @@ cr_box_dump_to_file (CRBox *a_this,
                 str = NULL ;
         }
         return status ;
+}
+
+/**
+ *Increments the reference count of
+ *the current instance of #CRBox.
+ */
+enum CRStatus
+cr_box_ref (CRBox *a_this)
+{
+        g_return_val_if_fail (a_this, CR_BAD_PARAM_ERROR) ;
+        
+        a_this->ref_count ++ ;
+
+        return TRUE ;
+}
+
+
+/**
+ *Decrements the current instance's ref count.
+ *If the ref count reaches zero, the instance is destroyed.
+ *@param a_this the current instance.
+ *@return TRUE if the ref count reached zero and the instance has been
+ *destroyed, FALSE otherwise.
+ */
+gboolean
+cr_box_unref (CRBox *a_this)
+{
+        g_return_val_if_fail (a_this, FALSE) ;
+
+        if (a_this->ref_count)
+                a_this->ref_count -- ;
+
+        if (a_this->ref_count == 0)
+        {
+                cr_box_destroy (a_this) ;
+                return TRUE ;
+        }
+
+        return FALSE ;
 }
 
 /**

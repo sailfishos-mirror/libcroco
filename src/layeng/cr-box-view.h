@@ -67,7 +67,14 @@ GType
 cr_box_view_get_type (void) ;
 
 CRBoxView *
-cr_box_view_new (void) ;
+cr_box_view_new (CRBox *a_box) ;
+
+enum CRStatus
+cr_box_view_get_box (CRBoxView *a_this, CRBox **a_box) ;
+
+enum CRStatus
+cr_box_view_set_box (CRBoxView *a_this,
+                     CRBox *a_box) ;
 
 void
 cr_box_view_destroy (GtkObject *a_this) ;

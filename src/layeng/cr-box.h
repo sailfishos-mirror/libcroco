@@ -110,12 +110,14 @@ cr_box_data_new (xmlNode *a_node)  ;
 void
 cr_box_data_destroy (CRBoxData *a_this) ;
 
+typedef struct _CRBoxModel CRBoxModel ;
 typedef struct _CRBox CRBox ;
+
 /**
  *The CRBox class.
  *Abstracts the css2 box as defined in the
  *css2 spec in chapter 8.
- *It is actually a tree of boxes, each being "generated"
+  *It is actually a tree of boxes, each being "generated"
  *by an xml document tree node.
  */
 struct _CRBox
@@ -201,6 +203,8 @@ struct _CRBox
 	/**the children (contained) boxes*/
 	CRBox *children ;
 
+        CRBoxModel * box_model ;
+
         /**some custom data used by libcroco*/
         CRBoxData *box_data ;
         /**some application data that will never 
@@ -208,7 +212,20 @@ struct _CRBox
          *are free to use it.
          */
         gpointer *app_data ;
+        
+        gulong ref_count ;
 } ;
+
+struct _CRBoxModel
+{
+        CRBox box ;
+        gulong viewport_width ;
+        gulong viewport_height ;
+} ;
+
+
+CRBoxModel *
+cr_box_new_model (void) ;
 
 CRBoxContent *
 cr_box_content_new_from_text (guchar *a_text) ;
@@ -223,7 +240,6 @@ enum CRStatus
 cr_box_insert_sibling (CRBox *a_prev,
                        CRBox *a_next,
                        CRBox *a_to_insert) ;
-
 enum CRStatus
 cr_box_to_string (CRBox *a_this, 
                   gulong a_nb_indent,
@@ -233,6 +249,13 @@ enum CRStatus
 cr_box_dump_to_file (CRBox *a_this, 
                      gulong a_nb_indent,
                      FILE *a_filep) ;
+
+enum CRStatus
+cr_box_ref (CRBox *a_this) ;
+
+
+gboolean
+cr_box_unref (CRBox *a_this) ;
 
 enum CRStatus
 cr_box_append_child (CRBox *a_this, CRBox *a_to_append) ;
