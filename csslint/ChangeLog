@@ -1,3 +1,7 @@
+2003-04-02  Gaël Chamoulaud  <strider@freespiders.org>
+
+	* csslint.1: updated man page
+
 2003-03-24  Gaël Chamoulaud  <strider@freespiders.org>
 
 	* csslint.c (csslint_usage): Added the ability to parse
