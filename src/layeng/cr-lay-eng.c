@@ -406,8 +406,10 @@ compute_text_box_inner_edge_size (CRBox *a_this)
 
         text = a_this->content->u.text ;
 
-        label = gtk_label_new (NULL) ;        
+        label = gtk_label_new (NULL) ;      
         g_return_val_if_fail (label, CR_ERROR) ;
+        gtk_misc_set_alignment (GTK_MISC (label),0, 0) ;
+        gtk_misc_set_padding (GTK_MISC (label), 0, 0) ;        
 
         pgo_layout = gtk_widget_create_pango_layout (label, text) ;
         pango_layout_get_pixel_extents (pgo_layout, &ink_rect,
@@ -415,6 +417,9 @@ compute_text_box_inner_edge_size (CRBox *a_this)
 
         a_this->inner_edge.width = logical_rect.width ;
         a_this->inner_edge.height = logical_rect.height ;
+        gtk_label_set_text (GTK_LABEL (label), text) ;
+        a_this->content->content_cache = label ;
+        label = NULL ;
 
 /* cleanup:*/
 

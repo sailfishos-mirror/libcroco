@@ -47,14 +47,8 @@ typedef struct _CRBoxViewPriv CRBoxViewPriv ;
 
 struct _CRBoxView
 {
-	GtkLayout parent ;
+	GtkLayout parent_widget ;
         CRBoxViewPriv *priv ;
-
-        /**<public fields>*/
-        CRBoxView *children ;
-        CRBoxView *next ;
-        CRBoxView *prev ;
-        
 } ;
 
 struct _CRBoxViewClass
@@ -67,7 +61,7 @@ GType
 cr_box_view_get_type (void) ;
 
 CRBoxView *
-cr_box_view_new (CRBox *a_box) ;
+cr_box_view_new (CRBox *a_box, CRBoxView *a_parent) ;
 
 enum CRStatus
 cr_box_view_get_box (CRBoxView *a_this, CRBox **a_box) ;
@@ -76,9 +70,9 @@ enum CRStatus
 cr_box_view_set_box (CRBoxView *a_this,
                      CRBox *a_box) ;
 
+
 void
 cr_box_view_destroy (GtkObject *a_this) ;
-
 
 G_END_DECLS
 

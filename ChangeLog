@@ -1,3 +1,19 @@
+2003-04-28  Dodji  <dodji@seketeli.org>
+
+	* tests/test7-main.c: woohoo, this now shows some text. 
+	Okay, it is a crappy design sketch, but this is a milestone.
+
+	* src/layeng/cr-lay-eng.c: store the created label widget in the cache.
+	box content cache.
+	* src/layeng/cr-box.h:created a box content cache to store the label 
+	widget used to calculate text box size.
+	
+	* src/layeng/cr-box-view.[hc]: made this simpler and manage to
+	make it show someting on the screen. Now the box view
+	is just the view port. To render the box model, we just walk thru it
+	and draw each box in the box view.
+	
+
 2003-04-26  dodji  <dodji@seketeli.org>
 	
 	* configure.in: made sure to include the libgnomeui clflags and

@@ -60,6 +60,15 @@ struct _CRBoxContent
 		guchar *text ;
 		CRImageContentDesc *img_desc ;
 	} u ;
+
+        /*
+         *a place where the rendered content can be cached.
+         *This can be usefull because sometime, during the layout,
+         *calculating the size of the content is better achieve by
+         *rendering it. In this case, the rendered content is just cached
+         *here so that the rendering stage can just pick it.
+         */
+        gpointer content_cache ;
 } ;
 
 typedef struct _CRBoxEdge CRBoxEdge ;

@@ -3,8 +3,8 @@
 
 Go forward in the box layout (positioning) code. (hard, very hard).
 This is gonna take me a coupe of months I think.
- cr-lay-eng.c:adjust_edges_on_inner_edge() code the TODO of this
- method. this is the must have before coding the draw_box() function.
+ cr-box-view.c: code the draw_borders() function.
+
  I wonder when the draw_box will enable me to see something on the
  screen.
  that day would then be a great day.

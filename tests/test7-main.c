@@ -158,7 +158,8 @@ test_layout_box (void)
                                                 GTK_POLICY_AUTOMATIC,
                                                 GTK_POLICY_AUTOMATIC) ;
 
-                box_view = cr_box_view_new (((CRBox*)box_model)->children) ;
+                box_view = cr_box_view_new (((CRBox*)box_model)->children,
+                                            NULL) ;
                 gtk_container_add (GTK_CONTAINER (window), scroll) ;
                 gtk_container_add (GTK_CONTAINER (scroll), 
                                    GTK_WIDGET (box_view)) ;
