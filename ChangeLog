@@ -1,3 +1,12 @@
+2004-02-24  Dodji Seketeli <dodji@gnome.org>
+
+	* src/cr-parser.c: 
+	(cr_parser_parse_import): fixed a parsing bug reported
+	by David A Knight. This should now properly parse
+	sequences of @import rules that without media parts.
+	* src/cr-statement.c: (cr_statement_dump_import_rule):
+	fixed a serialisation bug here.
+
 2004-02-24  Dodji Seketeli  <dodji@gnome.org>
 
 	* src/cr-parser.c,src/cr-tknzr.c,src/cr-token.[ch]: 

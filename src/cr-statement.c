@@ -850,8 +850,8 @@ cr_statement_dump_import_rule (CRStatement *a_this, FILE *a_fp,
 					}
 				}
 			}
-			fprintf (a_fp," ;") ;
 		}
+                fprintf (a_fp," ;") ;
 	}
 }
 

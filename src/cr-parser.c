@@ -4293,15 +4293,13 @@ cr_parser_parse_import (CRParser *a_this, GList ** a_media_list,
                         medium = NULL ;
                 }
 
-                CHECK_PARSING_STATUS (status, FALSE) ;
-
-                READ_NEXT_CHAR (a_this, &cur_char) ;
-
-                ENSURE_PARSING_COND (cur_char == ';') ;
-
+                CHECK_PARSING_STATUS (status, FALSE) ;                
                 cr_parser_try_to_skip_spaces_and_comments (a_this) ;
         }
-
+        cr_parser_try_to_skip_spaces_and_comments (a_this) ;
+        READ_NEXT_CHAR (a_this, &cur_char) ;
+        ENSURE_PARSING_COND (cur_char == ';') ;
+        cr_parser_try_to_skip_spaces_and_comments (a_this) ;
  okay:
         cr_parser_clear_errors (a_this) ;
         PRIVATE (a_this)->state = IMPORT_PARSED_STATE ;
