@@ -93,9 +93,9 @@ struct _CRDocHandler
 	 *of the imported style sheet.
 	 */
 	void (*import_style) (CRDocHandler *a_this,
-				     GList *a_media_list,
-				     GString *a_uri,
-				     GString *a_uri_default_ns) ;
+			      GList *a_media_list,
+			      GString *a_uri,
+			      GString *a_uri_default_ns) ;
 
 	void (*import_style_result) (CRDocHandler *a_this,
 				     GList *a_media_list,

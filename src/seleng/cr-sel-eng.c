@@ -3,7 +3,7 @@
 /*
  * This file is part of The Croco Library
  *
- * Copyright (C) 2002-2003 Dodji Seketeli <dodji@seketeli.org>
+ * Copyright (C) 2002-2003 Dodji Seketeli <dodji at seketeli.org>
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of version 2.1 of the GNU Lesser General Public
@@ -34,6 +34,32 @@
  */
 
 #define PRIVATE(a_this) (a_this)->priv
+
+struct CRPseudoClassSelHandlerEntry
+{
+        guchar *name ;
+        enum CRPseudoType type ;
+        CRPseudoClassSelectorHandler *handler ;
+} ;
+
+struct _CRSelEngPriv
+{
+        /*not used yet*/
+        gboolean case_sensitive ;
+
+        CRStyleSheet *sheet ;
+
+        /**
+         *where to store the next statement
+         *to be visited so that we can remember
+         *it from one method call to another.
+         */
+        CRStatement *cur_stmt ;
+        GList *pcs_handlers ;
+        gint pcs_handlers_size ;
+};
+
+
 
 static gboolean
 class_add_sel_matches_node (CRAdditionalSel *a_add_sel,
@@ -67,20 +93,14 @@ static void
 set_style_from_props_hash_hr_func (gpointer a_prop, gpointer a_decl,
                                    gpointer a_style) ;
 
-struct _CRSelEngPriv
+
+static gboolean
+pseudo_class_add_sel_matches_node (CRSelEng * a_this,
+                                   CRAdditionalSel *a_add_sel,
+                                   xmlNode *a_node)
 {
-        /*not used yet*/
-        gboolean case_sensitive ;
-
-        CRStyleSheet *sheet ;
-
-        /**
-         *where to store the next statement
-         *to be visited so that we can remember
-         *it from one method call to another.
-         */
-        CRStatement *cur_stmt ;
-};
+        return FALSE ;
+}
 
 /**
  *@param a_add_sel the class additional selector to consider.
@@ -335,7 +355,8 @@ attr_add_sel_matches_node (CRAdditionalSel *a_add_sel,
  *@return TRUE is a_add_sel matches a_node, FALSE otherwise.
  */
 static gboolean
-additional_selector_matches_node (CRAdditionalSel *a_add_sel,
+additional_selector_matches_node (CRSelEng *a_this,
+                                  CRAdditionalSel *a_add_sel,
                                   xmlNode *a_node)
 {
         if (!a_add_sel)
@@ -385,6 +406,15 @@ additional_selector_matches_node (CRAdditionalSel *a_add_sel,
                         return FALSE ;
                 }
                 return TRUE ;
+        } else if (a_add_sel->type == PSEUDO_CLASS_ADD_SELECTOR
+                   && a_add_sel->content.pseudo) 
+        {
+                if (pseudo_class_add_sel_matches_node 
+                    (a_this, a_add_sel, a_node) == TRUE)
+                {
+                        return TRUE ;
+                }
+                return FALSE ;
         }
         return FALSE ;
 }
@@ -505,8 +535,9 @@ sel_matches_node_real (CRSelEng *a_this, CRSimpleSel *a_sel,
                                          *their xml node counterpart.
                                          */
                                         if (cur_sel->add_sel) {
-                                                if (additional_selector_matches_node 
-                                                    (cur_sel->add_sel, cur_node) == TRUE) {
+                                                if (additional_selector_matches_node
+                                                    (a_this, cur_sel->add_sel, cur_node) == TRUE) 
+                                                {
                                                         goto walk_a_step_in_expr ;
                                                 } else {
                                                         goto done ;
@@ -528,7 +559,8 @@ sel_matches_node_real (CRSelEng *a_this, CRSimpleSel *a_sel,
                         goto done ;
                 }
                 if (additional_selector_matches_node 
-                    (cur_sel->add_sel, cur_node) == TRUE) {
+                    (a_this, cur_sel->add_sel, cur_node) == TRUE) 
+                {
                         goto walk_a_step_in_expr ;
                 } else {
                         goto done ;
@@ -946,8 +978,6 @@ put_css_properties_in_hashtable (GHashTable **a_props_hashtable,
         return CR_OK ;
 }
 
-
-
 static void
 set_style_from_props_hash_hr_func (gpointer a_prop, gpointer a_decl,
                                    gpointer a_style)
@@ -959,7 +989,6 @@ set_style_from_props_hash_hr_func (gpointer a_prop, gpointer a_decl,
 
         cr_style_set_style_from_decl (style, decl) ;
 }
-
 
 /****************************************
  *PUBLIC METHODS
@@ -995,6 +1024,121 @@ cr_sel_eng_new (void)
 	return result ;
 }
 
+/**
+ *Adds a new handler entry in the handlers entry table.
+ *@param a_this the current instance of #CRSelEng
+ *@param a_pseudo_class_sel_name the name of the pseudo class selector.
+ *@param a_pseudo_class_type the type of the pseudo class selector.
+ *@param a_handler the actual handler or callback to be called during
+ *the selector evaluation process.
+ *@return CR_OK, upon successful completion, an error code otherwise.
+ */
+enum CRStatus
+cr_sel_eng_add_pseudo_class_selector_handler (CRSelEng *a_this,
+                                              guchar *a_name,
+                                              enum CRPseudoType a_type,
+                                              CRPseudoClassSelectorHandler *a_handler)
+{
+        struct CRPseudoClassSelHandlerEntry *handler_entry = NULL ;
+        GList *list = NULL ;
+
+        g_return_val_if_fail (a_this
+                              && PRIVATE (a_this)
+                              && a_handler
+                              && a_name,
+                              CR_BAD_PARAM_ERROR) ;
+        
+        handler_entry = g_try_malloc 
+                (sizeof (struct CRPseudoClassSelHandlerEntry)) ;
+        if (!handler_entry)
+        {
+                return CR_OUT_OF_MEMORY_ERROR ;
+        }
+        memset (handler_entry, 0, 
+                sizeof (struct CRPseudoClassSelHandlerEntry)) ;
+        handler_entry->name = g_strdup (a_name) ;
+        handler_entry->type= a_type ;
+        handler_entry->handler = a_handler ;
+        list = g_list_append
+                (PRIVATE (a_this)->pcs_handlers, handler_entry) ;
+        if (!list)
+        {
+                return CR_OUT_OF_MEMORY_ERROR ;
+        }
+        PRIVATE (a_this)->pcs_handlers = list ;
+        return CR_OK ;
+}
+
+enum CRStatus
+cr_sel_eng_remove_pseudo_class_selector_handler (CRSelEng *a_this,
+                                                 guchar *a_name,
+                                                 enum CRPseudoType a_type)
+{
+        GList *elem = NULL, *deleted_elem = NULL ;
+        gboolean found = FALSE ;
+        struct CRPseudoClassSelHandlerEntry *entry = NULL ;
+
+        g_return_val_if_fail (a_this 
+                              && PRIVATE (a_this),
+                              CR_BAD_PARAM_ERROR) ;
+
+        for (elem = PRIVATE (a_this)->pcs_handlers ;
+             elem ;
+             elem = g_list_next (elem),entry = elem->data)
+        {
+                if (!strcmp (entry->name, a_name)
+                    && entry->type == a_type)
+                {
+                        found = TRUE;
+                        break ;
+                }                        
+        }
+        if (found == FALSE)
+                return CR_PSEUDO_CLASS_SEL_HANDLER_NOT_FOUND_ERROR ;
+        PRIVATE (a_this)->pcs_handlers = g_list_delete_link 
+                (PRIVATE (a_this)->pcs_handlers,
+                 elem) ;
+        entry = elem->data ;
+        if (entry->name)
+                g_free (entry->name) ;
+        g_free (elem) ;
+        g_list_free (deleted_elem) ;
+
+        return CR_OK ;
+}
+
+enum CRStatus
+cr_sel_eng_get_pseudo_class_selector_handler (CRSelEng *a_this,
+                                              guchar *a_name,
+                                              enum CRPseudoType a_type,
+                                              CRPseudoClassSelectorHandler **a_handler)
+{
+        GList *elem = NULL ;
+        struct CRPseudoClassSelHandlerEntry *entry = NULL ;
+        gboolean found = FALSE ;
+
+        g_return_val_if_fail (a_this 
+                              && PRIVATE (a_this)
+                              && a_name,
+                              CR_BAD_PARAM_ERROR) ;
+        
+        for (elem = PRIVATE (a_this)->pcs_handlers ;
+             elem ;
+             elem = g_list_next (elem), entry = elem->data)
+        {
+                if (!strcmp (a_name, entry->name) 
+                    && entry->type == a_type)
+                {
+                        found = TRUE ;
+                        break ;
+                }
+        }
+
+        if (found == FALSE)
+                return CR_PSEUDO_CLASS_SEL_HANDLER_NOT_FOUND_ERROR ;
+        *a_handler =  entry->handler ;
+        return CR_OK ;
+}
 
 /**
  *Evaluates a chained list of simple selectors (known as a css2 selector).

@@ -29,8 +29,8 @@
  *This file holds the declaration of the
  *#CRAddSel class. 
  */
-#ifndef __CR_ADD_SEL_H
-#define __CR_ADD_SEL_H
+#ifndef __CR_ADD_SEL_H__
+#define __CR_ADD_SEL_H__
 
 #include <stdio.h>
 #include <glib.h>
@@ -77,43 +77,33 @@ struct _CRAdditionalSel
         CRAdditionalSel * prev ;
 } ;
 
-CRAdditionalSel *
-cr_additional_sel_new (void) ;
+CRAdditionalSel * cr_additional_sel_new (void) ;
 
-CRAdditionalSel *
-cr_additional_sel_new_with_type 
-(enum AddSelectorType a_sel_type) ;
+CRAdditionalSel * cr_additional_sel_new_with_type  (enum AddSelectorType a_sel_type) ;
 
-CRAdditionalSel *
-cr_additional_sel_append (CRAdditionalSel *a_this, 
-                          CRAdditionalSel *a_sel) ;
-void
-cr_additional_sel_set_class_name (CRAdditionalSel *a_this,
-                                  GString *a_class_name) ;
-void
-cr_additional_sel_set_id_name (CRAdditionalSel *a_this,
-                               GString *a_id) ;
+CRAdditionalSel * cr_additional_sel_append (CRAdditionalSel *a_this, 
+                                            CRAdditionalSel *a_sel) ;
 
-void
-cr_additional_sel_set_pseudo (CRAdditionalSel *a_this,
-                              CRPseudo *a_pseudo) ;
+void cr_additional_sel_set_class_name (CRAdditionalSel *a_this,
+                                       GString *a_class_name) ;
 
-void
-cr_additional_sel_set_attr_sel (CRAdditionalSel *a_this,
-                                CRAttrSel *a_sel) ;
+void cr_additional_sel_set_id_name (CRAdditionalSel *a_this,
+                                    GString *a_id) ;
 
-CRAdditionalSel *
-cr_additional_sel_prepend (CRAdditionalSel *a_this, 
-                           CRAdditionalSel *a_sel) ;
+void cr_additional_sel_set_pseudo (CRAdditionalSel *a_this,
+                                   CRPseudo *a_pseudo) ;
 
-guchar *
-cr_additional_sel_to_string (CRAdditionalSel *a_this) ;
+void cr_additional_sel_set_attr_sel (CRAdditionalSel *a_this,
+                                     CRAttrSel *a_sel) ;
 
-void
-cr_additional_sel_dump (CRAdditionalSel *a_this, FILE *a_fp) ;
+CRAdditionalSel * cr_additional_sel_prepend (CRAdditionalSel *a_this, 
+                                             CRAdditionalSel *a_sel) ;
 
-void
-cr_additional_sel_destroy (CRAdditionalSel *a_this) ;
+guchar * cr_additional_sel_to_string (CRAdditionalSel *a_this) ;
+
+void cr_additional_sel_dump (CRAdditionalSel *a_this, FILE *a_fp) ;
+
+void cr_additional_sel_destroy (CRAdditionalSel *a_this) ;
 
 G_END_DECLS
 

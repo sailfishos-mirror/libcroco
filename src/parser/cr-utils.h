@@ -60,6 +60,8 @@ enum CRStatus {
         CR_SYNTAX_ERROR,
         CR_NO_ROOT_NODE_ERROR,
         CR_NO_TOKEN,
+        CR_OUT_OF_MEMORY_ERROR,
+        CR_PSEUDO_CLASS_SEL_HANDLER_NOT_FOUND_ERROR,
         CR_ERROR
 } ;
 

@@ -1,3 +1,11 @@
+2003-12-24  Dodji Seketeli  <dodji@gnome.org>
+
+	* src/parser/cr-additional-sel.h: small cosmetic changes.
+	* src/seleng/cr-sel-eng.c: started to work on the
+	support of a pluggable handler for pseudo class selectors
+	evaluation. Wrote facilities to register/unregister/lookup
+	the handler.
+
 2003-12-21  Dodji Seketeli  <dodji@gnome.org>
 
 	* docs/design/parser-architecture.txt: fixed some typos.

@@ -59,8 +59,28 @@ struct _CRSelEng
 	CRSelEngPriv *priv ;
 } ;
 
+typedef gboolean (*CRPseudoClassSelectorHandler) (CRSelEng* a_this,
+                                                  CRAdditionalSel *a_add_sel,
+                                                  xmlNode *a_node) ;
 CRSelEng *
 cr_sel_eng_new (void) ;
+
+enum CRStatus
+cr_sel_eng_add_pseudo_class_selector_handler (CRSelEng *a_this,
+                                              guchar *a_pseudo_class_sel_name,
+                                              enum CRPseudoType a_pseudo_class_type,
+                                              CRPseudoClassSelectorHandler *a_handler) ;
+
+enum CRStatus
+cr_sel_eng_remove_pseudo_class_selector_handler (CRSelEng *a_this,
+                                                 guchar *a_pseudo_class_sel_name,
+                                                 enum CRPseudoType a_pseudo_class_type) ;
+
+enum CRStatus
+cr_sel_eng_get_pseudo_class_selector_handler (CRSelEng *a_this,
+                                              guchar *a_pseudo_class_sel_name,
+                                              enum CRPseudoType a_pseudo_class_type,
+                                              CRPseudoClassSelectorHandler **a_handler) ;
 
 enum CRStatus
 cr_sel_eng_matches_node (CRSelEng *a_this, CRSimpleSel *a_sel,

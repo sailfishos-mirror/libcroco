@@ -156,7 +156,7 @@ test_layout_box (void)
         CRBoxView *box_view = NULL ;
         GtkWidget *window = NULL, *scroll = NULL ;
 
-        box_view = cr_box_view_new_from_xml_css_bufs 
+        box_view = cr_box_view_new_from_xml_css_bufs
                 (gv_xmlbuf, gv_cssbuf) ;
         g_return_val_if_fail (box_view, CR_BAD_PARAM_ERROR) ;
 
