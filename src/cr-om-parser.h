@@ -58,7 +58,7 @@ struct _CROMParser
 } ;
 
 CROMParser *
-cr_om_parser_new (CRParserInput *a_input) ;
+cr_om_parser_new (CRInput *a_input) ;
 
 enum CRStatus
 cr_om_parser_parse_file (CROMParser *a_this,

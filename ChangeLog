@@ -1,4 +1,4 @@
-2003-03-04  Dodji  <dodji@tintin.mifon.org>
+2003-03-04  Dodji  <dodji@seketeli.og>
 
 	* src/cr-input.c (cr_input_new_from_buf): 
 	added this new method to instanciate an input stream from
@@ -6,7 +6,7 @@
 	(cr_input_new_from_uri): modified this method to make it
 	use the new cr_input_new_from_buf() method.
 
-2003-03-03  Dodji  <dodji@tintin.mifon.org>
+2003-03-03  Dodji  <dodji@seketeli.org>
 
 	* tests/README-description.txt: 
 	added this test description file in the project.

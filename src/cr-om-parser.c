@@ -795,7 +795,7 @@ unrecoverable_error (CRDocHandler *a_this)
  *@return the newly built instance of #CROMParser.
  */
 CROMParser *
-cr_om_parser_new (CRParserInput *a_input)
+cr_om_parser_new (CRInput *a_input)
 {
 	CROMParser *result = NULL  ;
         enum CRStatus status = CR_OK ;

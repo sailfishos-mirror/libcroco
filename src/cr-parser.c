@@ -581,7 +581,7 @@ cr_parser_push_error (CRParser *a_this,
         enum CRStatus status = CR_OK ;
 
         CRParserError *error = NULL ;
-        CRParserInputPos pos ;
+        CRInputPos pos ;
 
         g_return_val_if_fail (a_this && PRIVATE (a_this)
                               && a_msg,
@@ -594,9 +594,9 @@ cr_parser_push_error (CRParser *a_this,
         RECORD_INITIAL_POS (a_this, &pos) ;
 
         cr_parser_error_set_pos 
-                (error, pos.input_pos.line,
-                 pos.input_pos.col,
-                 pos.input_pos.next_byte_index - 1);
+                (error, pos.line,
+                 pos.col,
+                 pos.next_byte_index - 1);
 
 
         PRIVATE (a_this)->err_stack = 
@@ -752,7 +752,7 @@ cr_parser_parse_unicode_range (CRParser *a_this, GString **a_inf,
                                GString **a_sup)
 {
         enum CRStatus status = CR_OK ;
-        CRParserInputPos init_pos;
+        CRInputPos init_pos;
         glong i = 0 ;
         gboolean min_str_needs_free = FALSE,
                 sup_str_needs_free = FALSE ;
@@ -888,7 +888,7 @@ cr_parser_parse_unicode_escape (CRParser *a_this,
                                 guint32 *a_unicode)
 {
         guint32 cur_char ;
-        CRParserInputPos init_pos ;
+        CRInputPos init_pos ;
         glong occur = 0 ;
         guint32 unicode = 0 ;
         guchar *tmp_char_ptr1 = NULL, *tmp_char_ptr2 = NULL ;
@@ -999,7 +999,7 @@ cr_parser_parse_escape (CRParser *a_this, guint32 *a_esc_code)
 {
         enum CRStatus status = CR_OK ;
         guint32 cur_char = 0 ;
-        CRParserInputPos init_pos ;
+        CRInputPos init_pos ;
         guchar next_chars[2] ;
 
         g_return_val_if_fail (a_this && PRIVATE (a_this)
@@ -1094,7 +1094,7 @@ static enum CRStatus
 cr_parser_parse_stylesheet_core (CRParser *a_this)
 {
         CRToken *token = NULL ;
-        CRParserInputPos init_pos ;
+        CRInputPos init_pos ;
         enum CRStatus status = CR_ERROR ;
 
         g_return_val_if_fail (a_this && PRIVATE (a_this),
@@ -1190,7 +1190,7 @@ static enum CRStatus
 cr_parser_parse_statement_core (CRParser *a_this)
 {
         CRToken *token = NULL ;
-        CRParserInputPos init_pos ;
+        CRInputPos init_pos ;
         enum CRStatus status = CR_ERROR ;
 
         g_return_val_if_fail (a_this && PRIVATE (a_this),
@@ -1250,7 +1250,7 @@ static enum CRStatus
 cr_parser_parse_atrule_core (CRParser *a_this)
 {
         CRToken *token = NULL ;
-        CRParserInputPos init_pos ;
+        CRInputPos init_pos ;
         enum CRStatus status = CR_ERROR ;
 
         g_return_val_if_fail (a_this && PRIVATE (a_this),
@@ -1331,7 +1331,7 @@ static enum CRStatus
 cr_parser_parse_ruleset_core (CRParser *a_this)
 {
         CRToken *token = NULL ;
-        CRParserInputPos init_pos ;
+        CRInputPos init_pos ;
         enum CRStatus status = CR_ERROR ;
 
         g_return_val_if_fail (a_this && PRIVATE (a_this),
@@ -1431,7 +1431,7 @@ static enum CRStatus
 cr_parser_parse_selector_core (CRParser *a_this)
 {
         CRToken *token = NULL ;
-        CRParserInputPos init_pos ;
+        CRInputPos init_pos ;
         enum CRStatus status = CR_ERROR ;
 
         g_return_val_if_fail (a_this && PRIVATE (a_this),
@@ -1473,7 +1473,7 @@ static enum CRStatus
 cr_parser_parse_block_core (CRParser *a_this)
 {
         CRToken *token = NULL ;
-        CRParserInputPos init_pos ;
+        CRInputPos init_pos ;
         enum CRStatus status = CR_ERROR ;
 
         g_return_val_if_fail (a_this && PRIVATE (a_this),
@@ -1556,7 +1556,7 @@ static enum CRStatus
 cr_parser_parse_declaration_core (CRParser *a_this)
 {
         CRToken *token = NULL ;
-        CRParserInputPos init_pos ;
+        CRInputPos init_pos ;
         enum CRStatus status = CR_ERROR ;
         GString *prop = NULL ;
 
@@ -1614,7 +1614,7 @@ static enum CRStatus
 cr_parser_parse_value_core (CRParser *a_this)
 {
         CRToken *token = NULL ;
-        CRParserInputPos init_pos ;
+        CRInputPos init_pos ;
         enum CRStatus status = CR_ERROR ;
         glong ref = 0 ;
 
@@ -1705,7 +1705,7 @@ static enum CRStatus
 cr_parser_parse_any_core (CRParser *a_this)
 {
         CRToken *token1 = NULL, *token2 = NULL ;
-        CRParserInputPos init_pos ;
+        CRInputPos init_pos ;
         enum CRStatus status = CR_ERROR ;
 
         g_return_val_if_fail (a_this, CR_BAD_PARAM_ERROR) ;
@@ -1877,7 +1877,7 @@ cr_parser_parse_declaration (CRParser *a_this, GString **a_property,
                              CRTerm **a_expr)
 {
         enum CRStatus status = CR_ERROR ;
-        CRParserInputPos init_pos ;
+        CRInputPos init_pos ;
         guint32 cur_char = 0 ;
         CRTerm *expr = NULL ;
 
@@ -1965,7 +1965,7 @@ static enum CRStatus
 cr_parser_parse_attribute_selector (CRParser *a_this, CRAttrSel **a_sel)
 {
         enum CRStatus status = CR_OK ;
-        CRParserInputPos init_pos ;
+        CRInputPos init_pos ;
         CRToken *token = NULL ;
         CRAttrSel *result = NULL ;
 
@@ -2130,7 +2130,7 @@ static enum CRStatus
 cr_parser_parse_property (CRParser *a_this, GString **a_property)
 {
         enum CRStatus status = CR_OK ;
-        CRParserInputPos init_pos ;
+        CRInputPos init_pos ;
 
         g_return_val_if_fail (a_this && PRIVATE (a_this) 
                               && PRIVATE (a_this)->tknzr
@@ -2171,7 +2171,7 @@ static enum CRStatus
 cr_parser_parse_term (CRParser *a_this, CRTerm **a_term)
 {
         enum CRStatus status = CR_PARSING_ERROR ;
-        CRParserInputPos init_pos ;
+        CRInputPos init_pos ;
         CRTerm *result = NULL;
         CRTerm *param = NULL ;
         CRToken * token = NULL ;
@@ -2427,7 +2427,7 @@ static enum CRStatus
 cr_parser_parse_expr (CRParser *a_this, CRTerm **a_expr)
 {
         enum CRStatus status = CR_ERROR ;
-        CRParserInputPos init_pos ;
+        CRInputPos init_pos ;
         CRTerm *expr = NULL, *expr2 = NULL ;
         guchar next_byte = 0 ;
 
@@ -2525,7 +2525,7 @@ static enum CRStatus
 cr_parser_parse_simple_selector (CRParser *a_this, CRSimpleSel **a_sel)
 {
         enum CRStatus status = CR_ERROR ;
-        CRParserInputPos init_pos ;
+        CRInputPos init_pos ;
         CRToken *token = NULL ;
         CRSimpleSel * sel = NULL ;
         CRAdditionalSel *add_sel_list = NULL ;
@@ -2809,7 +2809,7 @@ static enum CRStatus
 cr_parser_parse_simple_sels (CRParser *a_this, CRSimpleSel **a_sel)
 {
         enum CRStatus status = CR_ERROR ;
-        CRParserInputPos init_pos ;
+        CRInputPos init_pos ;
         CRSimpleSel *sel = NULL ;
         guint32 cur_char = 0 ;
 
@@ -2887,7 +2887,7 @@ static enum CRStatus
 cr_parser_parse_charset (CRParser *a_this, GString **a_value)
 {
         enum CRStatus status = CR_OK ;
-        CRParserInputPos init_pos ;
+        CRInputPos init_pos ;
         CRToken *token = NULL ;
         GString *charset_str = NULL ;
 
@@ -2988,7 +2988,7 @@ cr_parser_parse_import (CRParser *a_this, GList ** a_media_list,
                         GString **a_import_string)
 {
         enum CRStatus status = CR_OK ;
-        CRParserInputPos init_pos ;
+        CRInputPos init_pos ;
         guint32 cur_char = 0, next_char = 0 ;
         guchar next_bytes[CHARS_TAB_SIZE] = {0} ;
         GString *medium = NULL ;
@@ -3158,7 +3158,7 @@ static enum CRStatus
 cr_parser_parse_media (CRParser *a_this)
 {
         enum CRStatus status = CR_OK ;
-        CRParserInputPos init_pos ;
+        CRInputPos init_pos ;
         CRToken * token = NULL ;
         guint32 next_char = 0, cur_char = 0 ;
         GString * medium = NULL ;
@@ -3343,7 +3343,7 @@ static enum CRStatus
 cr_parser_parse_page (CRParser *a_this)
 {
         enum CRStatus status = CR_OK ;
-        CRParserInputPos init_pos ;
+        CRInputPos init_pos ;
         CRToken * token = NULL ;
         CRTerm * css_expression = NULL ;
         GString *page_selector = NULL, 
@@ -3615,7 +3615,7 @@ static enum CRStatus
 cr_parser_parse_font_face (CRParser *a_this)
 {
         enum CRStatus status = CR_ERROR ;
-        CRParserInputPos init_pos ;
+        CRInputPos init_pos ;
         GString *property = NULL ;
         CRTerm * css_expression = NULL ;
         CRToken *token = NULL ;
@@ -3819,7 +3819,7 @@ static enum CRStatus
 cr_parser_parse_ruleset (CRParser *a_this)
 {
         enum CRStatus status = CR_OK ;
-        CRParserInputPos init_pos ;
+        CRInputPos init_pos ;
         guint32 cur_char = 0, next_char = 0 ;
         GString * property = NULL ;
         CRTerm *expr = NULL ;
@@ -4064,7 +4064,7 @@ static enum CRStatus
 cr_parser_parse_function (CRParser *a_this, GString **a_func_name,
                           CRTerm **a_expr)
 {
-        CRParserInputPos init_pos ;
+        CRInputPos init_pos ;
         enum CRStatus status = CR_OK ;
         CRToken *token = NULL ;
         CRTerm *expr = NULL ;
@@ -4258,7 +4258,7 @@ static enum CRStatus
 cr_parser_parse_stylesheet (CRParser *a_this)
 {
         enum CRStatus status = CR_OK ;
-        CRParserInputPos init_pos ;
+        CRInputPos init_pos ;
         CRToken * token = NULL ;
         GString *charset = NULL ;
 
@@ -4814,7 +4814,7 @@ cr_parser_new (CRTknzr *a_tknzr)
 
 
 CRParser *
-cr_parser_new_from_input (CRParserInput *a_input)
+cr_parser_new_from_input (CRInput *a_input)
 {
         CRParser *result = NULL ;
         CRTknzr *tokenizer = NULL ;

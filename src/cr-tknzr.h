@@ -52,7 +52,7 @@ struct _CRTknzr
 } ;
 
 CRTknzr *
-cr_tknzr_new (CRParserInput *a_input) ;
+cr_tknzr_new (CRInput *a_input) ;
 
 CRTknzr *
 cr_tknzr_new_from_uri (guchar *a_file_uri,
@@ -78,13 +78,13 @@ cr_tknzr_peek_byte (CRTknzr *a_this, gulong a_offset,
                     guchar *a_byte) ;
 
 enum CRStatus
-cr_tknzr_set_cur_pos (CRTknzr *a_this, CRParserInputPos *a_pos) ;
+cr_tknzr_set_cur_pos (CRTknzr *a_this, CRInputPos *a_pos) ;
 
 glong
 cr_tknzr_get_nb_bytes_left (CRTknzr *a_this) ;
 
 enum CRStatus
-cr_tknzr_get_cur_pos (CRTknzr *a_this, CRParserInputPos *a_pos) ;
+cr_tknzr_get_cur_pos (CRTknzr *a_this, CRInputPos *a_pos) ;
 
 enum CRStatus
 cr_tknzr_seek_index (CRTknzr *a_this,
@@ -111,10 +111,10 @@ cr_tknzr_parse_token (CRTknzr *a_this, enum CRTokenType a_type,
                       enum CRTokenExtraType a_et, void *a_res,
                       void *a_extra_res) ;
 enum CRStatus
-cr_tknzr_set_input (CRTknzr *a_this, CRParserInput *a_input) ;
+cr_tknzr_set_input (CRTknzr *a_this, CRInput *a_input) ;
 
 enum CRStatus
-cr_tknzr_get_input (CRTknzr *a_this, CRParserInput **a_input) ;
+cr_tknzr_get_input (CRTknzr *a_this, CRInput **a_input) ;
 
 void
 cr_tknzr_destroy (CRTknzr *a_this) ;

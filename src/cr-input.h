@@ -76,7 +76,7 @@ extern "C" {
         void 
         cr_input_ref (CRInput *a_this) ;
 
-        void
+        gboolean
         cr_input_unref (CRInput *a_this) ;
 
         enum CRStatus
@@ -109,6 +109,9 @@ extern "C" {
         guchar *
         cr_input_get_byte_addr (CRInput *a_this, 
                                 gulong a_offset) ;
+
+        enum CRStatus
+        cr_input_get_cur_byte_addr (CRInput *a_this, guchar ** a_offset) ;
 
         enum CRStatus
         cr_input_seek_index (CRInput *a_this, 

@@ -92,7 +92,7 @@ struct _CRInputPriv
 /***************************
  *private constants
  **************************/
-#define CR_INPUT_MEM_CHUNK_SIZE 1024
+#define CR_INPUT_MEM_CHUNK_SIZE 1024 * 4
 
 static CRInput *
 cr_input_new_real (void) ;
@@ -111,8 +111,8 @@ cr_input_new_real (void)
         }
         memset (result, 0, sizeof (CRInput)) ;
 
-        PRIVATE (result) = g_try_malloc (sizeof (CRInput)) ;
-        if (!result)
+        PRIVATE (result) = g_try_malloc (sizeof (CRInputPriv)) ;
+        if (!PRIVATE (result))
         {
                 cr_utils_trace_info ("Out of memory") ;
                 g_free (result) ;
@@ -131,6 +131,9 @@ cr_input_new_real (void)
 /**
  *Creates a new input stream from a memory buffer.
  *@param a_buf the memory buffer to create the input stream from.
+ *The newly built instance of #CRInput owns this buffer and is
+ *responsible of freing it. The Caller should not try to access
+ *this buffer as it content may be totally transformed at any time.
  *@param a_len the size of the input buffer.
  *@param a_enc the buffer's encoding.
  *@return the newly built instance of #CRInput.
@@ -159,14 +162,25 @@ cr_input_new_from_buf (guchar *a_buf, gulong a_len,
 
                 status = cr_enc_handler_convert_input
                         (enc_handler, a_buf, &len,
-                         &PRIVATE (result)->in_buf, 
+                         &PRIVATE (result)->in_buf,
                          &PRIVATE (result)->in_buf_size) ;
 
                 if (status != CR_OK)
                         goto error ;
 
                 PRIVATE (result)->line = 1 ;
+                PRIVATE (result)->nb_bytes =  PRIVATE (result)->in_buf_size ;
+
+                g_free (a_buf) ;
         }
+        else
+        {
+                PRIVATE (result)->in_buf = a_buf ;
+                PRIVATE (result)->in_buf_size = a_len ;
+                PRIVATE (result)->nb_bytes = a_len ;
+        }
+
+        return result ;
 
  error:
         if (result)
@@ -175,7 +189,7 @@ cr_input_new_from_buf (guchar *a_buf, gulong a_len,
                 result = NULL ;
         }
 
-        return NULL ;        
+        return NULL ;
 }
 
 /**
@@ -189,6 +203,104 @@ cr_input_new_from_buf (guchar *a_buf, gulong a_len,
  *this method couldn read the file and create it,
  *NULL otherwise.
  */
+#define NEW0 = 1
+#ifdef NEW0
+CRInput *
+cr_input_new_from_uri (gchar *a_file_uri, enum CREncoding a_enc)
+{
+        CRInput * result = NULL ;
+        enum CRStatus status = CR_OK ;
+        FILE * file_ptr = NULL ;
+        guchar tmp_buf[CR_INPUT_MEM_CHUNK_SIZE] = {0} ;
+        gulong nb_read = 0, len = 0, buf_size = 0 ;
+        gboolean loop = TRUE ;
+        guchar *buf = NULL ;
+
+        g_return_val_if_fail (a_file_uri, NULL) ;
+
+        file_ptr = fopen (a_file_uri, "r") ;
+
+        if (file_ptr == NULL) 
+        {
+
+#ifdef CR_DEBUG
+                cr_utils_trace_debug ("could not open file") ;
+#endif
+                g_warning ("Could not open file %s\n", a_file_uri) ;
+                
+                return NULL ;
+        }
+
+        /*load the file*/
+        while (loop) 
+        {
+                nb_read =
+                        fread (tmp_buf, 1/*read bytes*/,
+                               CR_INPUT_MEM_CHUNK_SIZE/*nb of bytes*/,
+                               file_ptr) ;
+
+                if (nb_read != CR_INPUT_MEM_CHUNK_SIZE) 
+                {                        
+                        /*we read less chars than we wanted*/
+                        if (feof (file_ptr)) 
+                        {
+                                /*we reached eof*/
+                                loop = FALSE ;
+                        } 
+                        else 
+                        {  
+                                /*a pb occured !!*/
+                                cr_utils_trace_debug 
+                                        ("an io error occured") ;
+                                status = CR_ERROR ;
+                                goto error ;
+                        }
+                }
+
+                if (status == CR_OK)
+                {
+                        /*read went well*/
+                       buf = g_realloc 
+                               (buf, len + CR_INPUT_MEM_CHUNK_SIZE) ;
+                       memcpy (buf + len, tmp_buf, nb_read) ;
+                       len +=  nb_read ;
+                       buf_size += CR_INPUT_MEM_CHUNK_SIZE ;
+                }
+        }
+
+        if (file_ptr)
+        {
+                fclose (file_ptr) ;
+                file_ptr = NULL ;
+        }
+
+        if (status == CR_OK) 
+        {
+                result = cr_input_new_from_buf (buf, len, a_enc) ;
+                if (!result)
+                {
+                        goto error ;
+                }
+                return result ;
+        }
+
+ error:
+
+        if (file_ptr)
+        {
+                fclose (file_ptr) ;
+                file_ptr = NULL ;
+        }
+
+        if (buf)
+        {
+                g_free (buf) ;
+                buf = NULL ;
+        }
+
+        return NULL ;
+}
+#else
 CRInput *
 cr_input_new_from_uri (gchar *a_file_uri, enum CREncoding a_enc)
 {
@@ -341,6 +453,7 @@ cr_input_new_from_uri (gchar *a_file_uri, enum CREncoding a_enc)
 
         return NULL ;
 }
+#endif
 
 /**
  *The destructor of the #CRInput class.
@@ -390,10 +503,10 @@ cr_input_ref (CRInput *a_this)
  *@param a_this the current instance of #CRInput.
  *
  */        
-void
+gboolean
 cr_input_unref (CRInput *a_this)
 {
-        g_return_if_fail (a_this && PRIVATE (a_this)) ;
+        g_return_val_if_fail (a_this && PRIVATE (a_this), FALSE) ;
         
         if (PRIVATE (a_this)->ref_count)  
         {
@@ -403,7 +516,9 @@ cr_input_unref (CRInput *a_this)
         if (PRIVATE (a_this)->ref_count == 0) 
         {
                 cr_input_destroy (a_this) ;
+                return TRUE ;
         }
+        return FALSE ;
 }
 
 
@@ -442,7 +557,7 @@ cr_input_get_nb_bytes_left (CRInput *a_this)
 {
         g_return_val_if_fail (a_this && PRIVATE (a_this), -1) ;
         g_return_val_if_fail (PRIVATE (a_this)->nb_bytes 
-                              >= PRIVATE (a_this)->in_buf_size, -1) ;
+                              <= PRIVATE (a_this)->in_buf_size, -1) ;
         g_return_val_if_fail (PRIVATE (a_this)->next_byte_index 
                               <= PRIVATE (a_this)->nb_bytes, -1) ;
 
@@ -970,6 +1085,29 @@ cr_input_get_byte_addr (CRInput *a_this,
         }
 
         return &PRIVATE (a_this)->in_buf[a_offset] ;
+}
+
+/**
+ *Returns the address of the current character pointer.
+ *@param a_this the current input stream
+ *@param a_offset out parameter. The returned address.
+ *@return CR_OK upon successfull completion, an error code otherwise.
+ */
+enum CRStatus
+cr_input_get_cur_byte_addr (CRInput *a_this, guchar ** a_offset)
+{
+        g_return_val_if_fail (a_this && PRIVATE (a_this) && a_offset,
+                              CR_BAD_PARAM_ERROR) ;
+
+        if (!PRIVATE (a_this)->next_byte_index)
+        {
+                return CR_START_OF_INPUT_ERROR ;   
+        }
+
+        *a_offset = cr_input_get_byte_addr 
+                (a_this, PRIVATE (a_this)->next_byte_index -1) ;
+
+        return CR_OK ;
 }
 
 /**
