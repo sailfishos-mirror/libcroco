@@ -26,8 +26,15 @@
 #endif
 
 #include "cr-utils.h"
+#include "cr-num.h"
 
+/**
+ *@file
+ *Various type declarations about font selection related
+ *properties.
+ */
 G_BEGIN_DECLS
+
 
 enum CRFontFamilyType
 {
@@ -58,6 +65,163 @@ struct _CRFontFamily
 	CRFontFamily *prev ;
 } ;
 
+
+/**
+ *The different types
+ *of absolute font size.
+ *This is used by the 'font-size'
+ *property defined in css2 spec
+ *in chapter 15.2.4 .
+ *These values a indexes of 
+ *table of size so please, do not
+ *change their definition order unless
+ *you know what you are doing.
+ */
+enum CRPredefinedAbsoluteFontSize
+{
+        XX_SMALL_FONT_SIZE=0,
+        X_SMALL_FONT_SIZE,
+        SMALL_FONT_SIZE,
+        MEDIUM_FONT_SIZE,
+        LARGE_FONT_SIZE,
+        X_LARGE_FONT_SIZE,
+        XX_LARGE_FONT_SIZE
+} ;
+
+/**
+ *The different types
+ *of relative font size.
+ *This is used by the 'font-size'
+ *property defined in css2 spec
+ *in chapter 15.2.4 .
+ *These values a indexes of 
+ *table of size so please, do not
+ *change their definition order unless
+ *you know what you are doing.
+ */
+enum CRRelativeFontSize
+{
+        LARGER_FONT_SIZE,
+        SMALLER_FONT_SIZE
+} ;
+
+/**
+ *The type of font-size property.
+ *Used to define the type of #CRFontSize .
+ *See css2 spec chapter 15.2.4 to understand.
+ */
+enum CRFontSizeType
+{
+        /**
+         *If the type of #CRFontSize is
+         *PREDEFINED_ABSOLUTE_FONT_SIZE,
+         *the CRFontSize::value.predefined_absolute 
+         *field will be defined.
+         */
+        PREDEFINED_ABSOLUTE_FONT_SIZE,
+        
+        /**
+         *If the type of #CRFontSize is
+         *ABSOLUTE_FONT_SIZE,
+         *the CRFontSize::value.absolute 
+         *field will be defined.
+         */
+        ABSOLUTE_FONT_SIZE,
+
+        /**
+         *If the type of #CRFontSize is
+         *RELATIVE_FONT_SIZE,
+         *the CRFontSize::value.relative
+         *field will be defined.
+         */
+        RELATIVE_FONT_SIZE,
+
+        /**
+         *If the type of #CRFontSize is
+         *INHERITED_FONT_SIZE,
+         *the None of the field of the CRFontSize::value enum
+         *will be defined.
+         */
+        INHERITED_FONT_SIZE
+} ;
+
+typedef struct _CRFontSize CRFontSize ;
+struct _CRFontSize
+{
+        enum CRFontSizeType type ;
+        union 
+        {
+                enum CRPredefinedAbsoluteFontSize predefine_absolute ;
+                enum CRRelativeFontSize relative ;
+                CRNum * absolute ;
+        } value;
+} ;
+
+enum CRFontSizeAdjustType
+{
+        FONT_SIZE_ADJUST_NONE = 0,
+        FONT_SIZE_ADJUST_NUMBER,
+        FONT_SIZE_ADJUST_INHERIT        
+} ;
+typedef struct _CRFontSizeAdjust CRFontSizeAdjust ;
+struct _CRFontSizeAdjust
+{
+        enum CRFontSizeAdjustType type ;
+        CRNum *num ;
+} ;
+
+enum CRFontStyle
+{
+        FONT_STYLE_NORMAL=0,
+        FONT_STYLE_ITALIC,
+        FONT_STYLE_OBLIQUE,
+        FONT_STYLE_INHERIT
+} ;
+
+enum CRFontVariant
+{
+        FONT_VARIANT_NORMAL=0,
+        FONT_VARIANT_SMALL_CAPS,
+        FONT_VARIANT_INHERIT
+} ;
+
+enum CRFontWeight
+{
+        FONT_WEIGHT_NORMAL=0,
+        FONT_WEIGHT_BOLD,
+        FONT_WEIGHT_BOLDER,
+        FONT_WEIGHT_LIGHTER,
+        FONT_WEIGHT_100,
+        FONT_WEIGHT_200,
+        FONT_WEIGHT_300,
+        FONT_WEIGHT_400,
+        FONT_WEIGHT_500,
+        FONT_WEIGHT_600,
+        FONT_WEIGHT_700,
+        FONT_WEIGHT_800,
+        FONT_WEIGHT_900,
+        FONT_WEIGHT_INHERIT,
+} ;
+
+enum CRFontStretch
+{
+        FONT_STRETCH_NORMAL=0,
+        FONT_STRETCH_WIDER,
+        FONT_STRETCH_NARROWER,
+        FONT_STRETCH_ULTRA_CONDENSED,
+        FONT_STRETCH_EXTRA_CONDENSED,
+        FONT_STRETCH_CONDENSED,
+        FONT_STRETCH_SEMI_CONDENSED,
+        FONT_STRETCH_SEMI_EXPANDED,
+        FONT_STRETCH_EXPANDED,
+        FONT_STRETCH_EXTRA_EXPANDED,
+        FONT_STRETCH_ULTRA_EXPANDED,
+        FONT_STRETCH_INHERIT
+} ;
+
+/**************************************
+ *'font-family' manipulation functions
+ ***************************************/
 CRFontFamily *
 cr_font_family_new (enum CRFontFamilyType a_type, guchar *a_name) ;
 
@@ -74,5 +238,26 @@ cr_font_family_destroy (CRFontFamily *a_this) ;
 
 enum CRStatus
 cr_font_family_set_name (CRFontFamily *a_this, guchar *a_name) ;
+
+
+/************************************
+ *'font-size' manipulation functions
+ ***********************************/
+
+CRFontSize *
+cr_font_size_new (void) ;
+
+void
+cr_font_size_destroy (CRFontSize *a_font_size) ;
+
+/*******************************************************
+ *'font-size-adjust' manipulation function declarations
+ *******************************************************/
+
+CRFontSizeAdjust *
+cr_font_size_adjust_new (void) ;
+
+void
+cr_font_size_adjust_destroy (CRFontSizeAdjust *a_this) ;
 
 G_END_DECLS

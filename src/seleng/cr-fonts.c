@@ -147,3 +147,69 @@ cr_font_family_destroy (CRFontFamily *a_this)
 	return CR_OK ;		
 }
 
+/***************************************************
+ *'font-size' manipulation functions definitions
+ ***************************************************/
+
+CRFontSize *
+cr_font_size_new (void)
+{
+        CRFontSize *result = NULL ;
+
+        result = g_try_malloc (sizeof (CRFontSize)) ;
+        if (!result)
+        {
+                cr_utils_trace_info ("Out of memory") ;
+                return NULL ;
+        }
+        memset (result, 0, sizeof (CRFontSize)) ;
+
+        return result ;        
+}
+
+
+void
+cr_font_size_destroy (CRFontSize *a_font_size)
+{
+        g_return_if_fail (a_font_size) ;
+
+        if (a_font_size->type == ABSOLUTE_FONT_SIZE
+            && a_font_size->value.absolute)
+        {
+                cr_num_destroy (a_font_size->value.absolute) ;
+                a_font_size->value.absolute = NULL ;
+        }
+}
+
+/*******************************************************
+ *'font-size-adjust' manipulation function definition
+ *******************************************************/
+
+CRFontSizeAdjust *
+cr_font_size_adjust_new (void)
+{
+        CRFontSizeAdjust *result = NULL ;
+
+        result = g_try_malloc (sizeof (CRFontSizeAdjust)) ;
+        if (!result)
+        {
+                cr_utils_trace_info ("Out of memory") ;
+                return NULL ;
+        }
+        memset (result, 0, sizeof (CRFontSizeAdjust)) ;
+
+        return result ;
+}
+
+void
+cr_font_size_adjust_destroy (CRFontSizeAdjust *a_this)
+{
+        g_return_if_fail (a_this) ;
+
+        if (a_this->type == FONT_SIZE_ADJUST_NUMBER
+            && a_this->num)
+        {
+                cr_num_destroy (a_this->num) ;
+                a_this->num = NULL ;
+        }
+}

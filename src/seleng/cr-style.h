@@ -199,6 +199,9 @@ enum CRBoxOffsetProp
         NB_BOX_OFFSET_PROPS
 } ;
 
+
+
+
 /**
  *The css2 style class.
  *Contains computed and actual values
@@ -237,12 +240,19 @@ struct _CRStyle
         enum CRFloatType float_type ;
 
         /*
-         *the font-family property
-         *A list of null terminated instance of 
-         *guchar* each element of the list is
-         *the name of a font family.
+         *the 'font-family' property.
          */
         CRFontFamily *font_family ;
+
+        /**
+         *the 'font-size' property.
+         */
+        CRFontSize *font_size ;
+        CRFontSizeAdjust *font_size_adjust ;
+        enum CRFontStyle font_style ;
+        enum CRFontVariant font_variant ;
+        enum CRFontWeight font_weight ;
+        enum CRFontStretch font_stretch ;
 
         CRStyle *parent_style ;
         gulong ref_count ;
