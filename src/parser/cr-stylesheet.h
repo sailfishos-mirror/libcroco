@@ -66,13 +66,13 @@ struct _CRStyleSheet
         CRStatement *parent_import_rule ;
 
 	/**custom data used by libcroco*/
-	void *croco_data ;
+	gpointer croco_data ;
 
 	/**
 	 *custom application data pointer
 	 *Can be used by applications.
 	 */
-	void * app_data ;
+	gpointer app_data ;
 
 	/**
 	 *the reference count of this insance

@@ -109,8 +109,8 @@ cr_tknzr_unget_token (CRTknzr *a_this, CRToken *a_token) ;
 
 enum CRStatus
 cr_tknzr_parse_token (CRTknzr *a_this, enum CRTokenType a_type,
-                      enum CRTokenExtraType a_et, void *a_res,
-                      void *a_extra_res) ;
+                      enum CRTokenExtraType a_et, gpointer a_res,
+                      gpointer a_extra_res) ;
 enum CRStatus
 cr_tknzr_set_input (CRTknzr *a_this, CRInput *a_input) ;
 

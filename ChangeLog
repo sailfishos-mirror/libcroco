@@ -1,3 +1,7 @@
+2003-05-31	Kang Jeong-Hee	<Keizi@mail.co.kr>
+
+	* src/parser/*.[ch]: s/void */gpointer/
+
 2003-05-12  Dodji  <dodji@seketeli.org>
 
 	* tests/test7-main.c: updated the test to reflect the new supported

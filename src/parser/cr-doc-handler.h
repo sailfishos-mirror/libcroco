@@ -52,7 +52,7 @@ struct _CRDocHandler
 	 *This pointer is to be used by the application for
 	 *it custom needs. It is there to extend the doc handler.
 	 */
-	void * app_data ;
+	gpointer app_data ;
 
 	/**
 	 *This pointer is to hold an application parsing context.
@@ -62,13 +62,13 @@ struct _CRDocHandler
 	 *the beginning of the css document, and frees it at the end
 	 *of the document.
 	 */
-	void * context ;
+	gpointer context ;
 
 	/**
 	 *The place where #CROMParser put the result of it parsing, if
 	 *any.
 	 */
-	void * result ;
+	gpointer result ;
 
 	/**
 	 *Is called at the beginning of the parsing of the document.

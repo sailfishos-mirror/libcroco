@@ -2697,8 +2697,8 @@ cr_tknzr_get_next_token (CRTknzr *a_this, CRToken **a_tk)
 
 enum CRStatus
 cr_tknzr_parse_token (CRTknzr *a_this, enum CRTokenType a_type,
-                      enum CRTokenExtraType a_et, void *a_res,
-                      void *a_extra_res)
+                      enum CRTokenExtraType a_et, gpointer a_res,
+                      gpointer a_extra_res)
 {
         enum CRStatus status = CR_OK ;
         CRToken *token = NULL ;
