@@ -178,15 +178,19 @@ cr_box_layout_normal (CRBox *a_this)
                 return CR_UNEXPECTED_POSITION_SCHEME ;
         }
 
+        /*
+         *TODO
+         *compute the "computed values" of the style data structure.
+         */
         switch (a_this->type)
         {
         case BOX_TYPE_BLOCK:
         case BOX_TYPE_ANONYMOUS_BLOCK:
         {
                 CRBox *cont_box = a_this->parent ;
-                /*
+                /*****************************************
                  *We are in a block formating context 
-                 */
+                 *****************************************/
 
                 /*
                  *position the 'x' of the top
@@ -195,27 +199,78 @@ cr_box_layout_normal (CRBox *a_this)
                  *Position the 'y' of the top left corner of this
                  *just under the previous box.
                  */
+                
                 if (!cont_box)
                         a_this->outer_edge.x = 0 ;
                 else
                         a_this->outer_edge.x = cont_box->inner_edge.x ;
-
+                
                 a_this->outer_edge.y =
                         cr_box_get_bottommost_y (a_this->prev) ;
 
                 a_this->outer_edge.x =
                         cr_box_get_rightmost_x (a_this->prev) ;
 
-                /*
+                /***************************************************
                  *Now, compute the inner edge of this box;
                  *which means 
-                 *1/set the left margin, left border and 
+                 *1/set the left border and 
                  *left padding edges.
                  *2/compute the left most x and topmost y of
                  *the inner box and.
                  *3/Compute the outer edge of the containing
                  *box; this is recursive.
+                 ***************************************************/
+
+                /*
+                 *1/ => left side of outer edge is separated from
+                 *left side of border edge by "margin-left"... same
+                 *principle applies for padding edge and inner edge.
                  */
+                /*
+                 *TODO: collapse this margin !!!. 
+                 *See css2 chap 8.3.1 to see what "collapsing" means.
+                 */
+                a_this->border_edge.x =
+                        a_this->outer_edge.x
+                        - 
+                        a_this->style->margin_left.val ;
+                a_this->border_edge.y =
+                        a_this->outer_edge.y
+                        -
+                        a_this->style->margin_top.val ;
+
+                a_this->padding_edge.x =
+                        a_this->border_edge.x 
+                        -
+                        a_this->style->border_left_width.val ;
+                a_this->padding_edge.y =
+                        a_this->border_edge.y
+                        -
+                        a_this->style->border_top_width.val ;
+
+                /*
+                 *Now 2/
+                 */
+                a_this->inner_edge.x =
+                        a_this->padding_edge.x
+                        -
+                        a_this->style->padding_left.val ;
+                a_this->inner_edge.y =
+                        a_this->padding_edge.y
+                        -
+                        a_this->style->padding_left.val ;
+
+                /*
+                 *And now, 3/
+                 */
+
+                /*******************************************
+                 *Inner edge position (x,y) is finish. (we have it's width).
+                 *So now, we can compute the widths of the
+                 *remaining three other boxes (padding edge, border edge
+                 *and outer edge)
+                 ******************************************/
                 
                 break ;
         }
