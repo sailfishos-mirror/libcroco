@@ -101,7 +101,7 @@ struct _CRBoxData
          *the css box. If NULL, it means
          *that this node is an anonymous node
          */
-        xmlNode *node ;
+        xmlNode *xml_node ;
 } ;
 
 CRBoxData *
@@ -202,7 +202,7 @@ struct _CRBox
 	CRBox *children ;
 
         /**some custom data used by libcroco*/
-        gpointer *croco_data ;
+        CRBoxData *box_data ;
         /**some application data that will never 
          *be used by libcroco. Applications
          *are free to use it.

@@ -50,6 +50,18 @@ cr_lay_eng_create_box_tree_real (CRLayEng * a_this,
                                  xmlNode *a_root_node,
                                  CRBox *a_parent_box) ;
 
+static enum CRStatus
+cr_lay_eng_layout_box (CRBox *a_this) ;
+
+static glong
+cr_lay_eng_get_box_bottommost_y (CRBox *a_this) ;
+
+static glong
+cr_lay_eng_get_box_rightmost_x (CRBox *a_this) ;
+
+static enum CRStatus
+cr_lay_eng_layout_box_normal (CRBox *a_this) ;
+
 /**********************
  *Private methods.
  **********************/
@@ -136,7 +148,7 @@ cr_lay_eng_create_box_tree_real (CRLayEng * a_this,
 
         for (cur = a_root_node ; cur ; cur = cur->next)
         {
-                CRStyle *style = NULL, *parent_style = NULL ;                
+                CRStyle *style = NULL, *parent_style = NULL ;
 
                 if (cur->type != XML_ELEMENT_NODE
                     && cur->type != XML_TEXT_NODE)
@@ -148,9 +160,9 @@ cr_lay_eng_create_box_tree_real (CRLayEng * a_this,
 
                 if (cur->type == XML_ELEMENT_NODE)
                 {
-                        status = 
-                                cr_sel_eng_get_matched_style 
-                                (PRIVATE (a_this)->sel_eng, 
+                        status =
+                                cr_sel_eng_get_matched_style
+                                (PRIVATE (a_this)->sel_eng,
                                  PRIVATE (a_this)->cascade,
                                  cur, parent_style, &style) ;
 
@@ -191,7 +203,7 @@ cr_lay_eng_create_box_tree_real (CRLayEng * a_this,
                                 cr_utils_trace_info ("Out of memory") ;
                                 goto error ;
                         }
-                        cur_box->croco_data = (gpointer)box_data ;
+                        cur_box->box_data = box_data ;
                         box_data = NULL ;
 
                         if (style)
@@ -212,7 +224,7 @@ cr_lay_eng_create_box_tree_real (CRLayEng * a_this,
                         if (node_text)
                         {
                                 box_content = 
-                                        cr_box_content_new_from_text 
+                                        cr_box_content_new_from_text
                                         (node_text) ;
                                 xmlFree (node_text) ;
                                 node_text = NULL ;
@@ -236,17 +248,32 @@ cr_lay_eng_create_box_tree_real (CRLayEng * a_this,
                                 box_content = NULL ;
                                 /*
                                  *the anonymous box
-                                 *must have no margin, 
+                                 *must have no margin,
                                  *no padding, no border,
                                  *no border style, no offset
                                  */
                                 init_anonymous_text_box (cur_box) ;
+
+                                /*
+                                 *store a pointer to the node that generated
+                                 *the current box into that current box.
+                                 */
+                                box_data = cr_box_data_new (cur) ;
+                                if (!box_data)
+                                {
+                                        cr_utils_trace_info 
+                                                ("Out of memory") ;
+                                        goto error ;
+                                }
+                                cur_box->box_data = box_data ;
+                                box_data = NULL ;
+
                                 cr_box_append_child (a_parent_box,
                                                      cur_box) ;
                                 cur_box = NULL ;
                         }
                 }
-                else 
+                else
                 {
                         cr_utils_trace_info 
                                 ("xml node type neither element nor text") ;
@@ -279,6 +306,221 @@ cr_lay_eng_create_box_tree_real (CRLayEng * a_this,
         return NULL ;
 }
 
+
+static glong
+cr_lay_eng_get_box_bottommost_y (CRBox *a_this)
+{
+        return (a_this->outer_edge.y
+                +
+                a_this->outer_edge.y_offset
+                +
+                a_this->outer_edge.height) ;
+}
+
+/**
+ *Computes the abscissa of the rightmost side
+ *of the current box.
+ *@param a_box the current box.
+ *@return a positve or 0 number if the computation went well,
+ *-1 otherwise.
+ */
+static glong
+cr_lay_eng_get_box_rightmost_x (CRBox *a_this)
+{       
+        if (!a_this)
+                return 0 ;
+
+        return (a_this->outer_edge.x 
+                +
+                a_this->outer_edge.x_offset
+                +
+                a_this->outer_edge.width) ;
+}
+
+/**
+ *Lay the box out according to "Normal flow"
+ *as decribed in css2 spec chap 9.4.
+ *In normal flow, a box belongs to a formating context
+ *that may be block or inline. In block formating context,
+ *boxes are laid out verticaly, one under an other.
+ *In inline formatting context, boxes are laid out horizontally,
+ *usually from the left to the right, unless we support bidi.
+ *@param a_this the current box.
+ */
+static enum CRStatus
+cr_lay_eng_layout_box_normal (CRBox *a_this)
+{
+        enum CRStatus status = CR_OK ;
+
+        g_return_val_if_fail (a_this && a_this->style,
+                              CR_BAD_PARAM_ERROR) ;
+
+        /*
+         *Only boxes that have
+         *the position rule set to 'static' or 'relative'
+         *can be part of a normal formatting context.
+         */
+        if (a_this->style->position != POSITION_STATIC
+            && a_this->style->position != POSITION_RELATIVE)
+        {
+                return CR_UNEXPECTED_POSITION_SCHEME ;
+        }
+
+        /*
+         *TODO
+         *compute the "computed values" of the style data structure.
+         */
+        switch (a_this->type)
+        {
+        case BOX_TYPE_BLOCK:
+        case BOX_TYPE_ANONYMOUS_BLOCK:
+        {
+                CRBox *cont_box = a_this->parent ;
+                /************************************
+                 *We are in a block formating context 
+                 ************************************/
+
+                /*
+                 *position the 'x' of the top
+                 *left corner of this box
+                 *at the leftmost abscissa of it's 
+                 *containing box.
+                 *Position the 'y' of 
+                 *the top left corner of this
+                 *just under the previous box.
+                 */                
+                if (!cont_box)
+                        a_this->outer_edge.x = 0 ;
+                else
+                        a_this->outer_edge.x = 
+                                cont_box->inner_edge.x ;
+                
+                a_this->outer_edge.y =
+                        cr_lay_eng_get_box_bottommost_y (a_this->prev) ;
+
+                a_this->outer_edge.x =
+                        cr_lay_eng_get_box_rightmost_x (a_this->prev) ;
+
+                /*******************************************
+                 *Now, compute the inner edge of this box;
+                 *which means 
+                 *1/set the left border and 
+                 *left padding edges.
+                 *2/compute the left most x and topmost y of
+                 *the inner box and.
+                 *3/Compute the outer edge of the containing
+                 *box; this is recursive.
+                 *******************************************/
+
+                /*
+                 *1/ => left side of outer edge is separated from
+                 *left side of border edge by "margin-left"... same
+                 *principle applies for padding edge and inner edge.
+                 */
+
+                /*
+                 *TODO: collapse this margin !!!. 
+                 *See css2 chap 8.3.1 to see what "collapsing" means.
+                 */
+                a_this->border_edge.x =
+                        a_this->outer_edge.x
+                        - 
+                        a_this->style->margin_left.val ;
+                a_this->border_edge.y =
+                        a_this->outer_edge.y
+                        -
+                        a_this->style->margin_top.val ;
+
+                a_this->padding_edge.x =
+                        a_this->border_edge.x 
+                        -
+                        a_this->style->border_left_width.val ;
+                a_this->padding_edge.y =
+                        a_this->border_edge.y
+                        -
+                        a_this->style->border_top_width.val ;
+
+                /*
+                 *Now 2/
+                 */
+                a_this->inner_edge.x =
+                        a_this->padding_edge.x
+                        -
+                        a_this->style->padding_left.val ;
+                a_this->inner_edge.y =
+                        a_this->padding_edge.y
+                        -
+                        a_this->style->padding_left.val ;
+
+                /*
+                 *And now, 3/
+                 */
+                if (a_this->children)
+                {
+                        cr_lay_eng_layout_box (a_this->children) ;
+                }
+                else
+                {
+                        /*
+                         *this box may have a content.
+                         *TODO: compute it's width and height.
+                         *then, when computed, update the
+                         *children max width size in the parent box.
+                         */                        
+                }
+
+                /*******************************************
+                 *Inner edge position (x,y) computing is 
+                 *finished. (we have it's width).
+                 *So now, we can compute the widths of the
+                 *remaining three other boxes 
+                 *(padding edge, border edge and outer edge)
+                 ******************************************/
+                break ;
+        }
+
+        case BOX_TYPE_COMPACT:
+        case BOX_TYPE_RUN_IN:
+        case BOX_TYPE_INLINE:
+        case BOX_TYPE_ANONYMOUS_INLINE:
+                break ;
+
+        default:
+                break ;
+        }
+
+        return status ;
+}
+
+static enum CRStatus
+cr_lay_eng_layout_box (CRBox *a_this)
+{
+        CRBox *cur_box = NULL ;
+
+        g_return_val_if_fail (a_this && a_this->style,
+                              CR_BAD_PARAM_ERROR) ;
+
+        for (cur_box = a_this ; cur_box ; 
+             cur_box = cur_box->next)
+        {
+                switch (cur_box->style->position)
+                {
+                case POSITION_STATIC:
+                case POSITION_RELATIVE:
+                        cr_lay_eng_layout_box_normal (cur_box) ;
+                        break ;
+
+                case POSITION_ABSOLUTE:
+                case POSITION_FIXED:
+                        /*cr_box_layout_absolute (a_this) ;*/
+                        break ;
+
+                case POSITION_INHERIT:
+                        break ;
+                }
+        }
+        return CR_OK ;
+}
 
 /**********************
  *Public methods.

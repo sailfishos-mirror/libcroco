@@ -40,24 +40,6 @@ cr_box_edge_to_string (CRBoxEdge *a_this,
 static enum CRBoxType
 cr_box_guess_type (CRStyle *a_style) ;
 
-static glong
-cr_box_get_rightmost_x (CRBox *a_this) ;
-
-static glong
-cr_box_get_bottommost_y (CRBox *a_this) ;
-
-static enum CRStatus
-cr_box_layout_normal (CRBox *a_this) ;
-
-static enum CRStatus
-cr_box_layout_float (CRBox *a_this) ;
-
-static enum CRStatus
-cr_box_layout_absolute (CRBox *a_this) ;
-
-static enum CRStatus
-cr_box_layout (CRBox *a_this) ;
-
 
 /******************************
  *Private methods
@@ -72,7 +54,7 @@ static enum CRBoxType
 cr_box_guess_type (CRStyle *a_style)
 {
         enum CRBoxType box_type = BOX_TYPE_INLINE ;
-        
+
         if (!a_style)
                 return box_type ;
 
@@ -85,7 +67,7 @@ cr_box_guess_type (CRStyle *a_style)
         case DISPLAY_MARKER:
                 box_type = BOX_TYPE_INLINE ;
                 break ;
-        
+
         case DISPLAY_BLOCK:
         case DISPLAY_LIST_ITEM:
         case DISPLAY_TABLE:
@@ -121,222 +103,6 @@ cr_box_guess_type (CRStyle *a_style)
         }
 
         return box_type ;
-}
-
-static glong
-cr_box_get_bottommost_y (CRBox *a_this)
-{
-        return (a_this->outer_edge.y
-                +
-                a_this->outer_edge.y_offset
-                +
-                a_this->outer_edge.height) ;
-}
-
-/**
- *Computes the abscissa of the rightmost side
- *of the current box.
- *@param a_box the current box.
- *@return a positve or 0 number if the computation went well,
- *-1 otherwise.
- */
-static glong
-cr_box_get_rightmost_x (CRBox *a_this)
-{       
-        if (!a_this)
-                return 0 ;
-
-        return (a_this->outer_edge.x 
-                +
-                a_this->outer_edge.x_offset
-                +
-                a_this->outer_edge.width) ;
-}
-
-/**
- *Lay the box out according to "Normal flow"
- *as decribed in css2 spec chap 9.4.
- *In normal flow, a box belongs to a formating context
- *that may be block or inline. In block formating context,
- *boxes are laid out verticaly, one under an other.
- *In inline formatting context, boxes are laid out horizontally,
- *usually from the left to the right, unless we support bidi.
- *@param a_this the current box.
- */
-static enum CRStatus
-cr_box_layout_normal (CRBox *a_this)
-{
-        enum CRStatus status = CR_OK ;
-
-        g_return_val_if_fail (a_this && a_this->style,
-                              CR_BAD_PARAM_ERROR) ;
-
-        /*
-         *Only boxes that have
-         *the position rule set to 'static' or 'relative'
-         *can be part of a normal formatting context.
-         */
-        if (a_this->style->position != POSITION_STATIC
-            && a_this->style->position != POSITION_RELATIVE)
-        {
-                return CR_UNEXPECTED_POSITION_SCHEME ;
-        }
-
-        /*
-         *TODO
-         *compute the "computed values" of the style data structure.
-         */
-        switch (a_this->type)
-        {
-        case BOX_TYPE_BLOCK:
-        case BOX_TYPE_ANONYMOUS_BLOCK:
-        {
-                CRBox *cont_box = a_this->parent ;
-                /************************************
-                 *We are in a block formating context 
-                 ************************************/
-
-                /*
-                 *position the 'x' of the top
-                 *left corner of this box
-                 *at the leftmost abscissa of it's 
-                 *containing box.
-                 *Position the 'y' of 
-                 *the top left corner of this
-                 *just under the previous box.
-                 */                
-                if (!cont_box)
-                        a_this->outer_edge.x = 0 ;
-                else
-                        a_this->outer_edge.x = 
-                                cont_box->inner_edge.x ;
-                
-                a_this->outer_edge.y =
-                        cr_box_get_bottommost_y (a_this->prev) ;
-
-                a_this->outer_edge.x =
-                        cr_box_get_rightmost_x (a_this->prev) ;
-
-                /*******************************************
-                 *Now, compute the inner edge of this box;
-                 *which means 
-                 *1/set the left border and 
-                 *left padding edges.
-                 *2/compute the left most x and topmost y of
-                 *the inner box and.
-                 *3/Compute the outer edge of the containing
-                 *box; this is recursive.
-                 *******************************************/
-
-                /*
-                 *1/ => left side of outer edge is separated from
-                 *left side of border edge by "margin-left"... same
-                 *principle applies for padding edge and inner edge.
-                 */
-
-                /*
-                 *TODO: collapse this margin !!!. 
-                 *See css2 chap 8.3.1 to see what "collapsing" means.
-                 */
-                a_this->border_edge.x =
-                        a_this->outer_edge.x
-                        - 
-                        a_this->style->margin_left.val ;
-                a_this->border_edge.y =
-                        a_this->outer_edge.y
-                        -
-                        a_this->style->margin_top.val ;
-
-                a_this->padding_edge.x =
-                        a_this->border_edge.x 
-                        -
-                        a_this->style->border_left_width.val ;
-                a_this->padding_edge.y =
-                        a_this->border_edge.y
-                        -
-                        a_this->style->border_top_width.val ;
-
-                /*
-                 *Now 2/
-                 */
-                a_this->inner_edge.x =
-                        a_this->padding_edge.x
-                        -
-                        a_this->style->padding_left.val ;
-                a_this->inner_edge.y =
-                        a_this->padding_edge.y
-                        -
-                        a_this->style->padding_left.val ;
-
-                /*
-                 *And now, 3/
-                 */
-                if (a_this->children)
-                {
-                        cr_box_layout (a_this->children) ;
-                }
-                else
-                {
-                        /*
-                         *this box may have a content.
-                         *TODO: compute it's width and height.
-                         *then, when computed, update the
-                         *children max width size in the parent box.
-                         */                        
-                }
-
-                /*******************************************
-                 *Inner edge position (x,y) computing is 
-                 *finished. (we have it's width).
-                 *So now, we can compute the widths of the
-                 *remaining three other boxes 
-                 *(padding edge, border edge and outer edge)
-                 ******************************************/
-                
-                break ;
-        }
-
-        case BOX_TYPE_COMPACT:
-        case BOX_TYPE_RUN_IN:
-        case BOX_TYPE_INLINE:
-        case BOX_TYPE_ANONYMOUS_INLINE:
-                break ;
-
-        default:
-                break ;
-        }
-
-        return status ;
-}
-
-static enum CRStatus
-cr_box_layout (CRBox *a_this)
-{
-        CRBox *cur_box = NULL ;
-
-        g_return_val_if_fail (a_this && a_this->style,
-                              CR_BAD_PARAM_ERROR) ;
-
-        for (cur_box = a_this ; cur_box ; 
-             cur_box = cur_box->next)
-        {
-                switch (cur_box->style->position)
-                {
-                case POSITION_STATIC:
-                case POSITION_RELATIVE:
-                        cr_box_layout_normal (cur_box) ;
-                        break ;
-
-                case POSITION_ABSOLUTE:
-                case POSITION_FIXED:
-                        /*cr_box_layout_absolute (a_this) ;*/
-                        break ;
-
-                case POSITION_INHERIT:
-                        break ;
-                }
-        }
-        return CR_OK ;
 }
 
 
@@ -407,7 +173,7 @@ cr_box_data_new (xmlNode *a_node)
                 return NULL;
         }
         memset (result, 0, sizeof (CRBoxData)) ;
-        result->node = a_node ;
+        result->xml_node = a_node ;
         return result ;
 }
 
@@ -626,7 +392,7 @@ cr_box_to_string (CRBox *a_this,
                 switch (cur_box->type)
                 {
                 case BOX_TYPE_BLOCK:
-                        g_string_append_printf (result, "BLOCK") ;                
+                        g_string_append_printf (result, "BLOCK") ;
                         break ;
 
                 case BOX_TYPE_ANONYMOUS_BLOCK:
@@ -653,10 +419,34 @@ cr_box_to_string (CRBox *a_this,
                         g_string_append_printf (result, "UNKNOWN") ;
                         break ;
                 }
+                
                 g_string_append_printf (result, " box\n") ;
                 cr_utils_dump_n_chars2 (' ', result, a_nb_indent) ;
                 g_string_append_printf (result, "{") ;
         
+                if (cur_box->box_data && cur_box->box_data->xml_node)
+                {
+                        switch (cur_box->box_data->xml_node->type)
+                        {
+                        case XML_ELEMENT_NODE:
+                                cr_utils_dump_n_chars2 
+                                        (' ', result, a_nb_indent) ;
+                                g_string_append_printf 
+                                        (result, "xml-node-name: %s\n", 
+                                         cur_box->box_data->xml_node->name) ;
+                                break ;
+                        case XML_TEXT_NODE:
+                                cr_utils_dump_n_chars2 
+                                        (' ', result, a_nb_indent) ;
+                                g_string_append_printf 
+                                        (result, "xml-text-node\n") ;
+                                break ;
+
+                        default:                                
+                                break ;
+                        }
+                }
+
                 cr_utils_dump_n_chars2 (' ', result, a_nb_indent + 2) ;
                 g_string_append_printf (result, "/*****%s begin*****/\n", 
                                         "outer_edge") ;
