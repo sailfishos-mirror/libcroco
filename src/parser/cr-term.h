@@ -147,6 +147,9 @@ struct _CRTerm
 } ;
 
 CRTerm *
+cr_term_parse_expression_from_buf (const guchar *a_buf, 
+                                   enum CREncoding a_encoding) ;
+CRTerm *
 cr_term_new (void) ;
 
 enum CRStatus

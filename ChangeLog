@@ -1,5 +1,16 @@
 2003-06-20  Dodji Seketeli  <dodji@seketeli.org>
 
+	* src/parser/cr-term.[ch]:
+	added the  cr_term_parse_expression_from_buf() function.
+	this is new and still needs to be tested.
+	
+	* src/parser/cr-parser.[hc]:
+	made cr_parser_parse_expr() public.
+	
+	* src/parser/cr-declaration.[ch]:
+	changed cr_declaration_parse() into 
+	cr_declaration_parse_parse_from_buf().
+	
 	* src/parser/cr-statement.[ch]:
 	fixed some typos.
 	added the function cr_statement_does_buf_parses_against_core() and

@@ -152,8 +152,8 @@ test_cr_declaration_parse (void)
         guchar * tmp_str = NULL ;
         CRDeclaration * decl = NULL ;
 
-        decl = cr_declaration_parse (NULL, gv_decl_buf,
-                                     CR_UTF_8) ;
+        decl = cr_declaration_parse_from_buf (NULL, gv_decl_buf,
+                                              CR_UTF_8) ;
         tmp_str = cr_declaration_to_string (decl, 2) ;
 
         if (decl)

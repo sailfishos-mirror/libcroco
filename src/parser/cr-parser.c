@@ -407,9 +407,6 @@ cr_parser_parse_simple_selector (CRParser *a_this, CRSimpleSel **a_sel) ;
 static enum CRStatus
 cr_parser_parse_simple_sels (CRParser *a_this, CRSimpleSel **a_sel) ;
 
-static enum CRStatus
-cr_parser_parse_expr (CRParser *a_this, CRTerm **a_expr) ;
-
 static CRParserError *
 cr_parser_error_new (const guchar * a_msg, enum CRStatus) ;
 
@@ -2166,114 +2163,6 @@ cr_parser_parse_term (CRParser *a_this, CRTerm **a_term)
         return status ;
 }
 
-/**
- *Parses an expression as defined by the css2 spec in appendix
- *D.1:
- *expr: term [ operator term ]*
- */
-static enum CRStatus
-cr_parser_parse_expr (CRParser *a_this, CRTerm **a_expr)
-{
-        enum CRStatus status = CR_ERROR ;
-        CRInputPos init_pos ;
-        CRTerm *expr = NULL, *expr2 = NULL ;
-        guchar next_byte = 0 ;
-        gulong nb_terms = 0 ;
-
-        g_return_val_if_fail (a_this && PRIVATE (a_this)
-                              && a_expr,
-                              CR_BAD_PARAM_ERROR) ;
-
-        RECORD_INITIAL_POS (a_this, &init_pos) ;
-
-        status = cr_parser_parse_term (a_this, &expr) ;
-
-        CHECK_PARSING_STATUS (status, FALSE) ;
-        
-        for (;;)
-        {
-                guchar operator = 0 ;
-                status = cr_tknzr_peek_byte (PRIVATE (a_this)->tknzr,
-                                             1, &next_byte) ;
-                if (status != CR_OK)
-                {
-                        if (status == CR_END_OF_INPUT_ERROR)
-                        {
-                                if (!nb_terms)
-                                {
-                                        goto error ;
-                                }                                        
-                                status = CR_OK ;
-                                break ;
-                        }
-                        else
-                        {
-                                goto error ;
-                        }
-                }
-
-                if (next_byte == '/' || next_byte == ',')
-                {
-                        READ_NEXT_BYTE (a_this, &operator) ;
-                }
- 
-                cr_parser_try_to_skip_spaces_and_comments 
-                        (a_this) ;
-
-                status = cr_parser_parse_term (a_this, &expr2) ;
-
-                if (status != CR_OK || expr2 == NULL)
-                {
-                        status = CR_OK ;
-                        break ;
-                }
-                
-                switch (operator)
-                {
-                case '/':
-                        expr2->operator = DIVIDE ;
-                        break ;
-                case ',':
-                        expr2->operator = COMMA ;
-
-                default:
-                        break ;
-                }
-
-                expr = cr_term_append_term (expr, expr2) ;
-                expr2 = NULL ;
-                operator = 0 ;
-                nb_terms ++ ;
-        }
-
-        if (status == CR_OK)
-        {
-                *a_expr = cr_term_append_term (*a_expr, expr) ;
-                expr = NULL ;
-
-                cr_parser_clear_errors (a_this) ;
-                return CR_OK ;
-        }
-
- error:
-
-        if (expr)
-        {
-                cr_term_destroy (expr) ;
-                expr = NULL ;
-        }
-
-        if (expr2)
-        {
-                cr_term_destroy (expr2) ;
-                expr2 = NULL ;
-        }
-
-        cr_tknzr_set_cur_pos (PRIVATE (a_this)->tknzr,
-                                     &init_pos) ;
-
-        return status ;
-}
 
 
 /**
@@ -3754,6 +3643,115 @@ cr_parser_parse_file (CRParser *a_this,
         g_return_val_if_fail (status == CR_OK, CR_ERROR) ;
 
         status = cr_parser_parse (a_this) ;
+
+        return status ;
+}
+
+/**
+ *Parses an expression as defined by the css2 spec in appendix
+ *D.1:
+ *expr: term [ operator term ]*
+ */
+enum CRStatus
+cr_parser_parse_expr (CRParser *a_this, CRTerm **a_expr)
+{
+        enum CRStatus status = CR_ERROR ;
+        CRInputPos init_pos ;
+        CRTerm *expr = NULL, *expr2 = NULL ;
+        guchar next_byte = 0 ;
+        gulong nb_terms = 0 ;
+
+        g_return_val_if_fail (a_this && PRIVATE (a_this)
+                              && a_expr,
+                              CR_BAD_PARAM_ERROR) ;
+
+        RECORD_INITIAL_POS (a_this, &init_pos) ;
+
+        status = cr_parser_parse_term (a_this, &expr) ;
+
+        CHECK_PARSING_STATUS (status, FALSE) ;
+        
+        for (;;)
+        {
+                guchar operator = 0 ;
+                status = cr_tknzr_peek_byte (PRIVATE (a_this)->tknzr,
+                                             1, &next_byte) ;
+                if (status != CR_OK)
+                {
+                        if (status == CR_END_OF_INPUT_ERROR)
+                        {
+                                if (!nb_terms)
+                                {
+                                        goto error ;
+                                }                                        
+                                status = CR_OK ;
+                                break ;
+                        }
+                        else
+                        {
+                                goto error ;
+                        }
+                }
+
+                if (next_byte == '/' || next_byte == ',')
+                {
+                        READ_NEXT_BYTE (a_this, &operator) ;
+                }
+ 
+                cr_parser_try_to_skip_spaces_and_comments 
+                        (a_this) ;
+
+                status = cr_parser_parse_term (a_this, &expr2) ;
+
+                if (status != CR_OK || expr2 == NULL)
+                {
+                        status = CR_OK ;
+                        break ;
+                }
+                
+                switch (operator)
+                {
+                case '/':
+                        expr2->operator = DIVIDE ;
+                        break ;
+                case ',':
+                        expr2->operator = COMMA ;
+
+                default:
+                        break ;
+                }
+
+                expr = cr_term_append_term (expr, expr2) ;
+                expr2 = NULL ;
+                operator = 0 ;
+                nb_terms ++ ;
+        }
+
+        if (status == CR_OK)
+        {
+                *a_expr = cr_term_append_term (*a_expr, expr) ;
+                expr = NULL ;
+
+                cr_parser_clear_errors (a_this) ;
+                return CR_OK ;
+        }
+
+ error:
+
+        if (expr)
+        {
+                cr_term_destroy (expr) ;
+                expr = NULL ;
+        }
+
+        if (expr2)
+        {
+                cr_term_destroy (expr2) ;
+                expr2 = NULL ;
+        }
+
+        cr_tknzr_set_cur_pos (PRIVATE (a_this)->tknzr,
+                                     &init_pos) ;
 
         return status ;
 }

@@ -106,6 +106,8 @@ cr_parser_parse_buf (CRParser *a_this, const guchar *a_buf,
 enum CRStatus
 cr_parser_set_default_sac_handler (CRParser *a_this) ;
 
+enum CRStatus
+cr_parser_parse_expr (CRParser *a_this, CRTerm **a_expr) ;
 
 enum CRStatus
 cr_parser_parse_declaration (CRParser *a_this, GString **a_property,

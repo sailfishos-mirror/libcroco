@@ -1792,6 +1792,8 @@ cr_statement_ruleset_get_declarations (CRStatement *a_this,
 			      CR_BAD_PARAM_ERROR) ;
 
         *a_decl_list = a_this->kind.ruleset->decl_list ;
+
+        return CR_OK ;
 }
 
 /**

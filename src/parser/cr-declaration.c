@@ -157,9 +157,9 @@ cr_declaration_new (CRStatement *a_statement,
  *@return the parsed declaration, or NULL in case of error.
  */
 CRDeclaration *
-cr_declaration_parse (CRStatement *a_statement,
-		      const guchar *a_str,
-		      enum CREncoding a_enc)
+cr_declaration_parse_from_buf (CRStatement *a_statement,
+			       const guchar *a_str,
+			       enum CREncoding a_enc)
 {
 	enum CRStatus status = CR_OK ;
 	CRTerm *value = NULL ;
@@ -215,6 +215,7 @@ cr_declaration_parse (CRStatement *a_statement,
 
 	return result ;
 }
+
 
 /**
  *Appends a new declaration to the current declarations list.

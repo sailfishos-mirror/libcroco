@@ -75,9 +75,9 @@ cr_declaration_new (CRStatement *a_statement,
 
 
 CRDeclaration *
-cr_declaration_parse (CRStatement *a_statement,
-		      const guchar *a_str,
-		      enum CREncoding a_enc) ;
+cr_declaration_parse_from_buf (CRStatement *a_statement,
+			       const guchar *a_str,
+			       enum CREncoding a_enc) ;
 CRDeclaration *
 cr_declaration_append (CRDeclaration *a_this, CRDeclaration *a_new) ;
 
