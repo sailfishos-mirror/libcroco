@@ -36,6 +36,8 @@
 	* configure.in,src/layeng/Makefile.am,src/seleng/Makefile.am:
 	Provides libcrseleng and libcrlayeng with version info 
 	different from the one of libcroco.
+	* src/layeng/Makefile.am,src/seleng/Makefile.am: Fixed more
+	build system stuffs here.
 	
 2003-08-17  Gaël CHAMOULAUD <strider@gnome.org>
 
