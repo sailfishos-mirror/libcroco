@@ -64,7 +64,7 @@ cr_parser_new_from_buf (guchar *a_buf, gulong a_len,
                         enum CREncoding a_enc, 
                         gboolean a_free_buf) ;
 CRParser *
-cr_parser_new_from_file (guchar *a_file_uril, 
+cr_parser_new_from_file (guchar *a_file_uri, 
                          enum CREncoding a_enc) ;
 
 CRParser *
