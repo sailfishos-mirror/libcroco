@@ -369,6 +369,12 @@ set_border_x_width_from_value (CRStyle *a_style,
                         }
                 }
         }
+        else if (a_value->type != TERM_NUMBER
+                 || a_value->content.num == NULL)
+        {
+                return CR_UNKNOWN_TYPE_ERROR ;
+        }
+        
 
         switch (a_value->content.num->type)
         {
