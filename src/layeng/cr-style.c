@@ -206,7 +206,7 @@ static enum CRStatus
 set_prop_color_rgb (CRStyle *a_style, CRTerm *a_value) ;
 
 static enum CRStatus
-set_prop_background_color_rgb (CRStyle *a_style, CRTerm *a_value) ;
+set_prop_background_color (CRStyle *a_style, CRTerm *a_value) ;
 
 static enum CRStatus
 set_prop_border_x_color_from_value (CRStyle *a_style, CRTerm *a_value,
@@ -1079,7 +1079,7 @@ set_prop_color_rgb (CRStyle *a_style, CRTerm *a_value)
 }
 
 static enum CRStatus
-set_prop_background_color_rgb (CRStyle *a_style, CRTerm *a_value)
+set_prop_background_color (CRStyle *a_style, CRTerm *a_value)
 {
         g_return_val_if_fail (a_style && a_value,
                               CR_BAD_PARAM_ERROR) ;
@@ -1093,6 +1093,16 @@ set_prop_background_color_rgb (CRStyle *a_style, CRTerm *a_value)
                                  rgb_props[RGB_PROP_BACKGROUND_COLOR].sv,
                                  a_value->content.rgb) ;
                 }
+        }
+        else if (a_value->type == TERM_IDENT)
+        {
+                cr_rgb_set_from_name (&a_style->
+                                      rgb_props[RGB_PROP_BACKGROUND_COLOR].sv,
+                                      ) ;
+        }
+        else
+        {
+                return CR_UNKNOWN_TYPE_ERROR ;
         }
 
         return CR_OK ;
@@ -1532,7 +1542,7 @@ cr_style_set_style_from_decl (CRStyle *a_this, CRDeclaration *a_decl,
                 break ;
 
         case PROP_ID_BACKGROUND_COLOR:
-                status = set_prop_background_color_rgb (a_this, value) ;
+                status = set_prop_background_color (a_this, value) ;
 
         default:
                 return CR_UNKNOWN_TYPE_ERROR ;

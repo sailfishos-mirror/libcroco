@@ -61,7 +61,7 @@ const guchar *gv_cssbuf =
 " margin-right: 15px ;"
 " display: block ; " 
 " position: static; " 
-" background-color: azure ;"
+" background-color: coral ;"
 " border: solid yellow" 
 /*
 " border-top-width: thick ;"
