@@ -1,3 +1,7 @@
+2004-01-27  Gael CHAMOULAUD  <strider@gnome.org>
+                                                                                                                        
+        * csslint/csslint.c: (csslint_show_version): Made smallish cleanup
+
 2003-06-28  Gaël Chamoulaud  <strider@freespiders.org>
 
 	* csslint.c (csslint_show_version): Added CROCO_LAYENG_ENABLED test
