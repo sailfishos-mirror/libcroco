@@ -54,6 +54,58 @@ cr_lay_eng_create_box_tree_real (CRLayEng * a_this,
  *Private methods.
  **********************/
 
+/**
+ *Sets the box style values so that
+ *it has no padding, no border, no margin.
+ *The other style values are left as is cause
+ *they must have been set prior to calling this
+ *function.
+ */
+static void
+init_anonymous_text_box (CRBox *a_box)
+{
+        g_return_if_fail (a_box && a_box->style) ;
+        
+        cr_num_set (&a_box->style->padding_top, 0, NUM_LENGTH_PX) ;
+        cr_num_set (&a_box->style->padding_right, 0, NUM_LENGTH_PX) ;
+        cr_num_set (&a_box->style->padding_bottom, 0, NUM_LENGTH_PX) ;
+        cr_num_set (&a_box->style->padding_left, 0, NUM_LENGTH_PX) ;
+        
+        cr_num_set (&a_box->style->border_top_width, 0, NUM_LENGTH_PX) ;
+        cr_num_set (&a_box->style->border_right_width, 0, NUM_LENGTH_PX) ;
+        cr_num_set (&a_box->style->border_bottom_width, 0, NUM_LENGTH_PX) ;
+        cr_num_set (&a_box->style->border_left_width, 0, NUM_LENGTH_PX) ;
+
+        cr_num_set (&a_box->style->margin_top, 0, NUM_LENGTH_PX) ;
+        cr_num_set (&a_box->style->margin_right, 0, NUM_LENGTH_PX) ;
+        cr_num_set (&a_box->style->margin_bottom, 0, NUM_LENGTH_PX) ;
+        cr_num_set (&a_box->style->margin_left, 0, NUM_LENGTH_PX) ;
+        
+        a_box->style->border_top_style = BORDER_STYLE_NONE ;
+        a_box->style->border_right_style = BORDER_STYLE_NONE ;
+        a_box->style->border_bottom_style = BORDER_STYLE_NONE ;
+        a_box->style->border_left_style = BORDER_STYLE_NONE ;
+
+        cr_num_set (&a_box->style->top.num, 0, NUM_LENGTH_PX) ;
+        a_box->style->top.type = OFFSET_DEFINED ;
+        cr_num_set (&a_box->style->right.num, 0, NUM_LENGTH_PX) ;
+        a_box->style->right.type = OFFSET_DEFINED ;
+        cr_num_set (&a_box->style->bottom.num, 0, NUM_LENGTH_PX) ;
+        a_box->style->bottom.type = OFFSET_DEFINED ;
+        cr_num_set (&a_box->style->left.num, 0, NUM_LENGTH_PX) ;
+        a_box->style->left.type = OFFSET_DEFINED ;
+        
+        a_box->style->float_type = FLOAT_NONE ;
+}
+
+/**
+ *Creates a box sub tree from an xml node tree.
+ *@param a_this the current instance of #CRLayEng.
+ *@param a_root_node the root node of the xml tree.
+ *@param a_parent_box the root of the box tree to build.
+ *@return the newly built box tree, or NULL if an error
+ *happens.
+ */
 static CRBox *
 cr_lay_eng_create_box_tree_real (CRLayEng * a_this,
                                  xmlNode *a_root_node,
@@ -167,7 +219,31 @@ cr_lay_eng_create_box_tree_real (CRLayEng * a_this,
                         }
                         if (box_content)
                         {
-                                /*create here an anonymous box*/
+                                /*
+                                 *create here an anonymous box
+                                 *which style inherits the style
+                                 *of the parent box.
+                                 */
+                                cur_box = cr_box_new (parent_style) ;
+                                if (!cur_box)
+                                {
+                                        cr_utils_trace_info
+                                                ("could not create "
+                                                 "anonymous box") ;
+                                        goto error ;
+                                }
+                                cur_box->content = box_content ;
+                                box_content = NULL ;
+                                /*
+                                 *the anonymous box
+                                 *must have no margin, 
+                                 *no padding, no border,
+                                 *no border style, no offset
+                                 */
+                                init_anonymous_text_box (cur_box) ;
+                                cr_box_append_child (a_parent_box,
+                                                     cur_box) ;
+                                cur_box = NULL ;
                         }
                 }
                 else 
@@ -234,7 +310,15 @@ cr_lay_eng_new (void)
 	return result ;
 }
 
-
+/**
+ *Creates the box model from an xml document.
+ *@param a_this the current instance of #CRLayEng.
+ *@param a_doc the current xml document.
+ *@param a_cascade the css2 stylesheet cascade.
+ *@param a_box_model out parameter. The returned
+ *@return CR_OK upon successfull completion, an error code
+ *otherwise.
+ */
 enum CRStatus
 cr_lay_eng_build_box_tree (CRLayEng *a_this,
                            xmlDoc *a_doc,
@@ -260,6 +344,10 @@ cr_lay_eng_build_box_tree (CRLayEng *a_this,
 }
 
 
+/**
+ *Destuctor of #CRLayEng.
+ *@param a_this the current instance of #CRLayEng.
+ */
 void
 cr_lay_eng_destroy (CRLayEng *a_this)
 {

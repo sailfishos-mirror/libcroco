@@ -130,14 +130,12 @@ struct _CRStyle
 {
 
 	/**padding properties, in pixel*/
-
 	CRNum padding_top ;
 	CRNum padding_right ;
 	CRNum padding_bottom ;
 	CRNum padding_left ;
 
 	/**border properties*/
-
 	CRNum border_top_width ;
 	CRNum border_right_width ;
 	CRNum border_bottom_width ;
@@ -205,6 +203,9 @@ cr_style_unref (CRStyle *a_this) ;
 
 void
 cr_style_destroy (CRStyle *a_this) ;
+
+CRStyle *
+cr_style_dup (CRStyle *a_this) ;
 
 G_END_DECLS
 

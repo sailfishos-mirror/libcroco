@@ -1420,6 +1420,19 @@ cr_utils_dump_n_chars (guchar a_char, FILE *a_fp, glong a_nb)
         }
 }
 
+void
+cr_utils_dump_n_chars2 (guchar a_char, 
+                        GString *a_string,
+                        glong a_nb)
+{
+        glong i = 0 ;
+
+        for (i = 0 ; i < a_nb ; i++)
+        {
+                g_string_printf (a_string, "%c", a_char) ;
+        }
+}
+
 gdouble
 cr_utils_n_to_0_dot_n (glong a_n)
 {

@@ -32,6 +32,10 @@
  *The definition file of the #CRBox class.
  */
 
+static enum CRStatus
+cr_box_edge_to_string (CRBoxEdge *a_this,
+                       gulong a_nb_indent,
+                       GString **a_string) ;
 
 static enum CRBoxType
 cr_box_guess_type (CRStyle *a_style) ;
@@ -335,6 +339,53 @@ cr_box_layout (CRBox *a_this)
         return CR_OK ;
 }
 
+
+static enum CRStatus
+cr_box_edge_to_string (CRBoxEdge *a_this,
+                       gulong a_nb_indent,
+                       GString **a_string)
+{
+        GString *result = NULL ;
+
+        if (*a_string)
+        {
+                result = *a_string ;
+        }
+        else
+        {
+                result = g_string_new (NULL) ;
+                if (!result)
+                {
+                        cr_utils_trace_info ("Out of memory") ;
+                        return CR_ERROR ;
+                }
+        }
+
+        cr_utils_dump_n_chars2 (' ', result, 
+                                a_nb_indent) ;
+        g_string_append_printf (result, "(%ld, %ld)\n", 
+                                (long int)a_this->x,
+                                (long int) a_this->y) ;
+        cr_utils_dump_n_chars2 (' ', result, 
+                                a_nb_indent) ;
+        g_string_append_printf (result, "width: %ld\n", 
+                                (long int)a_this->width) ;
+        cr_utils_dump_n_chars2 (' ', 
+                                result, a_nb_indent) ;
+        g_string_append_printf (result, "height: %ld\n", 
+                                (long int)a_this->height) ;
+        cr_utils_dump_n_chars2 (' ', 
+                                result, a_nb_indent) ;
+        g_string_printf (result, "x_offset: %ld\n", 
+                         (long int)a_this->x_offset) ;
+        cr_utils_dump_n_chars2 (' ', result, 
+                                a_nb_indent) ;
+        g_string_append_printf (result, "y_offset: %ld\n", 
+                                (long int)a_this->y_offset) ;
+
+        return CR_OK ;
+}
+
 /*******************************
  *Public methods
  *******************************/
@@ -457,6 +508,7 @@ cr_box_new (CRStyle *a_style)
                 }
         }
         result->style = style ;
+        cr_style_ref (result->style) ;
         result->type = cr_box_guess_type (result->style) ;
 	return result ;
 
@@ -530,12 +582,77 @@ cr_box_insert_sibling (CRBox *a_prev,
  *Gives a string representation of the box tree.
  *@return the build string of NULL in case of an error.
  */
-GString *
-cr_box_to_string (CRBox *a_this, gulong a_nb_indent)
+enum CRStatus
+cr_box_to_string (CRBox *a_this, 
+                  gulong a_nb_indent,
+                  GString **a_string)
 {
-        g_return_val_if_fail (a_this, NULL) ;
+        GString *result = NULL ;
+
+        g_return_val_if_fail (a_this && a_string, 
+                              CR_BAD_PARAM_ERROR) ;
+
+        if (*a_string)
+        {
+                result = *a_string ;
+        }
+        else
+        {
+                result = g_string_new (NULL) ;
+                if (!result)
+                {
+                        cr_utils_trace_info ("Out of memory") ;
+                        return CR_ERROR ;
+                }
+        }        
+
+        cr_utils_dump_n_chars2 (' ', result, a_nb_indent) ;
+
+        switch (a_this->type)
+        {
+        case BOX_TYPE_BLOCK:
+                g_string_printf (result, "BLOCK") ;                
+                break ;
+
+        case BOX_TYPE_ANONYMOUS_BLOCK:
+                g_string_printf (result, "ANONYMOUS BLOCK") ;
+                break ;
+
+        case BOX_TYPE_INLINE:
+                g_string_printf (result, "INLINE") ;
+                break ;
+
+        case BOX_TYPE_ANONYMOUS_INLINE:
+                g_string_printf (result, "ANONYMOUS INLINE") ;
+                break ;
+
+        case BOX_TYPE_COMPACT:
+                g_string_printf (result, "COMPACT") ;
+                break ;
+
+        case BOX_TYPE_RUN_IN:
+                g_string_printf (result, "RUN IN") ;
+                break ;
+
+        default:
+                g_string_printf (result, "UNKNOWN") ;
+                break ;
+        }
+        g_string_printf (result, " box\n") ;
+        cr_utils_dump_n_chars2 (' ', result, a_nb_indent) ;
+        g_string_printf (result, "{") ;
         
-        return NULL ;
+        cr_utils_dump_n_chars2 (' ', result, a_nb_indent) ;
+        g_string_printf (result, "*****%s*****\n", "outer_edge") ;
+        cr_box_edge_to_string (&a_this->outer_edge,
+                               a_nb_indent, &result) ;
+
+        
+        g_string_printf (result, "\n") ;
+        cr_utils_dump_n_chars2 (' ', result, a_nb_indent) ;
+        g_string_printf (result, "}") ;
+
+        return CR_OK ;
 }
 
 /**
@@ -549,6 +666,18 @@ cr_box_destroy (CRBox *a_this)
 
 {
 	g_return_if_fail (a_this) ;
+
+        if (a_this->content)
+        {
+                cr_box_content_destroy (a_this->content) ;
+                a_this->content = NULL ;
+        }
+
+        if (a_this->style)
+        {
+                cr_style_unref (a_this->style) ;
+                a_this->style = NULL ;
+        }
 
 	if (a_this->children)
 	{

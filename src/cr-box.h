@@ -149,7 +149,6 @@ struct _CRBox
 	 *a surrounding area called "border".
 	 *If the border is inexistant, the
 	 *border edge equals the padding edge.
-	 *
 	 */
 	CRBoxEdge border_edge ;
 
@@ -172,7 +171,7 @@ struct _CRBox
 	 *The content (text or image) of this
 	 *box
 	 */
-	CRBoxContent content ;
+	CRBoxContent *content ;
 
 	/**
 	 *if TRUE, it means that this box has
@@ -225,8 +224,10 @@ cr_box_insert_sibling (CRBox *a_prev,
                        CRBox *a_next,
                        CRBox *a_to_insert) ;
 
-GString *
-cr_box_to_string (CRBox *a_this, gulong a_nb_indent) ;
+enum CRStatus
+cr_box_to_string (CRBox *a_this, 
+                  gulong a_nb_indent,
+                  GString **a_string) ;
 
 enum CRStatus
 cr_box_append_child (CRBox *a_this, CRBox *a_to_append) ;

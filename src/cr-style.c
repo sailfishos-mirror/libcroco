@@ -1265,9 +1265,15 @@ cr_style_set_style_from_decl (CRStyle *a_this, CRDeclaration *a_decl,
         }
 
         return status ;
-        
 }
 
+/**
+ *Increases the reference count
+ *of the current instance of #CRStyle.
+ *@param a_this the current instance of #CRStyle.
+ *@return CR_OK upon successfull completion, an error code
+ *otherwise.
+ */
 enum CRStatus
 cr_style_ref (CRStyle *a_this)
 {
@@ -1277,6 +1283,16 @@ cr_style_ref (CRStyle *a_this)
         return CR_OK ;
 }
 
+
+/**
+ *Decreases the reference count of
+ *the current instance of #CRStyle.
+ *If the reference count reaches 0, the
+ *instance of #CRStyle is destoyed.
+ *@param a_this the current instance of #CRStyle.
+ *@return TRUE if the instance has been destroyed, FALSE
+ *otherwise.
+ */
 gboolean
 cr_style_unref (CRStyle *a_this)
 {
@@ -1295,6 +1311,30 @@ cr_style_unref (CRStyle *a_this)
         return FALSE ;
 }
 
+/**
+ *Duplicates the current instance of #CRStyle .
+ *The newly created instance of #CRStyle must be
+ *freed using cr_style_destroy ().
+ *@param a_this the current instance of #CRStyle.
+ *@return the newly duplicated instance of #CRStyle.
+ */
+CRStyle *
+cr_style_dup (CRStyle *a_this)
+{
+        CRStyle *result = NULL ;
+
+        g_return_val_if_fail (a_this, NULL) ;
+
+        result = cr_style_new () ;
+        if (!result)
+        {
+                cr_utils_trace_info ("Out of memory") ;
+                return NULL ;
+        }
+        memcpy (result, a_this, sizeof (CRStyle)) ;
+
+        return result ;
+}
 
 /**
  *Destructor of the #CRStyle class.
