@@ -1,6 +1,6 @@
 
 /*simple Attribute set selectors*/
-s1[foo] {prop1 : value1}
+s1[foo] {prop1 : "\\73 tring"}
 
 /*simple exact attribute selector, simple ruleset*/
 s1[foo="warning"] {prop1 : value1}
