@@ -60,6 +60,10 @@ extern "C"
 	CRRgb *
 	cr_rgb_new_with_vals (glong a_red, glong a_green, 
                               glong a_blue, gboolean a_is_percentage) ;
+
+        guchar *
+        cr_rgb_to_string (CRRgb *a_this) ;
+
         void
         cr_rgb_dump (CRRgb *a_this, FILE *a_fp) ;
 

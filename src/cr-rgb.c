@@ -82,6 +82,54 @@ cr_rgb_new_with_vals (glong a_red, glong a_green,
         return result ;
 }
 
+/**
+ *Serialises the rgb into a zero terminated string.
+ *@param a_this the instance of #CRRgb to serialize.
+ *@return the zero terminated string containing the serialised
+ *rgb. MUST BE FREED by the caller using g_free().
+ */
+guchar *
+cr_rgb_to_string (CRRgb *a_this)
+{
+        guchar *result = NULL ;
+        GString *str_buf = NULL ;
+
+        str_buf = g_string_new (NULL) ;
+        g_return_val_if_fail (str_buf, NULL) ;
+
+        if (a_this->is_percentage == TRUE)
+        {
+                g_string_append_printf (str_buf, "%ld", a_this->red) ;
+
+                g_string_append_c (str_buf, '%') ;
+                g_string_append_printf (str_buf,", ") ;
+                
+                g_string_append_printf (str_buf,"%ld", a_this->green) ;
+                g_string_append_c (str_buf, '%') ; ;
+                g_string_append_printf (str_buf,", ") ;
+
+                g_string_append_printf (str_buf,"%ld", a_this->blue) ;
+                g_string_append_c (str_buf, '%') ;
+        }
+        else
+        {
+                g_string_append_printf (str_buf,"%ld", a_this->red) ;
+                g_string_append_printf (str_buf,", ") ;
+                
+                g_string_append_printf (str_buf,"%ld", a_this->green) ;
+                g_string_append_printf (str_buf,", ") ;
+
+                g_string_append_printf (str_buf,"%ld", a_this->blue) ;
+        }
+
+        if (str_buf)
+        {
+                result = str_buf->str ;
+                g_string_free (str_buf, FALSE) ;                
+        }
+
+        return result ;
+}
 
 /**
  *Dumps the current instance of #CRRgb
@@ -93,30 +141,17 @@ cr_rgb_new_with_vals (glong a_red, glong a_green,
 void
 cr_rgb_dump (CRRgb *a_this, FILE *a_fp)
 {
+        guchar *str = NULL ;
+
         g_return_if_fail (a_this) ;
 
-        if (a_this->is_percentage == TRUE)
-        {
-                fprintf (a_fp,"%ld", a_this->red) ;
-                fputc ('%', a_fp) ;
-                fprintf (a_fp,", ") ;
-                
-                fprintf (a_fp,"%ld", a_this->green) ;
-                fputc ('%', a_fp) ; ;
-                fprintf (a_fp,", ") ;
+        str = cr_rgb_to_string (a_this) ;
 
-                fprintf (a_fp,"%ld", a_this->blue) ;
-                fputc ('%', a_fp) ;
-        }
-        else
+        if (str)
         {
-                fprintf (a_fp,"%ld", a_this->red) ;
-                fprintf (a_fp,", ") ;
-                
-                fprintf (a_fp,"%ld", a_this->green) ;
-                fprintf (a_fp,", ") ;
-
-                fprintf (a_fp,"%ld", a_this->blue) ;
+                fprintf (a_fp, "%s",str) ;
+                g_free (str) ;
+                str = NULL ;
         }
 }
 

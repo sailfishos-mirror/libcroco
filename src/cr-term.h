@@ -181,6 +181,10 @@ cr_term_append_term (CRTerm *a_this, CRTerm *a_new_term) ;
 CRTerm *
 cr_term_prepend_term (CRTerm *a_this, CRTerm *a_new_term) ;
 
+
+guchar *
+cr_term_to_string (CRTerm *a_this) ;
+
 void
 cr_term_dump (CRTerm *a_this, FILE *a_fp) ;
 

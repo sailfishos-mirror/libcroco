@@ -252,20 +252,23 @@ cr_term_prepend_term (CRTerm *a_this, CRTerm *a_new_term)
 
 
 /**
- *Dumps the expression (a list of terms connected by operators)
- *to a file.
- *TODO: finish the dump. The dump of some type of terms have not yet been
- *implemented.
- *@param a_this the current instance of #CRTerm.
- *@param a_fp the destination file pointer.
+ *Serializes the expression represented by
+ *the chained instances of #CRterm.
+ *@param a_this the current instance of #CRTerm
+ *@return the zero terminated string containing the serialized
+ *form of #CRTerm. MUST BE FREED BY THE CALLER using g_free().
  */
-void
-cr_term_dump (CRTerm *a_this, FILE *a_fp)
+guchar *
+cr_term_to_string (CRTerm *a_this)
 {
-        guchar *content=NULL ;
-        CRTerm *cur = NULL ;
+        GString *str_buf = NULL ;
+        CRTerm *cur =  NULL ;
+        guchar *result = NULL, *content = NULL ;
 
-        g_return_if_fail (a_this) ;
+        g_return_val_if_fail (a_this, NULL) ;
+
+        str_buf = g_string_new (NULL) ;
+        g_return_val_if_fail (str_buf, NULL) ;
 
         for (cur = a_this ; cur ; cur = cur->next)
         {
@@ -278,16 +281,17 @@ cr_term_dump (CRTerm *a_this, FILE *a_fp)
                 switch (cur->operator)
                 {
                 case DIVIDE:
-                        fprintf (a_fp, " / ") ;
+                        g_string_append_printf (str_buf, " / ") ;
                         break ;
+
                 case COMMA:
-                        fprintf (a_fp, ", ") ;
+                        g_string_append_printf (str_buf, ", ") ;
                         break ;
 
                 case NO_OP:
                         if (cur->prev)
                         {
-                                fprintf (a_fp, " ") ;
+                                g_string_append_printf (str_buf, " ") ;
                         }
                         break ;
                 default:
@@ -298,11 +302,11 @@ cr_term_dump (CRTerm *a_this, FILE *a_fp)
                 switch (cur->unary_op)
                 {
                 case PLUS_UOP:
-                        fprintf (a_fp, "+") ;
+                        g_string_append_printf (str_buf, "+") ;
                         break ;
 
                 case MINUS_UOP:
-                        fprintf (a_fp, "-") ;
+                        g_string_append_printf (str_buf, "-") ;
                         break ;
 
                 default :
@@ -321,7 +325,7 @@ cr_term_dump (CRTerm *a_this, FILE *a_fp)
 
                         if (content)
                         {
-                                fprintf (a_fp, content) ;
+                                g_string_append(str_buf, content) ;
                                 g_free (content) ;
                                 content = NULL ;
                         }
@@ -338,20 +342,34 @@ cr_term_dump (CRTerm *a_this, FILE *a_fp)
 
                         if (content)
                         {
-                                fprintf (a_fp, "%s(", content) ;
+                                g_string_append_printf (str_buf, "%s(", 
+                                                        content) ;
 
                                 if (a_this->ext_content.func_param)
                                 {
-                                        cr_term_dump 
-                                                (a_this->
-                                                 ext_content.func_param,
-                                                 a_fp) ;
-                                }
+                                        guchar *tmp_str = NULL ;
 
-                                fprintf (a_fp, ")") ;
-                                g_free (content) ;
-                                content = NULL ;
+                                        tmp_str = cr_term_to_string 
+                                                (a_this->
+                                                 ext_content.func_param);
+
+                                        if (tmp_str)
+                                        { 
+                                                g_string_append_printf 
+                                                        (str_buf, 
+                                                         "%s",
+                                                         tmp_str) ;
+                                                g_free (tmp_str) ;
+                                                tmp_str = NULL ;
+                                        }
+
+                                        g_string_append_printf (str_buf, 
+                                                                ")") ;
+                                        g_free (content) ;
+                                        content = NULL ;
+                                }
                         }
+
                         break ;
 
                 case TERM_STRING:
@@ -364,7 +382,9 @@ cr_term_dump (CRTerm *a_this, FILE *a_fp)
 
                         if (content)
                         {
-                                fprintf (a_fp, "\"%s\"", content) ;
+                                g_string_append_printf (str_buf, 
+                                                        "\"%s\"", 
+                                                        content) ;
                                 g_free (content) ;
                                 content = NULL ;
                         }                        
@@ -380,7 +400,7 @@ cr_term_dump (CRTerm *a_this, FILE *a_fp)
                         
                         if (content)
                         {
-                                fprintf (a_fp, "%s",content) ;
+                                g_string_append (str_buf,content) ;
                                 g_free (content) ;
                                 content = NULL ;
                         }                        
@@ -396,7 +416,8 @@ cr_term_dump (CRTerm *a_this, FILE *a_fp)
 
                         if (content)
                         {
-                                fprintf (a_fp, "url(%s)",content) ;
+                                g_string_append_printf 
+                                        (str_buf,  "url(%s)",content) ;
                                 g_free (content) ;
                                 content = NULL ;
                         }                        
@@ -405,16 +426,27 @@ cr_term_dump (CRTerm *a_this, FILE *a_fp)
                 case TERM_RGB:
                         if (cur->content.rgb)
                         {
-                                fprintf (a_fp, "rgb(") ;
-                                cr_rgb_dump (cur->content.rgb, a_fp) ;
-                                fprintf (a_fp, ")") ;
+                                guchar *tmp_str = NULL ;
+
+                                g_string_append_printf (str_buf,  "rgb(");
+                                tmp_str = cr_rgb_to_string 
+                                        (cur->content.rgb) ;
+
+                                if (tmp_str)
+                                {
+                                        g_string_append (str_buf,
+                                                         tmp_str) ;
+                                        g_free (tmp_str) ;
+                                        tmp_str = NULL ;
+                                }
+                                g_string_append_printf (str_buf,  ")") ;
                         }
 
                         break ;
 
                 case TERM_UNICODERANGE:
-                       fprintf
-                                (a_fp, 
+                        g_string_append_printf 
+                                (str_buf, 
                                  "?found unicoderange: dump not supported yet?") ;
                         break ;
 
@@ -425,22 +457,55 @@ cr_term_dump (CRTerm *a_this, FILE *a_fp)
                                         (cur->content.str->str,
                                          cur->content.str->len) ;
                         }
-                        g_return_if_fail (content) ;
 
-                        fprintf (a_fp, "#%s", content) ;
-
+                        if (content)
+                        {
+                                g_string_append_printf (str_buf, 
+                                                        "#%s", content) ;
+                                g_free (content) ;
+                                content = NULL ;
+                        }
                         break ;
 
                 default:
-                        fprintf (a_fp, "%s", "Unrecognized Term type") ;
+                        g_string_append_printf (str_buf, 
+                                                "%s", 
+                                                "Unrecognized Term type");
                         break ;
                 }
-                                
-                if (content)
-                {
-                        g_free (content) ;
-                        content = NULL ;
-                }
+        }
+
+        if (str_buf)
+        {
+                result = str_buf->str ;
+                g_string_free (str_buf, FALSE) ;
+                str_buf = NULL ;
+        }
+
+        return result ;
+}
+
+/**
+ *Dumps the expression (a list of terms connected by operators)
+ *to a file.
+ *TODO: finish the dump. The dump of some type of terms have not yet been
+ *implemented.
+ *@param a_this the current instance of #CRTerm.
+ *@param a_fp the destination file pointer.
+ */
+void
+cr_term_dump (CRTerm *a_this, FILE *a_fp)
+{
+        guchar *content=NULL ;
+
+        g_return_if_fail (a_this) ;
+
+        content = cr_term_to_string (a_this) ;
+
+        if (content)
+        {
+                fprintf (a_fp, "%s", content) ;
+                g_free (content) ;
         }
 }
 
