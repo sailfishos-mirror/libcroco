@@ -91,6 +91,12 @@ cr_stylesheet_new (CRStatement *a_stmts) ;
 void
 cr_stylesheet_dump (CRStyleSheet *a_this, FILE *a_fp) ;
 
+int
+cr_stylesheet_nr_rules (CRStyleSheet *a_this) ;
+
+CRStatement *
+cr_stylesheet_statement_get_from_list (CRStyleSheet *a_this, int itemnr) ;
+
 void
 cr_stylesheet_ref (CRStyleSheet *a_this) ;
 

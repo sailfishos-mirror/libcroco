@@ -78,6 +78,34 @@ cr_stylesheet_dump (CRStyleSheet *a_this, FILE *a_fp)
 	}
 }
 
+/**
+ *Return the number of rules in the stylesheet.
+ *@param a_this the current instance of #CRStyleSheet.
+ *@return number of rules in the stylesheet.
+ */
+int
+cr_stylesheets_nr_rules (CRStyleSheet *a_this)
+{
+	g_return_val_if_fail (a_this, -1) ;
+
+	return cr_statement_nr_rules (a_this->statements);
+}
+
+/**
+ *Use an index to get a CRStatement from the rules in a given stylesheet.
+ *@param a_this the current instance of #CRStatement.
+ *@param itemnr the index into the rules.
+ *@return CRStatement at position itemnr, if itemnr > number of rules - 1,
+ *it will return NULL.
+ */
+CRStatement *
+cr_stylesheet_statement_get_from_list (CRStyleSheet *a_this, int itemnr)
+{
+	g_return_val_if_fail (a_this, NULL) ;
+
+	return cr_statement_get_from_list (a_this->statements, itemnr);
+}
+
 void
 cr_stylesheet_ref (CRStyleSheet *a_this)
 {

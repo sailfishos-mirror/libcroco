@@ -753,6 +753,45 @@ cr_statement_dump_page (CRStatement *a_this, FILE *a_fp, gulong a_indent)
 }
 
 /**
+ *Return the number of rules in the statement list;
+ *@param a_this the current instance of #CRStatement.
+ *@return number of rules in the statement list.
+ */
+int
+cr_statement_nr_rules (CRStatement *a_this)
+{
+	CRStatement *cur = NULL ;
+	int nr = 0;
+
+	g_return_val_if_fail (a_this, -1) ;
+
+	for (cur = a_this ; cur ; cur = cur->next)
+		nr ++;
+	return nr;
+}
+
+/**
+ *Use an index to get a CRStatement from the statement list.
+ *@param a_this the current instance of #CRStatement.
+ *@param itemnr the index into the statement list.
+ *@return CRStatement at position itemnr, if itemnr > number of statements - 1,
+ *it will return NULL.
+ */
+CRStatement *
+cr_statement_get_from_list (CRStatement *a_this, int itemnr)
+{
+	CRStatement *cur = NULL ;
+	int nr = 0;
+
+	g_return_val_if_fail (a_this, NULL) ;
+
+	for (cur = a_this ; cur ; cur = cur->next)
+		if (nr++ == itemnr)
+			return cur;
+	return NULL;
+}
+
+/**
  *Dumps an @media rule statement to a file.
  *@param a_this the statement to dump.
  *@param a_fp the destination file pointer
@@ -2105,6 +2144,40 @@ cr_statement_at_import_rule_get_url (CRStatement *a_this,
 	*a_url = a_this->kind.import_rule->url ;
 
 	return CR_OK ;
+}
+
+/**
+ *Return the number of rules in the media rule;
+ *@param a_this the current instance of #CRStatement.
+ *@return number of rules in the media rule.
+ */
+int
+cr_statement_at_media_nr_rules (CRStatement *a_this)
+{
+	g_return_val_if_fail (a_this 
+			      && a_this->type == AT_MEDIA_RULE_STMT
+			      && a_this->kind.media_rule,
+			      CR_BAD_PARAM_ERROR) ;
+
+	return cr_statement_nr_rules (a_this->kind.media_rule->rulesets);
+}
+
+/**
+ *Use an index to get a CRStatement from the media rule list of rules.
+ *@param a_this the current instance of #CRStatement.
+ *@param itemnr the index into the media rule list of rules.
+ *@return CRStatement at position itemnr, if itemnr > number of rules - 1,
+ *it will return NULL.
+ */
+CRStatement *
+cr_statement_at_media_get_from_list (CRStatement *a_this, int itemnr)
+{
+	g_return_val_if_fail (a_this 
+			      && a_this->type == AT_MEDIA_RULE_STMT
+			      && a_this->kind.media_rule,
+			      NULL) ;
+
+	return cr_statement_get_from_list (a_this->kind.media_rule->rulesets, itemnr);
 }
 
 /**

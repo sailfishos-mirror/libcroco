@@ -350,6 +350,12 @@ enum CRStatus
 cr_statement_at_import_rule_get_url (CRStatement *a_this,
 				     GString **a_url) ;
 
+int
+cr_statement_at_media_nr_rules (CRStatement *a_this) ;
+
+CRStatement *
+cr_statement_at_media_get_from_list (CRStatement *a_this, int itemnr) ;
+
 enum CRStatus
 cr_statement_at_page_rule_set_sel (CRStatement *a_this,
 				   CRSelector *a_sel) ;
@@ -389,6 +395,12 @@ cr_statement_at_font_face_rule_add_decl (CRStatement *a_this,
 
 void
 cr_statement_dump (CRStatement *a_this, FILE *a_fp, gulong a_indent) ;
+
+int
+cr_statement_nr_rules (CRStatement *a_this) ;
+
+CRStatement *
+cr_statement_get_from_list (CRStatement *a_this, int itemnr) ;
 
 void
 cr_statement_destroy (CRStatement *a_this) ;
