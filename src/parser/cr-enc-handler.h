@@ -35,32 +35,30 @@
 
 #include "cr-utils.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif /*__cplusplus*/
+G_BEGIN_DECLS
 
 
 typedef struct _CREncHandler CREncHandler ;
 
-        typedef enum CRStatus (*CREncInputFunc) (guchar * a_in,
-                                                 gulong *a_in_len,
-                                                 guchar *a_out,
-                                                 gulong *a_out_len) ;
+typedef enum CRStatus (*CREncInputFunc) (guchar * a_in,
+                                         gulong *a_in_len,
+                                         guchar *a_out,
+                                         gulong *a_out_len) ;
 
-        typedef enum CRStatus (*CREncOutputFunc) (guchar * a_in,
-                                                  gulong *a_in_len,
-                                                  guchar *a_out,
-                                                  gulong *a_out_len) ;
+typedef enum CRStatus (*CREncOutputFunc) (guchar * a_in,
+                                          gulong *a_in_len,
+                                          guchar *a_out,
+                                          gulong *a_out_len) ;
 
-        typedef enum CRStatus (*CREncInputStrLenAsUtf8Func) 
-        (guchar *a_in_start,
-         guchar *a_in_end,
-         gulong *a_in_size);
+typedef enum CRStatus (*CREncInputStrLenAsUtf8Func) 
+(guchar *a_in_start,
+ guchar *a_in_end,
+ gulong *a_in_size);
 
-        typedef enum CRStatus  (*CREncUtf8StrLenAsOutputFunc)
-        (guchar *a_in_start,
-         guchar *a_in_end,
-         gulong *a_in_size) ;
+typedef enum CRStatus  (*CREncUtf8StrLenAsOutputFunc)
+(guchar *a_in_start,
+ guchar *a_in_end,
+ gulong *a_in_size) ;
 
 /**
  *This class is responsible of the
@@ -68,33 +66,31 @@ typedef struct _CREncHandler CREncHandler ;
  *libcroco.
  */
 
-        struct _CREncHandler
-        {
-                enum CREncoding encoding ;
-                CREncInputFunc decode_input ;                
-                CREncInputFunc encode_output ;
-                CREncInputStrLenAsUtf8Func enc_str_len_as_utf8 ;
-                CREncUtf8StrLenAsOutputFunc utf8_str_len_as_enc ;
-        } ;
+struct _CREncHandler
+{
+        enum CREncoding encoding ;
+        CREncInputFunc decode_input ;                
+        CREncInputFunc encode_output ;
+        CREncInputStrLenAsUtf8Func enc_str_len_as_utf8 ;
+        CREncUtf8StrLenAsOutputFunc utf8_str_len_as_enc ;
+} ;
 
-        CREncHandler *
-        cr_enc_handler_get_instance (enum CREncoding a_enc) ;
+CREncHandler *
+cr_enc_handler_get_instance (enum CREncoding a_enc) ;
 
-        enum CRStatus
-        cr_enc_handler_resolve_enc_alias (guchar *a_en_alias, 
-                                          enum CREncoding *a_enc) ;
-        void
-        cr_enc_handler_destroy (CREncHandler * a_enc_hdlr) ;
+enum CRStatus
+cr_enc_handler_resolve_enc_alias (const guchar *a_en_alias, 
+                                  enum CREncoding *a_enc) ;
+void
+cr_enc_handler_destroy (CREncHandler * a_enc_hdlr) ;
 
-        enum CRStatus
-        cr_enc_handler_convert_input (CREncHandler *a_this,
-                                      guchar *a_in,
-                                      gulong *a_in_len,
-                                      guchar **a_out,
-                                      gulong *a_out_len) ;
+enum CRStatus
+cr_enc_handler_convert_input (CREncHandler *a_this,
+                              const guchar *a_in,
+                              gulong *a_in_len,
+                              guchar **a_out,
+                              gulong *a_out_len) ;
 
-#ifdef __cplusplus
-} /*extern "C" {*/
-#endif /*__cplusplus*/
+G_END_DECLS
 
 #endif /*__CR_ENC_HANDLER_H__*/

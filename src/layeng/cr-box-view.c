@@ -27,6 +27,9 @@
  */
 
 #include "cr-box-view.h"
+#include "cr-lay-eng.h"
+#include "cr-om-parser.h"
+#include <libxml/tree.h>
 
 #define PRIVATE(a_this) ((a_this)->priv)
 
@@ -40,6 +43,8 @@ struct _CRBoxViewPriv
          *draw what they have to draw and then restore it !!
          */
         GdkGC *gc ;
+
+        CRLayEng *layeng ;
 
         /**
          * a boolean used by some drawing functions.
@@ -142,6 +147,8 @@ expose_event_cb (GtkWidget *a_this,
                          && ((CRBox*)PRIVATE (CR_BOX_VIEW (a_this))->
                          box_model)->children,
                          FALSE) ;
+
+                cr_box_view_layout (CR_BOX_VIEW (a_this)) ;
 
                 draw_box (CR_BOX_VIEW (a_this),
                           ((CRBox*)PRIVATE (CR_BOX_VIEW (a_this))->box_model)->
@@ -639,7 +646,121 @@ cr_box_view_get_type (void)
 
 
 CRBoxView *
-cr_box_view_new (CRBoxModel *a_box_root)
+cr_box_view_new_from_xml_css_bufs (const guchar *a_xml_buf,
+                                   const guchar *a_css_buf)
+{
+        enum CRStatus status = CR_OK ;
+        CRStyleSheet *sheet = NULL;
+        xmlDoc * xml_doc = NULL;
+        CRBoxView *result = NULL ;
+        gulong len = 0 ;
+        CRCascade *cascade = NULL ;
+        CRBoxModel *box_model = NULL ;
+        
+        result = g_object_new (CR_TYPE_BOX_VIEW, NULL) ;
+        g_return_val_if_fail (result, NULL) ;
+
+        len = strlen (a_css_buf) ;
+        status = cr_om_parser_simply_parse_buf (a_css_buf, len, CR_UTF_8,
+                                                &sheet) ;
+        
+        if (status != CR_OK || !sheet)
+	{
+		cr_utils_trace_info ("Could not parse css buf") ;
+		status = CR_ERROR ;
+		goto cleanup ;
+	}
+                
+        len = strlen (a_xml_buf) ;
+	xml_doc = xmlParseMemory (a_xml_buf, len) ;
+	if (!xml_doc)
+	{
+		cr_utils_trace_info ("Could not parse xml buf") ;
+		status = CR_ERROR ;
+		goto cleanup ;
+	}
+
+        PRIVATE (result)->layeng = cr_lay_eng_new (GTK_LAYOUT (result)) ;
+        if (!PRIVATE (result)->layeng)
+        {       
+                cr_utils_trace_info ("Could not instanciate the layout engine. "
+                                     "The system may be out of memory") ;
+                cr_box_view_destroy (GTK_OBJECT (result)) ;
+                return NULL ;
+        }
+
+        cascade = cr_cascade_new (sheet, NULL, NULL) ;
+        
+        if (!cascade)
+	{
+		cr_utils_trace_info ("could not create the cascade") ;
+		cr_utils_trace_info 
+			("The system is possibly out of memory") ;
+		goto cleanup ;
+	}
+        sheet = NULL ;
+
+        status = cr_lay_eng_create_box_model (PRIVATE (result)->layeng,
+                                              xml_doc, cascade,
+                                              &box_model) ;
+	if (status != CR_OK)
+	{
+		cr_utils_trace_info ("could not build the annotated doc") ;
+		goto cleanup ;
+	}
+        
+        if (box_model)
+        {
+                box_model->box.inner_edge.width = 800 ;
+                box_model->box.inner_edge.max_width = 800 ;
+                box_model->box.inner_edge.width = 600 ;
+
+                cr_box_view_set_box_model (result, box_model) ;
+                gtk_layout_set_size (GTK_LAYOUT (result), 1024, 768) ;
+                g_signal_connect (G_OBJECT (result),
+                                  "expose-event",
+                                  (GCallback)expose_event_cb,
+                                  NULL) ;
+
+                return result ;
+        }
+
+ cleanup:
+        if (sheet)
+        {
+                cr_stylesheet_destroy (sheet) ;
+                sheet = NULL ;
+        }
+        
+        if (xml_doc)
+        {
+                xmlFreeDoc (xml_doc) ;
+                xml_doc = NULL ;
+        }
+
+        if (cascade)
+        {
+                cr_cascade_destroy (cascade) ;
+                cascade = NULL ;
+        }
+
+        if (box_model)
+        {
+                cr_box_destroy ((CRBox*)box_model) ;
+                box_model = NULL ;
+        }
+        
+        if (result)
+        {
+                gtk_object_destroy (GTK_OBJECT (result)) ;
+        }
+
+        return NULL ;
+}
+
+
+CRBoxView *
+cr_box_view_new_from_bm (CRBoxModel *a_box_root)
 {
 	CRBoxView *result = NULL ;
 
@@ -653,6 +774,15 @@ cr_box_view_new (CRBoxModel *a_box_root)
                           (GCallback)expose_event_cb,
                           NULL) ;
 
+        PRIVATE (result)->layeng = cr_lay_eng_new (GTK_LAYOUT (result)) ;
+        if (!PRIVATE (result)->layeng)
+        {       
+                cr_utils_trace_info ("Could not instanciate the layout engine. "
+                                     "The system may be out of memory") ;
+                cr_box_view_destroy (GTK_OBJECT (result)) ;
+
+                return NULL ;
+        }
 	return result ;
 }
 
@@ -676,6 +806,20 @@ cr_box_view_set_box_model (CRBoxView *a_this,
         return TRUE ;
 }
 
+enum CRStatus
+cr_box_view_layout (CRBoxView *a_this)
+{
+        
+        g_return_val_if_fail (a_this 
+                              && CR_IS_BOX_VIEW (a_this)
+                              && PRIVATE (a_this)->box_model, 
+                              CR_BAD_PARAM_ERROR) ;
+
+        cr_lay_eng_layout_box_tree (PRIVATE (a_this)->layeng,
+                                    PRIVATE (a_this)->box_model->box.children) ;
+
+        return CR_OK ;
+}
 
 enum CRStatus
 cr_box_view_get_box_model (CRBoxView *a_this, CRBoxModel **a_box_model)

@@ -860,7 +860,7 @@ cr_om_parser_new (CRInput *a_input)
  */
 enum CRStatus
 cr_om_parser_parse_buf (CROMParser *a_this,
-                        guchar *a_buf,
+                        const guchar *a_buf,
                         gulong a_len,
                         enum CREncoding a_enc,
                         CRStyleSheet **a_result)
@@ -901,7 +901,7 @@ cr_om_parser_parse_buf (CROMParser *a_this,
  *@return CR_OK upon successfull completion, an error code otherwise.
  */
 enum CRStatus
-cr_om_parser_simply_parse_buf (guchar *a_buf,
+cr_om_parser_simply_parse_buf (const guchar *a_buf,
                                gulong a_len,
                                enum CREncoding a_enc,
                                CRStyleSheet **a_result)
@@ -943,7 +943,7 @@ cr_om_parser_simply_parse_buf (guchar *a_buf,
  */
 enum CRStatus
 cr_om_parser_parse_file (CROMParser *a_this,
-                         guchar *a_file_uri,
+                         const guchar *a_file_uri,
                          enum CREncoding a_enc,
                          CRStyleSheet **a_result)
 {
@@ -987,7 +987,7 @@ cr_om_parser_parse_file (CROMParser *a_this,
  *have the same return values.
  */
 enum CRStatus
-cr_om_parser_simply_parse_file (guchar *a_file_path,
+cr_om_parser_simply_parse_file (const guchar *a_file_path,
                                 enum CREncoding a_enc,
                                 CRStyleSheet **a_result)
 {

@@ -1,3 +1,35 @@
+2003-06-09  Dodji  <dodji@seketeli.org>
+
+	* tests/test7-main.c: updated the test to reflect all the changes
+	that happened today.
+	
+	* src/parser/cr-enc-handler.[ch], src/parser/cr-input.[ch], 
+	src/parser/cr-om-parser.[hc], src/parser/cr-parser.[ch].
+	Add the 'const' keyword in to function prototypes.
+
+	
+	* src/layeng/cr-lay-eng.c: 
+	(compute_text_box_inner_edge_size ()) revisied this function to
+	make it append the text label to it's container so that
+	the size of the text label can be computed. I don't know how
+	to do this otherwise. I would have liked this not to happen since
+	compute_text_box_inner_edge_size () is part of the layout process
+	not the rendering process. Now these two processes are much more
+	tied than I would like.
+	
+	* src/layeng/cr-box.c:
+	updated the cr_box_to_string () method to make it serialise
+	CRBox->inner_edge.max_width for debug purposes.
+
+	* src/layeng/cr-box-view.c: 
+	1/now, the layout code is called
+	in the "expose-event" signal callback. Trying to isolate the
+	layout from the rendering appears to be too difficult 
+	if not impossible.
+	
+	2/created a cr_box_view_new_from_xml_css_bufs () method to create
+	a box view directly from a css buffer and an xml buffer.
+
 2003-06-04  Dodji  <dodji@seketeli.org>
 
 	* tests/test7-main.c: created a new xml/css document to bring the test to

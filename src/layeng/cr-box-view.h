@@ -61,15 +61,14 @@ GType
 cr_box_view_get_type (void) ;
 
 CRBoxView *
-cr_box_view_new (CRBoxModel *a_box_model) ;
-
+cr_box_view_new_from_xml_css_bufs (const guchar *a_xml_buf,
+                                   const guchar *a_css_buf) ;
 enum CRStatus
 cr_box_view_get_box_model (CRBoxView *a_this, CRBoxModel **a_box_model) ;
 
 enum CRStatus
 cr_box_view_set_box_model (CRBoxView *a_this,
                            CRBoxModel *a_box_model) ;
-
 
 void
 cr_box_view_destroy (GtkObject *a_this) ;

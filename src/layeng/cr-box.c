@@ -169,6 +169,12 @@ cr_box_edge_to_string (CRBoxEdge *a_this,
                                 a_nb_indent) ;
         g_string_append_printf (result, "width: %ld\n", 
                                 (long int)a_this->width) ;
+
+        cr_utils_dump_n_chars2 (' ', result, 
+                                a_nb_indent) ;
+        g_string_append_printf (result, "max-width: %ld\n", 
+                                (long int)a_this->max_width) ;
+
         cr_utils_dump_n_chars2 (' ', 
                                 result, a_nb_indent) ;
         g_string_append_printf (result, "height: %ld\n", 

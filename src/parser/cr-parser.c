@@ -4765,7 +4765,8 @@ cr_parser_new (CRTknzr *a_tknzr)
  *@return the newly built parser, or NULL if an error arises.
  */
 CRParser *
-cr_parser_new_from_buf (guchar *a_buf, gulong a_len,
+cr_parser_new_from_buf (const guchar *a_buf, 
+                        gulong a_len,
                         enum CREncoding a_enc, 
                         gboolean a_free_buf)
 {
@@ -4807,7 +4808,7 @@ cr_parser_new_from_input (CRInput *a_input)
 
 
 CRParser *
-cr_parser_new_from_file (guchar *a_file_uri, 
+cr_parser_new_from_file (const guchar *a_file_uri, 
                          enum CREncoding a_enc)
 {
         CRParser *result = NULL ;
@@ -4974,7 +4975,7 @@ cr_parser_set_tknzr (CRParser *a_this, CRTknzr *a_tknzr)
 
 
 enum CRStatus
-cr_parser_parse_buf (CRParser *a_this, guchar *a_buf, 
+cr_parser_parse_buf (CRParser *a_this, const guchar *a_buf, 
                      gulong a_len, enum CREncoding a_enc)
 {
         enum CRStatus status = CR_ERROR ;
@@ -5006,8 +5007,9 @@ cr_parser_parse_buf (CRParser *a_this, guchar *a_buf,
  *@return CR_OK upon successfull completion, an error code otherwise.
  */
 enum CRStatus
-cr_parser_parse_file (CRParser *a_this, guchar *a_file_uri, 
-                           enum CREncoding a_enc)
+cr_parser_parse_file (CRParser *a_this, 
+                      const guchar *a_file_uri, 
+                      enum CREncoding a_enc)
 {
         enum CRStatus status = CR_ERROR ;
         CRTknzr *tknzr = NULL ;

@@ -112,7 +112,7 @@ cr_enc_handler_get_instance (enum CREncoding a_enc)
  *@return CR_OK upon successfull completion, an error code otherwise.
  */
 enum CRStatus
-cr_enc_handler_resolve_enc_alias (guchar *a_alias_name, 
+cr_enc_handler_resolve_enc_alias (const guchar *a_alias_name, 
 				  enum CREncoding *a_enc)
 {
 	gulong i = 0 ;
@@ -152,7 +152,7 @@ cr_enc_handler_resolve_enc_alias (guchar *a_alias_name,
  */
 enum CRStatus
 cr_enc_handler_convert_input (CREncHandler *a_this,
-                              guchar *a_in,
+                              const guchar *a_in,
                               gulong *a_in_len,
                               guchar **a_out,
                               gulong *a_out_len)

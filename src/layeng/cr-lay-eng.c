@@ -46,6 +46,7 @@ struct _CRLayEngPriv
         gboolean update_parent_box_size ;
 	CRCascade *cascade ;
         CRSelEng *sel_eng ;
+        GtkLayout *layout ;
         gulong xdpi ;/*x resolution*/
         gulong ydpi ; /*y resolution*/
 } ;
@@ -99,7 +100,8 @@ static enum CRStatus
 layout_box (CRLayEng *a_this, CRBox *a_cur_box) ;
 
 static enum CRStatus
-compute_text_box_inner_edge_size (CRBox *a_this) ;
+compute_text_box_inner_edge_size (CRLayEng *a_this,
+                                  CRBox *a_box) ;
 
 static enum CRStatus
 adjust_parent_inner_edge_size (CRLayEng *a_this,
@@ -762,41 +764,57 @@ get_box_rightmost_x (CRBox *a_this)
  *@return TRUE if the inner edge has been computed, FALSE otherwise.
  */
 static enum CRStatus
-compute_text_box_inner_edge_size (CRBox *a_this)
+compute_text_box_inner_edge_size (CRLayEng *a_this,
+                                  CRBox *a_box)
 {
         enum CRStatus status = CR_OK ;
         GtkWidget *label = NULL ;
         PangoLayout *pgo_layout = NULL ;
         PangoRectangle ink_rect = {0}, logical_rect = {0} ;
+        GtkRequisition requisition ;
 
         g_return_val_if_fail (a_this 
-                              && a_this->content
-                              && a_this->content->type == TEXT_CONTENT_TYPE,
+                              && a_box 
+                              && a_box->content
+                              && a_box->content->type == TEXT_CONTENT_TYPE,
                               CR_BAD_PARAM_ERROR) ;
         
-        if (a_this->content->u.text == NULL 
-            || strlen (a_this->content->u.text) == 0)
+        if (a_box->content->u.text == NULL 
+            || strlen (a_box->content->u.text) == 0)
         {
-                a_this->inner_edge.width = 0 ;
-                a_this->inner_edge.height = 0 ;
+                a_box->inner_edge.width = 0 ;
+                a_box->inner_edge.height = 0 ;
                 return CR_OK ;
         }
 
-        g_return_val_if_fail (a_this->content->content_cache,
+        g_return_val_if_fail (a_box->content->content_cache,
                               CR_BAD_PARAM_ERROR) ;
 
-        label = a_this->content->content_cache ;
-        gtk_misc_set_alignment (GTK_MISC (label),0, 0) ;
-        gtk_misc_set_padding (GTK_MISC (label), 0, 0) ;
+        label = a_box->content->content_cache ;
+
+        if (label->parent == GTK_WIDGET (PRIVATE (a_this)->layout))
+                gtk_layout_move (PRIVATE (a_this)->layout,
+                                 label,
+                                 a_box->inner_edge.x,
+                                 a_box->inner_edge.y) ;
+        else
+                gtk_layout_put (PRIVATE (a_this)->layout,
+                                label,
+                                a_box->inner_edge.x,
+                                a_box->inner_edge.y) ;
+
+        gtk_widget_show_all (GTK_WIDGET (PRIVATE (a_this)->layout)) ;
 
         pgo_layout = gtk_label_get_layout (GTK_LABEL (label)) ;
 
         pango_layout_get_pixel_extents (pgo_layout, &ink_rect,
                                         &logical_rect) ;
 
-        a_this->inner_edge.width = logical_rect.width ;
-        a_this->inner_edge.height = logical_rect.height ;
-        
+        /*gtk_widget_size_request (label, &requisition) ;*/
+
+        a_box->inner_edge.width = logical_rect.width ;
+        a_box->inner_edge.height = logical_rect.height ;
+
         return status ;
 }
 
@@ -835,7 +853,9 @@ layout_text_in_box (CRLayEng *a_this, CRBox *a_text_box)
         g_return_val_if_fail (GTK_IS_LABEL (label), CR_ERROR) ;
 
         gtk_label_set_text (GTK_LABEL (label), 
-                            a_text_box->content->u.text) ;
+                            a_text_box->content->u.text) ;        
+        gtk_misc_set_alignment (GTK_MISC (label),0, 0) ;
+        gtk_misc_set_padding (GTK_MISC (label), 0, 0) ;
         gtk_label_set_use_markup (GTK_LABEL (label),
 				  FALSE) ;
 	gtk_label_set_use_underline (GTK_LABEL (label),
@@ -850,19 +870,19 @@ layout_text_in_box (CRLayEng *a_this, CRBox *a_text_box)
             == TRUE)
         {
                 wrap_width = 
-                        a_text_box->style->num_props[NUM_PROP_WIDTH].cv.val ;
-
-                gtk_widget_set_size_request (label, wrap_width,
-                                     -1) ;
+                        a_text_box->style->num_props[NUM_PROP_WIDTH].cv.val;
         }
-       
-/*        else 
-        {                
+        else 
+        {
                 wrap_width = a_text_box->parent->inner_edge.max_width 
                         + a_text_box->parent->inner_edge.x -
                         a_text_box->inner_edge.x ;
         }
-*/
+
+        gtk_label_set_line_wrap (GTK_LABEL (label), TRUE) ;
+        gtk_widget_set_size_request (label, wrap_width,
+                                     -1) ;
+                
         /*
          *TODO: set the font description attributes.
          */                
@@ -981,7 +1001,7 @@ compute_box_size (CRLayEng *a_this,
                         case TEXT_CONTENT_TYPE:
                                 layout_text_in_box (a_this, a_cur_box) ;
                                 compute_text_box_inner_edge_size
-                                        (a_cur_box) ;
+                                        (a_this, a_cur_box) ;
                                 break ;
 
                         case IMAGE_CONTENT_TYPE:
@@ -1392,7 +1412,7 @@ cr_lay_eng_init (glong a_argc, gchar ** a_argv)
  *an error occured.
  */
 CRLayEng *
-cr_lay_eng_new (void)
+cr_lay_eng_new (GtkLayout *a_layout)
 {
 	CRLayEng *result = NULL ;
 
@@ -1421,8 +1441,8 @@ cr_lay_eng_new (void)
 	}
 	memset (PRIVATE (result), 0, sizeof (CRLayEngPriv)) ;
 
+        PRIVATE (result)->layout = a_layout ;
         
-
         PRIVATE (result)->xdpi = gdk_screen_width () / 
                 gdk_screen_width_mm () * 25.4 ;
         PRIVATE (result)->ydpi = gdk_screen_height () /

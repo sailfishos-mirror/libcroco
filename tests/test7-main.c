@@ -127,8 +127,8 @@ rss
 channel
 {
  display:block;
- height:300px;
- width:50px;
+ /*height:300px;*/
+ /*width:200px;*/
  border:1px solid #000;
  overflow:auto;
  background-color:#eee;
@@ -140,8 +140,12 @@ item
  display: block;
  padding:10px;
  margin-bottom:10px;
- border-top:1px solid #ccc;
+ border:1px solid #ccc;
+ /*border-top:1px solid #ccc;
  border-bottom:1px solid #ccc;
+ border-left:1px solid #ccc;
+ border-right:1px solid #ccc;
+ */
  background-color:#fff;
 }
 
@@ -215,165 +219,44 @@ delete_event_cb (GtkWidget *a_widget, GdkEvent *a_event,
 static enum CRStatus
 test_layout_box (void)
 {
-	enum CRStatus status = CR_OK ;
-	CRStyleSheet * sheet = NULL ;
-	CRCascade *cascade = NULL ;
-	CRLayEng *layout_engine = NULL ;
-	xmlDoc *xml_doc = NULL ;
-	gulong len = 0 ;
-        CRBoxModel *box_model = NULL ;
+        enum CRStatus status = CR_OK ;
         CRBoxView *box_view = NULL ;
         GtkWidget *window = NULL, *scroll = NULL ;
 
-	len = strlen (gv_cssbuf) ;
-	status = cr_om_parser_simply_parse_buf ((guchar *)gv_cssbuf, len,
-						CR_UTF_8, &sheet) ;
-	if (status != CR_OK || !sheet)
-	{
-		cr_utils_trace_info ("Could not parse css2 buf") ;
-		status = CR_ERROR ;
-		goto cleanup ;
-	}
+        box_view = cr_box_view_new_from_xml_css_bufs 
+                (gv_xmlbuf, gv_cssbuf) ;
+        g_return_val_if_fail (box_view, CR_BAD_PARAM_ERROR) ;
 
-	len = strlen (gv_xmlbuf) ;
-	xml_doc = xmlParseMemory (gv_xmlbuf, len) ;
-	if (!xml_doc)
-	{
-		cr_utils_trace_info ("Could not parse xml buf") ;
-		status = CR_ERROR ;
-		goto cleanup ;
-	}
+        window = gtk_window_new (GTK_WINDOW_TOPLEVEL) ;
+        g_return_val_if_fail (window, CR_BAD_PARAM_ERROR) ;
 
-	layout_engine = cr_lay_eng_new () ;
-	if (!layout_engine)
-	{
-		cr_utils_trace_info 
-			("Could not create the layout engine") ;
-		cr_utils_trace_info 
-			("The system is possibly out of memory") ;
-		goto cleanup ;
+        gtk_window_set_title (GTK_WINDOW (window), 
+                              "Croco Renderer Test") ;
+        gtk_window_set_policy (GTK_WINDOW (window), TRUE, TRUE, TRUE) ;
+        gtk_widget_set_size_request (window, 800, 600) ;
 
-	}
+        g_signal_connect (G_OBJECT (window),
+                          "delete-event",
+                          G_CALLBACK (delete_event_cb),
+                          NULL) ;
 
-	cascade = cr_cascade_new (sheet, NULL, NULL) ;
-	if (!cascade)
-	{
-		cr_utils_trace_info ("could not create the cascade") ;
-		cr_utils_trace_info 
-			("The system is possibly out of memory") ;
-		goto cleanup ;
-	}
-        sheet = NULL ;
+        scroll = gtk_scrolled_window_new (NULL, NULL) ;
+        g_return_val_if_fail (scroll, CR_BAD_PARAM_ERROR) ;
 
-	status = cr_lay_eng_create_box_model (layout_engine,
-                                              xml_doc, cascade,
-                                              &box_model) ;
-	if (status != CR_OK)
-	{
-		cr_utils_trace_info ("could not build the annotated doc") ;
-		goto cleanup ;
-	}
+        gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (scroll),
+                                        GTK_POLICY_ALWAYS,
+                                        GTK_POLICY_ALWAYS) ;
+        gtk_container_add (GTK_CONTAINER (window), scroll) ;
+        gtk_container_add
+                (GTK_CONTAINER (scroll), 
+                 GTK_WIDGET (box_view)) ;
+        gtk_widget_show_all (window) ;
+        gtk_main () ;
 
-        if (box_model)
-        {
-                box_model->box.inner_edge.width = 800 ;
-                box_model->box.inner_edge.max_width = 800 ;
-                box_model->box.inner_edge.height = 600 ;                
-
-                cr_lay_eng_layout_box_tree (layout_engine,
-                                            ((CRBox*)box_model)->children) ;
-
-                cr_box_dump_to_file ((CRBox*)box_model, 0, stdout) ;
-
-
-                window = gtk_window_new (GTK_WINDOW_TOPLEVEL) ;
-                if (!window) 
-                {
-                        cr_utils_trace_info ("System may be out of memory") ;
-                        status = CR_ERROR ;
-                        goto cleanup ;
-                }
-                gtk_window_set_title (GTK_WINDOW (window), 
-                                      "Croco Renderer Test") ;
-                gtk_window_set_policy (GTK_WINDOW (window), TRUE, TRUE, TRUE) ;
-                gtk_window_set_usise () ;
-
-                g_signal_connect (G_OBJECT (window),
-                                  "delete-event",
-                                  G_CALLBACK (delete_event_cb),
-                                  NULL) ;
-
-                scroll = gtk_scrolled_window_new (NULL, NULL) ;
-                if (!scroll)
-                {
-                        status = CR_ERROR ;
-                        goto cleanup ;
-                }
-                gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (scroll),
-                                                GTK_POLICY_ALWAYS,
-                                                GTK_POLICY_ALWAYS) ;
-
-                box_view = cr_box_view_new (box_model) ;
-                
-                gtk_container_add (GTK_CONTAINER (window), scroll) ;
-                gtk_container_add
-                        (GTK_CONTAINER (scroll), 
-                         GTK_WIDGET (box_view)) ;
-                gtk_widget_show_all (window) ;
-                gtk_main () ;
-
-                return CR_OK ;
-        }
-
- cleanup:
-
-        if (scroll)
-        {
-                gtk_widget_destroy (scroll) ;
-                scroll = NULL ;
-        }
-
-        if (window)
-        {
-                gtk_widget_destroy (window) ;
-                window = NULL ;
-        }
-
-        if (box_view)
-        {
-                cr_box_view_destroy (GTK_OBJECT (box_view)) ;
-                box_view = NULL ;
-        }
-
-	if (cascade)
-	{
-		cr_cascade_destroy (cascade) ;
-		cascade = NULL ;
-	}
-	if (layout_engine)
-	{
-		cr_lay_eng_destroy (layout_engine) ;
-		layout_engine = NULL ;
-	}
-	if (sheet)
-	{
-		cr_stylesheet_destroy (sheet) ;
-		sheet = NULL ;
-	}
-	if (xml_doc)
-	{
-		xmlFreeDoc (xml_doc) ;
-		xml_doc = NULL ;
-	}
-        if (box_model)
-        {
-                cr_box_destroy ((CRBox*)box_model) ;
-                box_model = NULL ;
-        }
-
-	xmlCleanupParser () ;
-	return status ;
+        return CR_OK ;
 }
+
+
 
 int
 main (int argc, char **argv)

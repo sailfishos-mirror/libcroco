@@ -53,8 +53,7 @@ void
 cr_lay_eng_init (glong a_argc, gchar ** a_argv) ;
 
 CRLayEng *
-cr_lay_eng_new (void) ;
-
+cr_lay_eng_new (GtkLayout *a_layout) ;
 
 enum CRStatus
 cr_lay_eng_create_box_model (CRLayEng *a_this,

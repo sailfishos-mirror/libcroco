@@ -137,7 +137,8 @@ cr_input_new_real (void)
  *@return the newly built instance of #CRInput.
  */
 CRInput *
-cr_input_new_from_buf (guchar *a_buf, gulong a_len,
+cr_input_new_from_buf (const guchar *a_buf, 
+                       gulong a_len,
                        enum CREncoding a_enc, 
                        gboolean a_free_buf)
 {
@@ -172,7 +173,7 @@ cr_input_new_from_buf (guchar *a_buf, gulong a_len,
         }
         else
         {
-                PRIVATE (result)->in_buf = a_buf ;
+                PRIVATE (result)->in_buf = (guchar *) a_buf ;
                 PRIVATE (result)->in_buf_size = a_len ;
                 PRIVATE (result)->nb_bytes = a_len ;
         }
@@ -204,7 +205,7 @@ cr_input_new_from_buf (guchar *a_buf, gulong a_len,
  */
 
 CRInput *
-cr_input_new_from_uri (gchar *a_file_uri, enum CREncoding a_enc)
+cr_input_new_from_uri (const gchar *a_file_uri, enum CREncoding a_enc)
 {
         CRInput * result = NULL ;
         enum CRStatus status = CR_OK ;
