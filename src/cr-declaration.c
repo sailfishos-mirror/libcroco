@@ -512,7 +512,7 @@ cr_declaration_dump_one (CRDeclaration *a_this,
  *@param a_indent the number of indentation white char
  *to put before the actual serialisation.
  */
-guchar *
+gchar *
 cr_declaration_to_string (CRDeclaration *a_this,
 			  gulong a_indent)
 {
@@ -604,6 +604,60 @@ cr_declaration_list_to_string (CRDeclaration *a_this,
 		if (str)
 		{
 			g_string_append_printf (stringue, "%s;", str) ;
+			g_free (str) ;
+		}
+		else
+			break;
+	}
+	if (stringue && stringue->str)
+	{
+		result = stringue->str ;
+		g_string_free (stringue, FALSE) ;
+	}
+
+	return result ;
+}
+
+/**
+ *Serializes the declaration list into a string
+ *@param a_this the current instance of #CRDeclaration.
+ *@param a_indent the number of indentation white char
+ *to put before the actual serialisation.
+ */
+guchar *
+cr_declaration_list_to_string2 (CRDeclaration *a_this,
+				gulong a_indent,
+				gboolean a_one_decl_per_line)
+{
+	CRDeclaration *cur = NULL ;
+	GString *stringue = NULL ;
+	guchar *str = NULL, *result = NULL ;
+
+	g_return_val_if_fail (a_this, NULL) ;
+
+	stringue = g_string_new (NULL) ;
+
+	for (cur = a_this ; cur ; cur = cur->next)
+	{
+		str = cr_declaration_to_string (cur, a_indent) ;
+		if (str)
+		{
+			if (a_one_decl_per_line == TRUE)
+			{
+				if (cur->next)
+					g_string_append_printf (stringue,
+								"%s;\n", str) ;
+				else
+					g_string_append_printf (stringue,
+								"%s", str) ;
+			}
+			else 
+			{
+			if (cur->next)
+				g_string_append_printf (stringue, "%s;", str) ;
+			else
+				g_string_append_printf (stringue, "%s", str) ;
+			}
 			g_free (str) ;
 		}
 		else

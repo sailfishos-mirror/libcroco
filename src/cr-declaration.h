@@ -111,14 +111,16 @@ CRDeclaration * cr_declaration_get_from_list (CRDeclaration *a_this, int itemnr)
 
 CRDeclaration * cr_declaration_get_by_prop_name (CRDeclaration *a_this, const guchar *a_str) ;
 
-guchar * cr_declaration_to_string (CRDeclaration *a_this,
-			  gulong a_indent) ;
+gchar * cr_declaration_to_string (CRDeclaration *a_this,
+				  gulong a_indent) ;
 guchar * cr_declaration_list_to_string (CRDeclaration *a_this,
-			       gulong a_indent) ;
+					gulong a_indent) ;
+guchar * cr_declaration_list_to_string2 (CRDeclaration *a_this,
+					 gulong a_indent,
+					 gboolean a_one_decl_per_line) ;
 void  cr_declaration_ref (CRDeclaration *a_this) ;
 
-gboolean
-cr_declaration_unref (CRDeclaration *a_this) ;
+gboolean cr_declaration_unref (CRDeclaration *a_this) ;
 
 void cr_declaration_destroy (CRDeclaration *a_this) ;
 

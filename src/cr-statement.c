@@ -601,6 +601,81 @@ cr_statement_clear (CRStatement *a_this)
 }
 
 /**
+ *Serializes the ruleset statement into a string
+ *@param a_this the current instance of #CRStatement
+ *@param a_indent the number of whitespace to use for indentation
+ *@return the newly allocated serialised string. Must be freed
+ *by the caller, using g_free().
+ */
+static gchar *
+cr_statement_ruleset_to_string (CRStatement *a_this, glong a_indent)
+{
+        GString *stringue = NULL ;
+        gchar *tmp_str = NULL, *result = NULL ;
+
+        g_return_val_if_fail (a_this && a_this->type == RULESET_STMT,
+                              NULL) ;
+
+        stringue = g_string_new (NULL) ;
+
+	if (a_this->kind.ruleset->sel_list)
+	{
+		if (a_indent)
+			cr_utils_dump_n_chars2 
+                                (' ', stringue, a_indent) ;
+
+		tmp_str = 
+                        cr_selector_to_string (a_this->kind.ruleset->sel_list) ;
+                if (tmp_str)
+                {
+                        g_string_append_printf (stringue,
+                                                "%s", tmp_str) ;
+                        g_free (tmp_str) ;
+                        tmp_str = NULL ;
+                }
+	}
+
+	if (a_this->kind.ruleset->decl_list)
+	{
+		g_string_append_printf (stringue," {\n") ;
+
+                tmp_str = cr_declaration_list_to_string2 
+                        (a_this->kind.ruleset->decl_list,
+                         a_indent + DECLARATION_INDENT_NB,
+                         TRUE) ;
+                /*
+		cr_declaration_dump (a_this->kind.ruleset->decl_list,
+				     a_fp, a_indent + DECLARATION_INDENT_NB,
+				     TRUE) ;
+                */
+                if (tmp_str)
+                {
+                        g_string_append_printf 
+                                (stringue, "%s", tmp_str) ;
+                        g_free (tmp_str) ;
+                        tmp_str = NULL ;
+                }
+                g_string_append_printf (stringue, "%s", "\n") ;
+		cr_utils_dump_n_chars2 (' ', stringue, a_indent) ;
+		g_string_append_printf (stringue ,"%s","}") ;
+	}
+
+        result = stringue->str ;
+
+	if (stringue)
+	{
+		g_string_free (stringue, FALSE) ;
+		stringue = NULL ;
+	}
+	if (tmp_str)
+	{
+		g_free (tmp_str) ;
+		tmp_str = NULL ;
+	}
+        return result ;
+}
+
+/**
  *Dumps a ruleset statement to a file.
  *@param a_this the current instance of #CRStatement.
  *@param a_fp the destination file pointer.
@@ -609,42 +684,23 @@ cr_statement_clear (CRStatement *a_this)
 static void
 cr_statement_dump_ruleset (CRStatement *a_this, FILE *a_fp, glong a_indent)
 {
-	guchar *str = NULL, *tmp_str = NULL ;
+	guchar *str = NULL;
 
-	g_return_if_fail (a_this && a_this->type == RULESET_STMT) ;
-
-	if (a_this->kind.ruleset->sel_list)
-	{
-		if (a_indent)
-			cr_utils_dump_n_chars (' ', a_fp, a_indent) ;
-
-		cr_selector_dump (a_this->kind.ruleset->sel_list, a_fp) ;
-	}
-
-	if (a_this->kind.ruleset->decl_list)
-	{
-		fprintf (a_fp," {\n") ;
-		cr_declaration_dump (a_this->kind.ruleset->decl_list,
-				     a_fp, a_indent + DECLARATION_INDENT_NB,
-				     TRUE) ;
-		fprintf (a_fp,"\n") ;
-		cr_utils_dump_n_chars (' ', a_fp, a_indent) ;
-		fprintf (a_fp,"}") ;
-	}
-
-	if (str)
-	{
-		g_free (str) ;
-		str = NULL ;
-	}
-	if (tmp_str)
-	{
-		g_free (tmp_str) ;
-		tmp_str = NULL ;
-	}
+        g_return_if_fail (a_fp && a_this) ;
+        str = cr_statement_ruleset_to_string (a_this, a_indent) ;
+        if (str)
+        {
+                fprintf (a_fp, str) ;
+                g_free (str) ;
+                str = NULL ;
+        }
 }
 
+
+
 /**
+ *TODO: write cr_statement_font_face_rule_to_string()
+ *and make this function use it.
  *Dumps a font face rule statement to a file.
  *@param a_this the current instance of font face rule statement.
  *@param a_fp the destination file pointer.

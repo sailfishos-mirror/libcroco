@@ -1,3 +1,12 @@
+2004-03-06  Dodji  <dodji@gnome.org>
+
+	* Doxyfile: reflect the removal of src/parser src/seleng and
+	src/layeng
+	* src/cr-declaration.c: 
+	(cr_declaration_list_to_string2): added this new method.
+	* src/cr-sel-eng.c: fix a bug in the !important handling
+	in the cascading algorithm.
+	
 2004-03-06  Dodji Seketeli  <dodji@gnome.org>
 
 	* csslint/csslint.c: applied a patch from Rob BUIS

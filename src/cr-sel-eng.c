@@ -895,7 +895,7 @@ cr_sel_eng_get_matched_rulesets_real (CRSelEng *a_this,
                                 sel_list = cur_stmt->kind.ruleset->sel_list ;
                         }
                         break ;
-                
+
                 case AT_MEDIA_RULE_STMT:
                         if (cur_stmt->kind.media_rule
                             && cur_stmt->kind.media_rule->rulesets
@@ -1256,18 +1256,18 @@ put_css_properties_in_props_list (CRPropList **a_props,
                 if (a_stmt->specificity
                     >= decl->parent_statement->specificity)
                 {
-                        tmp_props = cr_prop_list_unlink (props,
-                                                         pair) ;
-                        if (!tmp_props)
-                        {
-                                cr_utils_trace_info ("tmp_props != NULL failed") ;
+                        if (decl->important == TRUE)
                                 continue ;
-                        }
-                        props = tmp_props ;
-                        tmp_props = NULL ;
-                        cr_prop_list_append2 (props,
-                                              cur_decl->property,
-                                              cur_decl) ;
+                        props = cr_prop_list_unlink (props,
+                                                     pair) ;
+                        if (pair)
+                        {
+                                cr_prop_list_destroy (pair) ;
+                                pair = NULL ;
+                        }                        
+                        props = cr_prop_list_append2 (props,
+                                                      cur_decl->property,
+                                                      cur_decl) ;
                 }
         }
         /*TODO: this may leak. Check this out*/
