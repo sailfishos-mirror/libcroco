@@ -303,6 +303,26 @@ cr_rgb_dump (CRRgb *a_this, FILE *a_fp)
 }
 
 /**
+ *If the rgb values are expressed in percentage,
+ *compute their real value.
+ *@param a_this the current instance of #CRRgb
+ *@return
+ */
+enum CRStatus
+cr_rgb_compute_from_percentage (CRRgb *a_this)
+{
+        g_return_val_if_fail (a_this, CR_BAD_PARAM_ERROR) ;
+
+        if (a_this->is_percentage == FALSE)
+                return CR_OK ;
+        a_this->red = a_this->red * 255 / 100 ;
+        a_this->green = a_this->green * 255 / 100 ;
+        a_this->blue = a_this->blue * 255 / 100 ;
+        a_this->is_percentage = FALSE ;
+        return CR_OK ;
+}
+
+/**
  *Sets rgb values to the RGB.
  *@param a_this the current instance of #CRRgb.
  *@param a_red the red value.

@@ -49,35 +49,28 @@ struct _CRRgb
         gboolean is_percentage ;
 } ;
 
-CRRgb *
-cr_rgb_new (void) ;
+CRRgb * cr_rgb_new (void) ;
 
-CRRgb *
-cr_rgb_new_with_vals (gulong a_red, gulong a_green, 
-                      gulong a_blue, gboolean a_is_percentage) ;
+CRRgb * cr_rgb_new_with_vals (gulong a_red, gulong a_green, 
+                              gulong a_blue, gboolean a_is_percentage) ;
 
-enum CRStatus
-cr_rgb_set (CRRgb *a_this, gulong a_red,
-            gulong a_green, gulong a_blue,
-            gboolean a_is_percentage) ;
+enum CRStatus cr_rgb_compute_from_percentage (CRRgb *a_this) ;
+
+enum CRStatus cr_rgb_set (CRRgb *a_this, gulong a_red,
+                          gulong a_green, gulong a_blue,
+                          gboolean a_is_percentage) ;
         
-enum CRStatus
-cr_rgb_set_from_rgb (CRRgb *a_this, CRRgb *a_rgb) ;
+enum CRStatus cr_rgb_set_from_rgb (CRRgb *a_this, CRRgb *a_rgb) ;
 
-enum CRStatus
-cr_rgb_set_from_name (CRRgb *a_this, const guchar *a_color_name) ;
+enum CRStatus cr_rgb_set_from_name (CRRgb *a_this, const guchar *a_color_name) ;
 
-enum CRStatus
-cr_rgb_set_from_hex_str (CRRgb *a_this, const guchar * a_hex_value) ;
+enum CRStatus cr_rgb_set_from_hex_str (CRRgb *a_this, const guchar * a_hex_value) ;
 
-guchar *
-cr_rgb_to_string (CRRgb *a_this) ;
+guchar * cr_rgb_to_string (CRRgb *a_this) ;
 
-void
-cr_rgb_dump (CRRgb *a_this, FILE *a_fp) ;
+void cr_rgb_dump (CRRgb *a_this, FILE *a_fp) ;
 
-void
-cr_rgb_destroy (CRRgb *a_this) ;
+void cr_rgb_destroy (CRRgb *a_this) ;
 
 G_END_DECLS
 
