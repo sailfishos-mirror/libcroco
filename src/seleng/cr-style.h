@@ -235,6 +235,14 @@ struct _CRStyle
         /**the float property*/
         enum CRFloatType float_type ;
 
+        /*
+         *the font-family property
+         *A list of null terminated instance of 
+         *guchar* each element of the list is
+         *the name of a font family.
+         */
+        /*CRFontFamily *font-family ;*/
+
         CRStyle *parent_style ;
         gulong ref_count ;
 } ;

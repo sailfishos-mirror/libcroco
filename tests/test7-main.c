@@ -47,9 +47,12 @@ const guchar *gv_xmlbuf =
 
 const guchar *gv_xmlbuf =
 "<ARTICLE>"
-"  <HEADLINE>Fredrick the Great meets Bach</HEADLINE>"
-"   <PARA>Wow, and this css2 tests seems to work ;)</PARA>"
-"  <AUTHOR>Johann Nikolaus Forkel</AUTHOR>"
+"  <HEADLINE>This is a first headline</HEADLINE>"
+"   <PARA>A paragraph</PARA>"
+"  <AUTHOR>Author: Dodji</AUTHOR>"
+"  <HEADLINE>This is another headline</HEADLINE>"
+"   <PARA>A second paragraph</PARA>"
+"  <AUTHOR>Author: Dodji.</AUTHOR>"
 "</ARTICLE>"
 ;
 const guchar *gv_cssbuf =
