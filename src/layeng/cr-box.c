@@ -32,6 +32,14 @@
  *The definition file of the #CRBox class.
  */
 
+
+static enum CRStatus
+cr_box_construct (CRBox *a_this, CRStyle *a_style,
+                  gboolean a_set_default_style) ;
+
+static void
+cr_box_shutdown (CRBox *a_this) ;
+
 static enum CRStatus
 cr_box_edge_to_string (CRBoxEdge *a_this,
                        gulong a_nb_indent,
@@ -105,6 +113,61 @@ cr_box_guess_type (CRStyle *a_style)
         return box_type ;
 }
 
+
+static enum CRStatus
+cr_box_construct (CRBox *a_this, CRStyle *a_style,
+                  gboolean a_set_default_style)
+{
+        CRStyle *style = a_style ;
+
+        if (!style && a_set_default_style == TRUE)
+        {
+                style = cr_style_new () ;
+                if (!style)
+                {
+                        cr_utils_trace_info 
+                                ("Could not create style object") ;
+                        cr_utils_trace_info ("System may be out of memory") ;
+                        return CR_ERROR ;
+                }
+        }
+
+        a_this->style = style ;
+        if (a_this->style)
+                cr_style_ref (a_this->style) ;
+        a_this->type = cr_box_guess_type (a_this->style) ;
+
+        return CR_OK ;
+}
+
+
+static void
+cr_box_shutdown (CRBox *a_this)
+{
+        if (a_this->content)
+        {
+                cr_box_content_destroy (a_this->content) ;
+                a_this->content = NULL ;
+        }
+
+        if (a_this->style)
+        {
+                cr_style_unref (a_this->style) ;
+                a_this->style = NULL ;
+        }
+
+	if (a_this->children)
+	{
+		CRBox *cur = NULL;
+
+		for (cur = a_this->children ; cur ; cur = cur->next)
+		{
+			cr_box_destroy (cur) ;
+		}
+
+		a_this->children = NULL ;
+	}
+}
 
 static enum CRStatus
 cr_box_edge_to_string (CRBoxEdge *a_this,
@@ -242,9 +305,11 @@ cr_box_content_destroy (CRBoxContent *a_this)
                 cr_utils_trace_info ("This seems to be a mem leak") ;
                 break ;
         }
+
         g_free (a_this) ;
         return ;
 }
+
 
 /**
  *Creates a new box model.
@@ -267,10 +332,50 @@ cr_box_model_new (void)
 
         memset (result, 0, sizeof (CRBoxModel)) ;
 
+        cr_box_construct (&result->box, NULL, FALSE) ;
+
         ((CRBox*)result)->type = BOX_TYPE_BOX_MODEL ;
         ((CRBox*)result)->box_model = result ;
 
         return result ;
+}
+
+
+void
+cr_box_model_destroy (CRBoxModel *a_this)
+{
+        g_return_if_fail (a_this) ;
+
+        cr_box_shutdown (&a_this->box) ;
+
+        g_free (a_this) ;
+}
+
+
+void
+cr_box_model_ref (CRBoxModel *a_this)
+{
+        if (a_this && a_this->ref_count)
+        {
+                a_this->ref_count ++ ;
+        }
+}
+
+gboolean
+cr_box_model_unref (CRBoxModel *a_this)
+{
+        if (a_this && a_this->ref_count)
+        {
+                a_this->ref_count -- ;
+        }
+
+        if (a_this && a_this->ref_count == 0)
+        {
+                cr_box_model_destroy (a_this) ;
+                return TRUE ;
+        }
+
+        return FALSE ;
 }
 
 
@@ -280,10 +385,9 @@ cr_box_model_new (void)
  *@return the newly created box.
  */
 CRBox *
-cr_box_new (CRStyle *a_style)
+cr_box_new (CRStyle *a_style, gboolean a_default_style)
 {
 	CRBox *result = NULL ;
-        CRStyle *style = a_style ;
 
 	result = g_try_malloc (sizeof (CRBox)) ;
 	if (!result)
@@ -293,21 +397,8 @@ cr_box_new (CRStyle *a_style)
 	}
 	memset (result, 0, sizeof (CRBox)) ;
 
-        if (!style)
-        {
-                style = cr_style_new () ;
-                if (!style)
-                {
-                        cr_utils_trace_info 
-                                ("Could not create style object") ;
-                        cr_utils_trace_info ("System may be out of memory") ;
-                        goto error ;
-                }
-        }
-        result->style = style ;
-        cr_style_ref (result->style) ;
-        result->type = cr_box_guess_type (result->style) ;
-	return result ;
+        if (cr_box_construct (result, a_style, a_default_style) == CR_OK)
+                return result ;
 
  error:
         if (result)
@@ -623,6 +714,7 @@ cr_box_unref (CRBox *a_this)
         return FALSE ;
 }
 
+
 /**
  *Destructor of #CRBox.
  *recursively destroys all
@@ -635,28 +727,7 @@ cr_box_destroy (CRBox *a_this)
 {
 	g_return_if_fail (a_this) ;
 
-        if (a_this->content)
-        {
-                cr_box_content_destroy (a_this->content) ;
-                a_this->content = NULL ;
-        }
-
-        if (a_this->style)
-        {
-                cr_style_unref (a_this->style) ;
-                a_this->style = NULL ;
-        }
-
-	if (a_this->children)
-	{
-		CRBox *cur = NULL;
-
-		for (cur = a_this->children ; cur ; cur = cur->next)
-		{
-			cr_box_destroy (cur) ;
-		}
-		a_this->children = NULL ;
-	}
+        cr_box_shutdown (a_this) ;
 
 	g_free (a_this) ;
 }

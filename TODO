@@ -3,11 +3,9 @@
 
 Go forward in the box layout (positioning) code. (hard, very hard).
 This is gonna take me a coupe of months I think.
- cr-box-view.c: code the draw_borders() function.
-
- I wonder when the draw_box will enable me to see something on the
- screen.
- that day would then be a great day.
+ Implement the style properties (of the 4 edges of the box model.
+  Start by implementing the border-color-x prop.
+  Make sure not to systematically hardwire the drawing of the 4 edges.
 
 *Doc:)
 

@@ -36,7 +36,7 @@ typedef struct _CRStyle CRStyle ;
 
 enum CRBorderStyle
 {
-        BORDER_STYLE_NONE,
+        BORDER_STYLE_NONE = 0,
         BORDER_STYLE_HIDDEN,
         BORDER_STYLE_DOTTED,
         BORDER_STYLE_DASHED,
@@ -88,47 +88,10 @@ enum CRFloatType
 } ;
 
 
-enum CRBoxOffsetType
-{
-        OFFSET_DEFINED,
-        OFFSET_AUTO        
-} ;
-
-typedef struct _CRBoxOffset CRBoxOffset ;
-struct _CRBoxOffset
-{
-        enum CRBoxOffsetType type ;
-        CRNum num ;
-} ;
-
-enum CRWidthType
-{
-        WIDTH_DEFINED,
-        WIDTH_AUTO
-} ;
-
-typedef struct _CRWidth CRWidth ;
-struct _CRWidth
-{
-        enum CRWidthType type ;
-        CRNum num ;
-} ;
-
-
 #define BORDER_THIN 2
 #define BORDER_MEDIUM 4
 #define BORDER_THICK 6
 
-typedef struct _CRWidthPropVal CRWidthPropVal ;
-struct _CRWidthPropVal
-{
-        /**specified value*/
-        CRWidth sv ;
-        /**computed value*/
-        CRWidth cv ;
-        /**actual value*/
-        CRWidth av ;
-} ;
 
 /**
  *A numerical css property value.
@@ -166,28 +129,6 @@ struct _CRRgbPropVal
         CRRgb sv ;
         /**computed value*/
         CRRgb cv ;
-        /**actual value*/
-        CRRgb av ;
-} ;
-
-/**
- *A box offset css property value.
- *This data type is actually split in 3 parts:
- *1/the specified value
- *2/the computed value
- *3/the actual value.
- *To understand the semantic of these three parts,
- *see css2 spec chap 6.1 ("Specified, computed and actual values.").
- */
-typedef struct _CRBoxOffsetPropVal CRBoxOffsetPropVal ;
-struct _CRBoxOffsetPropVal
-{
-        /**specified value*/
-        CRBoxOffset sv ;
-
-        /**computed value*/
-        CRRgb cv ;
-
         /**actual value*/
         CRRgb av ;
 } ;

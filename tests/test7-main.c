@@ -30,6 +30,7 @@
 #include "libcroco.h"
 #include "cr-test-utils.h"
 
+/*
 const guchar *gv_xmlbuf =
 "<ARTICLE>"
 "  <HEADLINE>Fredrick the Great meets Bach</HEADLINE>"
@@ -41,8 +42,15 @@ const guchar *gv_xmlbuf =
 "    the strangers who had arrived."
 "  </PARA>"
 "</ARTICLE>"
+*/
 ;
 
+const guchar *gv_xmlbuf =
+"<ARTICLE>"
+"  <HEADLINE>Fredrick the Great meets Bach</HEADLINE>"
+"  <AUTHOR>Johann Nikolaus Forkel</AUTHOR>"
+"</ARTICLE>"
+;
 const guchar *gv_cssbuf =
 "INSTRUMENT { display: inline}"
 "ARTICLE, HEADLINE, AUTHOR, PARA { display: block ; position: static}"
@@ -158,8 +166,7 @@ test_layout_box (void)
                                                 GTK_POLICY_AUTOMATIC,
                                                 GTK_POLICY_AUTOMATIC) ;
 
-                box_view = cr_box_view_new (((CRBox*)box_model)->children,
-                                            NULL) ;
+                box_view = cr_box_view_new (box_model) ;
                 gtk_container_add (GTK_CONTAINER (window), scroll) ;
                 gtk_container_add (GTK_CONTAINER (scroll), 
                                    GTK_WIDGET (box_view)) ;

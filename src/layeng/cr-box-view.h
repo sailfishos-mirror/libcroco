@@ -61,14 +61,14 @@ GType
 cr_box_view_get_type (void) ;
 
 CRBoxView *
-cr_box_view_new (CRBox *a_box, CRBoxView *a_parent) ;
+cr_box_view_new (CRBoxModel *a_box_model) ;
 
 enum CRStatus
-cr_box_view_get_box (CRBoxView *a_this, CRBox **a_box) ;
+cr_box_view_get_box_model (CRBoxView *a_this, CRBoxModel **a_box_model) ;
 
 enum CRStatus
-cr_box_view_set_box (CRBoxView *a_this,
-                     CRBox *a_box) ;
+cr_box_view_set_box_model (CRBoxView *a_this,
+                           CRBoxModel *a_box_model) ;
 
 
 void

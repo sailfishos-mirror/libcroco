@@ -211,17 +211,33 @@ if test "$WITH_LAYENG" = "yes" ; then
 	fi
 fi
 
-dnl By default compile in debug mode
+dnl **********************************
+dnl *By default compile in debug mode
+dnl **********************************
+
 if test "x$GCC" = "xyes" ; then
-	CFLAGS="$CFLAGS -g -Wunused -Wimplicit -Wreturn-type -Wswitch \
+	CFLAGS="$CFLAGS -Wunused -Wimplicit -Wreturn-type -Wswitch \
 	-Wcomment -Wtrigraphs -Wformat -Wchar-subscripts \
         -Wparentheses -Wpointer-arith -Wcast-align \
         -Wwrite-strings -Waggregate-return -Wstrict-prototypes \
-        -Wmissing-prototypes -Wnested-externs -Winline -Wredundant-decls "		
+        -Wmissing-prototypes -Wnested-externs -Winline -Wredundant-decls"		
 fi
 
 
-#-pedantic -Wshadow -0 -Wuninitialized
+dnl************************
+dnl*Dodji's environment.
+dnl************************
+
+if test "x$LOGNAME" = "xdodji" -a "x$GCC" = "xyes" ; then
+	CFLAGS="-g -Wunused -Wimplicit -Wreturn-type -Wswitch \
+	-Wcomment -Wtrigraphs -Wformat -Wchar-subscripts \ 
+        -Wparentheses -Wpointer-arith -Wcast-align \
+        -Wwrite-strings -Waggregate-return -Wstrict-prototypes \
+        -Wmissing-prototypes -Wnested-externs -Winline -Wredundant-decls"
+	
+fi
+
+#-pedantic  -0 -Wshadow -Wuninitialized
 
 dnl
 dnl Define the CROCO_LIBS and CROCO_CFLAGS variables. These will be used

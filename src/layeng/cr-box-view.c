@@ -32,7 +32,9 @@
 
 struct _CRBoxViewPriv
 {
-	CRBox *box ;
+	CRBoxModel *box_model ;
+        GdkGC *gc ;
+        gboolean draw ;
 } ;
 
 
@@ -73,6 +75,10 @@ static enum CRStatus
 draw_inner_box (CRBoxView *a_bv,
                 CRBox *a_box) ;
 
+static enum CRStatus
+set_border_line_attrs (CRBoxView *a_this,
+                       CRBox *a_box,
+                       enum CRBorderStyleProp a_style_prop) ;
 static void
 cr_box_view_class_init (CRBoxViewClass *a_klass)
 {
@@ -114,8 +120,15 @@ expose_event_cb (GtkWidget *a_this,
         switch (a_event->type)
         {
         case GDK_EXPOSE:
+                g_return_val_if_fail 
+                        (PRIVATE (CR_BOX_VIEW (a_this))->box_model
+                         && ((CRBox*)PRIVATE (CR_BOX_VIEW (a_this))->
+                         box_model)->children,
+                         FALSE) ;
+
                 draw_box (CR_BOX_VIEW (a_this),
-                          PRIVATE (CR_BOX_VIEW (a_this))->box,
+                          ((CRBox*)PRIVATE (CR_BOX_VIEW (a_this))->box_model)->
+                          children,
                           &a_event->area) ;
                 break ;
 
@@ -131,7 +144,93 @@ expose_event_cb (GtkWidget *a_this,
 }
 
 static enum CRStatus
-draw_margins (CRBoxView *a_bv,
+set_border_line_attrs (CRBoxView *a_this,
+                       CRBox *a_box,
+                       enum CRBorderStyleProp a_style_prop)
+{
+        enum CRNumProp border_width_dir ;
+        GdkGCValues gc_values = {0} ;
+
+        g_return_val_if_fail (a_this && PRIVATE (a_this)
+                              && a_box
+                              && a_style_prop < NB_BORDER_STYLE_PROPS,
+                              CR_BAD_PARAM_ERROR) ;
+
+        gdk_gc_get_values (PRIVATE (a_this)->gc, &gc_values) ;        
+
+        switch (a_style_prop)
+        {
+        case BORDER_STYLE_PROP_TOP:
+                border_width_dir = NUM_PROP_BORDER_TOP ;
+                break ;
+
+        case BORDER_STYLE_PROP_RIGHT:
+                border_width_dir = NUM_PROP_BORDER_RIGHT ;
+                break ;
+
+        case BORDER_STYLE_PROP_BOTTOM:
+                border_width_dir = NUM_PROP_BORDER_BOTTOM ;
+                break ;
+
+        case BORDER_STYLE_PROP_LEFT:
+                border_width_dir = NUM_PROP_BORDER_LEFT ;
+                break ;
+
+        default:
+                cr_utils_trace_info ("Bad value of enum CRBorderStyleProp " 
+                                     "given in parameter") ;
+                return CR_BAD_PARAM_ERROR ;
+
+        }
+
+        switch (a_box->style->border_style_props[a_style_prop])
+        {
+        case BORDER_STYLE_NONE :
+        case BORDER_STYLE_HIDDEN:
+                PRIVATE (a_this)->draw = FALSE ;
+                break ;
+                        
+        case BORDER_STYLE_DOTTED:
+                gdk_gc_set_line_attributes 
+                        (PRIVATE (a_this)->gc,
+                         a_box->style->num_props[border_width_dir].cv.val,
+                         GDK_LINE_ON_OFF_DASH,
+                         gc_values.cap_style,
+                         gc_values.join_style) ;
+                PRIVATE (a_this)->draw = TRUE ;
+                break ;
+
+        case BORDER_STYLE_DASHED:
+                gdk_gc_set_line_attributes 
+                        (PRIVATE (a_this)->gc,
+                         a_box->style->num_props[border_width_dir].cv.val,
+                         GDK_LINE_ON_OFF_DASH,
+                         gc_values.cap_style,
+                         gc_values.join_style) ;
+                PRIVATE (a_this)->draw = TRUE ;
+                break ;
+
+        case BORDER_STYLE_SOLID:
+        case BORDER_STYLE_DOUBLE:
+        case BORDER_STYLE_GROOVE:
+        case BORDER_STYLE_RIDGE:
+        case BORDER_STYLE_INSET:
+        case BORDER_STYLE_OUTSET:
+                gdk_gc_set_line_attributes 
+                        (PRIVATE (a_this)->gc,
+                         a_box->style->num_props[border_width_dir].cv.val,
+                         GDK_LINE_SOLID,
+                         gc_values.cap_style,
+                         gc_values.join_style) ;
+                PRIVATE (a_this)->draw = TRUE ;
+                break ;
+        }
+
+        return CR_OK ;
+}
+
+static enum CRStatus
+draw_margins (CRBoxView *a_this,
               CRBox *a_box)
 {
         GdkWindow * window = NULL ;
@@ -139,13 +238,13 @@ draw_margins (CRBoxView *a_bv,
         CRBox *box = NULL ;
         GdkRectangle rect ;
 
-        g_return_val_if_fail (a_bv
-                              && CR_IS_BOX_VIEW (a_bv)
+        g_return_val_if_fail (a_this
+                              && CR_IS_BOX_VIEW (a_this)
                               && a_box,
                               CR_BAD_PARAM_ERROR) ;
         
-        widget = GTK_WIDGET (a_bv) ;
-        window = GTK_LAYOUT (a_bv)->bin_window ;
+        widget = GTK_WIDGET (a_this) ;
+        window = GTK_LAYOUT (a_this)->bin_window ;
         g_return_val_if_fail (window, CR_ERROR) ;
 
         box = a_box ;
@@ -160,7 +259,7 @@ draw_margins (CRBoxView *a_bv,
         rect.height = box->border_edge.height ;
         gdk_draw_rectangle 
                 (window,
-                 widget->style->base_gc[widget->state],
+                 PRIVATE (a_this)->gc,
                  FALSE,
                  rect.x, rect.y, rect.width, rect.height) ;
 
@@ -172,10 +271,10 @@ draw_margins (CRBoxView *a_bv,
         /*rect.y remains the same*/
         rect.width = box->outer_edge.width - 
                 (box->border_edge.width + rect.width) ;
-        /*rect.height remains the same;*/        
+        /*rect.height remains the same;*/  
         gdk_draw_rectangle 
                 (window,
-                 GTK_WIDGET (a_bv)->style->base_gc[widget->state],
+                 GTK_WIDGET (a_this)->style->base_gc[widget->state],
                  FALSE,
                  rect.x, rect.y, rect.width, rect.height) ;
 
@@ -190,7 +289,7 @@ draw_margins (CRBoxView *a_bv,
         
         gdk_draw_rectangle 
                 (window,
-                 GTK_WIDGET (a_bv)->style->base_gc[widget->state],
+                 GTK_WIDGET (a_this)->style->base_gc[widget->state],
                  FALSE,
                  rect.x, rect.y, rect.width, rect.height) ;
 
@@ -205,7 +304,7 @@ draw_margins (CRBoxView *a_bv,
 
         gdk_draw_rectangle 
                 (window,
-                 GTK_WIDGET (a_bv)->style->base_gc[widget->state],
+                 GTK_WIDGET (a_this)->style->base_gc[widget->state],
                  FALSE,
                  rect.x, rect.y, rect.width, rect.height) ;
 
@@ -213,98 +312,112 @@ draw_margins (CRBoxView *a_bv,
 }
 
 static enum CRStatus
-draw_borders (CRBoxView *a_bv,
+draw_borders (CRBoxView *a_this,
               CRBox *a_box)
 {
         GdkWindow * window = NULL ;
         GtkWidget *widget = NULL ;
         CRBox *box = NULL ;
-        GdkRectangle rect ;
 
-        g_return_val_if_fail (a_bv
-                              && CR_IS_BOX_VIEW (a_bv)
+        gulong x0=0, y0=0, x1=0, y1=0 ;
+        enum CRStatus status = CR_OK ;
+
+        g_return_val_if_fail (a_this
+                              && CR_IS_BOX_VIEW (a_this)
                               && a_box,
                               CR_BAD_PARAM_ERROR) ;
 
-        widget = GTK_WIDGET (a_bv) ;
-        window = GTK_LAYOUT (a_bv)->bin_window ;
+        widget = GTK_WIDGET (a_this) ;
+        window = GTK_LAYOUT (a_this)->bin_window ;
         g_return_val_if_fail (window, CR_ERROR) ;
 
         box = a_box ;
         g_return_val_if_fail (box, CR_ERROR) ;
 
         /*
-         *draw left border rectangle
+         *Draw left border.
          */
-        rect.x = box->border_edge.x ;
-        rect.y = box->padding_edge.y ;
-        rect.width = box->padding_edge.x - box->border_edge.x ;
-        rect.height = box->padding_edge.height ;
-        gdk_draw_rectangle 
-                (window,
-                 widget->style->base_gc[widget->state],
-                 FALSE,
-                 rect.x, rect.y, rect.width, rect.height) ;
-        /*
-         *draw right border rectangle
-         */
-        rect.x = box->padding_edge.x + box->padding_edge.width ;
-        rect.y = box->padding_edge.y ;
-        rect.width = box->border_edge.width -
-                (rect.width + box->padding_edge.width) ;
-        /*rect.height remains the same*/
-        gdk_draw_rectangle 
-                (window,
-                 widget->style->base_gc[widget->state],
-                 FALSE,
-                 rect.x, rect.y, rect.width, rect.height) ;
+        x0 = box->border_edge.x ;
+        y0 = box->padding_edge.y ;
+        x1 = x0;
+        y1 = y0 + box->padding_edge.height ;
+        status = set_border_line_attrs (a_this, a_box,
+                                        BORDER_STYLE_PROP_LEFT) ;
+        g_return_val_if_fail (status == CR_OK, status) ;
+
+        if (PRIVATE (a_this)->draw == TRUE)
+                gdk_draw_line
+                        (window,
+                         PRIVATE (a_this)->gc,
+                         x0, y0, x1, y1);
 
         /*
-         *draw top border rectangle
+         *draw right border
          */
-        rect.x = box->border_edge.x ;
-        rect.y = box->border_edge.y ;
-        rect.width = box->border_edge.width ;
-        rect.height = box->padding_edge.y - box->border_edge.y ;
-        gdk_draw_rectangle 
-                (window,
-                 widget->style->base_gc[widget->state],
-                 FALSE,
-                 rect.x, rect.y, rect.width, rect.height) ;
+        x0 = box->padding_edge.x + box->padding_edge.width ;
+        y0 = box->padding_edge.y ;
+        x1 = x0 ;
+        /*y1 remains the same as y0*/
+        status = set_border_line_attrs (a_this, a_box,
+                                              BORDER_STYLE_PROP_RIGHT) ;
+        g_return_val_if_fail (status == CR_OK, status) ;
+
+        if (PRIVATE (a_this)->draw == TRUE)
+                gdk_draw_line (window, PRIVATE (a_this)->gc,
+                               x0, y0, x1, y1) ;
 
         /*
-         *draw bottom border rectangle
+         *draw top border.
          */
-        /*rect.x remains the same*/
-        rect.y = box->padding_edge.x + box->padding_edge.height;
-        /*rect.width remains the same as the top border rect width*/
-        rect.height = box->border_edge.height -
-                (rect.height + box->padding_edge.height) ;
-        gdk_draw_rectangle 
-                (window,
-                 widget->style->base_gc[widget->state],
-                 FALSE,
-                 rect.x, rect.y, rect.width, rect.height) ;
+        x0 = box->border_edge.x ;
+        y0 = box->border_edge.y ;
+        x1 = x0 + box->border_edge.width ;
+        y1 = y0 ;
+        status = set_border_line_attrs (a_this, a_box,
+                                              BORDER_STYLE_PROP_TOP) ;
+        g_return_val_if_fail (status == CR_OK, status) ;
+
+        if (PRIVATE (a_this)->draw == TRUE)
+                gdk_draw_line (window, PRIVATE (a_this)->gc,
+                               x0, y0, x1, y1) ;
+
+        /*
+         *draw bottom border
+         */
+        /*x0 remains the same as previous x0 ;*/
+        y0 = box->padding_edge.x + box->padding_edge.height;
+        x1 = x0 + box->border_edge.width ;
+        y1  = y0 ;
+        status = set_border_line_attrs (a_this, a_box,
+                                              BORDER_STYLE_PROP_BOTTOM) ;
+        g_return_val_if_fail (status == CR_OK, status) ;
+
+        if (PRIVATE (a_this)->draw == TRUE)
+                gdk_draw_line (window, PRIVATE (a_this)->gc,
+                               x0, y0, x1, y1) ;
+
+        PRIVATE (a_this)->draw = TRUE ;
 
         return CR_OK ;
 }
 
+
 static enum CRStatus
-draw_paddings (CRBoxView *a_bv,
+draw_paddings (CRBoxView *a_this,
                CRBox *a_box)
 {
         GdkWindow * window = NULL ;
         GtkWidget *widget = NULL ;
         CRBox *box = NULL ;
         GdkRectangle rect ;
-        
-        g_return_val_if_fail (a_bv
-                              && CR_IS_BOX_VIEW (a_bv)
+
+        g_return_val_if_fail (a_this
+                              && CR_IS_BOX_VIEW (a_this)
                               && a_box,
                               CR_BAD_PARAM_ERROR) ;
 
-        widget = GTK_WIDGET (a_bv) ;
-        window = GTK_LAYOUT (a_bv)->bin_window ;
+        widget = GTK_WIDGET (a_this) ;
+        window = GTK_LAYOUT (a_this)->bin_window ;
         g_return_val_if_fail (window, CR_ERROR) ;
 
         box = a_box ;
@@ -319,7 +432,7 @@ draw_paddings (CRBoxView *a_bv,
         rect.height = box->inner_edge.height ;
         gdk_draw_rectangle 
                 (window,
-                 widget->style->base_gc[widget->state],
+                 PRIVATE (a_this)->gc,
                  FALSE,
                  rect.x, rect.y, rect.width, rect.height) ;
 
@@ -333,7 +446,7 @@ draw_paddings (CRBoxView *a_bv,
         /*rect.height remains the same*/
         gdk_draw_rectangle 
                 (window,
-                 widget->style->base_gc[widget->state],
+                 PRIVATE (a_this)->gc,
                  FALSE,
                  rect.x, rect.y, rect.width, rect.height) ;
 
@@ -346,7 +459,7 @@ draw_paddings (CRBoxView *a_bv,
         rect.height = box->inner_edge.y - box->padding_edge.y ;
         gdk_draw_rectangle 
                 (window,
-                 widget->style->base_gc[widget->state],
+                 PRIVATE (a_this)->gc,
                  FALSE,
                  rect.x, rect.y, rect.width, rect.height) ;
 
@@ -360,7 +473,7 @@ draw_paddings (CRBoxView *a_bv,
                 (rect.height + box->inner_edge.height) ;
         gdk_draw_rectangle 
                 (window,
-                 widget->style->base_gc[widget->state],
+                 PRIVATE (a_this)->gc,
                  FALSE,
                  rect.x, rect.y, rect.width, rect.height) ;
 
@@ -369,18 +482,18 @@ draw_paddings (CRBoxView *a_bv,
 
 
 static enum CRStatus
-draw_inner_box (CRBoxView *a_bv,
+draw_inner_box (CRBoxView *a_this,
                 CRBox *a_box)
 {
         GtkWidget *widget = NULL, *label = NULL ;
         CRBox *box = NULL ;
    
-        g_return_val_if_fail (a_bv
-                              && CR_IS_BOX_VIEW (a_bv)
+        g_return_val_if_fail (a_this
+                              && CR_IS_BOX_VIEW (a_this)
                               && a_box,
                               CR_BAD_PARAM_ERROR) ;
 
-        widget = GTK_WIDGET (a_bv) ;        
+        widget = GTK_WIDGET (a_this) ;        
         g_return_val_if_fail (widget, CR_ERROR) ;
 
         box = a_box ;
@@ -398,11 +511,11 @@ draw_inner_box (CRBoxView *a_bv,
         g_return_val_if_fail (label, CR_ERROR) ;
 
         if (label->parent == NULL)                
-                gtk_layout_put (GTK_LAYOUT (a_bv), label,
+                gtk_layout_put (GTK_LAYOUT (a_this), label,
                                 box->inner_edge.x, 
                                 box->inner_edge.y) ;
         else
-                gtk_layout_move (GTK_LAYOUT (a_bv), label,
+                gtk_layout_move (GTK_LAYOUT (a_this), label,
                                  box->inner_edge.x, 
                                  box->inner_edge.y) ;
 
@@ -427,6 +540,17 @@ draw_box (CRBoxView *a_this,
 
         widget = GTK_WIDGET (a_this) ;
         g_return_val_if_fail (widget, CR_ERROR) ;
+
+        if (!PRIVATE (a_this)->gc)
+        {
+                PRIVATE (a_this)->gc = gdk_gc_new 
+                        (GDK_DRAWABLE (GTK_LAYOUT (a_this)->bin_window)) ;
+                g_return_val_if_fail (PRIVATE (a_this)->gc,
+                                      CR_ERROR) ;
+
+                gdk_gc_copy (PRIVATE (a_this)->gc,
+                             GTK_WIDGET (a_this)->style->base_gc[widget->state]);
+        }
 
         for (cur_box = a_box; cur_box ; cur_box = cur_box->next)
         {
@@ -477,15 +601,14 @@ cr_box_view_get_type (void)
 
 
 CRBoxView *
-cr_box_view_new (CRBox *a_box, CRBoxView *a_parent)
+cr_box_view_new (CRBoxModel *a_box_root)
 {
 	CRBoxView *result = NULL ;
-
 
         result = g_object_new (CR_TYPE_BOX_VIEW, NULL) ;
         g_return_val_if_fail (result, NULL) ;
 
-        cr_box_view_set_box (result, a_box) ;
+        cr_box_view_set_box_model (result, a_box_root) ;
 
         g_signal_connect (G_OBJECT (result),
                           "expose-event",
@@ -497,33 +620,33 @@ cr_box_view_new (CRBox *a_box, CRBoxView *a_parent)
 
 
 enum CRStatus
-cr_box_view_set_box (CRBoxView *a_this,
-                     CRBox *a_box)
+cr_box_view_set_box_model (CRBoxView *a_this,
+                           CRBoxModel *a_box_model)
 {
         g_return_val_if_fail (a_this, CR_BAD_PARAM_ERROR) ;
 
-        if (PRIVATE (a_this)->box)
+        if (PRIVATE (a_this)->box_model)
         {
-                if (cr_box_unref (PRIVATE (a_this)->box) == TRUE)
+                if (cr_box_unref ((CRBox*)PRIVATE (a_this)->box_model) == TRUE)
                         PRIVATE (a_this) = NULL ;
         }
 
-        PRIVATE (a_this)->box = a_box ;
-        if (a_box)
-                cr_box_ref (a_box) ;
+        PRIVATE (a_this)->box_model = a_box_model ;
+        if (a_box_model)
+                cr_box_ref ((CRBox*)a_box_model) ;
 
         return TRUE ;
 }
 
 
 enum CRStatus
-cr_box_view_get_box (CRBoxView *a_this, CRBox **a_box)
+cr_box_view_get_box_model (CRBoxView *a_this, CRBoxModel **a_box_model)
 {
         g_return_val_if_fail (a_this
                               && PRIVATE (a_this), 
                               CR_BAD_PARAM_ERROR) ;
 
-        *a_box = PRIVATE (a_this)->box ;
+        *a_box_model = PRIVATE (a_this)->box_model ;
         return TRUE ;
 }
 
@@ -535,12 +658,18 @@ cr_box_view_destroy (GtkObject *a_this)
 	g_return_if_fail (a_this && CR_IS_BOX_VIEW (a_this)) ;
 
         self = CR_BOX_VIEW (a_this) ;
-        g_return_if_fail (self) ;
+        g_return_if_fail (self && PRIVATE (self) ) ;
 
-        if (PRIVATE (self) && PRIVATE (self)->box)
+        if (PRIVATE (self)->box_model)
         {
-                cr_box_unref (PRIVATE (self)->box) ;
-                PRIVATE (self)->box = NULL ;
+                cr_box_unref ((CRBox*)PRIVATE (self)->box_model) ;
+                PRIVATE (self)->box_model = NULL ;
+        }
+
+        if (PRIVATE (self)->gc)
+        {
+                gdk_gc_unref (PRIVATE (self)->gc) ;
+                PRIVATE (self)->gc = NULL ;
         }
 
         if (PRIVATE (self))
@@ -554,5 +683,4 @@ cr_box_view_destroy (GtkObject *a_this)
         {
                 GTK_OBJECT_CLASS (gv_parent_class)->destroy (a_this) ;
         }
-
 }

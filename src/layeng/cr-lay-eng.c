@@ -435,6 +435,55 @@ style_specified_2_computed_values (CRLayEng *a_this,
                 }
         }
 
+        /*************************************
+         *Now compute the specific css2 specification recommendations.
+         *This can seem ugly, but it needs to be done. I do it here untill
+         *I find a better place for it.
+         ***************************************/
+
+        /*
+         *css2 spec chap 8.5.3 says that if border-style-x is set to
+         *'none', it forces border-x to have a width of zero.
+         *For the time being, we consider the 'none' and 'hidden' values
+         *being equal untill be implement the support of table.
+         */
+        if ((a_style->border_style_props[BORDER_STYLE_PROP_TOP] == 
+             BORDER_STYLE_NONE)
+            || (a_style->border_style_props[BORDER_STYLE_PROP_TOP] == 
+                BORDER_STYLE_HIDDEN))
+        {
+                cr_num_set (&a_style->num_props[NUM_PROP_BORDER_TOP].cv,
+                            0, NUM_LENGTH_PX) ;
+        }
+
+        if ((a_style->border_style_props[BORDER_STYLE_PROP_RIGHT] == 
+            BORDER_STYLE_NONE)
+            || (a_style->border_style_props[BORDER_STYLE_PROP_RIGHT] == 
+                BORDER_STYLE_HIDDEN))
+        {
+                cr_num_set (&a_style->num_props[NUM_PROP_BORDER_RIGHT].cv, 
+                            0, NUM_LENGTH_PX) ;
+        }
+
+        if ((a_style->border_style_props[BORDER_STYLE_PROP_BOTTOM] == 
+            BORDER_STYLE_NONE)
+            || (a_style->border_style_props[BORDER_STYLE_PROP_BOTTOM] == 
+                BORDER_STYLE_HIDDEN))
+        {
+                cr_num_set (&a_style->num_props[NUM_PROP_BORDER_BOTTOM].cv,
+                            0, NUM_LENGTH_PX) ;
+        }
+
+        if ((a_style->border_style_props[BORDER_STYLE_PROP_LEFT] == 
+             BORDER_STYLE_NONE)
+            || (a_style->border_style_props[BORDER_STYLE_PROP_LEFT] == 
+                BORDER_STYLE_HIDDEN))
+        {
+                cr_num_set (&a_style->num_props[NUM_PROP_BORDER_LEFT].cv,
+                            0, NUM_LENGTH_PX) ;
+        }
+
+        
         return CR_OK ;
 }
 
@@ -509,7 +558,7 @@ create_box_tree_real (CRLayEng * a_this,
                         style_specified_2_computed_values 
                                 (a_this, style, a_parent_box) ;
 
-                        cur_box = cr_box_new (style) ;
+                        cur_box = cr_box_new (style, TRUE) ;
                         if (!cur_box)
                         {
                                 cr_utils_trace_info
@@ -567,7 +616,7 @@ create_box_tree_real (CRLayEng * a_this,
                                  *which style inherits the style
                                  *of the parent box.
                                  */
-                                cur_box = cr_box_new (parent_style) ;
+                                cur_box = cr_box_new (parent_style, TRUE) ;
                                 if (!cur_box)
                                 {
                                         cr_utils_trace_info

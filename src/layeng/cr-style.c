@@ -519,9 +519,10 @@ set_prop_border_x_style_from_value (CRStyle *a_style,
         case DIR_TOP:
                 border_style_ptr = &a_style->
                         border_style_props[BORDER_STYLE_PROP_TOP] ;
-                parent_border_style_ptr = 
+                parent_border_style_ptr =
                         &a_style->parent_style->
                         border_style_props[BORDER_STYLE_PROP_TOP] ;
+
                 break ;
 
         case DIR_RIGHT:
@@ -531,7 +532,6 @@ set_prop_border_x_style_from_value (CRStyle *a_style,
                 parent_border_style_ptr = 
                         &a_style->parent_style->
                         border_style_props[BORDER_STYLE_PROP_RIGHT] ;
-
                 break ;
 
         case DIR_BOTTOM:
@@ -567,7 +567,7 @@ set_prop_border_x_style_from_value (CRStyle *a_style,
                 *border_style_ptr = BORDER_STYLE_NONE ;
         }
         else if (!strncmp ("hidden", 
-                           a_value->content.str->str, 
+                           a_value->content.str->str,
                            strlen ("hidden")))
         {
                 *border_style_ptr = BORDER_STYLE_HIDDEN ;

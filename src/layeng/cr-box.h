@@ -232,11 +232,21 @@ struct _CRBoxModel
         CRBox box ;
         gulong viewport_width ;
         gulong viewport_height ;
+        gulong ref_count ;
 } ;
 
 
 CRBoxModel *
 cr_box_model_new (void) ;
+
+void
+cr_box_model_destroy (CRBoxModel *a_this) ;
+
+void
+cr_box_model_ref (CRBoxModel *a_this) ;
+
+gboolean
+cr_box_model_unref (CRBoxModel *a_this) ;
 
 CRBoxContent *
 cr_box_content_new_from_text (guchar *a_text) ;
@@ -245,7 +255,7 @@ void
 cr_box_content_destroy (CRBoxContent *a_this) ;
 
 CRBox *
-cr_box_new (CRStyle *a_this) ;
+cr_box_new (CRStyle *a_this, gboolean a_set_default_style) ;
 
 enum CRStatus
 cr_box_insert_sibling (CRBox *a_prev,

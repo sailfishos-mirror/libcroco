@@ -1,3 +1,20 @@
+2003-05-05  Dodji  <dodji@seketeli.org>
+
+	* tests/test7-main.c: small update for debug purposes.
+
+	* src/layeng/cr-style.h: cleanup.
+
+	* src/layeng/cr-lay-eng.c: put in here what is needed to support
+	border-x and border-style-x properties.
+
+	* src/layeng/cr-box.[ch]: make CRBoxModel inherits CRBox.
+
+	* src/layeng/cr-box-view.c: start to support the border-style-x and
+	border-x property. I must test this.
+
+	* configure.in: defined a personal environment where I can set
+	the CFLAGS I want.
+
 2003-05-04  Dodji  <dodji@seketeli.org>
 
 	* src/parser/cr-tknzr.c:
