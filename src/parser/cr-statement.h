@@ -306,9 +306,7 @@ cr_statement_prepend (CRStatement *a_this,
 		      CRStatement *a_new) ;
 
 CRStatement *
-cr_statement_unlink (CRStatement *a_this,
-		     CRStatement *a_to_unlink) ;
-
+cr_statement_unlink (CRStatement *a_stmt) ;
 
 enum CRStatus
 cr_statement_ruleset_set_sel_list (CRStatement *a_this,

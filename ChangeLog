@@ -1,3 +1,9 @@
+2003-06-21  dodji  <dodji@seketeli.org>
+
+	* src/parser/cr-statement.[ch]:
+	Changed the prototype of cr_statement_unlink() to
+	harmonize it with cr_declaration_unlink().
+
 2003-06-20  Dodji Seketeli  <dodji@seketeli.org>
 
 	* src/parser/cr-term.[ch]:

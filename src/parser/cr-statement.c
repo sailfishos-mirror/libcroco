@@ -1720,28 +1720,50 @@ cr_statement_prepend (CRStatement *a_this,
  *from, or NULL in case of error.
  */
 CRStatement *
-cr_statement_unlink (CRStatement *a_this,
-		     CRStatement *a_to_unlink)
+cr_statement_unlink (CRStatement *a_stmt)
 {
-	CRStatement *cur = NULL, *next = NULL, *prev = NULL ;
+	CRStatement *result = a_stmt ;
 
-	g_return_val_if_fail (a_this && a_to_unlink, NULL) ;
+	g_return_val_if_fail (result, NULL) ;
 
-	/*make sure a_to_unlink belongs to the list headed by a_this*/
-	for (cur = a_this ; cur && (cur != a_to_unlink) ; cur = cur->next) ;
-	
-	if (!cur) return NULL ;
+        /**
+         *Some sanity checks first
+         */
+        if (a_stmt->next)
+        {
+                g_return_val_if_fail (a_stmt->next->prev == a_stmt,
+                                      NULL) ;
+        }
+        if (a_stmt->prev)
+        {
+                g_return_val_if_fail (a_stmt->prev->next == a_stmt,
+                                      NULL) ;
+        }
+        
+        /**
+         *Now, the real unlinking job.
+         */
+        if (a_stmt->next)
+        {
+                a_stmt->next->prev = a_stmt->prev ;
+        }
+        if (a_stmt->prev)
+        {
+                a_stmt->prev->next = a_stmt->next ;
+        }
+        
+        if (a_stmt->parent_sheet 
+            && a_stmt->parent_sheet->statements == a_stmt)
+        {
+                a_stmt->parent_sheet->statements = 
+                        a_stmt->parent_sheet->statements->next ;
+        }
 
-	next = a_to_unlink->next ;
-	prev = a_to_unlink->prev ;
-	
-	if (prev)
-		prev->next = next ;
-	
-	if (next)
-		next->prev = prev ;
+        a_stmt->next = NULL ;
+        a_stmt->prev = NULL ;
+        a_stmt->parent_sheet = NULL ;
 
-	return a_to_unlink ;
+	return result ;
 }
 
 
