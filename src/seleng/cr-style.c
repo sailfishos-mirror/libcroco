@@ -585,7 +585,8 @@ set_prop_border_x_style_from_value (CRStyle *a_style,
                                     enum CRDirection a_dir)
 {
         enum CRStatus status = CR_OK ;
-        enum CRBorderStyle *border_style_ptr, *parent_border_style_ptr ;
+        enum CRBorderStyle *border_style_ptr=NULL,
+                *parent_border_style_ptr = NULL;
 
         g_return_val_if_fail (a_style && a_value, 
                               CR_BAD_PARAM_ERROR) ;

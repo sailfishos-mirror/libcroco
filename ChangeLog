@@ -1,4 +1,9 @@
-2003-07-05  Dodji Seketeli  <dodji at seketeli dot org>
+2003-07-15  Dodji  <dodji@gnome.org>
+
+	* src/seleng/cr-sel-eng.c (id_add_sel_matches_node): 
+	fixed some stupid error that was making gcc 2.9xxx cry.
+
+2003-07-05  Dodji Seketeli  <dodji@gnome.org>
 
 	* src/seleng/cr-style.h: rearranged the enum CRNumProp values.
 	
@@ -11,7 +16,7 @@
 	* src/layeng/cr-lay-eng.c: Fixed some subtle bugs and finally implemented
 	the width:15% (set percentage to width).
 
-2003-07-01  Dodji Seketeli  <dodji at seketeli dot org>
+2003-07-01  Dodji Seketeli  <dodji@gnome.org>
 
 	* src/layeng/cr-lay-eng.c: put the 
 	call to style_specified_2_computed_values() in the
@@ -20,7 +25,7 @@
 	* src/layeng/cr-box-view.c: fixed a compiler warning.
 	* hmmh first commit after 0.2 release.
 
-2003-06-30  Dodji Seketeli <dodji at seketeli dot org>
+2003-06-30  Dodji Seketeli <dodji@gnome.org>
 
 	* tests/test-output-refs/test4.1.css.out: updated this
 	test reference output.
@@ -42,7 +47,7 @@
 
 	* docs/design/parser-architecture.txt: more bits on this.
 
-2003-06-22  Dodji Seketeli  <dodji at seketeli dot org>
+2003-06-22  Dodji Seketeli  <dodji@gnome.org>
 
 	* src/parser/cr-statement.c: added
 	parse_font_face_unrecoverable_error_cb(), 
@@ -69,7 +74,7 @@
 	Changed the prototype of cr_statement_unlink() to
 	harmonize it with cr_declaration_unlink().
 
-2003-06-20  Dodji Seketeli  <dodji@seketeli.org>
+2003-06-20  Dodji Seketeli  <dodji@gnome.org>
 
 	* src/parser/cr-term.[ch]:
 	added the  cr_term_parse_expression_from_buf() function.
@@ -96,7 +101,7 @@
 	* src/parser/cr-declaration.[ch]
 	added a new cr_declaration_unlink() function.
 
-2003-06-19  Dodji Seketeli  <dodji@seketeli.org>
+2003-06-19  Dodji Seketeli  <dodji@gnome.org>
 
 	* tests/test4-main.[ch]: updated this to test
 	cr_statement_parse_from_buf(). It seems to work now.
@@ -106,7 +111,7 @@
 	some bug fixes in cr_statement_parse_from_buf() + 
 	added a new cr_statement_at_import_rule_parse_from_buf() method.
 
-2003-06-18  Dodji Seketeli  <dodji@seketeli.org>
+2003-06-18  Dodji Seketeli  <dodji@gnome.org>
 
 	* src/parser/cr-statement.[ch]:
 	added cr_statement_font_face_rule_parse_from_buf () .
@@ -133,7 +138,7 @@
 	* src/parser/cr-parser.c: fixed a small bug in the
 	cr_parser_parse_page () function.
 
-2003-06-17  Dodji Seketeli <dodji@seketeli.org>
+2003-06-17  Dodji Seketeli <dodji@gnome.org>
 
 	* tests/test4-main.c: added test_cr_statement_at_page_rule_parse ()
 	to test the new cr_statement_at_page_rule_parse_from_buf() function.
@@ -172,7 +177,7 @@
 	* src/parser/cr-enc-handler.[ch]:
 	fixed some "const" omissions.
 	
-2003-06-16  dodji  <dodji@seketeli.org>
+2003-06-16  dodji  <dodji@gnome.org>
 
 	* src/parser/cr-parser.[ch]: cr_parser_parse_charset(), 
 	cr_parser_parse_import(), cr_parser_parse_page (),
@@ -182,7 +187,7 @@
 	added cr_tknzr_peek_byte2() function to export the functionalities
 	of cr_input_peek_byte2().
 
-2003-06-15  dodji  <dodji@seketeli.org>
+2003-06-15  dodji  <dodji@gnome.org>
 
 	* tests/test4-main.c: updated this to test the new
 	cr_statement_ruleset_parse_from_buf () method.
@@ -222,7 +227,7 @@
 	we can append declaration to a list of declarations that
 	don't belong to a ruleset.
 
-2003-06-14  dodji  <dodji@seketeli.org>
+2003-06-14  dodji  <dodji@gnome.org>
 
 	* src/parser/cr-term.h (struct _CRTerm): fixed a typo.
 
@@ -231,7 +236,7 @@
 	
 	* tests/test7-main.c: updated this to test the font selection implem.	
 	
-2003-06-12  dodji  <dodji@seketeli.org>
+2003-06-12  dodji  <dodji@gnome.org>
 
 	* src/seleng/Makefile.am: added pango stuffs.
 	* configure.in: added pango detection.
@@ -239,7 +244,7 @@
 	* src/layeng/cr-lay-eng.c: a bit more font selection.
 	* src/seleng/cr-style.c: font selection code again.
 
-2003-06-09  Dodji  <dodji@seketeli.org>
+2003-06-09  Dodji  <dodji@gnome.org>
 	* tests/test4-main.c: updated this test to test the
 	new cr_declaration_to_string () api.
 	
@@ -293,7 +298,7 @@
 	2/created a cr_box_view_new_from_xml_css_bufs () method to create
 	a box view directly from a css buffer and an xml buffer.
 
-2003-06-04  Dodji  <dodji@seketeli.org>
+2003-06-04  Dodji  <dodji@gnome.org>
 
 	* tests/test7-main.c: created a new xml/css document to bring the test to
 	a broader extend. It appeared that libcroco's layout code is 
@@ -316,7 +321,7 @@
 
 	* src/parser/*.[ch]: s/void */gpointer/
 
-2003-05-12  Dodji  <dodji@seketeli.org>
+2003-05-12  Dodji  <dodji@gnome.org>
 
 	* tests/test7-main.c: updated the test to reflect the new supported
 	css2 properties.
@@ -328,7 +333,7 @@
 	* src/layeng/cr-box-view.c:
 	(draw_borders ()) debugged this a lot.
 
-2003-05-07  Dodji  <dodji@seketeli.org>
+2003-05-07  Dodji  <dodji@gnome.org>
 
 	* tests/test7-main.c: just added a test for the "background-color" 
 	property.
@@ -343,7 +348,7 @@
 	a padding area that has "background" color.
 	
 	
-2003-05-06  Dodji  <dodji@seketeli.org>
+2003-05-06  Dodji  <dodji@gnome.org>
 
 	* src/layeng/cr-style.[ch]: started to add the support of
 	the "color" and "background-color" properties.
@@ -358,7 +363,7 @@
 	inner/padding edge color.
 	also started to use these two functions to test them.
 	
-2003-05-05  Dodji  <dodji@seketeli.org>
+2003-05-05  Dodji  <dodji@gnome.org>
 
 	* tests/test7-main.c: small update for debug purposes.
 
@@ -375,7 +380,7 @@
 	* configure.in: defined a personal environment where I can set
 	the CFLAGS I want.
 
-2003-05-04  Dodji  <dodji@seketeli.org>
+2003-05-04  Dodji  <dodji@gnome.org>
 
 	* src/parser/cr-tknzr.c:
 	(cr_tknzr_get_next_token ()) fixed a small bug in here.
@@ -403,12 +408,12 @@
 	(create_box_tree_real): updated this to make it call 
 	style_specified_2_computed_values () before actually building the box.
 
-2003-05-01  Dodji  <dodji@seketeli.org>
+2003-05-01  Dodji  <dodji@gnome.org>
 
 	* configure.in, csslint/Makefile.am, src/parser/Makefile.am, src/seleng/Makefile.am, src/layeng/Makefile.am: 
 	fixed #111895
 
-2003-04-28  Dodji  <dodji@seketeli.org>
+2003-04-28  Dodji  <dodji@gnome.org>
 
 	* tests/test7-main.c: woohoo, this now shows some text. 
 	Okay, it is a crappy design sketch, but this is a milestone.
@@ -424,7 +429,7 @@
 	and draw each box in the box view.
 	
 
-2003-04-26  dodji  <dodji@seketeli.org>
+2003-04-26  dodji  <dodji@gnome.org>
 	
 	* configure.in: made sure to include the libgnomeui clflags and
 	 libsflags to croco libs and croco cflags when the layeng is turned
@@ -439,7 +444,7 @@
 	 when layeng is turned on.
 	* tests/test7-main.c: made started to include a cr-box-view.c test.
 
-2003-04-20  dodji  <dodji@seketeli.org>
+2003-04-20  dodji  <dodji@gnome.org>
 
 	* tests/test7-main.c: updated the test7 code to see the layout in
 	action.
@@ -467,7 +472,7 @@
 	Only use filename for _HEADERS.
 	remove libcroco-config.h from _HEADERS
 
-2003-04-12  dodji  <dodji@seketeli.org>
+2003-04-12  dodji  <dodji@gnome.org>
 
 	* src/* made a big change of the source tree.
 	Now, the whole thing is divided in 3 parts:
@@ -479,7 +484,7 @@
 	library.
 	The same configure options as before apply.
 
-2003-04-05  Dodji  <dodji@seketeli.org>
+2003-04-05  Dodji  <dodji@gnome.org>
 
 	* src/cr-token.h (struct _CRToken): 
 	applied a patch from Greg Lee <greg@ling.lll.hawaii.edu>,
@@ -487,7 +492,7 @@
 	it transforms an implicitly defined  union into an explicitly
 	defined one. Modified all the files impacted.
 	
-2003-04-03  Dodji  <dodji@seketeli.org>
+2003-04-03  Dodji  <dodji@gnome.org>
 
 	* tests/testctl: can now run one single test. This can also
 	run all the tests a run a simple report that summarizes the
@@ -506,12 +511,12 @@
 	* croco-config.1: updated the man page
 	* csslint/csslint.1: updated the man page
 
-2003-04-01  Dodji  <dodji@seketeli.org>
+2003-04-01  Dodji  <dodji@gnome.org>
 
 	* tests/testctl: started to code the libcroco test launcher script.
 	it is not useable yet, but work is in progress.
 
-2003-03-31  Dodji  <dodji@seketeli.org>
+2003-03-31  Dodji  <dodji@gnome.org>
 	* src/cr-lay-eng.c: started to code the tree annotation process.
 	I seriously need to debug this.
 	
@@ -531,7 +536,7 @@
 	  system to generate .spec file.
 	* Remove Makefile.in from CVS, this is a generated file
 	
-2003-03-30  Dodji  <dodji@seketeli.org>
+2003-03-30  Dodji  <dodji@gnome.org>
 	* autogen.sh: 
 	Made sure that in dev mode, the configure scripts
 	gets called with --enable-tests=yes --enable-seleng=yes
@@ -556,7 +561,7 @@
 	if the features xxx depends on are available and then
 	switches xxx on.
 
-2003-03-24  dodji  <dodji@seketeli.org>
+2003-03-24  dodji  <dodji@gnome.org>
 	* src/cr-style.c (cr_style_set_style_from_decl): 
 	Have a first hot (and bugged) implem of this function.	
 	I can now, go and get worried about building the annotated
@@ -598,7 +603,7 @@
 	* tests/Makefile.am: disable test5 until I can think of a better 
 	work-around
 	
-2003-03-16  dodji  <dodji@seketeli.org>
+2003-03-16  dodji  <dodji@gnome.org>
 
 	* src/cr-style.c (set_border_x_style_from_value): 
 	new method added to gather 'border_top_style' ... 'border_left_style'
@@ -610,7 +615,7 @@
 
 	* src/cr-num.c (cr_num_set): new method added.
 
-2003-03-15  dodji  <dodji@seketeli.org>
+2003-03-15  dodji  <dodji@gnome.org>
 
 	* src/cr-utils.[ch]
 	added some new helper functions/did some cleanups.
@@ -636,7 +641,7 @@
 	* src/cr-num.[ch]: did some big changes for a better
 	handling of numeric types.
 
-2003-03-05  Dodji  <dodji@seketeli.org>
+2003-03-05  Dodji  <dodji@gnome.org>
 
 	* src/cr-parser.c (cr_parser_new_from_buf): 
 	new method to parse stylesheets from in memory buffers.
@@ -649,7 +654,7 @@
 	(cr_input_new_from_uri): modified this method to make it
 	use the new cr_input_new_from_buf() method.
 
-2003-03-03  Dodji  <dodji@seketeli.org>
+2003-03-03  Dodji  <dodji@gnome.org>
 
 	* tests/README-description.txt: 
 	added this test description file in the project.
@@ -665,13 +670,13 @@
 	cr_sel_eng_get_matched_rulesets_real().
 	
 
-2003-03-02  Dodji  <dodji@seketeli.org>
+2003-03-02  Dodji  <dodji@gnome.org>
 
 	* src/cr-sel-eng.c (cr_sel_eng_get_rulesets_real): 
 	started to code an implementation of a ruleset "requester".
 	Still have to debug all this.
 
-2002-09-25  dodji  <dodji@seketeli.org>
+2002-09-25  dodji  <dodji@gnome.org>
 
 	* src/cr-utils.h: updated this file to define stuffs needed by
 	other modules.

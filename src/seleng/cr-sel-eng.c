@@ -130,15 +130,14 @@ static gboolean
 id_add_sel_matches_node (CRAdditionalSel *a_add_sel,
                          xmlNode *a_node)
 {
+        gboolean result = FALSE ;
+        xmlChar *id = NULL ;
+
         g_return_val_if_fail (a_add_sel 
                               && a_add_sel->type == ID_ADD_SELECTOR
                               && a_add_sel->content.id_name
                               && a_add_sel->content.id_name->str
-                              && a_node, FALSE) ;
-
-        gboolean result = FALSE ;
-        xmlChar *id = NULL ;
-
+                              && a_node, FALSE) ;        
         g_return_val_if_fail (a_add_sel
                               && a_add_sel->type == ID_ADD_SELECTOR
                               && a_node, FALSE) ;
