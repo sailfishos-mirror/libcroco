@@ -86,9 +86,6 @@ static enum CRStatus
 adjust_parent_inner_edge_size (CRLayEng *a_this,
                                CRBox *a_cur_box) ;
 
-static enum CRStatus
-adjust_edges_on_inner_edge (CRBox *a_this) ;
-
 /**********************
  *Private methods.
  **********************/
@@ -647,58 +644,6 @@ adjust_parent_inner_edge_size (CRLayEng *a_this,
                                 a_cur_box->parent->inner_edge.y ;
                 }
         }
-
-        return CR_OK ;
-}
-
-
-/**
- *Given an inner edge size, adjust the padding, border and outer edges
- *so that they correctly contain the inner edge. That is, make the 3 first
- *edges bigger or smaller to correctly contain the inner edge
- *Note :Before calling this function, make sure the inner edge has been correctly
- *computed. This function does not compute the inner edge.
- */
-static enum CRStatus
-adjust_edges_on_inner_edge (CRBox *a_this)
-{
-        gulong h_border = 0, h_padding = 0, h_margin = 0,
-                v_padding = 0, v_border = 0, v_margin = 0 ;
-
-        g_return_val_if_fail (a_this,
-                              CR_BAD_PARAM_ERROR) ;        
-
-        if (a_this->style)
-        {
-                h_padding = a_this->style->padding_left.val +
-                        a_this->style->padding_right.val ;
-                h_border = a_this->style->border_left.val +
-                        a_this->style->border_right.val ;
-                h_margin = a_this->style->margin_left.val +
-                        a_this->style->margin_right.val ;
-                v_padding = a_this->style->padding_top.val +
-                        a_this->style->padding_bottom.val ;
-                v_border = a_this->style->border_top.val +
-                        a_this->style->border_bottom.val ;
-                v_margin = a_this->style->margin_top.val +
-                        a_this->style->margin_bottom.val ;
-        }
-
-        a_this->padding_edge.width =
-                a_this->inner_edge.width + h_padding ;
-        a_this->padding_edge.height =
-                a_this->inner_edge.height + v_padding ;
-
-        a_this->border_edge.width = 
-                a_this->padding_edge.width + h_border ;
-        a_this->border_edge.height = 
-                a_this->padding_edge.height + v_border ;
-
-        a_this->outer_edge.width =
-                a_this->border_edge.width + h_margin ;
-        a_this->outer_edge.height =
-                a_this->border_edge.height + v_margin ;
-                
 
         return CR_OK ;
 }

@@ -52,7 +52,8 @@ expose_event_cb (GtkWidget *a_this,
                  gpointer a_user_data) ;
 
 static enum CRStatus
-draw_box (CRBoxView *a_this) ;
+draw_box (CRBoxView *a_this,
+          GdkRectangle *a_region_to_draw) ;
 
 
 static void
@@ -96,17 +97,56 @@ expose_event_cb (GtkWidget *a_this,
         switch (a_event->type)
         {
         case GDK_EXPOSE:
+                draw_box (CR_BOX_VIEW (a_this),
+                          &a_event->area) ;
                 break ;
-                
+
         default:
                 cr_utils_trace_info ("Unexpected event received, "
                                      "Only GDK_EXPOSE was expected.") ;
                 return FALSE ;
+                break ;
         }
 
         return FALSE ;
         
 }
+
+static enum CRStatus
+draw_box (CRBoxView *a_this,
+          GdkRectangle *a_region_to_draw)
+{
+        GdkWindow *window = NULL ;
+        CRBoxView *cur_bv = NULL ;
+        GtkWidget *widget = NULL;
+
+        g_return_val_if_fail (a_this
+                              && CR_IS_BOX_VIEW (a_this),
+                              CR_BAD_PARAM_ERROR) ;
+
+        widget = GTK_WIDGET (a_this) ;
+        g_return_val_if_fail (widget, CR_ERROR) ;
+        window = GTK_LAYOUT (a_this)->bin_window ;
+        g_return_val_if_fail (window, CR_ERROR) ;
+
+        for (cur_bv = a_this; cur_bv ; cur_bv = cur_bv->next)
+        {
+                if (PRIVATE (cur_bv) && PRIVATE (cur_bv)->box)
+                {
+                        gdk_draw_rectangle 
+                                (window,
+                                 widget->style->base_gc[widget->state],
+                                 TRUE,
+                                 PRIVATE (cur_bv)->box->outer_edge.x,
+                                 PRIVATE (cur_bv)->box->outer_edge.y,
+                                 PRIVATE (cur_bv)->box->outer_edge.width,
+                                 PRIVATE (cur_bv)->box->outer_edge.height) ;
+                }
+        }
+
+        return CR_OK ;
+}
+
 /**********************************
  *Public funtions
  **********************************/
@@ -115,7 +155,7 @@ GType
 cr_box_view_get_type (void)
 {
 	static GType type = 0 ;
-	
+
 	if (type == 0)
 	{
 		static const GTypeInfo type_info = 
@@ -196,6 +236,12 @@ cr_box_view_destroy (GtkObject *a_this)
 	g_return_if_fail (a_this && CR_IS_BOX_VIEW (a_this)) ;
 
 	self = CR_BOX_VIEW (a_this) ;
+
+        if (PRIVATE (self) && PRIVATE (self)->box)
+        {
+                cr_box_unref (PRIVATE (self)->box) ;
+                PRIVATE (self)->box = NULL ;
+        }
 
 	if (PRIVATE (self))
 	{

@@ -45,6 +45,7 @@
 #ifdef WITH_LAYENG /*the layout engine headers*/
 #include "layeng/cr-style.h"
 #include "layeng/cr-box.h"
+#include "layeng/cr-box-view.h"
 #include "layeng/cr-lay-eng.h"
 #endif
 

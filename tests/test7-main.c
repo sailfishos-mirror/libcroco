@@ -51,6 +51,19 @@ const guchar *gv_cssbuf =
 static enum CRStatus
 test_layout_box (void)  ;
 
+static gboolean
+delete_event_cb (GtkWidget *a_widget, GdkEvent *a_event,
+                 gpointer *a_user_data) ;
+
+
+static gboolean
+delete_event_cb (GtkWidget *a_widget, GdkEvent *a_event,
+                 gpointer *a_user_data)
+{
+        gtk_main_quit () ;
+        return FALSE ;
+}
+
 static enum CRStatus
 test_layout_box (void)
 {
@@ -61,6 +74,8 @@ test_layout_box (void)
 	xmlDoc *xml_doc = NULL ;
 	gulong len = 0 ;
         CRBoxModel *box_model = NULL ;
+        CRBoxView *box_view = NULL ;
+        GtkWidget *window = NULL, *scroll = NULL ;
 
 	len = strlen (gv_cssbuf) ;
 	status = cr_om_parser_simply_parse_buf ((guchar *)gv_cssbuf, len,
@@ -116,11 +131,63 @@ test_layout_box (void)
                 cr_lay_eng_layout_box_tree (layout_engine,
                                             ((CRBox*)box_model)->children) ;
                 cr_box_dump_to_file ((CRBox*)box_model, 0, stdout) ;
-                cr_box_destroy ((CRBox*)box_model) ;
-                box_model = NULL ;
+
+                window = gtk_window_new (GTK_WINDOW_TOPLEVEL) ;
+                if (!window) 
+                {
+                        cr_utils_trace_info ("System may be out of memory") ;
+                        status = CR_ERROR ;
+                        goto cleanup ;
+                }
+                gtk_window_set_title (GTK_WINDOW (window), 
+                                      "Croco Renderer Test") ;
+                gtk_window_set_policy (GTK_WINDOW (window), TRUE, TRUE, TRUE) ;
+                gtk_widget_set_usize (window, 800, 600) ;
+                g_signal_connect (G_OBJECT (window),
+                                  "delete-event",
+                                  G_CALLBACK (delete_event_cb),
+                                  NULL) ;
+
+                scroll = gtk_scrolled_window_new (NULL, NULL) ;
+                if (!scroll)
+                {
+                        status = CR_ERROR ;
+                        goto cleanup ;
+                }
+                gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (scroll),
+                                                GTK_POLICY_AUTOMATIC,
+                                                GTK_POLICY_AUTOMATIC) ;
+
+                box_view = cr_box_view_new (((CRBox*)box_model)->children) ;
+                gtk_container_add (GTK_CONTAINER (window), scroll) ;
+                gtk_container_add (GTK_CONTAINER (scroll), 
+                                   GTK_WIDGET (box_view)) ;
+                gtk_widget_show_all (window) ;
+                gtk_main () ;
+
+                return CR_OK ;
         }
 
  cleanup:
+
+        if (scroll)
+        {
+                gtk_widget_destroy (scroll) ;
+                scroll = NULL ;
+        }
+
+        if (window)
+        {
+                gtk_widget_destroy (window) ;
+                window = NULL ;
+        }
+
+        if (box_view)
+        {
+                cr_box_view_destroy (GTK_OBJECT (box_view)) ;
+                box_view = NULL ;
+        }
+
 	if (cascade)
 	{
 		cr_cascade_destroy (cascade) ;

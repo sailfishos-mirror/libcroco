@@ -219,15 +219,11 @@ CFLAGS="-g -Wunused -Wimplicit -Wreturn-type -Wswitch \
         -Wmissing-prototypes -Wnested-externs -Winline -Wredundant-decls "
 #-pedantic -Wshadow -0 -Wuninitialized
 
+dnl
+dnl Define the CROCO_LIBS and CROCO_CFLAGS variables. These will be used
+dnl by client application to know where to find croco include files and libs.
+dnl
 CROCO_LIBS=" $GLIB2_LIBS $LIBXML2_LIBS -L${libdir} -lcroco"
-if test "$WITH_SELENG" = "yes" ; then
-	CROCO_LIBS="$CROCO_LIBS -l$CROCO_SELENG_LIB_NAME"
-fi
-
-if test "$WITH_LAYENG" = "yes" ; then
-	CROCO_LIBS="$CROCO_LIBS -l$CROCO_LAYENG_LIB_NAME"
-fi
-
 CROCO_CFLAGS="-I${includedir}/libcroco $GLIB2_CFLAGS $LIBXML2_CFLAGS"
 
 if test "$USE_LIBXML2" = "yes" ; then
@@ -238,6 +234,15 @@ if test "$USE_LIBXML2" = "yes" ; then
 	REQUIRE_LIBXML2=libxml-2.0
 else
 	REQUIRE_LIBXML2=
+fi
+
+if test "$WITH_SELENG" = "yes" ; then
+	CROCO_LIBS="$CROCO_LIBS -l$CROCO_SELENG_LIB_NAME"
+fi
+
+if test "$WITH_LAYENG" = "yes" ; then
+	CROCO_LIBS="$CROCO_LIBS $LIBGNOMEUI2_LIBS -l$CROCO_LAYENG_LIB_NAME"
+	CROCO_CFLAGS="$CROCO_CFLAGS $LIBGNOMEUI2_CFLAGS"
 fi
 
 AC_SUBST(LIBXML2_LIBS)

@@ -27,7 +27,9 @@ croco_seleng_lib=$(top_builddir)/src/seleng/@CROCO_SELENG_LIB@
 endif
 
 if HAVE_LAYENG
-croco_layeng_lib=$(top_builddir)/src/layeng/@CROCO_LAYENG_LIB@ 
+croco_layeng_lib=$(top_builddir)/src/layeng/@CROCO_LAYENG_LIB@
+croco_layeng_needed_includes=`pkg-config --cflags libgnomeui-2.0`
+croco_layeng_needed_libs=`pkg-config --libs libgnomeui-2.0`
 endif
 
 LDADD=$(croco_parser_lib) $(croco_seleng_lib) $(croco_layeng_lib)
@@ -37,8 +39,9 @@ INCLUDES=-I$(top_srcdir)/intl \
 	-I$(top_srcdir)/src/parser \
 	-I$(top_srcdir)/src/seleng \
 	-I$(top_srcdir)/src/layeng \
-	`pkg-config --cflags glib-2.0`
+	`pkg-config --cflags glib-2.0` \
+	$(croco_layeng_needed_includes)
 
-LDFLAGS=`pkg-config --libs glib-2.0` @LIBXML2_LIBS@
+LDFLAGS=`pkg-config --libs glib-2.0` $(croco_layeng_needed_libs) @LIBXML2_LIBS@
 AM_CFLAGS=-Wall -I. @LIBXML2_CFLAGS@
 endif

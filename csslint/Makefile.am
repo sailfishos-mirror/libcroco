@@ -12,7 +12,7 @@ INCLUDES=-I$(top_srcdir)/intl \
 	-I$(top_srcdir)/src/layeng \
 	`pkg-config --cflags glib-2.0`
 
-LDFLAGS=`pkg-config --libs glib-2.0` @LIBXML2_LIBS@
-AM_CFLAGS=-Wall -I. @LIBXML2_CFLAGS@
+LDFLAGS=@CROCO_LIBS@
+AM_CFLAGS=-Wall -I. @CROCO_CFLAGS@
 
 EXTRA_DIST = $(man_MANS)
