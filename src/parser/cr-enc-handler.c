@@ -168,8 +168,8 @@ cr_enc_handler_convert_input (CREncHandler *a_this,
         {
                 status =
                         a_this->enc_str_len_as_utf8 (a_in,
-                                                    &a_in[*a_in_len -1],
-                                                    a_out_len) ;
+                                                     &a_in[*a_in_len -1],
+                                                     a_out_len) ;
 
                 g_return_val_if_fail (status == CR_OK, status) ;
         }

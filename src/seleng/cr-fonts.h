@@ -85,7 +85,9 @@ enum CRPredefinedAbsoluteFontSize
         FONT_SIZE_MEDIUM,
         FONT_SIZE_LARGE,
         FONT_SIZE_X_LARGE,
-        FONT_SIZE_XX_LARGE
+        FONT_SIZE_XX_LARGE,
+
+        NB_PREDEFINED_ABSOLUTE_FONT_SIZES
 } ;
 
 /**
@@ -151,7 +153,7 @@ struct _CRFontSize
         enum CRFontSizeType type ;
         union 
         {
-                enum CRPredefinedAbsoluteFontSize predef_abs ;
+                enum CRPredefinedAbsoluteFontSize predefined ;
                 enum CRRelativeFontSize relative ;
                 CRNum * absolute ;
         } value;
@@ -228,6 +230,10 @@ cr_font_family_new (enum CRFontFamilyType a_type, guchar *a_name) ;
 CRFontFamily *
 cr_font_family_append (CRFontFamily *a_this, 
 		       CRFontFamily *a_family_to_append) ;
+
+guchar *
+cr_font_family_to_string (CRFontFamily *a_this,
+                          gboolean a_walk_font_family_list) ;
 
 CRFontFamily *
 cr_font_family_prepend (CRFontFamily *a_this, 

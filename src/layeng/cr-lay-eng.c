@@ -818,6 +818,7 @@ compute_text_box_inner_edge_size (CRLayEng *a_this,
         return status ;
 }
 
+
 static enum CRStatus
 layout_text_in_box (CRLayEng *a_this, CRBox *a_text_box)
 {
@@ -886,6 +887,11 @@ layout_text_in_box (CRLayEng *a_this, CRBox *a_text_box)
         /*
          *TODO: set the font description attributes.
          */                
+        
+        pgo_attr_list =
+                pango_attr_list_new () ;
+        g_return_val_if_fail (pgo_attr_list, CR_ERROR) ;
+
 
         return CR_OK ;
 }

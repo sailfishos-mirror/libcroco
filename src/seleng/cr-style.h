@@ -23,6 +23,7 @@
 #ifndef __CR_STYLE_H__
 #define __CR_STYLE_H__
 
+#include <pango/pango.h>
 #include "cr-utils.h"
 #include "cr-statement.h"
 #include "cr-fonts.h"
@@ -266,6 +267,9 @@ cr_style_new (void) ;
 enum CRStatus
 cr_style_set_style_from_decl (CRStyle *a_this, CRDeclaration *a_decl) ;
 
+enum CRStatus
+cr_style_to_pango_font_attributes (CRStyle *a_style,
+                                   PangoAttrList *a_pgo_attrs) ;
 enum CRStatus
 cr_style_ref (CRStyle *a_this) ;
 

@@ -143,6 +143,18 @@ static CRPropertyDesc gv_prop_table [] =
 	{NULL, 0}
 } ;
 
+const gulong gv_predefined_abs_font_size_tab [NB_PREDEFINED_ABSOLUTE_FONT_SIZES]
+=
+{
+        7, /*FONT_SIZE_XX_SMALL*/
+        9,/*FONT_SIZE_X_SMALL*/
+        11, /*FONT_SIZE_SMALL*/
+        14, /*FONT_MEDIUM*/
+        17, /*FONT_LARGE*/
+        20, /*FONT_X_LARGE*/
+        24 /*FONT_XX_LARGE*/        
+} ;
+
 /**
  *A the key/value pair of this hash table
  *are:
@@ -1495,7 +1507,7 @@ init_style_font_size_field (CRStyle *a_style)
                 a_style->font_size = cr_font_size_new () ;
                 if (!a_style->font_size)
                 {
-                        return CR_INSTANCIATION_FAILED ;
+                        return CR_INSTANCIATION_FAILED_ERROR ;
                 }
         }
         else
@@ -1526,7 +1538,7 @@ set_prop_font_size_from_value (CRStyle *a_style, CRTerm *a_value)
 
                         a_style->font_size->type = 
                                 PREDEFINED_ABSOLUTE_FONT_SIZE ;
-                        a_style->font_size->value.predef_abs = 
+                        a_style->font_size->value.predefined = 
                                 FONT_SIZE_XX_SMALL ;
                         
                 }
@@ -1540,7 +1552,7 @@ set_prop_font_size_from_value (CRStyle *a_style, CRTerm *a_value)
 
                         a_style->font_size->type = 
                                 PREDEFINED_ABSOLUTE_FONT_SIZE ;
-                        a_style->font_size->value.predef_abs = 
+                        a_style->font_size->value.predefined = 
                                 FONT_SIZE_X_SMALL ;
                 }
                 else if (a_value->content.str 
@@ -1553,7 +1565,7 @@ set_prop_font_size_from_value (CRStyle *a_style, CRTerm *a_value)
 
                         a_style->font_size->type = 
                                 PREDEFINED_ABSOLUTE_FONT_SIZE ;
-                        a_style->font_size->value.predef_abs = 
+                        a_style->font_size->value.predefined = 
                                 FONT_SIZE_SMALL ;
                 }
                 else if (a_value->content.str 
@@ -1566,7 +1578,7 @@ set_prop_font_size_from_value (CRStyle *a_style, CRTerm *a_value)
 
                         a_style->font_size->type = 
                                 PREDEFINED_ABSOLUTE_FONT_SIZE ;
-                        a_style->font_size->value.predef_abs = 
+                        a_style->font_size->value.predefined = 
                                 FONT_SIZE_MEDIUM ;
                 }
                 else if (a_value->content.str 
@@ -1579,7 +1591,7 @@ set_prop_font_size_from_value (CRStyle *a_style, CRTerm *a_value)
 
                         a_style->font_size->type = 
                                 PREDEFINED_ABSOLUTE_FONT_SIZE ;
-                        a_style->font_size->value.predef_abs = 
+                        a_style->font_size->value.predefined = 
                                 FONT_SIZE_LARGE ;
                 }
                 else if (a_value->content.str 
@@ -1592,7 +1604,7 @@ set_prop_font_size_from_value (CRStyle *a_style, CRTerm *a_value)
 
                         a_style->font_size->type = 
                                 PREDEFINED_ABSOLUTE_FONT_SIZE ;
-                        a_style->font_size->value.predef_abs = 
+                        a_style->font_size->value.predefined = 
                                 FONT_SIZE_X_LARGE ;
                 }
                 else if (a_value->content.str 
@@ -1605,7 +1617,7 @@ set_prop_font_size_from_value (CRStyle *a_style, CRTerm *a_value)
 
                         a_style->font_size->type = 
                                 PREDEFINED_ABSOLUTE_FONT_SIZE ;
-                        a_style->font_size->value.predef_abs = 
+                        a_style->font_size->value.predefined = 
                                 FONT_SIZE_XX_LARGE ;
                 }
                 else if (a_value->content.str 
@@ -1737,7 +1749,7 @@ set_prop_font_weight_from_value (CRStyle *a_style, CRTerm *a_value)
                         if (!strcmp (a_value->content.str->str,
                                      "normal"))
                         {
-                                a_style->font_weight = FONT_WEIGHT_BOLD ;
+                                a_style->font_weight = FONT_WEIGHT_NORMAL ;
                         }
                         else if (!strcmp (a_value->content.str->str,
                                           "bold"))
@@ -2164,6 +2176,76 @@ cr_style_dup (CRStyle *a_this)
         memcpy (result, a_this, sizeof (CRStyle)) ;
 
         return result ;
+}
+
+
+enum CRStatus
+cr_style_to_pango_font_attributes (CRStyle *a_style,
+                                   PangoAttrList *a_pgo_attrs)
+{
+        PangoFontDescription *pgo_font_desc = NULL ;
+        guchar *font_family = NULL ;
+
+        g_return_val_if_fail (a_pgo_attrs
+                              && a_style
+                              && a_style->font_size,
+                              CR_BAD_PARAM_ERROR) ;
+
+        pgo_font_desc = pango_font_description_new () ;
+        if (!pgo_font_desc)
+        {
+                cr_utils_trace_info ("Could not instanciate " 
+                                     "pango font description") ;
+                return CR_ERROR ;
+        }
+
+        
+        /*set font size*/
+        switch (a_style->font_size->type)
+        {
+        case PREDEFINED_ABSOLUTE_FONT_SIZE:
+                g_return_val_if_fail (a_style->font_size->value.predefined 
+                                      < NB_PREDEFINED_ABSOLUTE_FONT_SIZES,
+                                      CR_OUT_OF_BOUNDS_ERROR) ;
+                        
+                pango_font_description_set_size 
+                        (pgo_font_desc, 
+                         gv_predefined_abs_font_size_tab
+                         [a_style->font_size->value.predefined]) ;
+                break ;
+
+        case ABSOLUTE_FONT_SIZE:
+                g_return_val_if_fail (a_style->font_size->value.absolute,
+                                      CR_BAD_PARAM_ERROR) ;
+                
+                pango_font_description_set_size 
+                        (pgo_font_desc, 
+                         a_style->font_size->value.absolute->val) ;
+                break ;
+
+        case RELATIVE_FONT_SIZE:
+                cr_utils_trace_info ("relative font size are not supported "
+                                     "yes") ;
+
+                break ;
+
+        case INHERITED_FONT_SIZE:
+                cr_utils_trace_info ("inherited font size are not supported "
+                                     "yes") ;
+                break ;
+        }
+
+
+        /*set font family*/
+        font_family = cr_font_family_to_string (a_style->font_family,
+                                                TRUE) ;
+        if (font_family)
+        {
+                pango_font_description_set_family (pgo_font_desc,
+                                                   font_family) ;
+        }
+        
+        return CR_OK ;
 }
 
 /**

@@ -25,6 +25,78 @@
 #include "cr-fonts.h"
 #include <string.h>
 
+
+static enum CRStatus
+cr_font_family_to_string_real (CRFontFamily *a_this,
+                               gboolean a_walk_list,
+                               GString **a_string)
+{
+        guchar * name = NULL ;
+        enum CRStatus result = CR_OK ;
+
+        g_return_val_if_fail (a_this, CR_BAD_PARAM_ERROR) ;
+
+        if (!*a_string)
+        {
+                *a_string = g_string_new (NULL) ;
+                g_return_val_if_fail (*a_string,
+                                      CR_INSTANCIATION_FAILED_ERROR) ;
+        }
+
+        switch (a_this->type)
+        {
+        case FONT_FAMILY_SANS_SERIF:
+                name = (guchar*) "sans-serif" ;
+                break ;
+
+        case FONT_FAMILY_SERIF:
+                name = (guchar*) "sans-serif" ;
+                break ;
+
+        case FONT_FAMILY_CURSIVE:
+                name = (guchar*) "cursive" ;
+                break ;
+
+        case FONT_FAMILY_FANTASY:
+                name = (guchar*) "fantasy" ;
+                break ;
+
+        case FONT_FAMILY_MONOSPACE:
+                name = (guchar*) "monospace" ;
+                break ;
+
+        case FONT_FAMILY_NON_GENERIC:
+                name = (guchar*) a_this->name;
+                break ;
+
+        default:
+                name = (guchar*) NULL ;
+                break ;
+        }
+
+        if (name)
+        {
+                if (a_this->prev)
+                {
+                        g_string_append_printf (*a_string,
+                                                ", %s", name) ;                        
+                }
+                else
+                {
+                        g_string_append (*a_string,
+                                         name) ;
+                }
+        }
+
+        if (a_walk_list == TRUE && a_this->next)
+        {
+                result = cr_font_family_to_string_real (a_this->next,
+                                                        TRUE, a_string) ;
+        }
+
+        return result ;
+}
+
 CRFontFamily *
 cr_font_family_new (enum CRFontFamilyType a_type, guchar *a_name)
 {
@@ -46,6 +118,40 @@ cr_font_family_new (enum CRFontFamilyType a_type, guchar *a_name)
 	return result ;
 }
 
+
+guchar *
+cr_font_family_to_string (CRFontFamily *a_this,
+                          gboolean a_walk_font_family_list)
+{
+        enum CRStatus status = CR_OK ;
+        guchar *result = NULL ;
+        GString *stringue = NULL ;
+
+        g_return_val_if_fail (a_this,
+                              NULL) ;
+
+        status = cr_font_family_to_string_real (a_this,
+                                                a_walk_font_family_list,
+                                                &stringue) ;
+
+        if (status == CR_OK && stringue)
+        {
+                result = stringue->str ;
+                g_string_free (stringue, FALSE) ;
+                stringue = NULL ;
+                
+        }
+        else
+        {
+                if (stringue)
+                {
+                        g_string_free (stringue, TRUE) ;
+                        stringue = NULL ;
+                }
+        }
+
+        return result ;
+}
 enum CRStatus
 cr_font_family_set_name (CRFontFamily *a_this, guchar *a_name)
 {

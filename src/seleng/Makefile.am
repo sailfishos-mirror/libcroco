@@ -10,7 +10,7 @@ endif
 
 libcrseleng_la_SOURCES=$(SELENG_SRCS)
 INCLUDES=-I$(top_srcdir) -I$(top_srcdir)/src/parser -I$(top_srcdir)/intl \
-@GLIB2_CFLAGS@ @LIBXML2_CFLAGS@
+@GLIB2_CFLAGS@ @LIBXML2_CFLAGS@ @PANGO_CFLAGS@
 
 LDADD=$(top_srcdir)/src/parser/libcroco.la
 
