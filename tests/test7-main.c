@@ -53,7 +53,24 @@ const guchar *gv_xmlbuf =
 ;
 const guchar *gv_cssbuf =
 "INSTRUMENT { display: inline}"
-"ARTICLE, HEADLINE, AUTHOR, PARA { display: block ; position: static; background-color: rgb(255,0,0)}"
+"ARTICLE, HEADLINE, AUTHOR, PARA " 
+"{ " 
+" margin-top: 10px ;"
+" margin-left: 10px ;"
+" margin-bottom: 10px ;"
+" margin-right: 10px ;"
+" display: block ; " 
+" position: static; " 
+" background-color: rgb(255,0,0) ;"
+" border-top-width: thick ;"
+" border-top-style: solid ;"
+" border-right-width: thick ;"
+" border-right-style: solid ;"
+" border-bottom-width: thick ;"
+" border-bottom-style: solid ;"
+" border-left-width: thick ;"
+" border-left-style: solid ;"
+"}"
 ;
 
 static enum CRStatus

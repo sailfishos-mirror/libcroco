@@ -1,3 +1,15 @@
+2003-05-12  Dodji  <dodji@seketeli.org>
+
+	* tests/test7-main.c: updated the test to reflect the new supported
+	css2 properties.
+
+	* src/layeng/cr-style.c:
+	(set_prop_border_x_width_from_value ()) debugged this.	
+	(set_prop_border_x_style_from_value ()) debugged this.
+	
+	* src/layeng/cr-box-view.c:
+	(draw_borders ()) debugged this a lot.
+
 2003-05-07  Dodji  <dodji@seketeli.org>
 
 	* tests/test7-main.c: just added a test for the "background-color" 

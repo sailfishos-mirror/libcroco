@@ -422,42 +422,29 @@ set_prop_border_x_width_from_value (CRStyle *a_style,
                                     enum CRDirection a_dir)
 {
         enum CRStatus status = CR_OK ;
-        CRNum *num_val = NULL, *parent_num_val = NULL ;
+        CRNum *num_val = NULL ;
 
         g_return_val_if_fail (a_value
-                              && a_style->parent_style, 
+                              && a_style,
                               CR_BAD_PARAM_ERROR) ;
 
         switch (a_dir)
         {
         case DIR_TOP:
                 num_val = &a_style->num_props[NUM_PROP_BORDER_TOP].sv ;
-                parent_num_val = 
-                        &a_style->parent_style->num_props[NUM_PROP_BORDER_TOP].sv ;
                 break ;
 
         case DIR_RIGHT:
                 num_val = 
                         &a_style->num_props[NUM_PROP_BORDER_RIGHT].sv ;
-
-                parent_num_val = 
-                        &a_style->parent_style->
-                        num_props[NUM_PROP_BORDER_RIGHT].sv ;
-
                 break ;
 
         case DIR_BOTTOM:
                 num_val = &a_style->num_props[NUM_PROP_BORDER_BOTTOM].sv ;
-                parent_num_val =
-                        &a_style->parent_style->
-                        num_props[NUM_PROP_BORDER_BOTTOM].sv ;
                 break ;
 
         case DIR_LEFT:
                 num_val = &a_style->num_props[NUM_PROP_BORDER_LEFT].sv ;
-                parent_num_val = 
-                        &a_style->parent_style->
-                        num_props[NUM_PROP_BORDER_LEFT].sv ;
                 break ;
 
         default:
@@ -502,25 +489,6 @@ set_prop_border_x_width_from_value (CRStyle *a_style,
                 return CR_UNKNOWN_TYPE_ERROR ;
         }
         
-
-        switch (a_value->content.num->type)
-        {
-        case NUM_GENERIC:
-        case NUM_LENGTH_EM:
-        case NUM_LENGTH_EX:
-        case NUM_LENGTH_PX:
-        case NUM_LENGTH_IN:
-        case NUM_LENGTH_CM:
-        case NUM_LENGTH_MM:
-        case NUM_LENGTH_PT:
-        case NUM_LENGTH_PC:
-                status = cr_num_copy (num_val, a_value->content.num) ;
-                break ;
-        default :
-                status = CR_ERROR ;
-                break ;
-        }
-
         return status ;
 }
 
@@ -530,24 +498,20 @@ set_prop_border_x_style_from_value (CRStyle *a_style,
                                     CRTerm *a_value,
                                     enum CRDirection a_dir)
 {
-        g_return_val_if_fail (a_style && a_value, 
-                              CR_BAD_PARAM_ERROR) ;
-
         enum CRStatus status = CR_OK ;
         enum CRBorderStyle *border_style_ptr, *parent_border_style_ptr ;
 
-        g_return_val_if_fail (a_value
-                              && a_style->parent_style, 
+        g_return_val_if_fail (a_style && a_value, 
                               CR_BAD_PARAM_ERROR) ;
-
+     
         switch (a_dir)
         {
         case DIR_TOP:
                 border_style_ptr = &a_style->
                         border_style_props[BORDER_STYLE_PROP_TOP] ;
-                parent_border_style_ptr =
+                parent_border_style_ptr = (a_style->parent_style)?
                         &a_style->parent_style->
-                        border_style_props[BORDER_STYLE_PROP_TOP] ;
+                        border_style_props[BORDER_STYLE_PROP_TOP]: NULL ;
 
                 break ;
 
@@ -555,25 +519,25 @@ set_prop_border_x_style_from_value (CRStyle *a_style,
                 border_style_ptr = 
                         &a_style->border_style_props[BORDER_STYLE_PROP_RIGHT] ;
 
-                parent_border_style_ptr = 
+                parent_border_style_ptr = (a_style->parent_style)?
                         &a_style->parent_style->
-                        border_style_props[BORDER_STYLE_PROP_RIGHT] ;
+                        border_style_props[BORDER_STYLE_PROP_RIGHT] : NULL ;
                 break ;
 
         case DIR_BOTTOM:
                 border_style_ptr = &a_style->
                         border_style_props[BORDER_STYLE_PROP_BOTTOM] ;
-                parent_border_style_ptr = 
+                parent_border_style_ptr = (a_style->parent_style)?
                         &a_style->parent_style->
-                        border_style_props[BORDER_STYLE_PROP_BOTTOM] ;
+                        border_style_props[BORDER_STYLE_PROP_BOTTOM] : NULL;
                 break ;
 
         case DIR_LEFT:
                 border_style_ptr = &a_style->
                         border_style_props[BORDER_STYLE_PROP_LEFT] ;
-                parent_border_style_ptr = 
+                parent_border_style_ptr = (a_style->parent_style)?
                         &a_style->parent_style->
-                        border_style_props[BORDER_STYLE_PROP_LEFT] ;
+                        border_style_props[BORDER_STYLE_PROP_LEFT] : NULL;
                 break ;
 
         default:
@@ -650,7 +614,8 @@ set_prop_border_x_style_from_value (CRStyle *a_style,
                            a_value->content.str->str, 
                            strlen ("inherit")))
         {
-                *border_style_ptr = *parent_border_style_ptr ;
+                if (parent_border_style_ptr)
+                        *border_style_ptr = *parent_border_style_ptr ;
         }
         else
         {
@@ -1236,7 +1201,7 @@ cr_style_set_style_from_decl (CRStyle *a_this, CRDeclaration *a_decl,
                 break ;
         case PROP_ID_PADDING_BOTTOM:
                 status = set_prop_padding_x_from_value 
-                        (a_this, value, DIR_RIGHT) ;
+                        (a_this, value, DIR_BOTTOM) ;
                 break ;
 
         case PROP_ID_PADDING_LEFT:
@@ -1265,7 +1230,7 @@ cr_style_set_style_from_decl (CRStyle *a_this, CRDeclaration *a_decl,
         case PROP_ID_BORDER_LEFT_WIDTH:
                 status = 
                         set_prop_border_x_width_from_value (a_this, value,
-                                                            DIR_BOTTOM) ;
+                                                            DIR_LEFT) ;
                 break ;
 
         case PROP_ID_BORDER_TOP_STYLE:
@@ -1313,7 +1278,7 @@ cr_style_set_style_from_decl (CRStyle *a_this, CRDeclaration *a_decl,
         case PROP_ID_MARGIN_LEFT:
                 status = 
                         set_prop_margin_x_from_value (a_this, value,
-                                                      DIR_TOP) ;
+                                                      DIR_LEFT) ;
                 break ;
 
         case PROP_ID_DISPLAY:

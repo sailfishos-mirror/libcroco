@@ -409,10 +409,11 @@ draw_borders (CRBoxView *a_this,
         /*
          *Draw left border.
          */
-        x0 = box->border_edge.x ;
-        y0 = box->padding_edge.y ;
+        x0 = box->border_edge.x + (box->padding_edge.x - box->border_edge.x)/2 ;
+        /*x0 = box->border_edge.x ;*/
+        y0 = box->border_edge.y ;
         x1 = x0;
-        y1 = y0 + box->padding_edge.height ;
+        y1 = y0 + box->border_edge.height ;
         status = set_border_line_attrs (a_this, a_box,
                                         BORDER_STYLE_PROP_LEFT) ;
         g_return_val_if_fail (status == CR_OK, status) ;
@@ -426,8 +427,10 @@ draw_borders (CRBoxView *a_this,
         /*
          *draw right border
          */
-        x0 = box->padding_edge.x + box->padding_edge.width ;
-        y0 = box->padding_edge.y ;
+        x0 = box->padding_edge.x + box->padding_edge.width +
+                (box->border_edge.x + box->border_edge.width 
+                 - box->padding_edge.x - box->padding_edge.width)/2 ;
+        y0 = box->border_edge.y ;
         x1 = x0 ;
         /*y1 remains the same as y0*/
         status = set_border_line_attrs (a_this, a_box,
@@ -442,7 +445,8 @@ draw_borders (CRBoxView *a_this,
          *draw top border.
          */
         x0 = box->border_edge.x ;
-        y0 = box->border_edge.y ;
+        y0 = box->border_edge.y + (box->padding_edge.y - box->border_edge.y)/2 ;
+        /*y0 = box->border_edge.y ;*/
         x1 = x0 + box->border_edge.width ;
         y1 = y0 ;
         status = set_border_line_attrs (a_this, a_box,
@@ -457,7 +461,12 @@ draw_borders (CRBoxView *a_this,
          *draw bottom border
          */
         /*x0 remains the same as previous x0 ;*/
-        y0 = box->padding_edge.x + box->padding_edge.height;
+        
+        y0 = box->padding_edge.y + box->padding_edge.height +
+                (box->border_edge.y + box->border_edge.height 
+                 - box->padding_edge.y - box->padding_edge.height)/2 ;
+
+        /*y0 = box->padding_edge.y + box->padding_edge.height ;*/
         x1 = x0 + box->border_edge.width ;
         y1  = y0 ;
         status = set_border_line_attrs (a_this, a_box,
@@ -583,9 +592,9 @@ draw_box (CRBoxView *a_this,
         for (cur_box = a_box; cur_box ; cur_box = cur_box->next)
         {
                 /*draw_margins (a_this, cur_box) ;*/
-                draw_borders (a_this, cur_box) ;
                 draw_paddings (a_this, cur_box) ;
                 draw_inner_box (a_this, cur_box) ;
+                draw_borders (a_this, cur_box) ;                                
 
                 if (cur_box->children)
                 {

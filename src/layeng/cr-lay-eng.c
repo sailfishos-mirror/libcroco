@@ -602,6 +602,7 @@ create_box_tree_real (CRLayEng * a_this,
                 {
                         CRBoxContent *box_content = NULL ;
                         xmlChar *node_text = NULL ;
+                        CRStyle * style_dup = NULL ;
 
                         if (xmlIsBlankNode (cur))
                                 continue ;
@@ -622,7 +623,16 @@ create_box_tree_real (CRLayEng * a_this,
                                  *which style inherits the style
                                  *of the parent box.
                                  */
-                                cur_box = cr_box_new (parent_style, TRUE) ;
+                                style_dup = cr_style_dup (parent_style) ;
+                                if (!style_dup)
+                                {
+                                        cr_utils_trace_info 
+                                                ("cr_style_dup "
+                                                 "Maybe out of memory") ;
+                                        goto error ;
+                                }
+
+                                cur_box = cr_box_new (style_dup, TRUE) ;
                                 if (!cur_box)
                                 {
                                         cr_utils_trace_info

@@ -2,10 +2,10 @@
 *coding:)
 
 Go forward in the box layout (positioning/rendering) code. (hard, very hard).
-This is gonna take me a coupe of months I think.
+This is gonna take a coupe of months I think.
  Implement the style properties (of the 4 edges of the box model).
- Debug the border-color-x, border-x and border-x-style properties.
- debug the padding-x property
+ test/debug the properties used in test7  
+ code the shortcut properties (border, margin border-style etc ...)
  code the color 16 name aliases defined in the html 4.01 spec.
 
 *Doc:)
