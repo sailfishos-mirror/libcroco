@@ -69,6 +69,11 @@ cr_box_view_get_box_model (CRBoxView *a_this, CRBoxModel **a_box_model) ;
 enum CRStatus
 cr_box_view_set_box_model (CRBoxView *a_this,
                            CRBoxModel *a_box_model) ;
+CRBoxView *
+cr_box_view_new_from_bm (CRBoxModel *a_box_root) ;
+
+enum CRStatus
+cr_box_view_layout (CRBoxView *a_this) ;
 
 void
 cr_box_view_destroy (GtkObject *a_this) ;

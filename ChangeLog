@@ -1,3 +1,16 @@
+2003-06-30  Dodji Seketeli <dodji at seketeli dot org>
+
+	* tests/test-output-refs/test4.1.css.out: updated this
+	test reference output.
+
+	* src/parser/cr-statement.c: fixed a typo that lead to a small
+	regression detected by the non regression test suite.
+
+	* tests/testctl: made sure no to consider the .cvsignore file
+	during the final diff.
+
+	* src/layeng/cr-box-view.[ch]: fixed some compiler warnings.	
+
 2003-06-28  Gaël Chamoulaud (strider) <strider@freespiders.org>
 
 	* csslint/csslint.c (csslint_show_version): Added CROCO_LAYENG_ENABLED
@@ -28,7 +41,7 @@
 	* csslint/csslint.c: fixed some small bugs in csslint. Now, --cssom is
 	set by default.
 
-2003-06-21  dodji  <dodji@seketeli.org>
+2003-06-21  dodji  <dodji()seketeli()org>
 
 	* src/parser/cr-statement.[ch]:
 	Changed the prototype of cr_statement_unlink() to

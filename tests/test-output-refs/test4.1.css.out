@@ -2,6 +2,10 @@
   font-family : Verdana, Arial, Helvetica, sans-serif, monospace
 }
 
+tutu:class1:class2 {
+  test : ok
+}
+
 body {
   background : #606060;
   color : #000000

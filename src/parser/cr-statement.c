@@ -232,7 +232,6 @@ parse_page_end_page_cb (CRDocHandler *a_this,
 	g_return_if_fail (stmt->type == AT_PAGE_RULE_STMT);
         
 	status = cr_doc_handler_set_result (a_this, stmt) ;
-        status = cr_doc_handler_set_result (a_this, NULL) ;
 	g_return_if_fail (status == CR_OK) ;
 }
 

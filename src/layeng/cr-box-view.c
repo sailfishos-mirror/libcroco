@@ -76,10 +76,6 @@ draw_box (CRBoxView *a_this,
           GdkRectangle *a_region_to_draw) ;
 
 static enum CRStatus
-draw_margins (CRBoxView *a_bv,
-              CRBox *a_box) ;
-
-static enum CRStatus
 draw_borders (CRBoxView *a_bv,
               CRBox *a_box) ;
 
@@ -297,96 +293,6 @@ set_color (CRBoxView *a_this, CRRgb *a_rgb_color,
                                        &gdk_color) ;
         }
 
-
-        return CR_OK ;
-}
-
-/**
- *Draws the margin rectangle.
- *Note: This is only for debug purpose because 
- *margins are always transparent.
- *@param a_this the bow view to draw on.
- *@param a_box the box to draw.
- *@return CR_OK upon successfull completion, an error code
- *otherwise.
- */
-static enum CRStatus
-draw_margins (CRBoxView *a_this,
-              CRBox *a_box)
-{
-        GdkWindow * window = NULL ;
-        GtkWidget *widget = NULL ;
-        CRBox *box = NULL ;
-        GdkRectangle rect ;
-
-        g_return_val_if_fail (a_this
-                              && CR_IS_BOX_VIEW (a_this)
-                              && a_box,
-                              CR_BAD_PARAM_ERROR) ;
-
-        widget = GTK_WIDGET (a_this) ;
-        window = GTK_LAYOUT (a_this)->bin_window ;
-        g_return_val_if_fail (window, CR_ERROR) ;
-
-        box = a_box ;
-        g_return_val_if_fail (box, CR_ERROR) ;
-
-        /*
-         *draw left margin rectangle
-         */
-        rect.x = box->outer_edge.x ;
-        rect.y = box->border_edge.y ;
-        rect.width = box->border_edge.x - box->outer_edge.x ;
-        rect.height = box->border_edge.height ;
-        gdk_draw_rectangle 
-                (window,
-                 PRIVATE (a_this)->gc,
-                 FALSE,
-                 rect.x, rect.y, rect.width, rect.height) ;
-
-        /*
-         *draw right margin rectangle
-         *Note: this uses the previous left margin rectangle calculation result.
-         */
-        rect.x = box->border_edge.x + box->border_edge.width;
-        /*rect.y remains the same*/
-        rect.width = box->outer_edge.width - 
-                (box->border_edge.width + rect.width) ;
-        /*rect.height remains the same;*/  
-        gdk_draw_rectangle 
-                (window,
-                 GTK_WIDGET (a_this)->style->base_gc[widget->state],
-                 FALSE,
-                 rect.x, rect.y, rect.width, rect.height) ;
-
-        /*
-         *draw top margin rectangle.
-         */
-        rect.x = box->outer_edge.x ;
-        rect.y = box->outer_edge.y ;
-        rect.width = box->outer_edge.width ;
-        rect.height = box->border_edge.y - box->outer_edge.y ;
-        
-        gdk_draw_rectangle 
-                (window,
-                 GTK_WIDGET (a_this)->style->base_gc[widget->state],
-                 FALSE,
-                 rect.x, rect.y, rect.width, rect.height) ;
-
-        /*
-         *draw bottom margin rectangle.
-         */
-        /*rect.x remains the same*/
-        rect.y = box->border_edge.y + box->border_edge.height ;
-        /*rect.width remains the same as for top margin rect.*/
-        rect.height = box->outer_edge.height -
-                (box->border_edge.height + rect.height) ;
-
-        gdk_draw_rectangle 
-                (window,
-                 GTK_WIDGET (a_this)->style->base_gc[widget->state],
-                 FALSE,
-                 rect.x, rect.y, rect.width, rect.height) ;
 
         return CR_OK ;
 }
