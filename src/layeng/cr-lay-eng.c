@@ -42,7 +42,7 @@
 
 struct _CRLayEngPriv
 {
-        gboolean update_parent_inner_edge_size ;
+        gboolean update_parent_box_size ;
 	CRCascade *cascade ;
         CRSelEng *sel_eng ;
 } ;
@@ -82,6 +82,8 @@ layout_box (CRLayEng *a_this, CRBox *a_cur_box) ;
 static enum CRStatus
 compute_text_box_inner_edge_size (CRBox *a_this) ;
 
+static enum CRStatus
+adjust_edges_on_inner_edge (CRBox *a_this) ;
 
 /**********************
  *Private methods.
@@ -576,6 +578,57 @@ compute_box_size (CRLayEng *a_this,
 }
 
 /**
+ *Given an inner edge size, adjust the padding, border and outer edges
+ *so that they correctly contain the inner edge.
+ *TODO: should also take the (x,y) position of the top leftmost corner
+ *of the outer edge as a reference and position all the other edges, including
+ *the inner edge.
+ */
+static enum CRStatus
+adjust_edges_on_inner_edge (CRBox *a_this)
+{
+        gulong h_border = 0, h_padding = 0, h_margin = 0,
+                v_padding = 0, v_border = 0, v_margin = 0 ;
+
+        g_return_val_if_fail (a_this,
+                              CR_BAD_PARAM_ERROR) ;        
+
+        if (a_this->style)
+        {
+                h_padding = a_this->style->padding_left.val +
+                        a_this->style->padding_right.val ;
+                h_border = a_this->style->border_left.val +
+                        a_this->style->border_right.val ;
+                h_margin = a_this->style->margin_left.val +
+                        a_this->style->margin_right.val ;
+                v_padding = a_this->style->padding_top.val +
+                        a_this->style->padding_bottom.val ;
+                v_border = a_this->style->border_top.val +
+                        a_this->style->border_bottom.val ;
+                v_margin = a_this->style->margin_top.val +
+                        a_this->style->margin_bottom.val ;
+        }
+
+        a_this->padding_edge.width =
+                a_this->inner_edge.width + h_padding ;
+        a_this->padding_edge.height =
+                a_this->inner_edge.height + v_padding ;
+
+        a_this->border_edge.width = 
+                a_this->padding_edge.width + h_border ;
+        a_this->border_edge.height = 
+                a_this->padding_edge.height + v_border ;
+
+        a_this->outer_edge.width =
+                a_this->border_edge.width + h_margin ;
+        a_this->outer_edge.height =
+                a_this->border_edge.height + v_margin ;
+                
+
+        return CR_OK ;
+}
+
+/**
  *Layout a box in block formating context.
  *See css2 spec in chapters 9.2.
  *@param a_this the current instance of CRLayEng.
@@ -790,7 +843,7 @@ layout_box (CRLayEng *a_this,
         g_return_val_if_fail (a_cur_box && a_cur_box->style,
                               CR_BAD_PARAM_ERROR) ;
 
-        PRIVATE (a_this)->update_parent_inner_edge_size = TRUE ;
+        PRIVATE (a_this)->update_parent_box_size = TRUE ;
 
         for (cur_box = a_cur_box ; cur_box ; 
              cur_box = cur_box->next)
@@ -817,7 +870,7 @@ layout_box (CRLayEng *a_this,
          *make sure the parent inner_edge.width is big enough to contain
          *the current box.
          */
-        if (PRIVATE (a_this)->update_parent_inner_edge_size == TRUE
+        if (PRIVATE (a_this)->update_parent_box_size == TRUE
             && a_cur_box->parent)
         {
                 gulong parent_inner_edge_right_bound = 
@@ -839,6 +892,12 @@ layout_box (CRLayEng *a_this,
                         a_cur_box->parent->inner_edge.width = 
                                 outer_edge_right_bound - 
                                 a_cur_box->parent->inner_edge.x ;
+
+                        /*
+                         *make sure the edges surrounding the inner_edge
+                         *grow to contain the newly sized inner_edge.
+                         */
+                        adjust_edges_on_inner_edge (a_cur_box->parent) ;
                 }
         }
 
@@ -938,27 +997,37 @@ cr_lay_eng_new (void)
  *otherwise.
  */
 enum CRStatus
-cr_lay_eng_create_box_tree (CRLayEng *a_this,
-                           xmlDoc *a_doc,
-                           CRCascade *a_cascade,
-                           CRBox **a_box_model)
+cr_lay_eng_create_box_model (CRLayEng *a_this,
+                             xmlDoc *a_doc,
+                             CRCascade *a_cascade,                             
+                             CRBoxModel **a_box_model)
 {
         xmlNode *root_node = NULL ;
+        CRBox *box_tree = NULL;
 
         g_return_val_if_fail (a_this && a_doc && a_cascade,
                               CR_BAD_PARAM_ERROR) ;
 
         root_node = xmlDocGetRootElement (a_doc) ;
+
         if (!root_node)
                 return CR_NO_ROOT_NODE_ERROR ;
 
         PRIVATE (a_this)->cascade = a_cascade ;
 
-        *a_box_model = 
-                create_box_tree_real (a_this, root_node,
-                                      NULL) ;
+        if (!*a_box_model)
+        {
+                *a_box_model = cr_box_model_new () ;
+        }
 
-        return CR_OK ;
+        box_tree = 
+                create_box_tree_real (a_this, root_node,
+                                      (CRBox*)*a_box_model) ;
+
+        if (box_tree)
+                return CR_OK ;
+        else
+                return CR_ERROR ;
 }
 
 

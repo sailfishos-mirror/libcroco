@@ -60,7 +60,7 @@ test_layout_box (void)
 	CRLayEng *layout_engine = NULL ;
 	xmlDoc *xml_doc = NULL ;
 	gulong len = 0 ;
-        CRBox *box_tree = NULL ;
+        CRBoxModel *box_model = NULL ;
 
 	len = strlen (gv_cssbuf) ;
 	status = cr_om_parser_simply_parse_buf ((guchar *)gv_cssbuf, len,
@@ -102,22 +102,22 @@ test_layout_box (void)
 	}
         sheet = NULL ;
 
-	status = cr_lay_eng_create_box_tree (layout_engine,
-                                             xml_doc, cascade,
-                                             &box_tree) ;
+	status = cr_lay_eng_create_box_model (layout_engine,
+                                              xml_doc, cascade,
+                                              &box_model) ;
 	if (status != CR_OK)
 	{
 		cr_utils_trace_info ("could not build the annotated doc") ;
 		goto cleanup ;
 	}
 
-        if (box_tree)
+        if (box_model)
         {
                 cr_lay_eng_layout_box_tree (layout_engine,
-                                            box_tree) ;
-                cr_box_dump_to_file (box_tree, 0, stdout) ;
-                cr_box_destroy (box_tree) ;
-                box_tree = NULL ;
+                                            ((CRBox*)box_model)->children) ;
+                cr_box_dump_to_file ((CRBox*)box_model, 0, stdout) ;
+                cr_box_destroy ((CRBox*)box_model) ;
+                box_model = NULL ;
         }
 
  cleanup:
@@ -141,10 +141,10 @@ test_layout_box (void)
 		xmlFreeDoc (xml_doc) ;
 		xml_doc = NULL ;
 	}
-        if (box_tree)
+        if (box_model)
         {
-                cr_box_destroy (box_tree) ;
-                box_tree = NULL ;
+                cr_box_destroy ((CRBox*)box_model) ;
+                box_model = NULL ;
         }
 
 	xmlCleanupParser () ;

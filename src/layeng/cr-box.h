@@ -79,6 +79,8 @@ struct _CRBoxEdge
 
 enum CRBoxType
 {
+        BOX_TYPE_UNDEFINED,
+        BOX_TYPE_BOX_MODEL,
         BOX_TYPE_BLOCK,
         BOX_TYPE_ANONYMOUS_BLOCK,
         BOX_TYPE_INLINE,
@@ -225,7 +227,7 @@ struct _CRBoxModel
 
 
 CRBoxModel *
-cr_box_new_model (void) ;
+cr_box_model_new (void) ;
 
 CRBoxContent *
 cr_box_content_new_from_text (guchar *a_text) ;

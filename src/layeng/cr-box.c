@@ -247,6 +247,34 @@ cr_box_content_destroy (CRBoxContent *a_this)
 }
 
 /**
+ *Creates a new box model.
+ *This box model contains an empty box tree.
+ *Box tree may be added by calling cr_box_append_child().
+ *@return the newly built instance of #CRBoxModel, or NULL if an
+ *error arises.
+ */
+CRBoxModel *
+cr_box_model_new (void)
+{
+        CRBoxModel *result = NULL ;
+
+        result = g_try_malloc (sizeof (CRBoxModel)) ;
+        if (!result)
+        {
+                cr_utils_trace_info ("Out of memory") ;
+                return NULL ;
+        }
+
+        memset (result, 0, sizeof (CRBoxModel)) ;
+
+        ((CRBox*)result)->type = BOX_TYPE_BOX_MODEL ;
+        ((CRBox*)result)->box_model = result ;
+
+        return result ;
+}
+
+
+/**
  *Instanciates a new box.
  *Everything is initialized to zero in it.
  *@return the newly created box.
@@ -302,14 +330,16 @@ cr_box_append_child (CRBox *a_this, CRBox *a_to_append)
 {
 	CRBox * cur = NULL ;
 
-	g_return_val_if_fail (a_this && a_to_append, CR_BAD_PARAM_ERROR) ;
+	g_return_val_if_fail (a_this 
+                              && a_this->box_model
+                              && a_to_append, CR_BAD_PARAM_ERROR) ;
 
 	if (!a_this->children)
 	{
 		a_this->children = a_to_append ;
                 a_to_append->prev = NULL ;
                 a_to_append->parent = a_this ;
-
+                a_to_append->box_model = a_this->box_model ;
 		return CR_OK ;
 	}
 
@@ -319,6 +349,7 @@ cr_box_append_child (CRBox *a_this, CRBox *a_to_append)
 	cur->next = a_to_append ;
         a_to_append->prev = cur ;
         a_to_append->parent = cur ;
+        a_to_append->box_model = a_this->box_model ;
 
 	return CR_OK ;
 }
@@ -338,6 +369,8 @@ cr_box_insert_sibling (CRBox *a_prev,
 	g_return_val_if_fail (a_prev && a_prev->parent
 			      && a_next && a_prev->next == a_next
 			      && a_next->parent == a_prev->parent
+                              && a_prev->box_model
+                              && a_prev->box_model == a_next->box_model
 			      && a_to_insert
 			      && a_to_insert->parent != a_prev->parent,
 			      CR_BAD_PARAM_ERROR) ;
@@ -347,6 +380,7 @@ cr_box_insert_sibling (CRBox *a_prev,
 	a_to_insert->next = a_next ;
 	a_next->prev = a_to_insert ;
         a_to_insert->parent = a_prev->parent ;
+        a_to_insert->box_model = a_prev->box_model ;
 
 	return CR_OK ;
 }
@@ -391,7 +425,7 @@ cr_box_to_string (CRBox *a_this,
                 cr_utils_dump_n_chars2 (' ', result, a_nb_indent) ;
 
                 switch (cur_box->type)
-                {
+                {                        
                 case BOX_TYPE_BLOCK:
                         g_string_append_printf (result, "BLOCK") ;
                         break ;
@@ -416,6 +450,10 @@ cr_box_to_string (CRBox *a_this,
                         g_string_append_printf (result, "RUN IN") ;
                         break ;
 
+                case BOX_TYPE_BOX_MODEL:
+                        g_string_append_printf (result, "Root") ;
+                        break ;
+
                 default:
                         g_string_append_printf (result, "UNKNOWN") ;
                         break ;
@@ -436,6 +474,7 @@ cr_box_to_string (CRBox *a_this,
                                         (result, "xml-node-name: %s\n", 
                                          cur_box->box_data->xml_node->name) ;
                                 break ;
+
                         case XML_TEXT_NODE:
                                 cr_utils_dump_n_chars2 
                                         (' ', result, a_nb_indent) ;

@@ -62,10 +62,11 @@ cr_lay_eng_get_matched_style (CRLayEng *a_this,
                               CRStyle *a_parent_style,
                               CRStyle **a_style) ;
 enum CRStatus
-cr_lay_eng_create_box_tree (CRLayEng *a_this,
-                            xmlDoc *a_xml_doc,
-                            CRCascade *a_cascade,
-                            CRBox **a_box_tree) ;
+cr_lay_eng_create_box_model (CRLayEng *a_this,
+                             xmlDoc *a_xml_doc,
+                             CRCascade *a_cascade,
+                             CRBoxModel **a_box_model) ;
+
 enum CRStatus
 cr_lay_eng_layout_box_tree (CRLayEng *a_this,
                             CRBox *a_box_tree) ;

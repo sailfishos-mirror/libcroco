@@ -3,10 +3,11 @@
 
 Go forward in the box layout (positioning) code. (hard, very hard).
 This is gonna take me a coupe of months I think.
- cr-box.c:347 finish the CRBox dumping function for debug purpose
- and debug the box model creation code.
-
- cr-box.c:281:finish the computing of the content width and height.
+ cr-lay-eng.c:adjust_edges_on_inner_edge() code the TODO of this
+ method. this is the must have before coding the draw_box() function.
+ I wonder when the draw_box will enable me to see something on the
+ screen.
+ that day would then be a great day.
 
 *Doc:)
 
