@@ -1,3 +1,11 @@
+2003-03-04  Dodji  <dodji@tintin.mifon.org>
+
+	* src/cr-input.c (cr_input_new_from_buf): 
+	added this new method to instanciate an input stream from
+	an in memory buffer.
+	(cr_input_new_from_uri): modified this method to make it
+	use the new cr_input_new_from_buf() method.
+
 2003-03-03  Dodji  <dodji@tintin.mifon.org>
 
 	* tests/README-description.txt: 

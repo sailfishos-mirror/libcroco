@@ -94,11 +94,89 @@ struct _CRInputPriv
  **************************/
 #define CR_INPUT_MEM_CHUNK_SIZE 1024
 
+static CRInput *
+cr_input_new_real (void) ;
+
+
+static CRInput *
+cr_input_new_real (void)
+{
+        CRInput *result = NULL ;
+
+        result = g_try_malloc (sizeof (CRInput)) ;
+        if (!result)
+        {
+                cr_utils_trace_info ("Out of memory") ;
+                return NULL ;
+        }
+        memset (result, 0, sizeof (CRInput)) ;
+
+        PRIVATE (result) = g_try_malloc (sizeof (CRInput)) ;
+        if (!result)
+        {
+                cr_utils_trace_info ("Out of memory") ;
+                g_free (result) ;
+                return NULL ;
+        }
+        memset (PRIVATE (result), 0, sizeof (CRInputPriv)) ;
+        return result ;
+}
+
 
 /****************
  *Public methods
  ***************/
 
+
+/**
+ *Creates a new input stream from a memory buffer.
+ *@param a_buf the memory buffer to create the input stream from.
+ *@param a_len the size of the input buffer.
+ *@param a_enc the buffer's encoding.
+ *@return the newly built instance of #CRInput.
+ */
+CRInput *
+cr_input_new_from_buf (guchar *a_buf, gulong a_len,
+                       enum CREncoding a_enc)
+{
+        CRInput *result = NULL;
+        enum CRStatus status = CR_OK ;
+        CREncHandler *enc_handler = NULL ;
+        gulong len = a_len ;
+        g_return_val_if_fail (a_buf, NULL) ;
+
+        result = cr_input_new_real () ;
+        g_return_val_if_fail (result, NULL) ;
+
+        /*transform the encoding in utf8*/
+        if (a_enc != CR_UTF_8)
+        {
+                enc_handler = cr_enc_handler_get_instance (a_enc) ;
+                if (!enc_handler)
+                {
+                        goto error ;
+                }
+
+                status = cr_enc_handler_convert_input
+                        (enc_handler, a_buf, &len,
+                         &PRIVATE (result)->in_buf, 
+                         &PRIVATE (result)->in_buf_size) ;
+
+                if (status != CR_OK)
+                        goto error ;
+
+                PRIVATE (result)->line = 1 ;
+        }
+
+ error:
+        if (result)
+        {
+                cr_input_destroy (result) ;
+                result = NULL ;
+        }
+
+        return NULL ;        
+}
 
 /**
  *Creates a new input stream from
@@ -121,6 +199,8 @@ cr_input_new_from_uri (gchar *a_file_uri, enum CREncoding a_enc)
         gint nb_read = 0 ;
         gboolean loop = TRUE ;
         CREncHandler * enc_handler = NULL ;
+        guchar *utf8_buf = NULL ;
+        gulong len = 0 ;
 
         g_return_val_if_fail (a_file_uri, NULL) ;
 
@@ -154,6 +234,7 @@ cr_input_new_from_uri (gchar *a_file_uri, enum CREncoding a_enc)
         }
         memset (PRIVATE (result), 0, sizeof (CRInputPriv)) ;
 
+        /*load the file*/
         while (loop) 
         {
 
@@ -165,7 +246,6 @@ cr_input_new_from_uri (gchar *a_file_uri, enum CREncoding a_enc)
                 if (nb_read != CR_INPUT_MEM_CHUNK_SIZE) 
                 {                        
                         /*we read less chars than we wanted*/
-
                         if (feof (file_ptr)) 
                         {
                                 /*we reached eof*/
@@ -217,16 +297,13 @@ cr_input_new_from_uri (gchar *a_file_uri, enum CREncoding a_enc)
                 if (a_enc != CR_UTF_8)
                 {
                         enc_handler = cr_enc_handler_get_instance (a_enc);
-                        if (enc_handler == NULL && result)
+                        if (enc_handler == NULL)
                         {
                                 goto error ;
                         }
                         else
                         {
                                 /*encode the buffer in utf8.*/
-                                guchar *utf8_buf = NULL ;
-                                gulong len = 0 ;
-
                                 status = cr_enc_handler_convert_input 
                                         (enc_handler,
                                          PRIVATE (result)->in_buf,
@@ -264,7 +341,6 @@ cr_input_new_from_uri (gchar *a_file_uri, enum CREncoding a_enc)
 
         return NULL ;
 }
-
 
 /**
  *The destructor of the #CRInput class.

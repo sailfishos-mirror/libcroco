@@ -64,7 +64,9 @@ extern "C" {
                 glong next_byte_index ;
         } ;
 
-
+        CRInput *
+        cr_input_new_from_buf (guchar *a_buf, gulong a_len,
+                               enum CREncoding a_enc) ;
         CRInput *
         cr_input_new_from_uri (gchar *a_file_uri, enum CREncoding a_enc) ;
 
