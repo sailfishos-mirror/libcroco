@@ -1,3 +1,10 @@
+2003-03-24  dodji  <dodji@seketeli.org>
+
+	* src/cr-style.c (cr_style_set_style_from_decl): 
+	Have a first hot (and bugged) implem of this function.	
+	I can now, go and get worried about building the annotated
+	xml tree.
+
 2003-03-20  Gaël Chamoulaud  <strider@freespiders.org>
 
 	* Makefile.am (SUBDIRS): added man page for croco-config

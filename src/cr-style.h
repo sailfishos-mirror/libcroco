@@ -101,6 +101,20 @@ struct _CRBoxOffset
         CRNum num ;
 } ;
 
+enum CRWidthType
+{
+        WIDTH_DEFINED,
+        WIDTH_AUTO
+} ;
+
+typedef struct _CRWidth CRWidth ;
+struct _CRWidth
+{
+        enum CRWidthType type ;
+        CRNum num ;
+} ;
+
+
 #define BORDER_THIN 2
 #define BORDER_MEDIUM 4
 #define BORDER_THICK 6
@@ -160,7 +174,7 @@ struct _CRStyle
         /**the float property*/
         enum CRFloatType float_type ;
 
-        CRNum width ;
+        CRWidth width ;
         CRStyle *parent_style ;
 } ;
 

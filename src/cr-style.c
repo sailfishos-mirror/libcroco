@@ -168,6 +168,12 @@ set_prop_x_from_value (CRStyle *a_style, CRTerm *a_value,
                        enum CRDirection a_dir) ;
 
 static enum CRStatus
+set_prop_float (CRStyle *a_style, CRTerm *a_value) ;
+
+static enum CRStatus
+set_prop_width (CRStyle *a_style, CRTerm *a_value) ;
+
+static enum CRStatus
 cr_style_init_properties (void)
 {
 
@@ -658,7 +664,8 @@ set_prop_display_from_value (CRStyle *a_style, CRTerm *a_value)
                 {
                         if (!strncmp (disp_vals_map[i].prop_name,
                                       a_value->content.str->str,
-                                      strlen (disp_vals_map[i].prop_name)))
+                                      strlen 
+                                      (disp_vals_map[i].prop_name)))
                         {
                                 a_style->display = disp_vals_map[i].type ;
                         }
@@ -782,7 +789,8 @@ set_prop_x_from_value (CRStyle *a_style, CRTerm *a_value,
         case DIR_BOTTOM:
                 box_offset = &a_style->bottom ;
                 if (a_style->parent_style)
-                        parent_box_offset = &a_style->parent_style->bottom;
+                        parent_box_offset = 
+                                &a_style->parent_style->bottom;
                 break ;
         case DIR_LEFT:
                 box_offset = &a_style->left ;
@@ -825,6 +833,101 @@ set_prop_x_from_value (CRStyle *a_style, CRTerm *a_value,
         return CR_OK ;        
 }
 
+
+static enum CRStatus
+set_prop_float (CRStyle *a_style, CRTerm *a_value)
+{
+        g_return_val_if_fail (a_style && a_value, CR_BAD_PARAM_ERROR) ;
+
+        /*the default float type as specified by the css2 spec*/
+        a_style->float_type = FLOAT_NONE ;
+
+        if (a_value->type != TERM_STRING
+            || !a_value->content.str
+            || !a_value->content.str->str) 
+        {/*unknow type, the float type is set to it's default value*/
+                return CR_OK ;
+        }
+
+        if (!strncmp ("none",
+                      a_value->content.str->str,
+                      strlen ("none")))
+        {
+                a_style->float_type = FLOAT_NONE ;
+        }
+        else if (!strncmp ("left",
+                           a_value->content.str->str,
+                           strlen ("left")))
+        {
+                a_style->float_type = FLOAT_LEFT ;
+        }
+        else if (!strncmp ("right",
+                           a_value->content.str->str,
+                           strlen ("right")))
+        {
+                a_style->float_type = FLOAT_RIGHT ;
+        }
+        else if (!strncmp ("inherit",
+                           a_value->content.str->str,
+                           strlen ("inherit")))
+        {
+                a_style->float_type = 
+                        a_style->parent_style->float_type ;
+        }
+
+        return CR_OK ;        
+}
+
+
+static enum CRStatus
+set_prop_width (CRStyle *a_style, CRTerm *a_value)
+{
+        g_return_val_if_fail (a_style && a_value, CR_BAD_PARAM_ERROR) ;
+
+        
+        a_style->width.type = WIDTH_AUTO ;
+        
+        if (a_value->type == TERM_STRING)
+        {
+                if (a_value->content.str
+                    && a_value->content.str->str)
+                {
+                        if (!strncmp ("auto",
+                                      a_value->content.str->str,
+                                      strlen ("auto")))
+                        {
+                                a_style->width.type = WIDTH_AUTO ;
+                        }
+                        else if (!strncmp ("inherit",
+                                           a_value->content.str->str,
+                                           strlen ("inherit")))
+                        {
+                                a_style->width.type = 
+                                        a_style->parent_style->width.type;
+
+                                cr_num_copy 
+                                        (&a_style->width.num,
+                                         &a_style->parent_style->width.num);
+                        }
+                }
+        }
+        else if (a_value->type == TERM_NUMBER)
+        {
+                if (a_value->content.num)
+                {
+                        cr_num_copy (&a_style->width.num,
+                                     a_value->content.num) ;
+                        a_style->width.type = WIDTH_DEFINED ;
+                }
+        }
+
+        return CR_OK ;
+}
+
+
+/**
+ *Default constructor of #CRStyle.
+ */
 CRStyle *
 cr_style_new (void)
 {
@@ -843,6 +946,17 @@ cr_style_new (void)
 }
 
 
+/**
+ *Instanciates a new #CRStyle from a ruleset statement.
+ *Actually walks through all declarations of the ruleset
+ *statement and for each of them, sets the corresponding field
+ *of the CRStyle structure.
+ *@param a_stmt the ruleset statement.
+ *@param a_parent_style the parent style: the style of the
+ *parent xml element.
+ *@param a_style out parameter. The newly built instance of #CRStyle.
+ *@return CR_OK upon successfull completion, an error code otherwise.
+ */
 enum CRStatus
 cr_style_new_from_ruleset (CRStatement *a_stmt, 
                            CRStyle *a_parent_style,
@@ -875,7 +989,19 @@ cr_style_new_from_ruleset (CRStatement *a_stmt,
 	return CR_OK ;
 }
 
-
+/**
+ *Walks through a css2 property declaration, and populated the
+ *according field(s) in the #CRStyle structure.
+ *If the properties or their value(s) are/is not known, 
+ *sets the corresponding field(s) of #CRStyle to its/their default 
+ *value(s)
+ *@param a_this the instance of #CRStyle to set.
+ *@param a_decl the declaration from which the #CRStyle fields are set.
+ *@param a_parent_style the style of the parent xml node. The parent
+ *xml node is the parent node of the node that generated this style 
+ *structure.
+ *@return CR_OK upon successfull completion, an error code otherwise.
+ */
 enum CRStatus
 cr_style_set_style_from_decl (CRStyle *a_this, CRDeclaration *a_decl,
                               CRStyle *a_parent_style)
@@ -918,67 +1044,80 @@ cr_style_set_style_from_decl (CRStyle *a_this, CRDeclaration *a_decl,
                 break ;
                 
         case PROP_BORDER_TOP_WIDTH:
-                status = set_prop_border_x_width_from_value (a_this, value,
-                                                             DIR_TOP) ;
+                status = 
+                        set_prop_border_x_width_from_value (a_this, value,
+                                                            DIR_TOP) ;
                 break ;
 
         case PROP_BORDER_RIGHT_WIDTH:
-                status = set_prop_border_x_width_from_value (a_this, value,
-                                                             DIR_RIGHT) ;
+                status = 
+                        set_prop_border_x_width_from_value (a_this, value,
+                                                            DIR_RIGHT) ;
                 break ;
 
         case PROP_BORDER_BOTTOM_WIDTH:
-                status = set_prop_border_x_width_from_value (a_this, value,
-                                                             DIR_BOTTOM) ;
+                status = 
+                        set_prop_border_x_width_from_value (a_this, value,
+                                                            DIR_BOTTOM) ;
                 break ;
 
         case PROP_BORDER_LEFT_WIDTH:
-                status = set_prop_border_x_width_from_value (a_this, value,
-                                                             DIR_BOTTOM) ;
+                status = 
+                        set_prop_border_x_width_from_value (a_this, value,
+                                                            DIR_BOTTOM) ;
                 break ;
 
         case PROP_BORDER_TOP_STYLE:
-                status = set_prop_border_x_style_from_value (a_this, value,
-                                                             DIR_TOP) ;
+                status = 
+                        set_prop_border_x_style_from_value (a_this, value,
+                                                            DIR_TOP) ;
                 break ;
 
         case PROP_BORDER_RIGHT_STYLE:
-                status = set_prop_border_x_style_from_value (a_this, value,
-                                                             DIR_RIGHT) ;
+                status = 
+                        set_prop_border_x_style_from_value (a_this, value,
+                                                            DIR_RIGHT) ;
                 break ;
 
         case PROP_BORDER_BOTTOM_STYLE:
-                status = set_prop_border_x_style_from_value (a_this, value,
-                                                             DIR_BOTTOM) ;
+                status = 
+                        set_prop_border_x_style_from_value (a_this, value,
+                                                            DIR_BOTTOM) ;
                 break ;
 
         case PROP_BORDER_LEFT_STYLE: 
-                status = set_prop_border_x_style_from_value (a_this, value,
-                                                             DIR_LEFT) ;
+                status = 
+                        set_prop_border_x_style_from_value (a_this, value,
+                                                            DIR_LEFT) ;
                 break ;
 
         case PROP_MARGIN_TOP:
-                status = set_prop_margin_x_from_value (a_this, value,
-                                                       DIR_TOP) ;
+                status = 
+                        set_prop_margin_x_from_value (a_this, value,
+                                                      DIR_TOP) ;
                 break ;
 
         case PROP_MARGIN_RIGHT:
-                status = set_prop_margin_x_from_value (a_this, value,
-                                                       DIR_RIGHT) ;
+                status = 
+                        set_prop_margin_x_from_value (a_this, value,
+                                                      DIR_RIGHT) ;
                 break ;
 
         case PROP_MARGIN_BOTTOM:
-                status = set_prop_margin_x_from_value (a_this, value,
-                                                       DIR_BOTTOM) ;
+                status = 
+                        set_prop_margin_x_from_value (a_this, value,
+                                                      DIR_BOTTOM) ;
                 break ;
 
         case PROP_MARGIN_LEFT:
-                status = set_prop_margin_x_from_value (a_this, value,
-                                                       DIR_TOP) ;
+                status = 
+                        set_prop_margin_x_from_value (a_this, value,
+                                                      DIR_TOP) ;
                 break ;
 
         case PROP_DISPLAY:
-                status = set_prop_display_from_value (a_this, value) ;
+                status = 
+                        set_prop_display_from_value (a_this, value) ;
                 break ;
 
         case PROP_POSITION:
@@ -1006,9 +1145,11 @@ cr_style_set_style_from_decl (CRStyle *a_this, CRDeclaration *a_decl,
                 break ;
 
         case PROP_FLOAT:
+                status = set_prop_float (a_this, value) ;
                 break ;
 
         case PROP_WIDTH:
+                status = set_prop_width (a_this, value) ;
                 break ;
 
         default:
@@ -1019,6 +1160,11 @@ cr_style_set_style_from_decl (CRStyle *a_this, CRDeclaration *a_decl,
         
 }
 
+
+/**
+ *Destructor of the #CRStyle class.
+ *@param a_this the instance to destroy.
+ */
 void
 cr_style_destroy (CRStyle *a_this)
 {
