@@ -3,7 +3,12 @@
 	* docs/examples/selection-example-1.c: a bit of cleanup 
 	and bug fix here.
 	* docs/examples/selection-example-1.css: added more test cases.
-	
+	* src/seleng/cr-sel-eng.c: 
+	(additional_selector_matches_node): added this function to 
+	factorise the evaluation of additional selectors.
+	(sel_matches_node_real ): use additional_selector_matches_node().
+	This fixes a selector bug spotted by Stefan Seefeld.
+
 2003-12-11  Dodji Seketeli <dodji@gnome.org>
 
 	* configure.in: updated version numbers for 0.4.

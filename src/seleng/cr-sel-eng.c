@@ -329,6 +329,67 @@ attr_add_sel_matches_node (CRAdditionalSel *a_add_sel,
 }
 
 /**
+ *Evaluates if a given additional selector matches an xml node.
+ *@param a_add_sel the additional selector to consider.
+ *@param a_node the xml node to consider.
+ *@return TRUE is a_add_sel matches a_node, FALSE otherwise.
+ */
+static gboolean
+additional_selector_matches_node (CRAdditionalSel *a_add_sel,
+                                  xmlNode *a_node)
+{
+        if (!a_add_sel)
+        {
+                return FALSE ;
+        }
+
+        if (a_add_sel->type == NO_ADD_SELECTOR)
+        {
+                return FALSE ;
+        }
+        
+        if (a_add_sel->type == CLASS_ADD_SELECTOR
+            && a_add_sel->content.class_name
+            && a_add_sel->content.class_name->str)
+        {
+                if (class_add_sel_matches_node 
+                    (a_add_sel, a_node) == FALSE)
+                {
+                        return FALSE ;
+                }
+                return TRUE ;
+        }
+        else if (a_add_sel->type == ID_ADD_SELECTOR
+                 && a_add_sel->content.id_name
+                 && a_add_sel->content.id_name->str)
+        {
+                if (id_add_sel_matches_node 
+                    (a_add_sel, a_node) == FALSE)
+                {
+                        return FALSE ;
+                }
+                return TRUE ;
+        }
+        else if (a_add_sel->type == ATTRIBUTE_ADD_SELECTOR
+                 && a_add_sel->content.attr_sel)
+        {
+                /*
+                 *here, call a function that does the match
+                 *against an attribute additionnal selector
+                 *and an xml node.
+                 */
+                if (attr_add_sel_matches_node 
+                    (a_add_sel, a_node)
+                    == FALSE)
+                {
+                        return FALSE ;
+                }
+                return TRUE ;
+        }
+        return FALSE ;
+}
+
+/**
  *Evaluate a selector (a simple selectors list) and says
  *if it matches the xml node given in parameter.
  *The algorithm used here is the following:
@@ -397,7 +458,16 @@ sel_matches_node_real (CRSelEng *a_this, CRSimpleSel *a_sel,
                                          *simple selectors also match
                                          *their xml node counterpart.
                                          */
-					goto walk_a_step_in_expr ;
+                                        if (cur_sel->add_sel) {
+                                                if (additional_selector_matches_node 
+                                                    (cur_sel->add_sel, cur_node) == TRUE) {
+                                                        goto walk_a_step_in_expr ;
+                                                } else {
+                                                        goto done ;
+                                                }
+                                        } else {
+                                                goto walk_a_step_in_expr ;
+                                        }					
 				}
                                 goto done ;
 			}
@@ -411,51 +481,13 @@ sel_matches_node_real (CRSelEng *a_this, CRSimpleSel *a_sel,
                 {
                         goto done ;
                 }
-
-		if (cur_sel->add_sel->type == NO_ADD_SELECTOR)
-                {
-			goto done ;
+                if (additional_selector_matches_node 
+                    (cur_sel->add_sel, cur_node) == TRUE) {
+                        goto walk_a_step_in_expr ;
+                } else {
+                        goto done ;
                 }
-		
-		if (cur_sel->add_sel->type == CLASS_ADD_SELECTOR
-		    && cur_sel->add_sel->content.class_name
-		    && cur_sel->add_sel->content.class_name->str)
-		{
-                        if (class_add_sel_matches_node 
-                            (cur_sel->add_sel, cur_node) == FALSE)
-                        {
-                                goto done ;
-                        }
-                        goto walk_a_step_in_expr ;
-		}
-		else if (cur_sel->add_sel->type == ID_ADD_SELECTOR
-			 && cur_sel->add_sel->content.id_name
-			 && cur_sel->add_sel->content.id_name->str)
-		{
-                        if (id_add_sel_matches_node 
-                            (cur_sel->add_sel, cur_node) == FALSE)
-                        {
-                               goto done;
-                        }
-                        goto walk_a_step_in_expr ;
-		}
-		else if (cur_sel->add_sel->type == ATTRIBUTE_ADD_SELECTOR
-			 && cur_sel->add_sel->content.attr_sel)
-		{
-                        /*
-			 *here, call a function that does the match
-			 *against an attribute additionnal selector
-			 *and an xml node.
-			 */
-                        if (attr_add_sel_matches_node 
-                            (cur_sel->add_sel, cur_node)
-                            == FALSE)
-                        {
-                                goto done ;
-                        }
-                        goto walk_a_step_in_expr ;
-		}
-
+                        
 	walk_a_step_in_expr:
                 if (a_recurse == FALSE)
                 {

@@ -50,6 +50,11 @@ xml start element: E2
     prop5 : val5
   }
 
+
+  E2[attr2="val2"] {
+    prop8 : val8
+  }
+
 xml end element: E2
 '''''''''''''''''''''''''
 '''''''''''''''''''''''''
