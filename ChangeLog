@@ -1,9 +1,20 @@
 2004-03-03  Dodji Seketeli  <dodji@gnome.org>
 
+	* csslint/csslint.c:
+	(cssom_parse) put a '\n' after dumping the sheet on screen.
+	* src/cr-parser.c:
+	(cr_parser_parse_page): fixed a small bug in here.
+	This should fix http://bugzilla.gnome.org/show_bug.cgi?id=136109.
+	* src/cr-statement.c: 
+	(cr_statement_dump_page): added a white space before dumping
+	the pseudo part of the @page rule.
+
+2004-03-03  Dodji Seketeli  <dodji@gnome.org>
+
 	* csslint/csslint.c: added the support of selectors evaluation
 	in csslint. Now, one can do csslint --evaluate --xml <an xml file>
-	--author-sheet <a-css-sheet> --xpath <an xpath expression> .
-	This will show the css properties associated to the xml node(s) 
+	--author-sheet <a-css-sheet> --xpath <an xpath expression>.
+	This will show the css properties associated to the xml node(s)
 	refered to by the xpath expression.
 	* src/cr-declaration.[ch]: 
 	(cr_declaration_dump_one) added this new api entry to dump

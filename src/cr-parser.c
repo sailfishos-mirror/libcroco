@@ -4591,8 +4591,9 @@ cr_parser_parse_page (CRParser *a_this)
 
        /* 
         *try to parse pseudo_page
-        */        
+        */
 
+        cr_parser_try_to_skip_spaces_and_comments (a_this) ;
         status = cr_tknzr_get_next_token (PRIVATE (a_this)->tknzr,
                                           &token) ;
         ENSURE_PARSING_COND (status == CR_OK 

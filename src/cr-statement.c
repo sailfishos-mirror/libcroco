@@ -734,7 +734,7 @@ cr_statement_dump_page (CRStatement *a_this, FILE *a_fp, gulong a_indent)
 		str = g_strndup (a_this->kind.page_rule->pseudo->str,
 				 a_this->kind.page_rule->pseudo->len) ;
 		g_return_if_fail (str) ;
-		fprintf (a_fp,":%s", str) ;
+		fprintf (a_fp," :%s", str) ;
 		if (str)
 		{
 			g_free (str) ;

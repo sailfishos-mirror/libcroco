@@ -277,6 +277,7 @@ cssom_parse (guchar * a_file_uri)
 	if (status == CR_OK && stylesheet)
 	{
 		cr_stylesheet_dump (stylesheet, stdout) ;
+                g_print ("\n") ;
 		cr_stylesheet_destroy (stylesheet) ;
 	}
 	cr_om_parser_destroy (parser) ;
