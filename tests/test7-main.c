@@ -296,7 +296,8 @@ test_layout_box (void)
                 gtk_window_set_title (GTK_WINDOW (window), 
                                       "Croco Renderer Test") ;
                 gtk_window_set_policy (GTK_WINDOW (window), TRUE, TRUE, TRUE) ;
-                gtk_widget_set_usize (window, 800, 600) ;
+                gtk_window_set_usise () ;
+
                 g_signal_connect (G_OBJECT (window),
                                   "delete-event",
                                   G_CALLBACK (delete_event_cb),
@@ -309,13 +310,15 @@ test_layout_box (void)
                         goto cleanup ;
                 }
                 gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (scroll),
-                                                GTK_POLICY_AUTOMATIC,
-                                                GTK_POLICY_AUTOMATIC) ;
+                                                GTK_POLICY_ALWAYS,
+                                                GTK_POLICY_ALWAYS) ;
 
                 box_view = cr_box_view_new (box_model) ;
+                
                 gtk_container_add (GTK_CONTAINER (window), scroll) ;
-                gtk_container_add (GTK_CONTAINER (scroll), 
-                                   GTK_WIDGET (box_view)) ;
+                gtk_container_add
+                        (GTK_CONTAINER (scroll), 
+                         GTK_WIDGET (box_view)) ;
                 gtk_widget_show_all (window) ;
                 gtk_main () ;
 

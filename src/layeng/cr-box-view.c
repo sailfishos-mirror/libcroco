@@ -647,7 +647,7 @@ cr_box_view_new (CRBoxModel *a_box_root)
         g_return_val_if_fail (result, NULL) ;
 
         cr_box_view_set_box_model (result, a_box_root) ;
-
+        gtk_layout_set_size (GTK_LAYOUT (result), 1024, 768) ;
         g_signal_connect (G_OBJECT (result),
                           "expose-event",
                           (GCallback)expose_event_cb,
