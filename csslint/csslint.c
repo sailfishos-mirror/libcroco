@@ -28,7 +28,8 @@
  *@param a_argc the argc variable passed to the main function.
  *@param a_argv the argv variable passed to the main function.
  */
-static void showVersion (const char *name) 
+static void 
+showVersion (const char *name) 
 {
     fprintf(stderr, "%s: using libcroco version %s\n", name, VERSION);
     fprintf(stderr, "   compiled with: ");
@@ -49,7 +50,8 @@ static void showVersion (const char *name)
  *@param a_argc the argc variable passed to the main function.
  *@param a_argv the argv variable passed to the main function.
  */
-static void usage(const char *name) 
+static void 
+usage(const char *name) 
 {
     printf("Usage : %s [options] CSS2files ...\n", name);
     printf("\tParse the CSS2 files and output the result of the parsing\n");
