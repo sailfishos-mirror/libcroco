@@ -540,6 +540,8 @@ cr_box_append_child (CRBox *a_this, CRBox *a_to_append)
 	if (!a_this->children)
 	{
 		a_this->children = a_to_append ;
+                a_to_append->prev = NULL ;
+
 		return CR_OK ;
 	}
 
@@ -547,6 +549,7 @@ cr_box_append_child (CRBox *a_this, CRBox *a_to_append)
 		;
 
 	cur->next = a_to_append ;
+        a_to_append->prev = cur ;
 
 	return CR_OK ;
 }
@@ -612,6 +615,9 @@ cr_box_to_string (CRBox *a_this,
 
         for (cur_box = a_this ; cur_box ; cur_box = cur_box->next)
         {
+                if (cur_box->prev || cur_box->parent)
+                        g_string_append_printf (result, "\n\n") ;
+
                 cr_utils_dump_n_chars2 (' ', result, a_nb_indent) ;
 
                 switch (cur_box->type)
@@ -689,7 +695,6 @@ cr_box_to_string (CRBox *a_this,
                         g_string_append_printf (result, "\n") ;
                         cr_box_to_string (cur_box->children,
                                           a_nb_indent + 2, &result) ;
-                        g_string_append_printf (result, "\n") ;
                 }
 
                 g_string_append_printf (result, "\n") ;
