@@ -83,6 +83,8 @@ enum CRPropertyID
         PROP_ID_COLOR,        
         PROP_ID_BACKGROUND_COLOR,
         PROP_ID_FONT_FAMILY,
+        PROP_ID_FONT_SIZE,
+
         /*should be the last one.*/
         NB_PROP_IDS
 } ;
@@ -133,6 +135,7 @@ static CRPropertyDesc gv_prop_table [] =
         {"color", PROP_ID_COLOR},
         {"background-color", PROP_ID_BACKGROUND_COLOR},
         {"font-family", PROP_ID_FONT_FAMILY},
+        {"font-size", PROP_ID_FONT_SIZE},
 
         /*must be the last one*/
 	{NULL, 0}
@@ -232,6 +235,13 @@ set_prop_margin_from_value (CRStyle *a_style, CRTerm *a_value) ;
 
 static enum CRStatus
 set_prop_font_family_from_value (CRStyle *a_style, CRTerm *a_value) ;
+
+static enum CRStatus
+init_style_font_size_field (CRStyle *a_style) ;
+
+static enum CRStatus
+set_prop_font_size_from_value (CRStyle *a_style, CRTerm *a_value) ;
+
 
 static enum CRStatus
 cr_style_init_properties (void)
@@ -1459,6 +1469,193 @@ set_prop_font_family_from_value (CRStyle *a_style, CRTerm *a_value)
         return CR_OK ;
 }
 
+static enum CRStatus
+init_style_font_size_field (CRStyle *a_style)
+{
+        g_return_val_if_fail (a_style, CR_BAD_PARAM_ERROR) ;
+        
+        if (!a_style->font_size)
+        {
+                a_style->font_size = cr_font_size_new () ;
+                if (!a_style->font_size)
+                {
+                        return CR_INSTANCIATION_FAILED ;
+                }
+        }
+        else
+        {
+                cr_font_size_clear (a_style->font_size) ;
+        }
+        
+        return CR_OK ;
+}
+
+static enum CRStatus
+set_prop_font_size_from_value (CRStyle *a_style, CRTerm *a_value)
+{
+        enum CRStatus status = CR_OK ;
+
+        g_return_val_if_fail (a_style && a_value, CR_BAD_PARAM_ERROR) ;
+
+        switch (a_value->type)
+        {
+        case TERM_IDENT:
+                if (a_value->content.str 
+                    && a_value->content.str->str
+                    && !strcmp (a_value->content.str->str, "xx-small"))
+                {
+                        status = init_style_font_size_field (a_style) ;
+                        g_return_val_if_fail (status == CR_OK,
+                                              status) ;
+
+                        a_style->font_size->type = 
+                                PREDEFINED_ABSOLUTE_FONT_SIZE ;
+                        a_style->font_size->value.predef_abs = 
+                                FONT_SIZE_XX_SMALL ;
+                        
+                }
+                else if (a_value->content.str 
+                         && a_value->content.str->str
+                         && !strcmp (a_value->content.str->str, "x-small"))
+                {
+                        status = init_style_font_size_field (a_style) ;
+                        g_return_val_if_fail (status == CR_OK,
+                                              status) ;
+
+                        a_style->font_size->type = 
+                                PREDEFINED_ABSOLUTE_FONT_SIZE ;
+                        a_style->font_size->value.predef_abs = 
+                                FONT_SIZE_X_SMALL ;
+                }
+                else if (a_value->content.str 
+                         && a_value->content.str->str
+                         && !strcmp (a_value->content.str->str, "small"))
+                {
+                        status = init_style_font_size_field (a_style) ;
+                        g_return_val_if_fail (status == CR_OK,
+                                              status) ;
+
+                        a_style->font_size->type = 
+                                PREDEFINED_ABSOLUTE_FONT_SIZE ;
+                        a_style->font_size->value.predef_abs = 
+                                FONT_SIZE_SMALL ;
+                }
+                else if (a_value->content.str 
+                         && a_value->content.str->str
+                         && !strcmp (a_value->content.str->str, "medium"))
+                {
+                        status = init_style_font_size_field (a_style) ;
+                        g_return_val_if_fail (status == CR_OK,
+                                              status) ;
+
+                        a_style->font_size->type = 
+                                PREDEFINED_ABSOLUTE_FONT_SIZE ;
+                        a_style->font_size->value.predef_abs = 
+                                FONT_SIZE_MEDIUM ;
+                }
+                else if (a_value->content.str 
+                         && a_value->content.str->str
+                         && !strcmp (a_value->content.str->str, "large"))
+                {
+                        status = init_style_font_size_field (a_style) ;
+                        g_return_val_if_fail (status == CR_OK,
+                                              status) ;
+
+                        a_style->font_size->type = 
+                                PREDEFINED_ABSOLUTE_FONT_SIZE ;
+                        a_style->font_size->value.predef_abs = 
+                                FONT_SIZE_LARGE ;
+                }
+                else if (a_value->content.str 
+                         && a_value->content.str->str
+                         && !strcmp (a_value->content.str->str, "x-large"))
+                {
+                        status = init_style_font_size_field (a_style) ;
+                        g_return_val_if_fail (status == CR_OK,
+                                              status) ;
+
+                        a_style->font_size->type = 
+                                PREDEFINED_ABSOLUTE_FONT_SIZE ;
+                        a_style->font_size->value.predef_abs = 
+                                FONT_SIZE_X_LARGE ;
+                }
+                else if (a_value->content.str 
+                         && a_value->content.str->str
+                         && !strcmp (a_value->content.str->str, "xx-large"))
+                {
+                        status = init_style_font_size_field (a_style) ;
+                        g_return_val_if_fail (status == CR_OK,
+                                              status) ;
+
+                        a_style->font_size->type = 
+                                PREDEFINED_ABSOLUTE_FONT_SIZE ;
+                        a_style->font_size->value.predef_abs = 
+                                FONT_SIZE_XX_LARGE ;
+                }
+                else if (a_value->content.str 
+                         && a_value->content.str->str
+                         && !strcmp (a_value->content.str->str, "larger"))
+                {
+                        status = init_style_font_size_field (a_style) ;
+                        g_return_val_if_fail (status == CR_OK, status) ;
+
+                        a_style->font_size->type = 
+                                RELATIVE_FONT_SIZE ;
+                        a_style->font_size->value.relative = 
+                                FONT_SIZE_LARGER ;
+                }
+                else if (a_value->content.str 
+                         && a_value->content.str->str
+                         && !strcmp (a_value->content.str->str, "smaller"))
+                {
+                        status = init_style_font_size_field (a_style) ;
+                        g_return_val_if_fail (status == CR_OK, status) ;
+
+                        a_style->font_size->type = 
+                                RELATIVE_FONT_SIZE ;
+                        a_style->font_size->value.relative = 
+                                FONT_SIZE_SMALLER ;
+                }
+                else if (a_value->content.str 
+                         && a_value->content.str->str
+                         && !strcmp (a_value->content.str->str, "inherit"))
+                {
+                        status = init_style_font_size_field (a_style) ;
+                        g_return_val_if_fail (status == CR_OK, status) ;
+
+                        if (a_style->parent_style
+                            && a_style->parent_style->font_style)
+                        {
+                                cr_font_size_copy 
+                                        (a_style->font_size,
+                                         a_style->parent_style->font_size) ;
+                        }
+                }
+                else
+                {
+                        return CR_UNKNOWN_PROP_VAL_ERROR ;
+                }
+                break ;
+
+        case TERM_NUMBER:
+                if (a_value->content.num)
+                {
+                        status = init_style_font_size_field (a_style) ;
+                        g_return_val_if_fail (status == CR_OK, status) ;
+
+                        a_style->font_size->type = ABSOLUTE_FONT_SIZE ;
+                        a_style->font_size->value.absolute = 
+                                cr_num_dup (a_value->content.num) ;
+                }
+                break ;
+
+        default:
+                return CR_UNKNOWN_PROP_VAL_ERROR ;
+        }
+
+        return CR_OK ;
+}
+
 /******************
  *Public methods
  ******************/
@@ -1717,6 +1914,11 @@ cr_style_set_style_from_decl (CRStyle *a_this, CRDeclaration *a_decl)
         case PROP_ID_FONT_FAMILY:
                 status = 
                         set_prop_font_family_from_value (a_this, value) ;
+                break ;
+
+        case PROP_ID_FONT_SIZE:
+                status =
+                        set_prop_font_size_from_value (a_this, value) ;
                 break ;
 
         default:

@@ -213,6 +213,22 @@ cr_num_copy (CRNum *a_dest, CRNum *a_src)
         return CR_OK ;
 }
 
+CRNum *
+cr_num_dup (CRNum *a_this)
+{
+        CRNum *result = NULL ;
+        enum CRStatus status = CR_OK ;
+
+        g_return_val_if_fail (a_this, NULL) ;
+
+        result = cr_num_new () ;
+        g_return_val_if_fail (result, NULL) ;
+
+        status = cr_num_copy (result, a_this) ;
+        g_return_val_if_fail (status, NULL) ;
+
+        return result ;
+}
 
 enum CRStatus
 cr_num_set (CRNum *a_this, gdouble a_val, enum CRNumType a_type)

@@ -167,6 +167,67 @@ cr_font_size_new (void)
         return result ;        
 }
 
+enum CRStatus
+cr_font_size_clear (CRFontSize *a_this)
+{
+        g_return_val_if_fail (a_this, CR_BAD_PARAM_ERROR) ;
+
+        switch (a_this->type)
+        {
+        case PREDEFINED_ABSOLUTE_FONT_SIZE:
+        case RELATIVE_FONT_SIZE:
+        case INHERITED_FONT_SIZE:
+                memset (a_this, 0, sizeof (CRFontSize)) ;
+                break ;
+
+        case ABSOLUTE_FONT_SIZE:
+                if (a_this->value.absolute)
+                {
+                        cr_num_destroy (a_this->value.absolute) ;
+                }
+                memset (a_this, 0, sizeof (CRFontSize)) ;
+                break ;
+
+        default:
+                return CR_UNKNOWN_TYPE_ERROR ;
+        }
+
+        return CR_OK ;
+}
+
+enum CRStatus
+cr_font_size_copy (CRFontSize *a_dst, CRFontSize *a_src)
+{
+        g_return_val_if_fail (a_dst && a_src, CR_BAD_PARAM_ERROR) ;
+
+        switch (a_src->type)
+        {
+        case PREDEFINED_ABSOLUTE_FONT_SIZE:
+        case RELATIVE_FONT_SIZE:
+        case INHERITED_FONT_SIZE:
+                cr_font_size_clear (a_dst) ;
+                memcpy (a_dst, a_src, sizeof (CRFontSize)) ;
+                break ;
+
+        case ABSOLUTE_FONT_SIZE:                
+                if (a_src->value.absolute)
+                {
+                        cr_font_size_clear (a_dst) ;
+                        if (!a_dst->value.absolute)
+                        {
+                                a_dst->value.absolute = cr_num_new () ;
+                        }
+                        cr_num_copy (a_dst->value.absolute,
+                                     a_src->value.absolute) ;
+                        a_dst->type = a_src->type ;
+                }
+                break ;
+
+        default:
+                return CR_UNKNOWN_TYPE_ERROR ;
+        }
+        return CR_OK ;
+}
 
 void
 cr_font_size_destroy (CRFontSize *a_font_size)

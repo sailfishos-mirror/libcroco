@@ -83,6 +83,9 @@ CRNum *
 cr_num_new_with_val (gdouble a_val,
                      enum CRNumType a_type) ;
 
+CRNum *
+cr_num_dup (CRNum *a_this) ;
+
 guchar *
 cr_num_to_string (CRNum *a_this) ;
 

@@ -79,13 +79,13 @@ struct _CRFontFamily
  */
 enum CRPredefinedAbsoluteFontSize
 {
-        XX_SMALL_FONT_SIZE=0,
-        X_SMALL_FONT_SIZE,
-        SMALL_FONT_SIZE,
-        MEDIUM_FONT_SIZE,
-        LARGE_FONT_SIZE,
-        X_LARGE_FONT_SIZE,
-        XX_LARGE_FONT_SIZE
+        FONT_SIZE_XX_SMALL=0,
+        FONT_SIZE_X_SMALL,
+        FONT_SIZE_SMALL,
+        FONT_SIZE_MEDIUM,
+        FONT_SIZE_LARGE,
+        FONT_SIZE_X_LARGE,
+        FONT_SIZE_XX_LARGE
 } ;
 
 /**
@@ -101,8 +101,8 @@ enum CRPredefinedAbsoluteFontSize
  */
 enum CRRelativeFontSize
 {
-        LARGER_FONT_SIZE,
-        SMALLER_FONT_SIZE
+        FONT_SIZE_LARGER,
+        FONT_SIZE_SMALLER
 } ;
 
 /**
@@ -151,7 +151,7 @@ struct _CRFontSize
         enum CRFontSizeType type ;
         union 
         {
-                enum CRPredefinedAbsoluteFontSize predefine_absolute ;
+                enum CRPredefinedAbsoluteFontSize predef_abs ;
                 enum CRRelativeFontSize relative ;
                 CRNum * absolute ;
         } value;
@@ -246,6 +246,13 @@ cr_font_family_set_name (CRFontFamily *a_this, guchar *a_name) ;
 
 CRFontSize *
 cr_font_size_new (void) ;
+
+enum CRStatus
+cr_font_size_clear (CRFontSize *a_this) ;
+
+enum CRStatus
+cr_font_size_copy (CRFontSize *a_dst, CRFontSize *a_src) ;
+
 
 void
 cr_font_size_destroy (CRFontSize *a_font_size) ;
