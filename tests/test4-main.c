@@ -35,8 +35,12 @@
 
 CRDocHandler * gv_test_handler = {0} ;
 
-const guchar * gv_decl=
+const guchar * gv_decl_buf =
 "toto: tutu, tata" ;
+
+const guchar *gv_ruleset_buf =
+"s1 > s2 {toto: tutu, tata} "
+;
 
 static void 
 display_help (char *prg_name) ;
@@ -123,7 +127,7 @@ test_cr_declaration_parse (void)
         guchar * tmp_str = NULL ;
         CRDeclaration * decl = NULL ;
 
-        decl = cr_declaration_parse (NULL, gv_decl,
+        decl = cr_declaration_parse (NULL, gv_decl_buf,
                                      CR_UTF_8) ;
         tmp_str = cr_declaration_to_string (decl, 2) ;
 
@@ -142,6 +146,24 @@ test_cr_declaration_parse (void)
         return CR_ERROR ;
 }
 
+static enum CRStatus
+test_cr_statement_ruleset_parse (void)
+{
+        CRStatement *stmt = NULL ;
+        
+        stmt = cr_statement_ruleset_parse_from_buf (gv_ruleset_buf,
+                                                    CR_UTF_8) ;
+        g_return_val_if_fail (stmt, CR_ERROR) ;
+
+        if (stmt)
+        {
+                cr_statement_destroy (stmt) ;
+                stmt = NULL ;
+        }
+
+        return CR_OK ;
+}
+
 /**
  *The entry point of the testing routine.
  */
@@ -152,13 +174,19 @@ main (int argc, char ** argv)
         enum CRStatus status = CR_OK ;
 
         status = test_cr_declaration_parse () ;
-
         if (status != CR_OK)
         {
                 g_print ("\nKO\n") ;
                 return 0 ;
         }
-                
+
+        status = test_cr_statement_ruleset_parse () ;
+        if (status != CR_OK)
+        {
+                g_print ("\nKO\n") ;
+                return 0 ;
+        }
+
         cr_test_utils_parse_cmd_line (argc, argv, &options) ;
 
         if (options.display_help == TRUE)
@@ -179,13 +207,11 @@ main (int argc, char ** argv)
                 return 0 ;
         }
         
-        status = test_cr_parser_parse (options.files_list[0]) ;
-
-        
+        status = test_cr_parser_parse (options.files_list[0]) ;        
         if (status != CR_OK)
         {
                 g_print ("\nKO\n") ;
         }
-
+        
 	return 0 ;
 }

@@ -57,6 +57,7 @@ struct _CRAtMediaRule ;
 typedef struct _CRAtMediaRule CRAtMediaRule ;
 
 typedef struct _CRRuleSet CRRuleSet ;
+
 /**
  *The abstraction of a css ruleset.
  *A ruleset is made of a list of selectors,
@@ -281,6 +282,9 @@ CRStatement *
 cr_statement_unlink (CRStatement *a_this,
 		     CRStatement *a_to_unlink) ;
 
+CRStatement *
+cr_statement_ruleset_parse_from_buf (const guchar * a_buf,
+				     enum CREncoding a_enc) ;
 enum CRStatus
 cr_statement_ruleset_set_sel_list (CRStatement *a_this,
 				   CRSelector *a_sel_list) ;

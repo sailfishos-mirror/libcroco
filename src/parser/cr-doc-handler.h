@@ -39,6 +39,10 @@ G_BEGIN_DECLS
 
 typedef struct _CRDocHandler CRDocHandler ;
 
+struct _CRDocHandlerPriv ;
+typedef struct _CRDocHandlerPriv CRDocHandlerPriv ;
+
+
 /**
  *The SAC document handler.
  *An instance of this class is to
@@ -48,27 +52,13 @@ typedef struct _CRDocHandler CRDocHandler ;
  */
 struct _CRDocHandler
 {
+	CRDocHandlerPriv *priv ;
+
 	/**
 	 *This pointer is to be used by the application for
 	 *it custom needs. It is there to extend the doc handler.
 	 */
 	gpointer app_data ;
-
-	/**
-	 *This pointer is to hold an application parsing context.
-	 *For example, it used by the Object Model parser to 
-	 *store it parsing context. #CRParser does not touch it, but
-	 *#CROMParser does. #CROMParser allocates this pointer at
-	 *the beginning of the css document, and frees it at the end
-	 *of the document.
-	 */
-	gpointer context ;
-
-	/**
-	 *The place where #CROMParser put the result of it parsing, if
-	 *any.
-	 */
-	gpointer result ;
 
 	/**
 	 *Is called at the beginning of the parsing of the document.
@@ -270,6 +260,18 @@ struct _CRDocHandler
 } ;
 
 CRDocHandler * cr_doc_handler_new (void) ;
+
+enum CRStatus
+cr_doc_handler_set_result (CRDocHandler *a_this, gpointer a_result) ;
+
+enum CRStatus
+cr_doc_handler_get_result (CRDocHandler *a_this, gpointer * a_result) ;
+
+enum CRStatus
+cr_doc_handler_set_ctxt (CRDocHandler *a_this, gpointer a_ctxt) ;
+
+enum CRStatus
+cr_doc_handler_get_ctxt (CRDocHandler *a_this, gpointer * a_ctxt) ;
 
 enum CRStatus
 cr_doc_handler_set_default_sac_handler (CRDocHandler *a_this) ;

@@ -73,13 +73,10 @@ cr_parser_new_from_input (CRInput *a_input) ;
 enum CRStatus
 cr_parser_set_tknzr (CRParser *a_this, CRTknzr *a_tknzr) ;
 
-
 enum CRStatus
 cr_parser_try_to_skip_spaces_and_comments (CRParser *a_this) ;
 
-enum CRStatus
-cr_parser_parse_declaration (CRParser *a_this, GString **a_property,
-                             CRTerm **a_expr) ;
+
 enum CRStatus
 cr_parser_set_sac_handler (CRParser *a_this, 
                            CRDocHandler *a_handler) ;
@@ -108,6 +105,13 @@ cr_parser_parse_buf (CRParser *a_this, const guchar *a_buf,
 
 enum CRStatus
 cr_parser_set_default_sac_handler (CRParser *a_this) ;
+
+
+enum CRStatus
+cr_parser_parse_declaration (CRParser *a_this, GString **a_property,
+                             CRTerm **a_expr) ;
+enum CRStatus
+cr_parser_parse_ruleset (CRParser *a_this) ;
 
 void
 cr_parser_destroy (CRParser *a_this) ;

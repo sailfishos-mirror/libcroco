@@ -409,9 +409,6 @@ static enum CRStatus
 cr_parser_parse_simple_sels (CRParser *a_this, CRSimpleSel **a_sel) ;
 
 static enum CRStatus
-cr_parser_parse_ruleset (CRParser *a_this) ;
-
-static enum CRStatus
 cr_parser_parse_expr (CRParser *a_this, CRTerm **a_expr) ;
 
 static CRParserError *
@@ -1861,93 +1858,6 @@ cr_parser_parse_any_core (CRParser *a_this)
         return status ;
 }
 
-/**
- *Parses a "declaration" as defined by the css2 spec in appendix D.1:
- *declaration ::= [property ':' S* expr prio?]?
- *
- *@param a_this the "this pointer" of the current instance of #CRParser.
- *@param a_property the successfully parsed property. The caller
- * *must* free the returned pointer.
- *@param a_expr the expression that represents the attribute value.
- *The caller *must* free the returned pointer.
- *@return CR_OK upon successfull completion, an error code otherwise.
- */
-enum CRStatus
-cr_parser_parse_declaration (CRParser *a_this, GString **a_property,
-                             CRTerm **a_expr)
-{
-        enum CRStatus status = CR_ERROR ;
-        CRInputPos init_pos ;
-        guint32 cur_char = 0 ;
-        CRTerm *expr = NULL ;
-
-        g_return_val_if_fail (a_this && PRIVATE (a_this)
-                              && a_property && a_expr,
-                              CR_BAD_PARAM_ERROR) ;
-
-        RECORD_INITIAL_POS (a_this, &init_pos) ;
-
-        status = cr_parser_parse_property (a_this, a_property) ;
-
-        CHECK_PARSING_STATUS_ERR 
-                (a_this, status, FALSE,
-                 "while parsing declaration: next property is malformed",
-                 CR_SYNTAX_ERROR) ;
-
-
-        READ_NEXT_CHAR (a_this, &cur_char) ;
-
-        if (cur_char != ':')
-        {
-                status = CR_PARSING_ERROR ;
-                cr_parser_push_error 
-                        (a_this,
-                         "while parsing declaration: this char must be ':'",
-                         CR_SYNTAX_ERROR) ;
-                goto error ;
-        }
-
-        cr_parser_try_to_skip_spaces_and_comments (a_this) ;
-
-        status = cr_parser_parse_expr (a_this, &expr) ;
-
-        CHECK_PARSING_STATUS_ERR 
-                (a_this, status, FALSE,
-                 "while parsing declaration: next expression is malformed",
-                 CR_SYNTAX_ERROR) ;
-
-        if (*a_expr)
-        {
-                cr_term_append_term (*a_expr, expr) ;
-                expr = NULL ;
-        }
-        else
-        {
-                *a_expr = expr ;
-                expr = NULL ;
-        }
-
-        cr_parser_clear_errors (a_this) ;
-        return CR_OK ;
-
- error:
-
-        if (expr)
-        {
-                cr_term_destroy (expr) ;
-                expr = NULL ;
-        }
-
-        if (*a_property)
-        {
-                g_string_free (*a_property, TRUE) ;
-                *a_property = NULL ;
-        }
-
-        cr_tknzr_set_cur_pos (PRIVATE (a_this)->tknzr, &init_pos) ;
-        
-        return status ;
-}
 
 
 /**
@@ -3725,25 +3635,17 @@ cr_parser_parse_font_face (CRParser *a_this)
 }
 
 
-/**
- *Parses a "ruleset" as defined in the css2 spec at appendix D.1.
- *ruleset ::= selector [ ',' S* selector ]* 
- *'{' S* declaration? [ ';' S* declaration? ]* '}' S*;
- *
- *@param a_this the "this pointer" of the current instance of #CRParser.
- *@return CR_OK upon successfull completion, an error code otherwise.
- */
 static enum CRStatus
-cr_parser_parse_ruleset (CRParser *a_this)
+cr_parser_parse_selector (CRParser *a_this, CRSelector **a_selector)
 {
         enum CRStatus status = CR_OK ;
         CRInputPos init_pos ;
         guint32 cur_char = 0, next_char = 0 ;
-        GString * property = NULL ;
-        CRTerm *expr = NULL ;
         CRSimpleSel * simple_sels = NULL ;
         CRSelector *selector = NULL ;
-        gboolean start_selector = FALSE ;
+
+        g_return_val_if_fail (a_this && a_selector, 
+                              CR_BAD_PARAM_ERROR) ;
 
         RECORD_INITIAL_POS (a_this, &init_pos) ;
 
@@ -3758,7 +3660,20 @@ cr_parser_parse_ruleset (CRParser *a_this)
                 simple_sels = NULL ;
         }
 
-        PEEK_NEXT_CHAR (a_this, &next_char) ;
+        status = cr_tknzr_peek_char (PRIVATE (a_this)->tknzr,
+                                     &next_char) ;
+        if (status != CR_OK)
+        {
+                if (status == CR_END_OF_INPUT_ERROR)
+                {
+                        status = CR_OK ;
+                        goto okay ;
+                }
+                else
+                {
+                        goto error ;
+                }
+        }
 
         if (next_char == ',')
         {
@@ -3766,8 +3681,21 @@ cr_parser_parse_ruleset (CRParser *a_this)
                 {
                         simple_sels = NULL ;
 
-                        PEEK_NEXT_CHAR (a_this, &next_char) ;
-
+                        status = cr_tknzr_peek_char (PRIVATE (a_this)->tknzr,
+                                                     &next_char) ;
+                        if (status != CR_OK)
+                        {
+                                if (status == CR_END_OF_INPUT_ERROR)
+                                {
+                                        status = CR_OK ;
+                                        break ;
+                                }
+                                else
+                                {
+                                        goto error ;
+                                }
+                        }
+                
                         if (next_char != ',') break ;
 
                         /*consume the ',' char*/
@@ -3791,182 +3719,29 @@ cr_parser_parse_ruleset (CRParser *a_this)
                         }
                 }
         }
-        
+
+ okay:
         cr_parser_try_to_skip_spaces_and_comments (a_this) ;
 
-        READ_NEXT_CHAR (a_this, &cur_char) ;
-
-        ENSURE_PARSING_COND_ERR 
-                (a_this, cur_char == '{',
-                 "while parsing rulset: current char should be '{'",
-                 CR_SYNTAX_ERROR) ;
-
-                
-        if (PRIVATE (a_this)->sac_handler
-            &&PRIVATE (a_this)->sac_handler->start_selector)
+        if (!*a_selector)
         {
-                /*
-                 *the selector if ref counted so that the parser's user
-                 *can choose to keep it.
-                 */
-                if (selector)
-                {
-                        cr_selector_ref (selector) ;
-                }
-
-                PRIVATE (a_this)->sac_handler->start_selector 
-                        (PRIVATE (a_this)->sac_handler, selector) ;
-                start_selector = TRUE ;
+                *a_selector = selector ;
+        }
+        else
+        {
+                *a_selector = cr_selector_append (*a_selector,
+                                                  selector) ;
         }
 
-        cr_parser_try_to_skip_spaces_and_comments (a_this) ;
-        
-        PRIVATE (a_this)->state = TRY_PARSE_RULESET_STATE ;
-
-        status = cr_parser_parse_declaration (a_this, &property, &expr) ;
-
-        if (expr)
-        {
-                cr_term_ref (expr) ;
-        }
-
-        if ( status == CR_OK 
-             && PRIVATE (a_this)->sac_handler
-             && PRIVATE (a_this)->sac_handler->property)
-        {
-                PRIVATE (a_this)->sac_handler->property 
-                        (PRIVATE (a_this)->sac_handler, property, expr) ;
-        }
-
-        if (status == CR_OK)
-        {
-                /*
-                 *free the allocated
-                 *'property' and 'term' before parsing
-                 *next declarations.
-                 */
-                if (property)
-                {
-                        g_string_free (property, TRUE) ;
-                        property = NULL ;
-                }
-
-                if (expr)
-                {
-                        cr_term_unref (expr) ;
-                        expr = NULL ;
-                }
-        }
-
-        CHECK_PARSING_STATUS_ERR 
-                (a_this, status, FALSE,
-                 "while parsing ruleset: next construction should be a declaration",
-                 CR_SYNTAX_ERROR) ;
-
-        for (;;)
-        {
-                PEEK_NEXT_CHAR (a_this, &next_char) ;
-                if (next_char != ';') break ;
-
-                /*consume the ';' char*/
-                READ_NEXT_CHAR (a_this, &cur_char) ;
-                
-                cr_parser_try_to_skip_spaces_and_comments (a_this) ;
-
-                status = cr_parser_parse_declaration (a_this, &property,
-                                                      &expr) ;
-                if (expr)
-                {
-                        cr_term_ref (expr) ;
-                }
-
-                if (status == CR_OK 
-                    && PRIVATE (a_this)->sac_handler
-                    && PRIVATE (a_this)->sac_handler->property)
-                {
-                        PRIVATE (a_this)->sac_handler->property 
-                                (PRIVATE (a_this)->sac_handler, 
-                                 property, expr) ;
-                }
-
-                if (property)
-                {
-                        g_string_free (property, TRUE) ;
-                        property = NULL ;
-                }
-
-                if (expr)
-                {
-                        cr_term_unref (expr) ;
-                        expr = NULL ;
-                }
-        }
-
-        cr_parser_try_to_skip_spaces_and_comments (a_this) ;
-
-        READ_NEXT_CHAR (a_this, &cur_char) ;
-
-        ENSURE_PARSING_COND_ERR 
-                (a_this, cur_char == '}',
-                 "while parsing rulset: current char must be a '}'",
-                 CR_SYNTAX_ERROR) ;
-
-        if (PRIVATE (a_this)->sac_handler
-            && PRIVATE (a_this)->sac_handler->end_selector)
-        {
-                PRIVATE (a_this)->sac_handler->end_selector 
-                        (PRIVATE (a_this)->sac_handler, selector) ;
-                start_selector = FALSE ;
-        }
-
-        if (expr)
-        {
-                cr_term_unref (expr) ;
-                expr = NULL ;
-        }
-
-        if (simple_sels)
-        {
-                cr_simple_sel_destroy (simple_sels) ;
-                simple_sels = NULL ;
-        }
-
-        if (selector)
-        {
-                cr_selector_unref (selector) ;
-                selector = NULL ;
-        }
-
-        cr_parser_clear_errors (a_this) ;
-        PRIVATE (a_this)->state = RULESET_PARSED_STATE ;
-
+        selector = NULL ;
         return CR_OK ;
 
  error:
-
-        if (start_selector == TRUE
-            && PRIVATE (a_this)->sac_handler
-            && PRIVATE (a_this)->sac_handler->error)
-        {
-                PRIVATE (a_this)->sac_handler->error 
-                        (PRIVATE (a_this)->sac_handler) ;                
-        }
-
-        if (expr)
-        {
-                cr_term_unref (expr) ;
-                expr = NULL ;
-        }
-
+       
         if (simple_sels)
         {
                 cr_simple_sel_destroy (simple_sels) ;
                 simple_sels = NULL ;
-        }
-
-        if (property)
-        {
-                g_string_free (property, TRUE) ;
         }
 
         if (selector)
@@ -3979,6 +3754,7 @@ cr_parser_parse_ruleset (CRParser *a_this)
 
         return status ;
 }
+
 
 /**
  *Parses a "function" as defined in css spec at appendix D.1:
@@ -4738,6 +4514,311 @@ cr_parser_parse_stylesheet (CRParser *a_this)
 /****************************************
  *Public CRParser Methods
  ****************************************/
+
+/**
+ *Parses a "declaration" as defined by the css2 spec in appendix D.1:
+ *declaration ::= [property ':' S* expr prio?]?
+ *
+ *@param a_this the "this pointer" of the current instance of #CRParser.
+ *@param a_property the successfully parsed property. The caller
+ * *must* free the returned pointer.
+ *@param a_expr the expression that represents the attribute value.
+ *The caller *must* free the returned pointer.
+ *@return CR_OK upon successfull completion, an error code otherwise.
+ */
+enum CRStatus
+cr_parser_parse_declaration (CRParser *a_this, GString **a_property,
+                             CRTerm **a_expr)
+{
+        enum CRStatus status = CR_ERROR ;
+        CRInputPos init_pos ;
+        guint32 cur_char = 0 ;
+        CRTerm *expr = NULL ;
+
+        g_return_val_if_fail (a_this && PRIVATE (a_this)
+                              && a_property && a_expr,
+                              CR_BAD_PARAM_ERROR) ;
+
+        RECORD_INITIAL_POS (a_this, &init_pos) ;
+
+        status = cr_parser_parse_property (a_this, a_property) ;
+
+        CHECK_PARSING_STATUS_ERR 
+                (a_this, status, FALSE,
+                 "while parsing declaration: next property is malformed",
+                 CR_SYNTAX_ERROR) ;
+
+
+        READ_NEXT_CHAR (a_this, &cur_char) ;
+
+        if (cur_char != ':')
+        {
+                status = CR_PARSING_ERROR ;
+                cr_parser_push_error 
+                        (a_this,
+                         "while parsing declaration: this char must be ':'",
+                         CR_SYNTAX_ERROR) ;
+                goto error ;
+        }
+
+        cr_parser_try_to_skip_spaces_and_comments (a_this) ;
+
+        status = cr_parser_parse_expr (a_this, &expr) ;
+
+        CHECK_PARSING_STATUS_ERR 
+                (a_this, status, FALSE,
+                 "while parsing declaration: next expression is malformed",
+                 CR_SYNTAX_ERROR) ;
+
+        if (*a_expr)
+        {
+                cr_term_append_term (*a_expr, expr) ;
+                expr = NULL ;
+        }
+        else
+        {
+                *a_expr = expr ;
+                expr = NULL ;
+        }
+
+        cr_parser_clear_errors (a_this) ;
+        return CR_OK ;
+
+ error:
+
+        if (expr)
+        {
+                cr_term_destroy (expr) ;
+                expr = NULL ;
+        }
+
+        if (*a_property)
+        {
+                g_string_free (*a_property, TRUE) ;
+                *a_property = NULL ;
+        }
+
+        cr_tknzr_set_cur_pos (PRIVATE (a_this)->tknzr, &init_pos) ;
+        
+        return status ;
+}
+
+/**
+ *Parses a "ruleset" as defined in the css2 spec at appendix D.1.
+ *ruleset ::= selector [ ',' S* selector ]* 
+ *'{' S* declaration? [ ';' S* declaration? ]* '}' S*;
+ *
+ *This methods calls the the SAC handler on the relevant SAC handler
+ *callbacks whenever it encounters some specific constructions.
+ *See the documentation of #CRDocHandler (the SAC handler) to know
+ *when which SAC handler is called.
+ *@param a_this the "this pointer" of the current instance of #CRParser.
+ *@return CR_OK upon successfull completion, an error code otherwise.
+ */
+enum CRStatus
+cr_parser_parse_ruleset (CRParser *a_this)
+{
+        enum CRStatus status = CR_OK ;
+        CRInputPos init_pos ;
+        guint32 cur_char = 0, next_char = 0 ;
+        GString * property = NULL ;
+        CRTerm *expr = NULL ;
+        CRSimpleSel * simple_sels = NULL ;
+        CRSelector *selector = NULL ;
+        gboolean start_selector = FALSE ;
+
+        g_return_val_if_fail (a_this, CR_BAD_PARAM_ERROR) ;
+
+        RECORD_INITIAL_POS (a_this, &init_pos) ;
+
+        status = cr_parser_parse_selector (a_this, &selector) ;
+        CHECK_PARSING_STATUS (status, FALSE) ;
+
+        READ_NEXT_CHAR (a_this, &cur_char) ;
+
+        ENSURE_PARSING_COND_ERR 
+                (a_this, cur_char == '{',
+                 "while parsing rulset: current char should be '{'",
+                 CR_SYNTAX_ERROR) ;
+
+                
+        if (PRIVATE (a_this)->sac_handler
+            &&PRIVATE (a_this)->sac_handler->start_selector)
+        {
+                /*
+                 *the selector if ref counted so that the parser's user
+                 *can choose to keep it.
+                 */
+                if (selector)
+                {
+                        cr_selector_ref (selector) ;
+                }
+
+                PRIVATE (a_this)->sac_handler->start_selector 
+                        (PRIVATE (a_this)->sac_handler, selector) ;
+                start_selector = TRUE ;
+        }
+
+        cr_parser_try_to_skip_spaces_and_comments (a_this) ;
+        
+        PRIVATE (a_this)->state = TRY_PARSE_RULESET_STATE ;
+
+        status = cr_parser_parse_declaration (a_this, &property, &expr) ;
+
+        if (expr)
+        {
+                cr_term_ref (expr) ;
+        }
+
+        if ( status == CR_OK 
+             && PRIVATE (a_this)->sac_handler
+             && PRIVATE (a_this)->sac_handler->property)
+        {
+                PRIVATE (a_this)->sac_handler->property 
+                        (PRIVATE (a_this)->sac_handler, property, expr) ;
+        }
+
+        if (status == CR_OK)
+        {
+                /*
+                 *free the allocated
+                 *'property' and 'term' before parsing
+                 *next declarations.
+                 */
+                if (property)
+                {
+                        g_string_free (property, TRUE) ;
+                        property = NULL ;
+                }
+
+                if (expr)
+                {
+                        cr_term_unref (expr) ;
+                        expr = NULL ;
+                }
+        }
+
+        CHECK_PARSING_STATUS_ERR 
+                (a_this, status, FALSE,
+                 "while parsing ruleset: next construction should be a declaration",
+                 CR_SYNTAX_ERROR) ;
+
+        for (;;)
+        {
+                PEEK_NEXT_CHAR (a_this, &next_char) ;
+                if (next_char != ';') break ;
+
+                /*consume the ';' char*/
+                READ_NEXT_CHAR (a_this, &cur_char) ;
+                
+                cr_parser_try_to_skip_spaces_and_comments (a_this) ;
+
+                status = cr_parser_parse_declaration (a_this, &property,
+                                                      &expr) ;
+                if (expr)
+                {
+                        cr_term_ref (expr) ;
+                }
+
+                if (status == CR_OK 
+                    && PRIVATE (a_this)->sac_handler
+                    && PRIVATE (a_this)->sac_handler->property)
+                {
+                        PRIVATE (a_this)->sac_handler->property 
+                                (PRIVATE (a_this)->sac_handler, 
+                                 property, expr) ;
+                }
+
+                if (property)
+                {
+                        g_string_free (property, TRUE) ;
+                        property = NULL ;
+                }
+
+                if (expr)
+                {
+                        cr_term_unref (expr) ;
+                        expr = NULL ;
+                }
+        }
+
+        cr_parser_try_to_skip_spaces_and_comments (a_this) ;
+
+        READ_NEXT_CHAR (a_this, &cur_char) ;
+
+        ENSURE_PARSING_COND_ERR 
+                (a_this, cur_char == '}',
+                 "while parsing rulset: current char must be a '}'",
+                 CR_SYNTAX_ERROR) ;
+
+        if (PRIVATE (a_this)->sac_handler
+            && PRIVATE (a_this)->sac_handler->end_selector)
+        {
+                PRIVATE (a_this)->sac_handler->end_selector 
+                        (PRIVATE (a_this)->sac_handler, selector) ;
+                start_selector = FALSE ;
+        }
+
+        if (expr)
+        {
+                cr_term_unref (expr) ;
+                expr = NULL ;
+        }
+
+        if (simple_sels)
+        {
+                cr_simple_sel_destroy (simple_sels) ;
+                simple_sels = NULL ;
+        }
+
+        if (selector)
+        {
+                cr_selector_unref (selector) ;
+                selector = NULL ;
+        }
+
+        cr_parser_clear_errors (a_this) ;
+        PRIVATE (a_this)->state = RULESET_PARSED_STATE ;
+
+        return CR_OK ;
+
+ error:
+
+        if (start_selector == TRUE
+            && PRIVATE (a_this)->sac_handler
+            && PRIVATE (a_this)->sac_handler->error)
+        {
+                PRIVATE (a_this)->sac_handler->error 
+                        (PRIVATE (a_this)->sac_handler) ;                
+        }
+
+        if (expr)
+        {
+                cr_term_unref (expr) ;
+                expr = NULL ;
+        }
+
+        if (simple_sels)
+        {
+                cr_simple_sel_destroy (simple_sels) ;
+                simple_sels = NULL ;
+        }
+
+        if (property)
+        {
+                g_string_free (property, TRUE) ;
+        }
+
+        if (selector)
+        {
+                cr_selector_unref (selector) ;
+                selector = NULL ;
+        }
+
+        cr_tknzr_set_cur_pos (PRIVATE (a_this)->tknzr, &init_pos) ;
+
+        return status ;
+}
 
 /**
  *Creates a new parser to parse data

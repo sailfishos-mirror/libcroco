@@ -894,7 +894,7 @@ layout_text_in_box (CRLayEng *a_this, CRBox *a_text_box)
                  pgo_attr_list,
                  strlen (a_text_box->content->u.text)) ;
 
-        gtk_label_set_attributes (label, pgo_attr_list) ;
+        gtk_label_set_attributes (GTK_LABEL (label), pgo_attr_list) ;
 
         return status ;
 }

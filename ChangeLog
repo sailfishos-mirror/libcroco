@@ -1,4 +1,46 @@
+2003-06-15  dodji  <dodji@seketeli.org>
+
+	* tests/test4-main.c: updated this to test the new
+	cr_statement_ruleset_parse_from_buf () method.
+	
+	* src/parser/cr-statement.[ch]:
+	Added a cr_statement_ruleset_parse_from_buf () method. This
+	is based on the changes made in cr-parser.[ch].
+	
+	* src/parser/cr-selector.[ch]: 
+	added a method cr_selector_parse_from_buf (). This is based
+	on the changes made in cr-parser.[ch].
+
+	* src/parser/cr-parser.[ch]: 
+	Some rather important changes occured here ...
+	revisited the way selectors and rulesets are parsed
+	so that one could parse a buffer that contains only a ruleset.
+	A visible implication of this is that cr_parser_parse_selector () and
+	cr_parser_parse_ruleset () become public methods callable independantly.
+	In the past, this was not possible. Only cr_parser_parse_stylesheet ()
+	was public.
+	
+	* src/parser/cr-om-parser.c: updated this to comply with the
+	changes made in cr-doc-handler.[ch].
+	
+	* src/parser/cr-doc-handler.[ch]: 
+	1/ Created an explicitely private field of CRDocHandler
+	to store parsing context, parsing result and any eventually
+	needed private data structure. The privates fields are
+	accessible through getters/setters though.	
+	2/ made sure to increment the ref count of each instance
+	of CRDocHandler at instanciation time. This may 
+	introduce some memleaks in the working code. I will
+	fix them in next commits.
+	
+	* src/parser/cr-declaration.c:
+	(cr_declaration_append2() ): modified this so that
+	we can append declaration to a list of declarations that
+	don't belong to a ruleset.
+
 2003-06-14  dodji  <dodji@seketeli.org>
+
+	* src/parser/cr-term.h (struct _CRTerm): fixed a typo.
 
 	* src/layeng/cr-lay-eng.c, src/seleng/cr-style.[hc]: 
 	more fonts selection implementation.	

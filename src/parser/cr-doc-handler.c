@@ -32,6 +32,25 @@
  *to custom values.
  */
 
+struct _CRDocHandlerPriv
+{
+	/**
+	 *This pointer is to hold an application parsing context.
+	 *For example, it used by the Object Model parser to 
+	 *store it parsing context. #CRParser does not touch it, but
+	 *#CROMParser does. #CROMParser allocates this pointer at
+	 *the beginning of the css document, and frees it at the end
+	 *of the document.
+	 */
+	gpointer context ;
+
+	/**
+	 *The place where #CROMParser puts the result of its parsing, if
+	 *any.
+	 */
+	gpointer result ;
+} ;
+
 
 /**
  *Constructor of #CRDocHandler.
@@ -49,11 +68,89 @@ cr_doc_handler_new (void)
 
 	memset (result, 0, sizeof (CRDocHandler)) ;
 
+	result->priv = g_try_malloc (sizeof (CRDocHandlerPriv)) ;
+	if (!result->priv)
+	{
+		cr_utils_trace_info ("Out of memory exception") ;
+		g_free (result) ;
+		return NULL ;
+	}
+	
+	cr_doc_handler_ref (result) ;
 	cr_doc_handler_set_default_sac_handler (result) ;
 
 	return result ;
 }
 
+
+/**
+ *Returns the private parsing context.
+ *The private parsing context is used by libcroco only.
+ *@param a_this the current instance of #CRDocHandler.
+ *@param a_ctxt out parameter. The new parsing context.
+ *@return CR_OK upon successfull completion, an error code otherwise.
+ *@return the parsing context, or NULL if an error occured.
+ */
+enum CRStatus
+cr_doc_handler_get_ctxt (CRDocHandler *a_this, gpointer * a_ctxt)
+{
+	g_return_val_if_fail (a_this && a_this->priv,
+			      CR_BAD_PARAM_ERROR) ;
+
+	*a_ctxt = a_this->priv->context ;
+
+	return CR_OK ;
+}
+
+/**
+ *Sets the private parsing context.
+ *This is used by libcroco only.
+ *@param a_this the current instance of #CRDocHandler
+ *@param a_ctxt a pointer to the parsing context.
+ *@return CR_OK upon successfull completion, an error code otherwise.
+ */
+enum CRStatus
+cr_doc_handler_set_ctxt (CRDocHandler *a_this, gpointer a_ctxt)
+{
+	g_return_val_if_fail (a_this && a_this->priv,
+			      CR_BAD_PARAM_ERROR) ;
+	a_this->priv->context = a_ctxt ;
+	return CR_OK ;
+}
+
+/**
+ *Returns the private parsing result.
+ *The private parsing result is used by libcroco only.
+ *@param a_this the current instance of #CRDocHandler
+ *@param a_result out parameter. The returned result.
+ *@return CR_OK upon successfull completion, an error code otherwise.
+ */
+enum CRStatus
+cr_doc_handler_get_result (CRDocHandler *a_this, gpointer * a_result)
+{
+	g_return_val_if_fail (a_this && a_this->priv,
+			      CR_BAD_PARAM_ERROR) ;
+
+	*a_result = a_this->priv->result ;
+
+	return CR_OK ;
+}
+
+/**
+ *Sets the private parsing context.
+ *This is used by libcroco only.
+ *@param a_this the current instance of #CRDocHandler
+ *@param a_result the new result.
+ *@return CR_OK upon successfull completion, an error code otherwise.
+ */
+enum CRStatus
+cr_doc_handler_set_result (CRDocHandler *a_this, gpointer a_result)
+{
+	g_return_val_if_fail (a_this && a_this->priv,
+			      CR_BAD_PARAM_ERROR) ;
+	a_this->priv->result = a_result ;
+	return CR_OK ;
+}
 
 /**
  *Sets the sac handlers contained in the current
@@ -138,5 +235,10 @@ cr_doc_handler_destroy (CRDocHandler *a_this)
 {
 	g_return_if_fail (a_this) ;
 
+	if (a_this->priv)
+	{
+		g_free (a_this->priv) ;
+		a_this->priv = NULL ;
+	}
 	g_free (a_this) ;
 }

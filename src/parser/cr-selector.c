@@ -25,6 +25,7 @@
  */
 #include <string.h>
 #include "cr-selector.h"
+#include "cr-parser.h"
 
 /**
  *Creates a new instance of #CRSelector.
@@ -47,6 +48,22 @@ cr_selector_new (CRSimpleSel *a_simple_sel)
 	memset (result, 0, sizeof (CRSelector)) ;
 	result->simple_sel = a_simple_sel ;
 	return result ;
+}
+
+CRSelector *
+cr_selector_parse_from_buf (const guchar * a_char_buf,
+			    enum CREncoding a_enc)
+{
+	CRParser * parser = NULL ;
+	
+	g_return_val_if_fail (a_char_buf, NULL) ;
+
+	parser = cr_parser_new_from_buf (a_char_buf, strlen (a_char_buf),
+					 a_enc, FALSE) ;
+	g_return_val_if_fail (parser, NULL) ;
+
+	
+	return NULL ;
 }
 
 /**

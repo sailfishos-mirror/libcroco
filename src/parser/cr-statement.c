@@ -26,7 +26,7 @@
 
 #include <string.h>
 #include "cr-statement.h"
-
+#include "cr-parser.h"
 
 /**
  *@file
@@ -34,6 +34,88 @@
  */
 
 #define DECLARATION_INDENT_NB 2
+
+static void
+cr_statement_clear (CRStatement *a_this) ;
+
+static void
+cr_statement_dump_ruleset (CRStatement *a_this, FILE *a_fp, glong a_indent) ;
+
+static void
+cr_statement_dump_charset (CRStatement *a_this, FILE *a_fp,
+			   gulong a_indent) ;
+
+static void
+cr_statement_dump_page (CRStatement *a_this, FILE *a_fp, gulong a_indent) ;
+
+static void
+cr_statement_dump_media_rule (CRStatement *a_this, FILE *a_fp,
+			      gulong a_indent) ;
+
+static void
+cr_statement_dump_import_rule (CRStatement *a_this, FILE *a_fp,
+			       gulong a_indent) ;
+
+static void
+parse_ruleset_start_selector_cb (CRDocHandler *a_this, 
+				 CRSelector *a_sellist)
+{
+	CRStatement *ruleset = NULL ;
+
+	g_return_if_fail (a_this 
+			  && a_this->priv
+			  && a_sellist) ;
+	
+	cr_selector_ref (a_sellist) ;
+		
+	ruleset = cr_statement_new_ruleset (NULL, a_sellist,
+					    NULL, NULL) ;
+	g_return_if_fail (ruleset) ;
+
+	cr_doc_handler_set_result (a_this, ruleset) ;	
+}
+
+static void
+parse_ruleset_property_cb (CRDocHandler *a_this,
+			   GString *a_name, CRTerm *a_value)
+{
+	enum CRStatus status = CR_OK ;
+	CRStatement *ruleset = NULL ;
+	GString * stringue = NULL ;
+
+	g_return_if_fail (a_this && a_this->priv && a_name) ;
+
+	stringue = g_string_new (a_name->str) ;
+	g_return_if_fail (stringue) ;
+
+	status = cr_doc_handler_get_result (a_this, (gpointer *)&ruleset) ;
+	g_return_if_fail (status == CR_OK
+			  && ruleset && ruleset->type == RULESET_STMT) ;
+
+	if (a_value)
+	{
+		cr_term_ref (a_value) ;
+	}
+
+	status = cr_statement_ruleset_append_decl2 (ruleset, stringue, a_value) ;
+	g_return_if_fail (status == CR_OK) ;	
+}
+
+static void
+parse_ruleset_end_selector_cb (CRDocHandler *a_this, 
+			       CRSelector *a_sellist)
+{
+	CRStatement *result = NULL ;
+	enum CRStatus status = CR_OK ;
+
+	g_return_if_fail (a_this && a_sellist) ;
+
+	status = cr_doc_handler_get_result (a_this, (gpointer *)&result) ;
+
+	g_return_if_fail (status == CR_OK 
+			  && result 
+			  && result->type == RULESET_STMT) ;
+}
 
 static void
 cr_statement_clear (CRStatement *a_this)
@@ -437,6 +519,67 @@ cr_statement_dump_import_rule (CRStatement *a_this, FILE *a_fp,
 }
 
 
+/*******************
+ *public functions
+ ******************/
+
+CRStatement *
+cr_statement_ruleset_parse_from_buf (const guchar * a_buf,
+				     enum CREncoding a_enc)
+{
+	enum CRStatus status = CR_OK ;
+	CRStatement *result = NULL;
+	CRParser *parser = NULL ;
+	CRDocHandler *sac_handler = NULL ;
+
+	g_return_val_if_fail (a_buf, NULL) ;
+
+	parser = cr_parser_new_from_buf (a_buf, strlen (a_buf),
+					 a_enc, FALSE) ;
+
+	g_return_val_if_fail (parser, NULL) ;
+
+	sac_handler = cr_doc_handler_new () ;
+	g_return_val_if_fail (parser, NULL) ;
+
+	sac_handler->start_selector = parse_ruleset_start_selector_cb ;
+	sac_handler->end_selector = parse_ruleset_end_selector_cb ;
+	sac_handler->property = parse_ruleset_property_cb ;
+
+	
+	cr_parser_set_sac_handler (parser, sac_handler) ;
+	cr_parser_try_to_skip_spaces_and_comments (parser) ;
+	cr_parser_parse_ruleset (parser) ;
+	
+	status = cr_doc_handler_get_result (sac_handler, 
+					    (gpointer*)&result) ;
+	if (! ((status == CR_OK) && result) )
+	{
+		if (result)
+		{
+			cr_statement_destroy (result) ;
+			result = NULL ;
+		}
+	}
+
+/* cleanup:*/
+	if (parser)
+	{
+		cr_parser_destroy (parser) ;
+		parser = NULL ;
+	}
+	if (sac_handler)
+	{
+		cr_doc_handler_unref (sac_handler) ;
+		sac_handler = NULL ;
+	}
+	return result ;
+}
+
+/**********************
+ *public functions
+ **********************/
+
 /**
  *Creates a new instance of #CRStatement of type
  *#CRRulSet.
@@ -457,7 +600,7 @@ cr_statement_new_ruleset (CRStyleSheet * a_sheet,
 {
 	CRStatement *result = NULL ;
 
-	g_return_val_if_fail (a_sheet, NULL) ;
+	g_return_val_if_fail (a_sel_list, NULL) ;
 
 	if (a_parent_media_rule)
 	{
@@ -511,8 +654,6 @@ cr_statement_new_at_media_rule (CRStyleSheet *a_sheet,
 {
 	CRStatement *result = NULL ;
 
-	g_return_val_if_fail (a_sheet, NULL) ;
-
 	if (a_rulesets)
 		g_return_val_if_fail (a_rulesets->type == RULESET_STMT,
 				      NULL) ;
@@ -538,7 +679,11 @@ cr_statement_new_at_media_rule (CRStyleSheet *a_sheet,
 	memset (result->kind.media_rule, 0, sizeof (CRAtMediaRule)) ;
 	result->kind.media_rule->rulesets = a_rulesets ;
 	result->kind.media_rule->media_list = a_media ;
-	cr_statement_set_parent_sheet (result, a_sheet) ;
+
+	if (a_sheet)
+	{
+		cr_statement_set_parent_sheet (result, a_sheet) ;
+	}
 
 	return result ;
 }

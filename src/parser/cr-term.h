@@ -128,7 +128,7 @@ struct _CRTerm
          *A spare pointer, just in case.
          *Can be used by the application.
          */
-        gpointer custom_data ;
+        gpointer app_data ;
 
         glong ref_count ;
 

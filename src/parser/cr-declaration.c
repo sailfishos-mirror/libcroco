@@ -280,17 +280,16 @@ cr_declaration_append2 (CRDeclaration *a_this,
 {
 	CRDeclaration *new_elem = NULL ;
 
-	g_return_val_if_fail (a_this && a_this->parent_statement
-			      && ((a_this->parent_statement->type 
-				   == RULESET_STMT) 
-				  || (a_this->parent_statement->type 
-				      == AT_FONT_FACE_RULE_STMT)
-				  || (a_this->parent_statement->type 
-				      == AT_PAGE_RULE_STMT)),
-			      NULL) ;
+	if (a_this)
+	{
+		new_elem = cr_declaration_new (a_this->parent_statement,
+					       a_prop, a_value) ;
+	}
+	else
+	{
+		new_elem = cr_declaration_new (NULL, a_prop, a_value) ;
+	}
 
-	new_elem = cr_declaration_new (a_this->parent_statement,
-				       a_prop, a_value) ;
 	g_return_val_if_fail (new_elem, NULL) ;
 	
 	return cr_declaration_append (a_this, new_elem) ;
