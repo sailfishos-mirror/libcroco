@@ -1081,6 +1081,8 @@ set_prop_color_rgb (CRStyle *a_style, CRTerm *a_value)
 static enum CRStatus
 set_prop_background_color (CRStyle *a_style, CRTerm *a_value)
 {
+        enum CRStatus status = CR_OK ;
+
         g_return_val_if_fail (a_style && a_value,
                               CR_BAD_PARAM_ERROR) ;
 
@@ -1088,7 +1090,7 @@ set_prop_background_color (CRStyle *a_style, CRTerm *a_value)
         {
                 if (a_value->content.rgb)
                 {
-                        cr_rgb_set_from_rgb
+                        status = cr_rgb_set_from_rgb
                                 (&a_style->
                                  rgb_props[RGB_PROP_BACKGROUND_COLOR].sv,
                                  a_value->content.rgb) ;
@@ -1096,16 +1098,16 @@ set_prop_background_color (CRStyle *a_style, CRTerm *a_value)
         }
         else if (a_value->type == TERM_IDENT)
         {
-                cr_rgb_set_from_name (&a_style->
-                                      rgb_props[RGB_PROP_BACKGROUND_COLOR].sv,
-                                      ) ;
+                status = cr_rgb_set_from_name (&a_style->
+                                               rgb_props[RGB_PROP_BACKGROUND_COLOR].sv,
+                                               a_value->content.str->str) ;
         }
         else
         {
                 return CR_UNKNOWN_TYPE_ERROR ;
         }
 
-        return CR_OK ;
+        return status ;
 }
 
 /**
