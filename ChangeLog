@@ -1,5 +1,7 @@
 2004-04-18  Dodji Seketeli  <dodji@gnome.org>
 
+================== 0.5.1 release ========================
+
 	* tests/Makefile.am: added test-several-media.sh to archive.
 
 	* configure.in: bumped the version info 3.0.1 
