@@ -10,6 +10,7 @@ extrainclude_DATA= libcroco-config.h
 
 bin_SCRIPTS=croco-config
 
+man_MANS = croco-config.1
 
 EXTRA_DIST= croco-config.in libcroco.pc.in TODO Doxyfile HACKING \
 docs/examples/cssom-example.c  docs/usage.txt tests/test-inputs/*.css \

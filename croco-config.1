@@ -1,0 +1,31 @@
+.TH LIBCROCO 1 "20 January 2003" Version 0.1.0
+.SH NAME
+croco-config - script to get information about the installed version of LIBCROCO
+.SH SYNOPSIS
+.B croco-config
+[\-\-prefix\fI[=DIR]\fP] [\-\-libs] [\-\-cflags] [\-\-version] [\-\-help]
+.SH DESCRIPTION
+\fIcroco-config\fP is a tool that is used to determine the compile and
+linker flags that should be used to compile and link programs that use
+\fILIBCROCO\fP.
+.SH OPTIONS
+.l
+\fIcroco-config\fP accepts the following options:
+.TP 8
+.B  \-\-version
+Print the currently installed version of \fILIBCROCO\fP on the standard output.
+.TP 8
+.B  \-\-libs
+Print the linker flags that are necessary to link a \fILIBCROCO\fP program.
+.TP 8
+.B  \-\-cflags
+Print the compiler flags that are necessary to compile a \fILIBCROCO\fP program.
+.TP 8
+.B  \-\-prefix=PREFIX
+If specified, use PREFIX instead of the installation prefix that
+\fILIBCROCO\fP was built with when computing the output for the
+\-\-cflags and \-\-libs options. This option must be specified before
+any \-\-libs or \-\-cflags options.
+.SH AUTHOR
+This manual page was written by Gaël CHAMOULAUD (strider) <strider@freespiders.org>,
+for the Mandrake GNU/linux system (but may be used by others).

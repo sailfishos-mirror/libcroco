@@ -1,3 +1,7 @@
+2003-03-20  Gaël Chamoulaud  <strider@freespiders.org>
+
+	* Makefile.am (SUBDIRS): added man page for croco-config
+
 2003-03-20  Dom Lachowicz <cinamod@hotmail.com>
 
 	* COPYING: replace with contents from COPYING.LIB (GNU LGPL)
