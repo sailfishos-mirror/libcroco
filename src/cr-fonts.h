@@ -189,21 +189,20 @@ enum CRFontVariant
 
 enum CRFontWeight
 {
-        FONT_WEIGHT_NORMAL = 1,
-        FONT_WEIGHT_BOLD = 1<<1,
-        FONT_WEIGHT_BOLDER = 1<<2,
-        FONT_WEIGHT_LIGHTER = 1<<3,
-        FONT_WEIGHT_100 = 1<<4,
-        FONT_WEIGHT_200 = 1<<5,
-        FONT_WEIGHT_300 = 1<<6,
-        FONT_WEIGHT_400 = 1<<7,
-        FONT_WEIGHT_500 = 1<<8,
-        FONT_WEIGHT_600 = 1<<9,
-        FONT_WEIGHT_700 = 1<<10,
-        FONT_WEIGHT_800 = 1<<11,
-        FONT_WEIGHT_900 = 1<<12,
-        FONT_WEIGHT_INHERIT = 1<<13,
-        NB_FONT_WEIGHTS
+        FONT_WEIGHT_NORMAL=0,
+        FONT_WEIGHT_BOLD,
+        FONT_WEIGHT_BOLDER,
+        FONT_WEIGHT_LIGHTER,
+        FONT_WEIGHT_100,
+        FONT_WEIGHT_200,
+        FONT_WEIGHT_300,
+        FONT_WEIGHT_400,
+        FONT_WEIGHT_500,
+        FONT_WEIGHT_600,
+        FONT_WEIGHT_700,
+        FONT_WEIGHT_800,
+        FONT_WEIGHT_900,
+        FONT_WEIGHT_INHERIT,
 } ;
 
 enum CRFontStretch

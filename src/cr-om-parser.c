@@ -216,13 +216,11 @@ start_font_face (CRDocHandler * a_this)
 {
         enum CRStatus status = CR_OK;
         ParsingContext *ctxt = NULL;
-        ParsingContext **ctxtptr = NULL;
 
         g_return_if_fail (a_this);
 
         g_return_if_fail (a_this);
-	ctxtptr = &ctxt;
-        status = cr_doc_handler_get_ctxt (a_this, (gpointer *) ctxtptr);
+        status = cr_doc_handler_get_ctxt (a_this, (gpointer *) & ctxt);
         g_return_if_fail (status == CR_OK && ctxt);
         g_return_if_fail (ctxt->cur_stmt == NULL);
 
@@ -237,14 +235,12 @@ end_font_face (CRDocHandler * a_this)
 {
         enum CRStatus status = CR_OK;
         ParsingContext *ctxt = NULL;
-        ParsingContext **ctxtptr = NULL;
         CRStatement *stmts = NULL;
 
         g_return_if_fail (a_this);
 
         g_return_if_fail (a_this);
-	ctxtptr = &ctxt;
-        status = cr_doc_handler_get_ctxt (a_this, (gpointer *) ctxtptr);
+        status = cr_doc_handler_get_ctxt (a_this, (gpointer *) & ctxt);
         g_return_if_fail (status == CR_OK && ctxt);
         g_return_if_fail
                 (ctxt->cur_stmt
@@ -280,11 +276,9 @@ end_document (CRDocHandler * a_this)
 {
         enum CRStatus status = CR_OK;
         ParsingContext *ctxt = NULL;
-        ParsingContext **ctxtptr = NULL;
 
         g_return_if_fail (a_this);
-	ctxtptr = &ctxt;
-        status = cr_doc_handler_get_ctxt (a_this, (gpointer *) ctxtptr);
+        status = cr_doc_handler_get_ctxt (a_this, (gpointer *) & ctxt);
         g_return_if_fail (status == CR_OK && ctxt);
 
         if (!ctxt->stylesheet || ctxt->cur_stmt)
@@ -314,11 +308,10 @@ charset (CRDocHandler * a_this, GString * a_charset)
         GString *charset = NULL;
 
         ParsingContext *ctxt = NULL;
-        ParsingContext **ctxtptr = NULL;
 
         g_return_if_fail (a_this);
-	ctxtptr = &ctxt;
-        status = cr_doc_handler_get_ctxt (a_this, (gpointer *) ctxtptr);
+
+        status = cr_doc_handler_get_ctxt (a_this, (gpointer *) & ctxt);
         g_return_if_fail (status == CR_OK && ctxt);
         g_return_if_fail (ctxt->stylesheet);
 
@@ -349,11 +342,10 @@ start_page (CRDocHandler * a_this, GString * a_page, GString * a_pseudo)
 {
         enum CRStatus status = CR_OK;
         ParsingContext *ctxt = NULL;
-        ParsingContext **ctxtptr = NULL;
 
         g_return_if_fail (a_this);
-	ctxtptr = &ctxt;
-        status = cr_doc_handler_get_ctxt (a_this, (gpointer *) ctxtptr);
+
+        status = cr_doc_handler_get_ctxt (a_this, (gpointer *) & ctxt);
         g_return_if_fail (status == CR_OK && ctxt);
         g_return_if_fail (ctxt->cur_stmt == NULL);
 
@@ -392,12 +384,11 @@ end_page (CRDocHandler * a_this, GString * a_page, GString * a_pseudo_page)
 {
         enum CRStatus status = CR_OK;
         ParsingContext *ctxt = NULL;
-        ParsingContext **ctxtptr = NULL;
         CRStatement *stmt = NULL;
 
         g_return_if_fail (a_this);
-	ctxtptr = &ctxt;
-        status = cr_doc_handler_get_ctxt (a_this, (gpointer *) ctxtptr);
+
+        status = cr_doc_handler_get_ctxt (a_this, (gpointer *) & ctxt);
         g_return_if_fail (status == CR_OK && ctxt);
         g_return_if_fail (ctxt->cur_stmt
                           && ctxt->cur_stmt->type == AT_PAGE_RULE_STMT
@@ -425,12 +416,10 @@ start_media (CRDocHandler * a_this, GList * a_media_list)
 {
         enum CRStatus status = CR_OK;
         ParsingContext *ctxt = NULL;
-        ParsingContext **ctxtptr = NULL;
         GList *media_list = NULL;
 
         g_return_if_fail (a_this);
-	ctxtptr = &ctxt;
-        status = cr_doc_handler_get_ctxt (a_this, (gpointer *) ctxtptr);
+        status = cr_doc_handler_get_ctxt (a_this, (gpointer *) & ctxt);
         g_return_if_fail (status == CR_OK && ctxt);
 
         g_return_if_fail (ctxt
@@ -454,12 +443,10 @@ end_media (CRDocHandler * a_this, GList * a_media_list)
 {
         enum CRStatus status = CR_OK;
         ParsingContext *ctxt = NULL;
-        ParsingContext **ctxtptr = NULL;
         CRStatement *stmts = NULL;
 
         g_return_if_fail (a_this);
-	ctxtptr = &ctxt;
-        status = cr_doc_handler_get_ctxt (a_this, (gpointer *) ctxtptr);
+        status = cr_doc_handler_get_ctxt (a_this, (gpointer *) & ctxt);
         g_return_if_fail (status == CR_OK && ctxt);
         g_return_if_fail (ctxt
                           && ctxt->cur_media_stmt
@@ -488,13 +475,11 @@ import_style (CRDocHandler * a_this, GList * a_media_list,
         CRStatement *stmt = NULL,
                 *stmt2 = NULL;
         ParsingContext *ctxt = NULL;
-        ParsingContext **ctxtptr = NULL;
         GList *media_list = NULL,
                 *cur = NULL;
 
         g_return_if_fail (a_this);
-	ctxtptr = &ctxt;
-        status = cr_doc_handler_get_ctxt (a_this, (gpointer *) ctxtptr);
+        status = cr_doc_handler_get_ctxt (a_this, (gpointer *) & ctxt);
         g_return_if_fail (status == CR_OK && ctxt);
         g_return_if_fail (ctxt->stylesheet);
 
@@ -553,11 +538,10 @@ start_selector (CRDocHandler * a_this, CRSelector * a_selector_list)
 {
         enum CRStatus status = CR_OK;
         ParsingContext *ctxt = NULL;
-        ParsingContext **ctxtptr = NULL;
 
         g_return_if_fail (a_this);
-	ctxtptr = &ctxt;
-        status = cr_doc_handler_get_ctxt (a_this, (gpointer *) ctxtptr);
+
+        status = cr_doc_handler_get_ctxt (a_this, (gpointer *) & ctxt);
         g_return_if_fail (status == CR_OK && ctxt);
         if (ctxt->cur_stmt) {
                 /*hmm, this should be NULL so free it */
@@ -574,11 +558,10 @@ end_selector (CRDocHandler * a_this, CRSelector * a_selector_list)
 {
         enum CRStatus status = CR_OK;
         ParsingContext *ctxt = NULL;
-        ParsingContext **ctxtptr = NULL;
 
         g_return_if_fail (a_this);
-	ctxtptr = &ctxt;
-        status = cr_doc_handler_get_ctxt (a_this, (gpointer *) ctxtptr);
+
+        status = cr_doc_handler_get_ctxt (a_this, (gpointer *) & ctxt);
         g_return_if_fail (status == CR_OK && ctxt);
         g_return_if_fail (ctxt->cur_stmt && ctxt->stylesheet);
 
@@ -628,14 +611,12 @@ property (CRDocHandler * a_this,
 {
         enum CRStatus status = CR_OK;
         ParsingContext *ctxt = NULL;
-        ParsingContext **ctxtptr = NULL;
         CRDeclaration *decl = NULL,
                 *decl2 = NULL;
         GString *str = NULL;
 
         g_return_if_fail (a_this);
-	ctxtptr = &ctxt;
-        status = cr_doc_handler_get_ctxt (a_this, (gpointer *) ctxtptr);
+        status = cr_doc_handler_get_ctxt (a_this, (gpointer *) & ctxt);
         g_return_if_fail (status == CR_OK && ctxt);
 
         /*
@@ -730,11 +711,10 @@ error (CRDocHandler * a_this)
 {
         enum CRStatus status = CR_OK;
         ParsingContext *ctxt = NULL;
-        ParsingContext **ctxtptr = NULL;
 
         g_return_if_fail (a_this);
-	ctxtptr = &ctxt;
-        status = cr_doc_handler_get_ctxt (a_this, (gpointer *) ctxtptr);
+
+        status = cr_doc_handler_get_ctxt (a_this, (gpointer *) & ctxt);
         g_return_if_fail (status == CR_OK && ctxt);
 
         if (ctxt->cur_stmt) {
@@ -748,10 +728,8 @@ unrecoverable_error (CRDocHandler * a_this)
 {
         enum CRStatus status = CR_OK;
         ParsingContext *ctxt = NULL;
-        ParsingContext **ctxtptr = NULL;
 
-	ctxtptr = &ctxt;
-        status = cr_doc_handler_get_ctxt (a_this, (gpointer *) ctxtptr);
+        status = cr_doc_handler_get_ctxt (a_this, (gpointer *) & ctxt);
         g_return_if_fail (status == CR_OK);
 
         if (ctxt) {
@@ -850,15 +828,14 @@ cr_om_parser_parse_buf (CROMParser * a_this,
 
         if (status == CR_OK) {
                 CRStyleSheet *result = NULL;
-                CRStyleSheet **resultptr = NULL;
                 CRDocHandler *sac_handler = NULL;
 
                 cr_parser_get_sac_handler (PRIVATE (a_this)->parser,
                                            &sac_handler);
                 g_return_val_if_fail (sac_handler, CR_ERROR);
-		resultptr = &result;
+
                 status = cr_doc_handler_get_result (sac_handler,
-                                                    (gpointer *) resultptr);
+                                                    (gpointer *) & result);
                 g_return_val_if_fail (status == CR_OK, status);
 
                 if (result)
@@ -935,15 +912,14 @@ cr_om_parser_parse_file (CROMParser * a_this,
 
         if (status == CR_OK) {
                 CRStyleSheet *result = NULL;
-                CRStyleSheet **resultptr = NULL;
                 CRDocHandler *sac_handler = NULL;
 
                 cr_parser_get_sac_handler (PRIVATE (a_this)->parser,
                                            &sac_handler);
                 g_return_val_if_fail (sac_handler, CR_ERROR);
-		resultptr = &result;
+
                 status = cr_doc_handler_get_result
-                        (sac_handler, (gpointer *) resultptr);
+                        (sac_handler, (gpointer *) & result);
                 g_return_val_if_fail (status == CR_OK, status);
                 if (result)
                         *a_result = result;

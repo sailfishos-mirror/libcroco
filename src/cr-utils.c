@@ -897,15 +897,8 @@ cr_utils_ucs1_to_utf8 (const guchar * a_in,
                 out_len = 0;
         enum CRStatus status = CR_OK;
 
-        g_return_val_if_fail (a_in && a_in_len
-                              && a_out_len, 
-                              CR_BAD_PARAM_ERROR);
-
-        if (*a_in_len == 0) {
-                *a_out_len = 0 ;
-                return CR_OK ;
-        }
-        g_return_val_if_fail (a_out, CR_BAD_PARAM_ERROR) ;
+        g_return_val_if_fail (a_in && a_in_len && a_out
+                              && a_out_len, CR_BAD_PARAM_ERROR);
 
         if (*a_in_len < 1) {
                 status = CR_OK;

@@ -3,6 +3,8 @@
 /*
  * This file is part of The Croco Library
  *
+ * Copyright (C) 2002-2003 Dodji Seketeli <dodji@seketeli.org>
+ *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of version 2.1 of the GNU Lesser General Public
  * License as published by the Free Software Foundation.
@@ -16,8 +18,6 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
  * USA
- *
- * See COPYRIGHTS file for coypyright information.
  */
 
 /*
@@ -63,7 +63,7 @@ cr_tknzr_new_from_uri (const guchar *a_file_uri,
                        enum CREncoding a_enc) ;
 
 CRTknzr *
-cr_tknzr_new_from_buf (guchar *a_buf, gulong a_len,
+cr_tknzr_new_from_buf (const guchar *a_buf, gulong a_len,
                        enum CREncoding a_enc,
                        gboolean a_free_at_destroy) ;
 

@@ -140,9 +140,9 @@ test_cr_statement_at_page_rule_parse_from_buf (void)
         stmt = cr_statement_at_page_rule_parse_from_buf 
                 (gv_at_page_buf, CR_UTF_8) ;
         if (!stmt) {
-                return CR_ERROR ;                
+                return CR_ERROR ;
+                
         }
-        cr_statement_destroy (stmt) ;        
         return CR_OK ;
 }
 
@@ -237,6 +237,7 @@ test_cr_statement_ruleset_parse (void)
                 cr_statement_destroy (stmt);
                 stmt = NULL;
         }
+
         return CR_OK;
 }
 

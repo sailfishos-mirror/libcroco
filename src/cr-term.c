@@ -114,7 +114,7 @@ cr_term_parse_expression_from_buf (const guchar * a_buf,
 
         g_return_val_if_fail (a_buf, NULL);
 
-        parser = cr_parser_new_from_buf ((guchar*)a_buf, strlen (a_buf),
+        parser = cr_parser_new_from_buf (a_buf, strlen (a_buf),
                                          a_encoding, FALSE);
         g_return_val_if_fail (parser, NULL);
 
@@ -497,45 +497,6 @@ cr_term_dump (CRTerm * a_this, FILE * a_fp)
                 fprintf (a_fp, "%s", content);
                 g_free (content);
         }
-}
-
-/**
- *Return the number of terms in the expression.
- *@param a_this the current instance of #CRTerm.
- *@return number of terms in the expression.
- */
-int
-cr_term_nr_values (CRTerm *a_this)
-{
-	CRTerm *cur = NULL ;
-	int nr = 0;
-
-	g_return_val_if_fail (a_this, -1) ;
-
-	for (cur = a_this ; cur ; cur = cur->next)
-		nr ++;
-	return nr;
-}
-
-/**
- *Use an index to get a CRTerm from the expression.
- *@param a_this the current instance of #CRTerm.
- *@param itemnr the index into the expression.
- *@return CRTerm at position itemnr, if itemnr > number of terms - 1,
- *it will return NULL.
- */
-CRTerm *
-cr_term_get_from_list (CRTerm *a_this, int itemnr)
-{
-	CRTerm *cur = NULL ;
-	int nr = 0;
-
-	g_return_val_if_fail (a_this, NULL) ;
-
-	for (cur = a_this ; cur ; cur = cur->next)
-		if (nr++ == itemnr)
-			return cur;
-	return NULL;
 }
 
 /**

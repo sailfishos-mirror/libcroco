@@ -3,6 +3,8 @@
 /*
  * This file is part of The Croco Library
  *
+ * Copyright (C) 2002-2003 Dodji Seketeli <dodji@seketeli.org>
+ *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of version 2.1 of the GNU Lesser General Public
  * License as published by the Free Software Foundation.
@@ -16,16 +18,18 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
  * USA
- * 
- * see COPYRIGHTS file for copyright information.
  */
 
-#ifndef __CR_RGB_H__
-#define __CR_RGB_H__
+/*
+ *$Id$
+ */
 
 #include <stdio.h>
 #include <glib.h>
 #include "cr-utils.h"
+
+#ifndef __CR_RGB_H__
+#define __CR_RGB_H__
 
 G_BEGIN_DECLS
 
@@ -50,9 +54,6 @@ CRRgb * cr_rgb_new (void) ;
 CRRgb * cr_rgb_new_with_vals (gulong a_red, gulong a_green, 
                               gulong a_blue, gboolean a_is_percentage) ;
 
-CRRgb *cr_rgb_parse_from_buf(const guchar *a_str,
-                             enum CREncoding a_enc);
-
 enum CRStatus cr_rgb_compute_from_percentage (CRRgb *a_this) ;
 
 enum CRStatus cr_rgb_set (CRRgb *a_this, gulong a_red,
@@ -64,10 +65,6 @@ enum CRStatus cr_rgb_set_from_rgb (CRRgb *a_this, CRRgb *a_rgb) ;
 enum CRStatus cr_rgb_set_from_name (CRRgb *a_this, const guchar *a_color_name) ;
 
 enum CRStatus cr_rgb_set_from_hex_str (CRRgb *a_this, const guchar * a_hex_value) ;
-
-struct _CRTerm;
-
-enum CRStatus cr_rgb_set_from_term (CRRgb *a_this, const struct _CRTerm *a_value);
 
 guchar * cr_rgb_to_string (CRRgb *a_this) ;
 
