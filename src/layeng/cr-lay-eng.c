@@ -1214,11 +1214,12 @@ layout_block_box (CRLayEng *a_this,
                   CRBox *a_cur_box)
 {
         enum CRStatus status = CR_OK ;
+	CRBox *cont_box = NULL;
 
         g_return_val_if_fail (a_cur_box && a_cur_box->style,
                               CR_BAD_PARAM_ERROR) ;
         
-        CRBox *cont_box = a_cur_box->parent ;
+        cont_box = a_cur_box->parent ;
 
         /************************************
          *We are in a block formating context 

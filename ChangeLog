@@ -1,3 +1,11 @@
+2003-08-17  Gaël CHAMOULAUD <strider@gnome.org>
+
+	* src/layeng/cr-lay-eng.c: (layout_block_box):
+	* src/seleng/cr-sel-eng.c: (put_css_properties_in_hashtable):
+	Applied a patch from Michael Culbertson <Michael.J.Culbertson@wheaton.edu>
+	-> Compilation failed with gcc 2.95.4 due to declarations after calls to 
+	g_return_val_if_fail and the like.
+
 2003-07-15  Dodji  <dodji@gnome.org>
 
 	* src/seleng/cr-sel-eng.c (id_add_sel_matches_node): 

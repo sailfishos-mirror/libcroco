@@ -785,10 +785,10 @@ put_css_properties_in_hashtable (GHashTable **a_props_hashtable,
         for (cur_decl = a_stmt->kind.ruleset->decl_list ; 
              cur_decl ; cur_decl = cur_decl->next)
         {
+                CRDeclaration *decl = NULL ;
+                
                 if (!cur_decl->property || !cur_decl->property->str)
                         continue ;
-
-                CRDeclaration *decl = NULL ;
 
                 /*
                  *First, test if the property is not
