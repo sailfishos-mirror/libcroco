@@ -1,3 +1,8 @@
+2004-01-26  Dodji Seketeli  <dodji@gnome.org>
+
+	* src/cr-utils.h: added CR_FILE_NOT_FOUND_ERROR to
+	the CRStatus enum.
+
 2004-01-24  Dodji Seketeli  <dodji@gnome.org>
 
 	* all: separated the library into two projects. Libcroco
