@@ -1,3 +1,8 @@
+2003-12-13  Dodji Seketeli <dodji@gnome.org>
+============= 0.4 release ================
+	* README: updated this.
+	* docs/examples/sac-example-[12].c: make this compile with g++.	
+
 2003-12-12  Dodji Seketeli <dodji@gnome.org>
 
 	* docs/examples/selection-example-1.c: a bit of cleanup 
