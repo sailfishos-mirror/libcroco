@@ -19,7 +19,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
  * USA
  *
- *see COPYRIGTHS file for information
+ * see COPYRIGTHS file for copyright information
  */
 
 /*
@@ -998,73 +998,30 @@ set_prop_width (CRStyle * a_style, CRTerm * a_value)
         return CR_OK;
 }
 
-static enum CRStatus
+static enum CRStatus 
 set_prop_color (CRStyle * a_style, CRTerm * a_value)
 {
-        enum CRStatus status = CR_OK;
+	enum CRStatus status = CR_OK;
+	CRRgb *a_rgb = &a_style->rgb_props[RGB_PROP_COLOR].sv;
 
-        g_return_val_if_fail (a_style && a_value, CR_BAD_PARAM_ERROR);
+	g_return_val_if_fail (a_style && a_value, CR_BAD_PARAM_ERROR);
 
-        switch (a_value->type) {
-        case TERM_RGB:
-                if (a_value->content.rgb) {
-                        cr_rgb_set_from_rgb
-                                (&a_style->rgb_props[RGB_PROP_COLOR].sv,
-                                 a_value->content.rgb);
-                }
-                break;
-        case TERM_IDENT:
-                status = cr_rgb_set_from_name
-                        (&a_style->rgb_props[RGB_PROP_COLOR].sv,
-                         a_value->content.str->str);
-                break;
-        case TERM_HASH:
-                status = cr_rgb_set_from_hex_str
-                        (&a_style->rgb_props[RGB_PROP_COLOR].sv,
-                         a_value->content.str->str);
-                break;
-        default:
-                status = CR_UNKNOWN_TYPE_ERROR;
-        }
+	status = cr_rgb_set_from_term (a_rgb, a_value);
 
-        return status;
+	return status;
 }
 
 static enum CRStatus
 set_prop_background_color (CRStyle * a_style, CRTerm * a_value)
 {
-        enum CRStatus status = CR_OK;
+	enum CRStatus status = CR_OK;
+	CRRgb *a_rgb = &a_style->rgb_props[RGB_PROP_BACKGROUND_COLOR].sv;
 
-        g_return_val_if_fail (a_style && a_value, CR_BAD_PARAM_ERROR);
+	g_return_val_if_fail (a_style && a_value, CR_BAD_PARAM_ERROR);
 
-        switch (a_value->type) {
-        case TERM_RGB:
-                if (a_value->content.rgb) {
-                        status = cr_rgb_set_from_rgb
-                                (&a_style->
-                                 rgb_props[RGB_PROP_BACKGROUND_COLOR].sv,
-                                 a_value->content.rgb);
-                }
-                break;
+	status = cr_rgb_set_from_term (a_rgb, a_value);
 
-        case TERM_IDENT:
-                status = cr_rgb_set_from_name
-                        (&a_style->rgb_props[RGB_PROP_BACKGROUND_COLOR].sv,
-                         a_value->content.str->str);
-                break;
-
-        case TERM_HASH:
-                status = cr_rgb_set_from_hex_str
-                        (&a_style->rgb_props[RGB_PROP_BACKGROUND_COLOR].sv,
-                         a_value->content.str->str);
-                break;
-
-        default:
-                status = CR_UNKNOWN_TYPE_ERROR;
-                break;
-        }
-
-        return status;
+	return status;
 }
 
 /**
@@ -1715,7 +1672,10 @@ cr_style_set_props_to_defaults (CRStyle * a_this)
         a_this->position = POSITION_STATIC;
         a_this->float_type = FLOAT_NONE;
         a_this->parent_style = NULL;
-
+        a_this->font_style = FONT_STYLE_NORMAL;
+        a_this->font_variant = FONT_VARIANT_NORMAL;
+        a_this->font_weight = FONT_WEIGHT_NORMAL;
+        a_this->font_stretch = FONT_STRETCH_NORMAL;
         return CR_OK;
 }
 

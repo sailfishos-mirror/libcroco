@@ -1,8 +1,32 @@
+2004-03-15  Dodji  <dodji@gnome.org>
+
+	* tests/Makefile.am: added the tests/valgrind-version.sh file in
+	the distribution.
+	
+	* tests/testctl: enforced the use of valgrind 2.1.1 or higher.
+	* tests/valgrind-version.sh: added this file to test the version of
+	the currently installed version of valgrind.
+
+2004-03-14  Dodji  <dodji@gnome.org>
+
+	* src/cr-style.c: 
+	(cr_style_set_props_to_defaults): added more default props 
+	init.
+	* src/cr-fonts.h: modified some declarations here to
+	ease the support of the "font-weight: bolder" and 
+	"font-weight: lighter" support in sewfox.
+
+	* src/cr-parser.[ch],src/cr-rgb.[ch],src/cr-style.c:
+	applied a patch from Benjamin Dauvergne to add
+	CRRgb::parse_from_buf() and CRRgb::set_from_term()
+	methods. Modified the patch to comply with libcroco
+	coding style and to kill a compiler warning.
+
 2004-03-13  Dodji  <dodji@gnome.org>
 
-	* ==== 
-	    merge point of dodji@gnome.org--xml-style-2004/libcroco--snapshots--0.1--patch-1
-	  ===
+	* Makefile.am,tests/Makefile.am,tests/test-output-refs/Makefile.am: 
+	Added some distribution plumbing.
+
 	* configure.in: bumped version number to 0.5 and bumped version-info.
 
 	* src/cr-sel-eng.c,src/cr-stylesheet.c,
@@ -102,8 +126,6 @@
 	   removed useless files.
 
 	* files.txt,dirs.txt: removed these files.
-
-	====starting from here, going upward, we use gnu arch ===
 
 2004-03-07  Dodji Seketeli  <dodji@gnome.org>
 

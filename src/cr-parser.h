@@ -110,6 +110,9 @@ enum CRStatus
 cr_parser_set_default_sac_handler (CRParser *a_this) ;
 
 enum CRStatus
+cr_parser_parse_term (CRParser *a_this, CRTerm **a_term) ;
+
+enum CRStatus
 cr_parser_parse_expr (CRParser *a_this, CRTerm **a_expr) ;
 
 enum CRStatus

@@ -12,6 +12,7 @@
 #the directory that contains the tests
 HERE=`dirname $0`
 
+
 #the list of tests to be run
 TEST_PROG_LIST=
 
@@ -32,6 +33,10 @@ if test x$RUN_VALGRIND = x ; then
 else
     RUN_VALGRIND=yes
 fi
+if test "x$CHECKER" = "x" ; then
+    CHECKER="valgrind --tool=memcheck"
+fi
+
 VALGRIND_LOGS_DIR=valgrind-logs
 VALGRIND=
 TEST_PROG=
@@ -137,12 +142,27 @@ run_test_prog ()
     if test x$RUN_VALGRIND = xno ; then
 	VALGRIND=
     else
-	VALGRIND=`which valgrind`
-	if test x$VALGRIND = x ; then
-	    echo "Could not find valgrind in your path"
+	if ! test -x $HERE/valgrind-version.sh ; then
+	    echo "Argh! Could not find file $HERE/valgrind-version.sh"
+	    exit -1 ;
+	fi
+	version=`$HERE/valgrind-version.sh`
+	if ! test "x$version" = "xokay" ; then
+	    echo "You must install a valgrind versin greater than 2.1.1"
+	    echo "version=$version"
+	    exit -1
+	fi
+	if test "x$CHECKER" = "x" ; then
+	    VALGRIND=`which valgrind`
+	    if test "x$VALGRIND" = x ; then
+		echo "Could not find valgrind in your path"
+	    else
+		VALGRIND="$VALGRIND $VALGRIND_OPTIONS"
+		echo "Gonna run the tests with valgrind, using the following options: $VALGRIND_OPTIONS"
+	    fi
 	else
-	    VALGRIND="$VALGRIND $VALGRIND_OPTIONS"
-	    echo "Gonna run the tests with valgrind, using the following options: $VALGRIND_OPTIONS"
+	    VALGRIND="$CHECKER $VALGRIND_OPTIONS"
+	    echo "Gonna run the tests with valgrind, using the cmd line: $VALGRIND"
 	fi
     fi
     export VALGRIND

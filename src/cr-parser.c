@@ -358,9 +358,6 @@ static enum CRStatus cr_parser_parse_ident (CRParser * a_this,
 static enum CRStatus cr_parser_parse_uri (CRParser * a_this,
                                           GString ** a_str);
 
-static enum CRStatus cr_parser_parse_term (CRParser * a_this,
-                                           CRTerm ** a_term);
-
 static enum CRStatus cr_parser_parse_function (CRParser * a_this,
                                                GString ** a_func_name,
                                                CRTerm ** a_expr);
@@ -1777,7 +1774,7 @@ cr_parser_parse_property (CRParser * a_this, GString ** a_property)
  *@param a_term out parameter. The successfully parsed term.
  *@return CR_OK upon successfull completion, an error code otherwise.
  */
-static enum CRStatus
+enum CRStatus
 cr_parser_parse_term (CRParser * a_this, CRTerm ** a_term)
 {
         enum CRStatus status = CR_PARSING_ERROR;
