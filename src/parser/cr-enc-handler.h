@@ -40,24 +40,24 @@ G_BEGIN_DECLS
 
 typedef struct _CREncHandler CREncHandler ;
 
-typedef enum CRStatus (*CREncInputFunc) (guchar * a_in,
+typedef enum CRStatus (*CREncInputFunc) (const guchar * a_in,
                                          gulong *a_in_len,
                                          guchar *a_out,
                                          gulong *a_out_len) ;
 
-typedef enum CRStatus (*CREncOutputFunc) (guchar * a_in,
+typedef enum CRStatus (*CREncOutputFunc) (const guchar * a_in,
                                           gulong *a_in_len,
                                           guchar *a_out,
                                           gulong *a_out_len) ;
 
 typedef enum CRStatus (*CREncInputStrLenAsUtf8Func) 
-(guchar *a_in_start,
- guchar *a_in_end,
+(const guchar *a_in_start,
+ const guchar *a_in_end,
  gulong *a_in_size);
 
 typedef enum CRStatus  (*CREncUtf8StrLenAsOutputFunc)
-(guchar *a_in_start,
- guchar *a_in_end,
+(const guchar *a_in_start,
+ const guchar *a_in_end,
  gulong *a_in_size) ;
 
 /**

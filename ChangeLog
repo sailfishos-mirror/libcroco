@@ -1,3 +1,34 @@
+2003-06-17  dodji  <dodji@seketeli.org>
+			
+	* src/parser/cr-statement.[hc]:
+	coded  a first version of cr_statement_at_media_rule_parse_from_buf().
+	This took the writing of a couple a SAC callback. Pfffew, SAC is a rather
+	tedious api. cr_statement_at_media_rule_parse_from_buf() does not
+	work yet, I still have to debug it.
+
+	* src/parser/cr-parser.c: use the new cr_tknzr_peek_byte2 () function
+	in the cr_parser_parse_import() method. This is a cleaner, smaller and
+	faster than the older approach.
+
+	* src/parser/cr-om-parser.c: use the
+	cr_dup_glist_of_string () helper fonction in the
+	start media callback.
+	
+	* src/parser/cr-utils.[ch]: fixed some 'const' omissions here also.
+	
+	* src/parser/cr-enc-handler.[ch]:
+	fixed some "const" omissions.
+	
+2003-06-16  dodji  <dodji@seketeli.org>
+
+	* src/parser/cr-parser.[ch]: cr_parser_parse_charset(), 
+	cr_parser_parse_import(), cr_parser_parse_page (),
+	cr_parser_parse_font_face(), cr_parser_parse_media(),
+
+	* src/parser/cr-tknzr.[ch]:
+	added cr_tknzr_peek_byte2() function to export the functionalities
+	of cr_input_peek_byte2().
+
 2003-06-15  dodji  <dodji@seketeli.org>
 
 	* tests/test4-main.c: updated this to test the new

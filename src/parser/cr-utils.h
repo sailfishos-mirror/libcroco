@@ -139,55 +139,65 @@ cr_utils_trace (G_LOG_LEVEL_DEBUG, a_msg) ;
  ****************************/
 
 enum CRStatus
-cr_utils_read_char_from_utf8_buf (guchar * a_in, gulong a_in_len,
+cr_utils_read_char_from_utf8_buf (const guchar * a_in, gulong a_in_len,
                                   guint32 *a_out, gulong *a_consumed) ;
 
 enum CRStatus
-cr_utils_ucs1_to_utf8 (guchar *a_in, gulong *a_in_len,
+cr_utils_ucs1_to_utf8 (const guchar *a_in, gulong *a_in_len,
                        guchar *a_out, gulong *a_out_len) ;
 
 enum CRStatus
-cr_utils_utf8_to_ucs1 (guchar * a_in, gulong * a_in_len,
+cr_utils_utf8_to_ucs1 (const guchar * a_in, gulong * a_in_len,
                        guchar *a_out, gulong *a_out_len) ;
 
 enum CRStatus
-cr_utils_ucs4_to_utf8 (guint32 *a_in, gulong *a_in_len,
+cr_utils_ucs4_to_utf8 (const guint32 *a_in, gulong *a_in_len,
                        guchar *a_out, gulong *a_out_len) ;
 
 enum CRStatus
-cr_utils_utf8_str_len_as_ucs4 (guchar *a_in_start,
-                               guchar *a_in_end,
+cr_utils_utf8_str_len_as_ucs4 (const guchar *a_in_start,
+                               const guchar *a_in_end,
                                gulong *a_len) ;
 enum CRStatus
-cr_utils_ucs1_str_len_as_utf8 (guchar *a_in_start, guchar *a_in_end,
+cr_utils_ucs1_str_len_as_utf8 (const guchar *a_in_start, 
+                               const guchar *a_in_end,
                                gulong *a_len) ;
 enum CRStatus
-cr_utils_utf8_str_len_as_ucs1 (guchar *a_in_start,
-                               guchar *a_in_end,
+cr_utils_utf8_str_len_as_ucs1 (const guchar *a_in_start,
+                               const guchar *a_in_end,
                                gulong *a_len) ;
 enum CRStatus
-cr_utils_ucs4_str_len_as_utf8 (guint32 *a_in_start, guint32 *a_in_end,
+cr_utils_ucs4_str_len_as_utf8 (const guint32 *a_in_start, 
+                               const guint32 *a_in_end,
                                gulong *a_len) ;
 
 enum CRStatus
-cr_utils_ucs1_str_to_utf8 (guchar *a_in_start, gulong *a_in_len,
-                           guchar **a_out, gulong *a_len) ;
+cr_utils_ucs1_str_to_utf8 (const guchar *a_in_start, 
+                           gulong *a_in_len,
+                           guchar **a_out, 
+                           gulong *a_len) ;
 
 enum CRStatus
-cr_utils_utf8_str_to_ucs1 (guchar * a_in_start, gulong * a_in_len,
-                           guchar **a_out, gulong *a_out_len) ;
+cr_utils_utf8_str_to_ucs1 (const guchar * a_in_start, 
+                           gulong * a_in_len,
+                           guchar **a_out, 
+                           gulong *a_out_len) ;
 
 enum CRStatus
-cr_utils_utf8_to_ucs4 (guchar * a_in, gulong * a_in_len,
+cr_utils_utf8_to_ucs4 (const guchar * a_in, 
+                       gulong * a_in_len,
                        guint32 *a_out, gulong *a_out_len) ;
 
 enum CRStatus
-cr_utils_ucs4_str_to_utf8 (guint32 *a_in, gulong *a_in_len,
+cr_utils_ucs4_str_to_utf8 (const guint32 *a_in, 
+                           gulong *a_in_len,
                            guchar **a_out, gulong *a_out_len) ;
 
 enum CRStatus
-cr_utils_utf8_str_to_ucs4 (guchar * a_in, gulong *a_in_len,
-                           guint32 **a_out, gulong *a_out_len) ;
+cr_utils_utf8_str_to_ucs4 (const guchar * a_in, 
+                           gulong *a_in_len,
+                           guint32 **a_out, 
+                           gulong *a_out_len) ;
 
 
 /*****************************************
@@ -206,6 +216,11 @@ cr_utils_is_nonascii (guint32 a_char) ;
 gboolean
 cr_utils_is_hexa_char (guint32 a_char) ;
 
+
+/**********************************
+ *Miscellaneous utility functions
+ ***********************************/
+
 void
 cr_utils_dump_n_chars (guchar a_char, 
                        FILE *a_fp, 
@@ -217,6 +232,9 @@ cr_utils_dump_n_chars2 (guchar a_char,
                         glong a_nb) ;
 gdouble
 cr_utils_n_to_0_dot_n (glong a_n) ;
+
+GList *
+cr_dup_glist_of_string (GList *a_list) ;
 
 G_END_DECLS
 

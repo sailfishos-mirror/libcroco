@@ -271,6 +271,8 @@ status = cr_tknzr_peek_byte (PRIVATE (a_this)->tknzr, \
                               a_byte_ptr) ; \
 CHECK_PARSING_STATUS (status, TRUE) ;
 
+#define BYTE(a_parser, a_offset, a_eof) \
+cr_tknzr_peek_byte2 (PRIVATE (a_this)->tknzr, a_offset, a_eof)
 
 /**
  *Reads a byte from the topmost parser input
@@ -2701,938 +2703,6 @@ cr_parser_parse_simple_sels (CRParser *a_this, CRSimpleSel **a_sel)
         return status ;
 }
 
-/**
- *Parses a charset declaration as defined implictly by the css2 spec in
- *appendix D.1:
- *charset ::= CHARSET_SYM S* STRING S* ';'
- *
- *@param a_this the "this pointer" of the current instance of #CRParser.
- *@param a_value out parameter. The actual parsed value of the charset 
- *declararation.
- *@return CR_OK upon successfull completion, an error code otherwise.
- */
-static enum CRStatus
-cr_parser_parse_charset (CRParser *a_this, GString **a_value)
-{
-        enum CRStatus status = CR_OK ;
-        CRInputPos init_pos ;
-        CRToken *token = NULL ;
-        GString *charset_str = NULL ;
-
-        g_return_val_if_fail (a_this && a_value 
-                              && (*a_value == NULL),
-                              CR_BAD_PARAM_ERROR) ;
-
-        RECORD_INITIAL_POS (a_this, &init_pos) ;
-
-        status = cr_tknzr_get_next_token (PRIVATE (a_this)->tknzr,
-                                          &token) ;
-
-        ENSURE_PARSING_COND (status == CR_OK 
-                             && token && token->type == CHARSET_SYM_TK) ;
-
-        cr_token_destroy (token) ;
-        token = NULL ;
-
-        PRIVATE (a_this)->state = TRY_PARSE_CHARSET_STATE ;
-
-        cr_parser_try_to_skip_spaces_and_comments (a_this) ;
-
-        status = cr_tknzr_get_next_token (PRIVATE (a_this)->tknzr,
-                                          &token) ;
-        ENSURE_PARSING_COND (status == CR_OK 
-                             && token && token->type == STRING_TK) ;
-        charset_str = token->u.str ;
-        token->u.str = NULL ;
-        cr_token_destroy (token) ;
-        token = NULL ;
-
-        cr_parser_try_to_skip_spaces_and_comments (a_this) ;
-
-        status = cr_tknzr_get_next_token (PRIVATE (a_this)->tknzr,
-                                          &token) ;
-
-        ENSURE_PARSING_COND (status == CR_OK 
-                             && token && token->type == SEMICOLON_TK) ;
-        cr_token_destroy (token) ;
-        token = NULL ;
-
-        if (charset_str)
-        {
-                *a_value = charset_str ;
-        }
-
-        PRIVATE (a_this)->state = CHARSET_PARSED_STATE ;
-        return CR_OK ;
-
- error:
-
-        if (token)
-        {
-                cr_token_destroy (token) ;
-                token = NULL ;
-        }
-
-        if (*a_value)
-        {
-                g_string_free (*a_value, TRUE) ;
-                *a_value = NULL ;
-        }
-
-        cr_tknzr_set_cur_pos (PRIVATE (a_this)->tknzr, 
-                                     &init_pos) ;
-
-        return status ;
-}
-
-
-/**
- *Parses an 'import' declaration as defined in the css2 spec
- *in appendix D.1:
- *
- *import ::= 
- *@import [STRING|URI] S* [ medium [ ',' S* medium]* ]? ';' S*
- *
- *@param a_this the "this pointer" of the current instance 
- *of #CRParser.
- *
- *@param a_medium_list out parameter. A linked list of 
- *GString (see the doc of glib-2). 
- *Each GString is a string that contains
- *a 'medium' declaration part of the successfully 
- *parsed 'import' declaration.
- *
- *@param a_import_string out parameter. 
- *A string that contains the 'import 
- *string". The import string can be either an uri (if it starts with
- *the substring "uri(") or a any other css2 string. Note that
- * *a_import_string must be initially set to NULL or else, this function
- *will return CR_BAD_PARAM_ERROR.
- *
- *@return CR_OK upon sucessfull completion, an error code otherwise.
- */
-static enum CRStatus
-cr_parser_parse_import (CRParser *a_this, GList ** a_media_list,
-                        GString **a_import_string)
-{
-        enum CRStatus status = CR_OK ;
-        CRInputPos init_pos ;
-        guint32 cur_char = 0, next_char = 0 ;
-        guchar next_bytes[CHARS_TAB_SIZE] = {0} ;
-        GString *medium = NULL ;
-
-        g_return_val_if_fail (a_this 
-                              && a_import_string 
-                              && (*a_import_string == NULL),
-                              CR_BAD_PARAM_ERROR) ;
-
-        RECORD_INITIAL_POS (a_this, &init_pos) ;
- 
-        PEEK_BYTE (a_this, 1, &next_bytes[0]) ;
-        PEEK_BYTE (a_this, 2, &next_bytes[1]) ;
-        PEEK_BYTE (a_this, 3, &next_bytes[2]) ;
-        PEEK_BYTE (a_this, 4, &next_bytes[3]) ;
-        PEEK_BYTE (a_this, 5, &next_bytes[4]) ;
-        PEEK_BYTE (a_this, 6, &next_bytes[5]) ;
-        PEEK_BYTE (a_this, 7, &next_bytes[6]) ;
-
-        if (next_bytes[0] == '@'
-            && next_bytes[1] == 'i'
-            && next_bytes[2] == 'm'
-            && next_bytes[3] == 'p'
-            && next_bytes[4] == 'o'
-            && next_bytes[5] == 'r'
-            && next_bytes[6] == 't')
-        {
-                SKIP_CHARS (a_this, 7) ;
-                status = CR_OK ;
-        }
-        else
-        {
-                status = CR_PARSING_ERROR ;
-                goto error ;
-        }
-
-        cr_parser_try_to_skip_spaces_and_comments (a_this) ;
-
-        PRIVATE (a_this)->state = TRY_PARSE_IMPORT_STATE ;
-
-        PEEK_NEXT_CHAR (a_this, &next_char) ;
-
-        if (next_char == '"' || next_char == '\'')
-        {                                
-                status = cr_parser_parse_string 
-                        (a_this, a_import_string) ;
-                
-                CHECK_PARSING_STATUS (status, FALSE) ;
-        }
-        else
-        {
-                status = cr_parser_parse_uri 
-                        (a_this, a_import_string) ;
-
-                CHECK_PARSING_STATUS (status, FALSE) ;
-        }
-
-        cr_parser_try_to_skip_spaces_and_comments (a_this) ;
-
-        status = cr_parser_parse_ident (a_this, &medium) ;
-
-        if (status == CR_OK && medium)
-        {
-                *a_media_list = g_list_append (*a_media_list, 
-                                               medium) ;
-                medium = NULL ;
-        }
-
-        cr_parser_try_to_skip_spaces_and_comments (a_this) ;
-
-        for (;status == CR_OK;)
-        {
-                PEEK_NEXT_CHAR (a_this, &next_char) ;
-
-                if (next_char == ',')
-                {
-                        READ_NEXT_CHAR (a_this, &cur_char) ;
-                }
-                else
-                {
-                        break ;
-                }
-
-                cr_parser_try_to_skip_spaces_and_comments (a_this) ;
-                                
-                status = cr_parser_parse_ident (a_this, 
-                                                &medium) ;
-
-                cr_parser_try_to_skip_spaces_and_comments (a_this) ;
-
-                if ((status == CR_OK)  &&  medium)
-                {
-                        *a_media_list = g_list_append 
-                                (*a_media_list,  medium) ;
-
-                        medium = NULL ;
-                }
-
-                CHECK_PARSING_STATUS (status, FALSE) ;
-
-                READ_NEXT_CHAR (a_this, &cur_char) ;
-
-                ENSURE_PARSING_COND (cur_char == ';') ;
-
-                cr_parser_try_to_skip_spaces_and_comments (a_this) ;
-        }
-
-        cr_parser_clear_errors (a_this) ;
-        PRIVATE (a_this)->state = IMPORT_PARSED_STATE ;
-
-        return CR_OK ;
-
- error:
-
-        if (*a_media_list)
-        {
-                GList *cur = NULL ;
-                /*
-                 *free each element of *a_media_list.
-                 *Note that each element of *a_medium list *must*
-                 *be a GString* or else, the code that is coming next 
-                 *will corrupt the memory and lead to hard to debug
-                 *random crashes.
-                 *This is where C++ and its compile time
-                 *type checking mecanism (through STL containers) would
-                 *have prevented us to go through this hassle.
-                 */
-                for (cur = *a_media_list; cur ; cur = cur->next)
-                {
-                        if (cur->data)
-                        {
-                                g_string_free (cur->data, TRUE) ;
-                        }
-                }
-
-                g_list_free (*a_media_list) ;
-                *a_media_list = NULL ;
-        }
-
-        if (*a_import_string)
-        {
-                g_string_free (*a_import_string, TRUE) ;
-                *a_import_string = NULL ;
-        }
-
-        if (medium)
-        {
-                g_string_free (medium, TRUE) ;
-                medium = NULL ;
-        }
-
-        cr_tknzr_set_cur_pos (PRIVATE (a_this)->tknzr, &init_pos) ;
-
-        return status ;
-}
-
-/**
- *Parses a 'media' declaration as specified in the css2 spec at
- *appendix D.1:
- *
- *media ::= @media S* medium [ ',' S* medium ]* '{' S* ruleset* '}' S*
- *
- *@param a_this the "this pointer" of the current instance of #CRParser.
- *@return CR_OK upon successfull completion, an error code otherwise.
- */
-static enum CRStatus
-cr_parser_parse_media (CRParser *a_this)
-{
-        enum CRStatus status = CR_OK ;
-        CRInputPos init_pos ;
-        CRToken * token = NULL ;
-        guint32 next_char = 0, cur_char = 0 ;
-        GString * medium = NULL ;
-        GList *media_list = NULL ;
-
-        g_return_val_if_fail (a_this && PRIVATE (a_this), 
-                              CR_BAD_PARAM_ERROR) ;
-
-        RECORD_INITIAL_POS (a_this, &init_pos) ;
-
-        status = cr_tknzr_get_next_token (PRIVATE (a_this)->tknzr,
-                                          &token) ;
-        ENSURE_PARSING_COND (status == CR_OK 
-                             && token
-                             && token->type == MEDIA_SYM_TK) ;
-
-        cr_token_destroy (token) ;
-        token = NULL ;
-
-        cr_parser_try_to_skip_spaces_and_comments (a_this) ;
-
-        status = cr_tknzr_get_next_token (PRIVATE (a_this)->tknzr,
-                                          &token) ;
-        ENSURE_PARSING_COND (status == CR_OK
-                             && token && token->type == IDENT_TK) ;
-
-        medium = token->u.str ;
-        token->u.str = NULL ;
-        cr_token_destroy (token) ;
-        token = NULL ;
-        
-        if (medium)
-        {
-                media_list = g_list_append (media_list, medium) ;
-                medium = NULL ;
-        }
-
-        for (;status == CR_OK;)
-        {
-                cr_parser_try_to_skip_spaces_and_comments (a_this) ;
-
-                PEEK_NEXT_CHAR (a_this, &next_char) ;
-
-                if (next_char == ',') 
-                {
-                        READ_NEXT_CHAR (a_this, &cur_char) ;
-                }
-                else
-                {
-                        break ;
-                }
-
-                cr_parser_try_to_skip_spaces_and_comments (a_this) ;
-
-                status = cr_parser_parse_ident (a_this, &medium) ;
-
-                CHECK_PARSING_STATUS (status, FALSE) ;
-
-                if (medium)
-                {
-                        media_list = g_list_append (media_list,
-                                                    medium) ;
-                        medium = NULL ;
-                }
-        }
-
-        READ_NEXT_CHAR (a_this, &cur_char) ;
-        
-        ENSURE_PARSING_COND (cur_char == '{') ;
-
-        /*
-         *call the SAC handler api here.
-         */
-        if (PRIVATE (a_this)->sac_handler
-            && PRIVATE (a_this)->sac_handler->start_media)
-        {
-                PRIVATE (a_this)->sac_handler->start_media 
-                        (PRIVATE (a_this)->sac_handler, media_list) ;
-        }
-
-        cr_parser_try_to_skip_spaces_and_comments (a_this) ;
-
-        PRIVATE (a_this)->state = TRY_PARSE_MEDIA_STATE ;
-
-        for (;status == CR_OK;)
-        {
-                status = cr_parser_parse_ruleset (a_this) ;
-                cr_parser_try_to_skip_spaces_and_comments (a_this) ;
-        }
-
-        READ_NEXT_CHAR (a_this, &cur_char) ;
-
-        ENSURE_PARSING_COND (cur_char == '}') ;
-
-        /*
-         *call the right SAC handler api here.
-         */
-        if (PRIVATE (a_this)->sac_handler
-            && PRIVATE (a_this)->sac_handler->end_media)
-        {
-                PRIVATE (a_this)->sac_handler->end_media 
-                        (PRIVATE (a_this)->sac_handler, 
-                         media_list) ;
-        }
-
-        cr_parser_try_to_skip_spaces_and_comments (a_this) ;
-
-        /*
-         *Then, free the data structures passed to
-         *the last call to the SAC handler.
-         */
-        if (medium)
-        {
-                g_string_free (medium, TRUE) ;
-                medium = NULL ;
-        }
-
-        if (media_list)
-        {
-                GList *cur = NULL ;
-                
-                for (cur = media_list ; cur ; cur = cur->next)
-                {
-                        g_string_free (cur->data, TRUE) ;
-                }
-
-                g_list_free (media_list) ;
-                media_list = NULL ;
-        }
-
-
-        cr_parser_clear_errors (a_this) ;
-        PRIVATE (a_this)->state = MEDIA_PARSED_STATE ;
-
-        return CR_OK ;
-
- error:
-
-        if (token)
-        {
-                cr_token_destroy (token) ;
-                token = NULL ;
-        }
-
-        if (medium)
-        {
-                g_string_free (medium, TRUE) ;
-                medium = NULL ;
-        }
-
-        if (media_list)
-        {
-                GList *cur = NULL ;
-                
-                for (cur = media_list ; cur ; cur = cur->next)
-                {
-                        g_string_free (cur->data, TRUE) ;
-                }
-
-                g_list_free (media_list) ;
-                media_list = NULL ;
-        }
-        
-        cr_tknzr_set_cur_pos (PRIVATE (a_this)->tknzr, &init_pos);
-        
-        return status ;
-}
-
-
-/**
- *Parses '@page' rule as specified in the css2 spec in appendix D.1:
- *page ::= PAGE_SYM S* IDENT? pseudo_page? S* 
- *'{' S* declaration [ ';' S* declaration ]* '}' S*
- *
- *This function also calls the relevant SAC handlers whenever it
- *encounters a construction that must 
- *be reported to the calling application.
- *@param a_this the "this pointer" of the current instance of #CRParser.
- *@return CR_OK upon successfull completion, an error code otherwise.
- */
-static enum CRStatus
-cr_parser_parse_page (CRParser *a_this)
-{
-        enum CRStatus status = CR_OK ;
-        CRInputPos init_pos ;
-        CRToken * token = NULL ;
-        CRTerm * css_expression = NULL ;
-        GString *page_selector = NULL, 
-                *page_pseudo_class = NULL, 
-                *property = NULL ;
-        
-        g_return_val_if_fail (a_this, CR_BAD_PARAM_ERROR) ;
-
-        RECORD_INITIAL_POS (a_this, &init_pos) ;
-
-        status = cr_tknzr_get_next_token (PRIVATE (a_this)->tknzr,
-                                          &token) ;
-        ENSURE_PARSING_COND (status == CR_OK 
-                             && token
-                             && token->type == PAGE_SYM_TK) ;
-
-        cr_token_destroy (token) ;
-        token = NULL ;
-        
-        cr_parser_try_to_skip_spaces_and_comments (a_this) ;
-        
-        status = cr_tknzr_get_next_token (PRIVATE (a_this)->tknzr,
-                                          &token) ;
-        ENSURE_PARSING_COND (status == CR_OK && token) ;
-
-        if (token->type == IDENT_TK)
-        {
-                page_selector = token->u.str ;
-                token->u.str = NULL ;
-                cr_token_destroy (token) ;
-                token = NULL ;
-        }
-        else
-        {
-                cr_tknzr_unget_token (PRIVATE (a_this)->tknzr,
-                                      token) ;
-                token = NULL ;
-        }        
-
-       /* 
-        *try to parse pseudo_page
-        */        
-
-        status = cr_tknzr_get_next_token (PRIVATE (a_this)->tknzr,
-                                          &token) ;
-        ENSURE_PARSING_COND (status == CR_OK 
-                             && token) ;
-
-        if (token->type == DELIM_TK && token->u.unichar == ':')
-        {
-                cr_token_destroy (token) ;
-                token = NULL ;
-                status = cr_parser_parse_ident (a_this, &page_pseudo_class) ;
-                CHECK_PARSING_STATUS (status, FALSE) ;
-        }
-        else
-        {
-                cr_tknzr_unget_token (PRIVATE (a_this)->tknzr, token) ;
-                token = NULL ;
-        }
-
-        /*
-         *parse_block
-         *
-         */
-        cr_parser_try_to_skip_spaces_and_comments (a_this) ;
-
-        status = cr_tknzr_get_next_token (PRIVATE (a_this)->tknzr,
-                                          &token) ;
-
-        ENSURE_PARSING_COND (status == CR_OK 
-                             && token
-                             && token->type == CBO_TK) ;
-
-        cr_token_destroy (token) ; token = NULL ;
-
-        /*
-         *Call the appropriate SAC handler here.
-         */
-        if (PRIVATE (a_this)->sac_handler 
-            && PRIVATE (a_this)->sac_handler->start_page)
-        {
-                PRIVATE (a_this)->sac_handler->start_page 
-                        (PRIVATE (a_this)->sac_handler, 
-                         page_selector, page_pseudo_class) ;
-        }
-        cr_parser_try_to_skip_spaces_and_comments (a_this) ;
-
-        PRIVATE (a_this)->state = TRY_PARSE_PAGE_STATE ;
-
-        status = cr_parser_parse_declaration (a_this, &property,
-                                              &css_expression) ;
-        
-        /*
-         *call the relevant SAC handler here...
-         */
-        if (PRIVATE (a_this)->sac_handler
-            && PRIVATE (a_this)->sac_handler->property)
-        {
-                cr_term_ref (css_expression) ;
-                PRIVATE (a_this)->sac_handler->property 
-                        (PRIVATE (a_this)->sac_handler, 
-                         property,
-                         css_expression) ;
-        }
-
-        /*
-         *... and free the data structure passed to that last
-         *SAC handler.
-         */
-
-        if (property)
-        {
-                g_string_free (property, TRUE) ;
-                property = NULL ;
-        }
-
-        if (css_expression)
-        {
-                cr_term_unref (css_expression) ;
-                css_expression = NULL ;
-        }
-
-        for (;;)
-        {
-                /*parse the other ';' separated declarations*/
-                if (token)
-                {
-                        cr_token_destroy (token) ;
-                        token = NULL ;
-                }
-                
-                status = cr_tknzr_get_next_token 
-                        (PRIVATE (a_this)->tknzr, &token) ;
-
-                ENSURE_PARSING_COND (status == CR_OK && token) ; 
-
-                if (token->type != SEMICOLON_TK) break ;
-                
-                cr_token_destroy (token) ;
-                token = NULL ;
-
-                cr_parser_try_to_skip_spaces_and_comments (a_this) ;
-
-                status = cr_parser_parse_declaration (a_this, &property,
-                                                      &css_expression) ;
-                CHECK_PARSING_STATUS (status, FALSE) ;
-                
-                /*
-                 *call the relevant SAC handler here...
-                 */
-
-                if (PRIVATE (a_this)->sac_handler
-                    && PRIVATE (a_this)->sac_handler->property)
-                {
-                        cr_term_ref (css_expression) ;
-                        PRIVATE (a_this)->sac_handler->property 
-                                (PRIVATE (a_this)->sac_handler, 
-                                 property,
-                                 css_expression) ;
-                }
-
-                /*
-                 *... and free the data structure passed to that last
-                 *SAC handler.
-                 */
-
-                if (property)
-                {
-                        g_string_free (property, TRUE) ;
-                        property = NULL ;
-                }
-
-                if (css_expression)
-                {
-                        cr_term_unref (css_expression) ;
-                        css_expression = NULL ;
-                }
-        }
-
-        ENSURE_PARSING_COND (status == CR_OK 
-                             && token
-                             && token->type == CBC_TK) ;
-
-        cr_token_destroy (token) ; token = NULL ;
-
-
-        /*
-         *call the relevant SAC handler here.
-         */
-        if (PRIVATE (a_this)->sac_handler
-            && PRIVATE (a_this)->sac_handler->end_page)
-        {
-                PRIVATE (a_this)->sac_handler->end_page 
-                        (PRIVATE (a_this)->sac_handler, 
-                         page_selector, page_pseudo_class) ;
-        }
-
-        if (page_selector)
-        {
-                g_string_free (page_selector, TRUE) ;
-                page_selector = NULL ;
-        }
-
-        if (page_pseudo_class)
-        {
-                g_string_free (page_pseudo_class, TRUE) ;
-                page_pseudo_class = NULL ;
-        }
-
-        cr_parser_try_to_skip_spaces_and_comments (a_this) ;
-
-        /*here goes the former implem of this function ...*/
-
-        cr_parser_clear_errors (a_this) ;
-        PRIVATE (a_this)->state = PAGE_PARSED_STATE ;
-
-        return CR_OK ;
-
- error:
-
-        if (token)
-        {
-                cr_token_destroy (token) ;
-                token = NULL ;
-        }
-
-        if (page_selector)
-        {
-                g_string_free (page_selector, TRUE) ;
-                page_selector = NULL ;
-        }
-
-        if (page_pseudo_class)
-        {
-                g_string_free (page_pseudo_class, TRUE) ;
-                page_pseudo_class = NULL ;
-        }
-
-        if (property)
-        {
-                g_string_free (property, TRUE) ;
-                property = NULL ;
-        }
-
-        if (css_expression)
-        {
-                cr_term_destroy (css_expression) ;
-                css_expression = NULL ;
-        }
-
-        cr_tknzr_set_cur_pos (PRIVATE (a_this)->tknzr, &init_pos) ;
-
-        return status ;
-}
-
-
-/**
- *Parses the "@font-face" rule specified in the css1 spec in
- *appendix D.1:
- *
- *font_face ::= FONT_FACE_SYM S* 
- *'{' S* declaration [ ';' S* declaration ]* '}' S*
- *
- *This function will call SAC handlers whenever it is necessary.
- *@return CR_OK upon successfull completion, an error code otherwise.
- */
-static enum CRStatus
-cr_parser_parse_font_face (CRParser *a_this)
-{
-        enum CRStatus status = CR_ERROR ;
-        CRInputPos init_pos ;
-        GString *property = NULL ;
-        CRTerm * css_expression = NULL ;
-        CRToken *token = NULL ;
-        guint32 next_char = 0, cur_char = 0 ;
-
-        g_return_val_if_fail (a_this, CR_BAD_PARAM_ERROR) ;
-
-        RECORD_INITIAL_POS (a_this, &init_pos) ;
-
-        status = cr_tknzr_get_next_token (PRIVATE (a_this)->tknzr,
-                                          &token) ;
-        ENSURE_PARSING_COND (status == CR_OK 
-                             && token 
-                             && token->type == FONT_FACE_SYM_TK) ;
-
-        cr_parser_try_to_skip_spaces_and_comments (a_this) ;
-
-        if (token)
-        {
-                cr_token_destroy (token) ;
-                token = NULL ;
-        }
-
-        status = cr_tknzr_get_next_token (PRIVATE (a_this)->tknzr,
-                                          &token) ;
-        ENSURE_PARSING_COND (status == CR_OK 
-                             && token 
-                             && token->type == CBO_TK) ;
-
-
-        if (token)
-        {
-                cr_token_destroy (token) ;
-                token = NULL ;
-        }
-
-        /*
-         *here, call the relevant SAC handler.
-         */
-
-        if (PRIVATE (a_this)->sac_handler->start_font_face)
-        {
-                PRIVATE (a_this)->sac_handler->start_font_face 
-                        (PRIVATE (a_this)->sac_handler) ;
-        }
-
-        PRIVATE (a_this)->state = TRY_PARSE_FONT_FACE_STATE ;
-
-        /*
-         *and resume the parsing.
-         */
-        cr_parser_try_to_skip_spaces_and_comments (a_this) ;
-
-        
-        status = cr_parser_parse_declaration (a_this, &property, 
-                                              &css_expression) ;
-
-        if (status == CR_OK)
-        {
-                /*
-                 *here, call the relevant SAC handler.
-                 */
-                cr_term_ref (css_expression) ;
-
-                if (PRIVATE (a_this)->sac_handler->property)
-                {
-                        PRIVATE (a_this)->sac_handler->property
-                                (PRIVATE (a_this)->sac_handler,
-                                 property, css_expression) ;
-                }
-                ENSURE_PARSING_COND (css_expression && property) ;
-        }
-
-        /*free the data structures allocated during last parsing.*/
-        if (property)
-        {
-                g_string_free (property, TRUE) ;
-                property = NULL ;
-        }
-
-        if (css_expression)
-        {
-                cr_term_unref (css_expression) ;
-                css_expression = NULL ;
-        }
-
-        for (;;)
-        {
-                PEEK_NEXT_CHAR (a_this, &next_char) ;
-
-                if (next_char == ';')
-                {
-                        READ_NEXT_CHAR (a_this, &cur_char) ;
-                }
-                else
-                {
-                        break ;
-                }
-
-                cr_parser_try_to_skip_spaces_and_comments (a_this) ;
-
-                status = cr_parser_parse_declaration (a_this, &property, 
-                                                      &css_expression) ;
-
-                if (status != CR_OK) break ;
-
-                /*
-                 *here, call the relevant SAC handler.
-                 */
-                cr_term_ref (css_expression) ;
-
-                if (PRIVATE (a_this)->sac_handler->property)
-                {
-                        PRIVATE (a_this)->sac_handler->property
-                                (PRIVATE (a_this)->sac_handler,
-                                 property, css_expression) ;
-                }
-
-                /*
-                 *Then, free the data structures allocated during 
-                 *last parsing.
-                 */
-                if (property)
-                {
-                        g_string_free (property, TRUE) ;
-                        property = NULL ;
-                }
-
-                if (css_expression)
-                {
-                        cr_term_unref (css_expression) ;
-                        css_expression = NULL ;
-                }
-        }
-
-        cr_parser_try_to_skip_spaces_and_comments (a_this) ;
-
-        READ_NEXT_CHAR (a_this, &cur_char) ;
-
-        ENSURE_PARSING_COND (cur_char == '}') ;
-
-        /*
-         *here, call the relevant SAC handler.
-         */
-
-        if (PRIVATE (a_this)->sac_handler->end_font_face)
-        {
-                PRIVATE (a_this)->sac_handler->end_font_face 
-                        (PRIVATE (a_this)->sac_handler) ;
-        }
-
-        cr_parser_try_to_skip_spaces_and_comments (a_this) ;
-
-        if (token)
-        {
-                cr_token_destroy (token) ;
-                token = NULL ;
-        }
-
-        cr_parser_clear_errors (a_this) ;
-
-        PRIVATE (a_this)->state = FONT_FACE_PARSED_STATE ;
-
-        return CR_OK ;
-
- error:
-
-        if (token)
-        {
-                cr_token_destroy (token) ;
-                token = NULL ;
-        }
-
-        if (property)
-        {
-                g_string_free (property, TRUE) ;
-                property = NULL ;
-        }
-
-        if (css_expression)
-        {
-                cr_term_destroy (css_expression) ;
-                css_expression = NULL ;
-        }
-
-        cr_tknzr_set_cur_pos (PRIVATE (a_this)->tknzr, &init_pos) ;
-
-        return status ;
-}
 
 
 static enum CRStatus
@@ -4515,6 +3585,240 @@ cr_parser_parse_stylesheet (CRParser *a_this)
  *Public CRParser Methods
  ****************************************/
 
+
+/**
+ *Creates a new parser to parse data
+ *coming the input stream given in parameter.
+ *@param a_input the input stream of the parser.
+ *Note that the newly created parser will ref
+ *a_input and unref it when parsing reaches the
+ *end of the input stream.
+ *@return the newly created instance of #CRParser,
+ *or NULL if an error occured.
+ */
+CRParser *
+cr_parser_new (CRTknzr *a_tknzr)
+{
+        CRParser * result = NULL ;
+        enum CRStatus status = CR_OK ;
+
+        result = g_malloc0 (sizeof (CRParserInput)) ;
+
+        PRIVATE (result) = g_malloc0 (sizeof (CRParserPriv)) ;
+
+        if (a_tknzr)
+        {
+                status = cr_parser_set_tknzr (result, a_tknzr) ;
+        }
+
+        g_return_val_if_fail (status == CR_OK, NULL) ;
+
+        return result ;
+}
+
+
+/**
+ *Instanciates a new parser from a memory buffer.
+ *@param a_buf the buffer to parse.
+ *@param a_len the length of the data in the buffer.
+ *@param a_enc the encoding of the input buffer a_buf.
+ *@param a_free_buf if set to TRUE, a_buf will be freed
+ *during the destruction of the newly built instance 
+ *of #CRParser. If set to FALSE, it is up to the caller to
+ *eventually free it.
+ *@return the newly built parser, or NULL if an error arises.
+ */
+CRParser *
+cr_parser_new_from_buf (const guchar *a_buf, 
+                        gulong a_len,
+                        enum CREncoding a_enc, 
+                        gboolean a_free_buf)
+{
+        CRParser * result = NULL ;
+        CRInput *input = NULL ;
+        g_return_val_if_fail (a_buf && a_len, NULL) ;
+       
+        input = cr_input_new_from_buf (a_buf, a_len, a_enc, 
+                                       a_free_buf) ;
+        g_return_val_if_fail (input, NULL) ;
+
+        result = cr_parser_new_from_input (input) ;
+        if (!result)
+        {
+                cr_input_destroy (input) ;
+                input = NULL ;
+                return NULL ;
+        }
+        return result ;        
+}
+
+CRParser *
+cr_parser_new_from_input (CRInput *a_input)
+{
+        CRParser *result = NULL ;
+        CRTknzr *tokenizer = NULL ;
+
+        if (a_input)
+        {
+                tokenizer = cr_tknzr_new (a_input) ;
+                g_return_val_if_fail (tokenizer, NULL) ;
+        }
+
+        result = cr_parser_new (tokenizer) ;
+        g_return_val_if_fail (result, NULL) ;
+
+        return result ;
+}
+
+
+CRParser *
+cr_parser_new_from_file (const guchar *a_file_uri, 
+                         enum CREncoding a_enc)
+{
+        CRParser *result = NULL ;
+        CRTknzr *tokenizer = NULL ;
+
+        tokenizer = cr_tknzr_new_from_uri (a_file_uri, a_enc) ;
+        if (!tokenizer)
+        {
+                cr_utils_trace_info ("Could not open input file") ;
+                return NULL ;
+        }
+        
+        result = cr_parser_new (tokenizer) ;
+        g_return_val_if_fail (result, NULL) ;
+        return result ;
+}
+
+
+/**
+ *Sets a SAC document handler to the parser.
+ *@param a_this the "this pointer" of the current instance of #CRParser.
+ *@param a_handler the handler to set.
+ *@return CR_OK upon successfull completion, an error code otherwise.
+ */
+enum CRStatus
+cr_parser_set_sac_handler (CRParser *a_this, CRDocHandler *a_handler)
+{
+        g_return_val_if_fail (a_this, CR_BAD_PARAM_ERROR) ;
+
+        if (PRIVATE (a_this)->sac_handler)
+        {
+                cr_doc_handler_unref (PRIVATE (a_this)->sac_handler) ;
+        }
+
+        PRIVATE (a_this)->sac_handler = a_handler ;
+        cr_doc_handler_ref (a_handler) ;
+
+        return CR_OK ;
+}
+
+
+/**
+ *Gets the SAC document handler.
+ *@param a_this the "this pointer" of the current instance of
+ *#CRParser.
+ *@param a_handler out parameter. The returned handler.
+ *@return CR_OK upon successfull completion, an error code
+ *otherwise.
+ */
+enum CRStatus
+cr_parser_get_sac_handler (CRParser *a_this, CRDocHandler **a_handler)
+{
+        g_return_val_if_fail (a_this, CR_BAD_PARAM_ERROR) ;
+
+        *a_handler = PRIVATE (a_this)->sac_handler ;
+
+        return CR_OK ;
+}
+
+
+/**
+ *Sets the SAC handler associated to the current instance
+ *of #CRParser to the default SAC handler.
+ *@param a_this a pointer to the current instance of #CRParser.
+ *@return CR_OK upon successfull completion, an error code otherwise.
+ */
+enum CRStatus
+cr_parser_set_default_sac_handler (CRParser *a_this)
+{
+        CRDocHandler *default_sac_handler = NULL ;
+        enum CRStatus status = CR_ERROR ;
+
+        g_return_val_if_fail (a_this && PRIVATE (a_this),
+                              CR_BAD_PARAM_ERROR) ;
+
+        default_sac_handler = cr_doc_handler_new () ;
+
+        cr_doc_handler_set_default_sac_handler (default_sac_handler) ;
+
+        status = cr_parser_set_sac_handler (a_this, default_sac_handler) ;
+
+        if (status != CR_OK)
+        {
+                cr_doc_handler_destroy (default_sac_handler) ;
+                default_sac_handler = NULL ;
+        }
+
+        return status ;
+}
+
+
+enum CRStatus
+cr_parser_set_use_core_grammar (CRParser *a_this,
+                                gboolean a_use_core_grammar)
+{
+        g_return_val_if_fail (a_this && PRIVATE (a_this),
+                              CR_BAD_PARAM_ERROR) ;
+
+        PRIVATE (a_this)->use_core_grammar = a_use_core_grammar ;
+
+        return CR_OK ;
+}
+
+enum CRStatus
+cr_parser_get_use_core_grammar (CRParser *a_this,
+                                gboolean *a_use_core_grammar)
+{
+        g_return_val_if_fail (a_this && PRIVATE (a_this),
+                              CR_BAD_PARAM_ERROR) ;
+
+        *a_use_core_grammar = PRIVATE (a_this)->use_core_grammar ;
+
+        return CR_OK ;
+}
+
+/**
+ *Parses a the given in parameter.
+ *@param a_this a pointer to the current instance of #CRParser.
+ *@param a_file_uri the uri to the file to load. For the time being,
+ *only local files are supported.
+ *@return CR_OK upon successfull completion, an error code otherwise.
+ */
+enum CRStatus
+cr_parser_parse_file (CRParser *a_this, 
+                      const guchar *a_file_uri, 
+                      enum CREncoding a_enc)
+{
+        enum CRStatus status = CR_ERROR ;
+        CRTknzr *tknzr = NULL ;
+
+        g_return_val_if_fail (a_this && PRIVATE (a_this)
+                              && a_file_uri,
+                              CR_BAD_PARAM_ERROR) ;
+
+        tknzr = cr_tknzr_new_from_uri (a_file_uri, a_enc) ;
+
+        g_return_val_if_fail (tknzr != NULL, CR_ERROR) ;
+
+        status = cr_parser_set_tknzr (a_this, tknzr) ;
+        g_return_val_if_fail (status == CR_OK, CR_ERROR) ;
+
+        status = cr_parser_parse (a_this) ;
+
+        return status ;
+}
+
 /**
  *Parses a "declaration" as defined by the css2 spec in appendix D.1:
  *declaration ::= [property ':' S* expr prio?]?
@@ -4820,207 +4124,944 @@ cr_parser_parse_ruleset (CRParser *a_this)
         return status ;
 }
 
+
 /**
- *Creates a new parser to parse data
- *coming the input stream given in parameter.
- *@param a_input the input stream of the parser.
- *Note that the newly created parser will ref
- *a_input and unref it when parsing reaches the
- *end of the input stream.
- *@return the newly created instance of #CRParser,
- *or NULL if an error occured.
+ *Parses an 'import' declaration as defined in the css2 spec
+ *in appendix D.1:
+ *
+ *import ::= 
+ *@import [STRING|URI] S* [ medium [ ',' S* medium]* ]? ';' S*
+ *
+ *@param a_this the "this pointer" of the current instance 
+ *of #CRParser.
+ *
+ *@param a_medium_list out parameter. A linked list of 
+ *GString (see the doc of glib-2). 
+ *Each GString is a string that contains
+ *a 'medium' declaration part of the successfully 
+ *parsed 'import' declaration.
+ *
+ *@param a_import_string out parameter. 
+ *A string that contains the 'import 
+ *string". The import string can be either an uri (if it starts with
+ *the substring "uri(") or a any other css2 string. Note that
+ * *a_import_string must be initially set to NULL or else, this function
+ *will return CR_BAD_PARAM_ERROR.
+ *
+ *@return CR_OK upon sucessfull completion, an error code otherwise.
  */
-CRParser *
-cr_parser_new (CRTknzr *a_tknzr)
+enum CRStatus
+cr_parser_parse_import (CRParser *a_this, GList ** a_media_list,
+                        GString **a_import_string)
 {
-        CRParser * result = NULL ;
         enum CRStatus status = CR_OK ;
+        CRInputPos init_pos ;
+        guint32 cur_char = 0, next_char = 0 ;
+        GString *medium = NULL ;
 
-        result = g_malloc0 (sizeof (CRParserInput)) ;
-
-        PRIVATE (result) = g_malloc0 (sizeof (CRParserPriv)) ;
-
-        if (a_tknzr)
-        {
-                status = cr_parser_set_tknzr (result, a_tknzr) ;
-        }
-
-        g_return_val_if_fail (status == CR_OK, NULL) ;
-
-        return result ;
-}
-
-/**
- *Instanciates a new parser from a memory buffer.
- *@param a_buf the buffer to parse.
- *@param a_len the length of the data in the buffer.
- *@param a_enc the encoding of the input buffer a_buf.
- *@param a_free_buf if set to TRUE, a_buf will be freed
- *during the destruction of the newly built instance 
- *of #CRParser. If set to FALSE, it is up to the caller to
- *eventually free it.
- *@return the newly built parser, or NULL if an error arises.
- */
-CRParser *
-cr_parser_new_from_buf (const guchar *a_buf, 
-                        gulong a_len,
-                        enum CREncoding a_enc, 
-                        gboolean a_free_buf)
-{
-        CRParser * result = NULL ;
-        CRInput *input = NULL ;
-        g_return_val_if_fail (a_buf && a_len, NULL) ;
-       
-        input = cr_input_new_from_buf (a_buf, a_len, a_enc, 
-                                       a_free_buf) ;
-        g_return_val_if_fail (input, NULL) ;
-
-        result = cr_parser_new_from_input (input) ;
-        if (!result)
-        {
-                cr_input_destroy (input) ;
-                input = NULL ;
-                return NULL ;
-        }
-        return result ;        
-}
-
-CRParser *
-cr_parser_new_from_input (CRInput *a_input)
-{
-        CRParser *result = NULL ;
-        CRTknzr *tokenizer = NULL ;
-
-        if (a_input)
-        {
-                tokenizer = cr_tknzr_new (a_input) ;
-                g_return_val_if_fail (tokenizer, NULL) ;
-        }
-
-        result = cr_parser_new (tokenizer) ;
-        g_return_val_if_fail (result, NULL) ;
-
-        return result ;
-}
-
-
-CRParser *
-cr_parser_new_from_file (const guchar *a_file_uri, 
-                         enum CREncoding a_enc)
-{
-        CRParser *result = NULL ;
-        CRTknzr *tokenizer = NULL ;
-
-        tokenizer = cr_tknzr_new_from_uri (a_file_uri, a_enc) ;
-        if (!tokenizer)
-        {
-                cr_utils_trace_info ("Could not open input file") ;
-                return NULL ;
-        }
-        
-        result = cr_parser_new (tokenizer) ;
-        g_return_val_if_fail (result, NULL) ;
-        return result ;
-}
-
-
-/**
- *Sets a SAC document handler to the parser.
- *@param a_this the "this pointer" of the current instance of #CRParser.
- *@param a_handler the handler to set.
- *@return CR_OK upon successfull completion, an error code otherwise.
- */
-enum CRStatus
-cr_parser_set_sac_handler (CRParser *a_this, CRDocHandler *a_handler)
-{
-        g_return_val_if_fail (a_this, CR_BAD_PARAM_ERROR) ;
-
-        if (PRIVATE (a_this)->sac_handler)
-        {
-                cr_doc_handler_unref (PRIVATE (a_this)->sac_handler) ;
-        }
-
-        PRIVATE (a_this)->sac_handler = a_handler ;
-        cr_doc_handler_ref (a_handler) ;
-
-        return CR_OK ;
-}
-
-
-/**
- *Gets the SAC document handler.
- *@param a_this the "this pointer" of the current instance of
- *#CRParser.
- *@param a_handler out parameter. The returned handler.
- *@return CR_OK upon successfull completion, an error code
- *otherwise.
- */
-enum CRStatus
-cr_parser_get_sac_handler (CRParser *a_this, CRDocHandler **a_handler)
-{
-        g_return_val_if_fail (a_this, CR_BAD_PARAM_ERROR) ;
-
-        *a_handler = PRIVATE (a_this)->sac_handler ;
-
-        return CR_OK ;
-}
-
-
-/**
- *Sets the SAC handler associated to the current instance
- *of #CRParser to the default SAC handler.
- *@param a_this a pointer to the current instance of #CRParser.
- *@return CR_OK upon successfull completion, an error code otherwise.
- */
-enum CRStatus
-cr_parser_set_default_sac_handler (CRParser *a_this)
-{
-        CRDocHandler *default_sac_handler = NULL ;
-        enum CRStatus status = CR_ERROR ;
-
-        g_return_val_if_fail (a_this && PRIVATE (a_this),
+        g_return_val_if_fail (a_this 
+                              && a_import_string 
+                              && (*a_import_string == NULL),
                               CR_BAD_PARAM_ERROR) ;
 
-        default_sac_handler = cr_doc_handler_new () ;
-
-        cr_doc_handler_set_default_sac_handler (default_sac_handler) ;
-
-        status = cr_parser_set_sac_handler (a_this, default_sac_handler) ;
-
-        if (status != CR_OK)
+        RECORD_INITIAL_POS (a_this, &init_pos) ;
+ 
+        if (BYTE (a_this, 1, NULL)    == '@'
+            && BYTE (a_this, 2, NULL) == 'i'
+            && BYTE (a_this, 3, NULL) == 'm'
+            && BYTE (a_this, 4, NULL) == 'p'
+            && BYTE (a_this, 5, NULL) == 'o'
+            && BYTE (a_this, 6, NULL) == 'r'
+            && BYTE (a_this, 7, NULL) == 't')
         {
-                cr_doc_handler_destroy (default_sac_handler) ;
-                default_sac_handler = NULL ;
+                SKIP_CHARS (a_this, 7) ;
+                status = CR_OK ;
         }
+        else
+        {
+                status = CR_PARSING_ERROR ;
+                goto error ;
+        }
+
+        cr_parser_try_to_skip_spaces_and_comments (a_this) ;
+
+        PRIVATE (a_this)->state = TRY_PARSE_IMPORT_STATE ;
+
+        PEEK_NEXT_CHAR (a_this, &next_char) ;
+
+        if (next_char == '"' || next_char == '\'')
+        {                                
+                status = cr_parser_parse_string 
+                        (a_this, a_import_string) ;
+                
+                CHECK_PARSING_STATUS (status, FALSE) ;
+        }
+        else
+        {
+                status = cr_parser_parse_uri 
+                        (a_this, a_import_string) ;
+
+                CHECK_PARSING_STATUS (status, FALSE) ;
+        }
+
+        cr_parser_try_to_skip_spaces_and_comments (a_this) ;
+
+        status = cr_parser_parse_ident (a_this, &medium) ;
+
+        if (status == CR_OK && medium)
+        {
+                *a_media_list = g_list_append (*a_media_list, 
+                                               medium) ;
+                medium = NULL ;
+        }
+
+        cr_parser_try_to_skip_spaces_and_comments (a_this) ;
+
+        for (;status == CR_OK;)
+        {
+                if ( (status = cr_tknzr_peek_char (PRIVATE (a_this)->tknzr,
+                                                   &next_char)) != CR_OK)
+                {
+                        if (status == CR_END_OF_INPUT_ERROR)
+                        {
+                                status = CR_OK ;
+                                goto okay ;
+                        }
+                        goto error ;
+                }
+
+
+                if (next_char == ',')
+                {
+                        READ_NEXT_CHAR (a_this, &cur_char) ;
+                }
+                else
+                {
+                        break ;
+                }
+
+                cr_parser_try_to_skip_spaces_and_comments (a_this) ;
+                                
+                status = cr_parser_parse_ident (a_this, 
+                                                &medium) ;
+
+                cr_parser_try_to_skip_spaces_and_comments (a_this) ;
+
+                if ((status == CR_OK)  &&  medium)
+                {
+                        *a_media_list = g_list_append 
+                                (*a_media_list,  medium) ;
+
+                        medium = NULL ;
+                }
+
+                CHECK_PARSING_STATUS (status, FALSE) ;
+
+                READ_NEXT_CHAR (a_this, &cur_char) ;
+
+                ENSURE_PARSING_COND (cur_char == ';') ;
+
+                cr_parser_try_to_skip_spaces_and_comments (a_this) ;
+        }
+
+ okay:
+        cr_parser_clear_errors (a_this) ;
+        PRIVATE (a_this)->state = IMPORT_PARSED_STATE ;
+
+        return CR_OK ;
+
+ error:
+
+        if (*a_media_list)
+        {
+                GList *cur = NULL ;
+                /*
+                 *free each element of *a_media_list.
+                 *Note that each element of *a_medium list *must*
+                 *be a GString* or else, the code that is coming next 
+                 *will corrupt the memory and lead to hard to debug
+                 *random crashes.
+                 *This is where C++ and its compile time
+                 *type checking mecanism (through STL containers) would
+                 *have prevented us to go through this hassle.
+                 */
+                for (cur = *a_media_list; cur ; cur = cur->next)
+                {
+                        if (cur->data)
+                        {
+                                g_string_free (cur->data, TRUE) ;
+                        }
+                }
+
+                g_list_free (*a_media_list) ;
+                *a_media_list = NULL ;
+        }
+
+        if (*a_import_string)
+        {
+                g_string_free (*a_import_string, TRUE) ;
+                *a_import_string = NULL ;
+        }
+
+        if (medium)
+        {
+                g_string_free (medium, TRUE) ;
+                medium = NULL ;
+        }
+
+        cr_tknzr_set_cur_pos (PRIVATE (a_this)->tknzr, &init_pos) ;
+
+        return status ;
+}
+
+/**
+ *Parses a 'media' declaration as specified in the css2 spec at
+ *appendix D.1:
+ *
+ *media ::= @media S* medium [ ',' S* medium ]* '{' S* ruleset* '}' S*
+ *
+ *Note that this function calls the required sac handlers during the parsing
+ *to notify media productions. See #CRDocHandler to know the callback called
+ *during @media parsing.
+ *@param a_this the "this pointer" of the current instance of #CRParser.
+ *@return CR_OK upon successfull completion, an error code otherwise.
+ */
+enum CRStatus
+cr_parser_parse_media (CRParser *a_this)
+{
+        enum CRStatus status = CR_OK ;
+        CRInputPos init_pos ;
+        CRToken * token = NULL ;
+        guint32 next_char = 0, cur_char = 0 ;
+        GString * medium = NULL ;
+        GList *media_list = NULL ;
+
+        g_return_val_if_fail (a_this && PRIVATE (a_this), 
+                              CR_BAD_PARAM_ERROR) ;
+
+        RECORD_INITIAL_POS (a_this, &init_pos) ;
+
+        status = cr_tknzr_get_next_token (PRIVATE (a_this)->tknzr,
+                                          &token) ;
+        ENSURE_PARSING_COND (status == CR_OK 
+                             && token
+                             && token->type == MEDIA_SYM_TK) ;
+
+        cr_token_destroy (token) ;
+        token = NULL ;
+
+        cr_parser_try_to_skip_spaces_and_comments (a_this) ;
+
+        status = cr_tknzr_get_next_token (PRIVATE (a_this)->tknzr,
+                                          &token) ;
+        ENSURE_PARSING_COND (status == CR_OK
+                             && token && token->type == IDENT_TK) ;
+
+        medium = token->u.str ;
+        token->u.str = NULL ;
+        cr_token_destroy (token) ;
+        token = NULL ;
+        
+        if (medium)
+        {
+                media_list = g_list_append (media_list, medium) ;
+                medium = NULL ;
+        }
+
+        for (;status == CR_OK;)
+        {
+                cr_parser_try_to_skip_spaces_and_comments (a_this) ;
+                PEEK_NEXT_CHAR (a_this, &next_char) ;
+
+                if (next_char == ',') 
+                {
+                        READ_NEXT_CHAR (a_this, &cur_char) ;
+                }
+                else
+                {
+                        break ;
+                }
+
+                cr_parser_try_to_skip_spaces_and_comments (a_this) ;
+
+                status = cr_parser_parse_ident (a_this, &medium) ;
+
+                CHECK_PARSING_STATUS (status, FALSE) ;
+
+                if (medium)
+                {
+                        media_list = g_list_append (media_list,
+                                                    medium) ;
+                        medium = NULL ;
+                }
+        }
+
+        READ_NEXT_CHAR (a_this, &cur_char) ;
+        
+        ENSURE_PARSING_COND (cur_char == '{') ;
+
+        /*
+         *call the SAC handler api here.
+         */
+        if (PRIVATE (a_this)->sac_handler
+            && PRIVATE (a_this)->sac_handler->start_media)
+        {
+                PRIVATE (a_this)->sac_handler->start_media 
+                        (PRIVATE (a_this)->sac_handler, media_list) ;
+        }
+
+        cr_parser_try_to_skip_spaces_and_comments (a_this) ;
+
+        PRIVATE (a_this)->state = TRY_PARSE_MEDIA_STATE ;
+
+        for (;status == CR_OK;)
+        {
+                status = cr_parser_parse_ruleset (a_this) ;
+                cr_parser_try_to_skip_spaces_and_comments (a_this) ;
+        }
+
+        READ_NEXT_CHAR (a_this, &cur_char) ;
+
+        ENSURE_PARSING_COND (cur_char == '}') ;
+
+        /*
+         *call the right SAC handler api here.
+         */
+        if (PRIVATE (a_this)->sac_handler
+            && PRIVATE (a_this)->sac_handler->end_media)
+        {
+                PRIVATE (a_this)->sac_handler->end_media 
+                        (PRIVATE (a_this)->sac_handler, 
+                         media_list) ;
+        }
+
+        cr_parser_try_to_skip_spaces_and_comments (a_this) ;
+
+        /*
+         *Then, free the data structures passed to
+         *the last call to the SAC handler.
+         */
+        if (medium)
+        {
+                g_string_free (medium, TRUE) ;
+                medium = NULL ;
+        }
+
+        if (media_list)
+        {
+                GList *cur = NULL ;
+                
+                for (cur = media_list ; cur ; cur = cur->next)
+                {
+                        g_string_free (cur->data, TRUE) ;
+                }
+
+                g_list_free (media_list) ;
+                media_list = NULL ;
+        }
+
+
+        cr_parser_clear_errors (a_this) ;
+        PRIVATE (a_this)->state = MEDIA_PARSED_STATE ;
+
+        return CR_OK ;
+
+ error:
+
+        if (token)
+        {
+                cr_token_destroy (token) ;
+                token = NULL ;
+        }
+
+        if (medium)
+        {
+                g_string_free (medium, TRUE) ;
+                medium = NULL ;
+        }
+
+        if (media_list)
+        {
+                GList *cur = NULL ;
+                
+                for (cur = media_list ; cur ; cur = cur->next)
+                {
+                        g_string_free (cur->data, TRUE) ;
+                }
+
+                g_list_free (media_list) ;
+                media_list = NULL ;
+        }
+        
+        cr_tknzr_set_cur_pos (PRIVATE (a_this)->tknzr, &init_pos);
+        
+        return status ;
+}
+
+/**
+ *Parses '@page' rule as specified in the css2 spec in appendix D.1:
+ *page ::= PAGE_SYM S* IDENT? pseudo_page? S* 
+ *'{' S* declaration [ ';' S* declaration ]* '}' S*
+ *
+ *This function also calls the relevant SAC handlers whenever it
+ *encounters a construction that must 
+ *be reported to the calling application.
+ *@param a_this the "this pointer" of the current instance of #CRParser.
+ *@return CR_OK upon successfull completion, an error code otherwise.
+ */
+enum CRStatus
+cr_parser_parse_page (CRParser *a_this)
+{
+        enum CRStatus status = CR_OK ;
+        CRInputPos init_pos ;
+        CRToken * token = NULL ;
+        CRTerm * css_expression = NULL ;
+        GString *page_selector = NULL, 
+                *page_pseudo_class = NULL, 
+                *property = NULL ;
+        
+        g_return_val_if_fail (a_this, CR_BAD_PARAM_ERROR) ;
+
+        RECORD_INITIAL_POS (a_this, &init_pos) ;
+
+        status = cr_tknzr_get_next_token (PRIVATE (a_this)->tknzr,
+                                          &token) ;
+        ENSURE_PARSING_COND (status == CR_OK 
+                             && token
+                             && token->type == PAGE_SYM_TK) ;
+
+        cr_token_destroy (token) ;
+        token = NULL ;
+        
+        cr_parser_try_to_skip_spaces_and_comments (a_this) ;
+        
+        status = cr_tknzr_get_next_token (PRIVATE (a_this)->tknzr,
+                                          &token) ;
+        ENSURE_PARSING_COND (status == CR_OK && token) ;
+
+        if (token->type == IDENT_TK)
+        {
+                page_selector = token->u.str ;
+                token->u.str = NULL ;
+                cr_token_destroy (token) ;
+                token = NULL ;
+        }
+        else
+        {
+                cr_tknzr_unget_token (PRIVATE (a_this)->tknzr,
+                                      token) ;
+                token = NULL ;
+        }        
+
+       /* 
+        *try to parse pseudo_page
+        */        
+
+        status = cr_tknzr_get_next_token (PRIVATE (a_this)->tknzr,
+                                          &token) ;
+        ENSURE_PARSING_COND (status == CR_OK 
+                             && token) ;
+
+        if (token->type == DELIM_TK && token->u.unichar == ':')
+        {
+                cr_token_destroy (token) ;
+                token = NULL ;
+                status = cr_parser_parse_ident (a_this, &page_pseudo_class) ;
+                CHECK_PARSING_STATUS (status, FALSE) ;
+        }
+        else
+        {
+                cr_tknzr_unget_token (PRIVATE (a_this)->tknzr, token) ;
+                token = NULL ;
+        }
+
+        /*
+         *parse_block
+         *
+         */
+        cr_parser_try_to_skip_spaces_and_comments (a_this) ;
+
+        status = cr_tknzr_get_next_token (PRIVATE (a_this)->tknzr,
+                                          &token) ;
+
+        ENSURE_PARSING_COND (status == CR_OK 
+                             && token
+                             && token->type == CBO_TK) ;
+
+        cr_token_destroy (token) ; token = NULL ;
+
+        /*
+         *Call the appropriate SAC handler here.
+         */
+        if (PRIVATE (a_this)->sac_handler 
+            && PRIVATE (a_this)->sac_handler->start_page)
+        {
+                PRIVATE (a_this)->sac_handler->start_page 
+                        (PRIVATE (a_this)->sac_handler, 
+                         page_selector, page_pseudo_class) ;
+        }
+        cr_parser_try_to_skip_spaces_and_comments (a_this) ;
+
+        PRIVATE (a_this)->state = TRY_PARSE_PAGE_STATE ;
+
+        status = cr_parser_parse_declaration (a_this, &property,
+                                              &css_expression) ;
+        
+        /*
+         *call the relevant SAC handler here...
+         */
+        if (PRIVATE (a_this)->sac_handler
+            && PRIVATE (a_this)->sac_handler->property)
+        {
+                cr_term_ref (css_expression) ;
+                PRIVATE (a_this)->sac_handler->property 
+                        (PRIVATE (a_this)->sac_handler, 
+                         property,
+                         css_expression) ;
+        }
+
+        /*
+         *... and free the data structure passed to that last
+         *SAC handler.
+         */
+
+        if (property)
+        {
+                g_string_free (property, TRUE) ;
+                property = NULL ;
+        }
+
+        if (css_expression)
+        {
+                cr_term_unref (css_expression) ;
+                css_expression = NULL ;
+        }
+
+        for (;;)
+        {
+                /*parse the other ';' separated declarations*/
+                if (token)
+                {
+                        cr_token_destroy (token) ;
+                        token = NULL ;
+                }
+                
+                status = cr_tknzr_get_next_token 
+                        (PRIVATE (a_this)->tknzr, &token) ;
+
+                ENSURE_PARSING_COND (status == CR_OK && token) ; 
+
+                if (token->type != SEMICOLON_TK) break ;
+                
+                cr_token_destroy (token) ;
+                token = NULL ;
+
+                cr_parser_try_to_skip_spaces_and_comments (a_this) ;
+
+                status = cr_parser_parse_declaration (a_this, &property,
+                                                      &css_expression) ;
+                CHECK_PARSING_STATUS (status, FALSE) ;
+                
+                /*
+                 *call the relevant SAC handler here...
+                 */
+
+                if (PRIVATE (a_this)->sac_handler
+                    && PRIVATE (a_this)->sac_handler->property)
+                {
+                        cr_term_ref (css_expression) ;
+                        PRIVATE (a_this)->sac_handler->property 
+                                (PRIVATE (a_this)->sac_handler, 
+                                 property,
+                                 css_expression) ;
+                }
+
+                /*
+                 *... and free the data structure passed to that last
+                 *SAC handler.
+                 */
+
+                if (property)
+                {
+                        g_string_free (property, TRUE) ;
+                        property = NULL ;
+                }
+
+                if (css_expression)
+                {
+                        cr_term_unref (css_expression) ;
+                        css_expression = NULL ;
+                }
+        }
+
+        ENSURE_PARSING_COND (status == CR_OK 
+                             && token
+                             && token->type == CBC_TK) ;
+
+        cr_token_destroy (token) ; token = NULL ;
+
+
+        /*
+         *call the relevant SAC handler here.
+         */
+        if (PRIVATE (a_this)->sac_handler
+            && PRIVATE (a_this)->sac_handler->end_page)
+        {
+                PRIVATE (a_this)->sac_handler->end_page 
+                        (PRIVATE (a_this)->sac_handler, 
+                         page_selector, page_pseudo_class) ;
+        }
+
+        if (page_selector)
+        {
+                g_string_free (page_selector, TRUE) ;
+                page_selector = NULL ;
+        }
+
+        if (page_pseudo_class)
+        {
+                g_string_free (page_pseudo_class, TRUE) ;
+                page_pseudo_class = NULL ;
+        }
+
+        cr_parser_try_to_skip_spaces_and_comments (a_this) ;
+
+        /*here goes the former implem of this function ...*/
+
+        cr_parser_clear_errors (a_this) ;
+        PRIVATE (a_this)->state = PAGE_PARSED_STATE ;
+
+        return CR_OK ;
+
+ error:
+
+        if (token)
+        {
+                cr_token_destroy (token) ;
+                token = NULL ;
+        }
+
+        if (page_selector)
+        {
+                g_string_free (page_selector, TRUE) ;
+                page_selector = NULL ;
+        }
+
+        if (page_pseudo_class)
+        {
+                g_string_free (page_pseudo_class, TRUE) ;
+                page_pseudo_class = NULL ;
+        }
+
+        if (property)
+        {
+                g_string_free (property, TRUE) ;
+                property = NULL ;
+        }
+
+        if (css_expression)
+        {
+                cr_term_destroy (css_expression) ;
+                css_expression = NULL ;
+        }
+
+        cr_tknzr_set_cur_pos (PRIVATE (a_this)->tknzr, &init_pos) ;
 
         return status ;
 }
 
 
+/**
+ *Parses a charset declaration as defined implictly by the css2 spec in
+ *appendix D.1:
+ *charset ::= CHARSET_SYM S* STRING S* ';'
+ *
+ *@param a_this the "this pointer" of the current instance of #CRParser.
+ *@param a_value out parameter. The actual parsed value of the charset 
+ *declararation.
+ *@return CR_OK upon successfull completion, an error code otherwise.
+ */
 enum CRStatus
-cr_parser_set_use_core_grammar (CRParser *a_this,
-                                gboolean a_use_core_grammar)
+cr_parser_parse_charset (CRParser *a_this, GString **a_value)
 {
-        g_return_val_if_fail (a_this && PRIVATE (a_this),
+        enum CRStatus status = CR_OK ;
+        CRInputPos init_pos ;
+        CRToken *token = NULL ;
+        GString *charset_str = NULL ;
+
+        g_return_val_if_fail (a_this && a_value 
+                              && (*a_value == NULL),
                               CR_BAD_PARAM_ERROR) ;
 
-        PRIVATE (a_this)->use_core_grammar = a_use_core_grammar ;
+        RECORD_INITIAL_POS (a_this, &init_pos) ;
 
+        status = cr_tknzr_get_next_token (PRIVATE (a_this)->tknzr,
+                                          &token) ;
+
+        ENSURE_PARSING_COND (status == CR_OK 
+                             && token && token->type == CHARSET_SYM_TK) ;
+
+        cr_token_destroy (token) ;
+        token = NULL ;
+
+        PRIVATE (a_this)->state = TRY_PARSE_CHARSET_STATE ;
+
+        cr_parser_try_to_skip_spaces_and_comments (a_this) ;
+
+        status = cr_tknzr_get_next_token (PRIVATE (a_this)->tknzr,
+                                          &token) ;
+        ENSURE_PARSING_COND (status == CR_OK 
+                             && token && token->type == STRING_TK) ;
+        charset_str = token->u.str ;
+        token->u.str = NULL ;
+        cr_token_destroy (token) ;
+        token = NULL ;
+
+        cr_parser_try_to_skip_spaces_and_comments (a_this) ;
+
+        status = cr_tknzr_get_next_token (PRIVATE (a_this)->tknzr,
+                                          &token) ;
+
+        ENSURE_PARSING_COND (status == CR_OK 
+                             && token && token->type == SEMICOLON_TK) ;
+        cr_token_destroy (token) ;
+        token = NULL ;
+
+        if (charset_str)
+        {
+                *a_value = charset_str ;
+        }
+
+        PRIVATE (a_this)->state = CHARSET_PARSED_STATE ;
         return CR_OK ;
+
+ error:
+
+        if (token)
+        {
+                cr_token_destroy (token) ;
+                token = NULL ;
+        }
+
+        if (*a_value)
+        {
+                g_string_free (*a_value, TRUE) ;
+                *a_value = NULL ;
+        }
+
+        cr_tknzr_set_cur_pos (PRIVATE (a_this)->tknzr, 
+                                     &init_pos) ;
+
+        return status ;
 }
 
+
+
+
+/**
+ *Parses the "@font-face" rule specified in the css1 spec in
+ *appendix D.1:
+ *
+ *font_face ::= FONT_FACE_SYM S* 
+ *'{' S* declaration [ ';' S* declaration ]* '}' S*
+ *
+ *This function will call SAC handlers whenever it is necessary.
+ *@return CR_OK upon successfull completion, an error code otherwise.
+ */
 enum CRStatus
-cr_parser_get_use_core_grammar (CRParser *a_this,
-                                gboolean *a_use_core_grammar)
+cr_parser_parse_font_face (CRParser *a_this)
 {
-        g_return_val_if_fail (a_this && PRIVATE (a_this),
-                              CR_BAD_PARAM_ERROR) ;
+        enum CRStatus status = CR_ERROR ;
+        CRInputPos init_pos ;
+        GString *property = NULL ;
+        CRTerm * css_expression = NULL ;
+        CRToken *token = NULL ;
+        guint32 next_char = 0, cur_char = 0 ;
 
-        *a_use_core_grammar = PRIVATE (a_this)->use_core_grammar ;
+        g_return_val_if_fail (a_this, CR_BAD_PARAM_ERROR) ;
+
+        RECORD_INITIAL_POS (a_this, &init_pos) ;
+
+        status = cr_tknzr_get_next_token (PRIVATE (a_this)->tknzr,
+                                          &token) ;
+        ENSURE_PARSING_COND (status == CR_OK 
+                             && token 
+                             && token->type == FONT_FACE_SYM_TK) ;
+
+        cr_parser_try_to_skip_spaces_and_comments (a_this) ;
+
+        if (token)
+        {
+                cr_token_destroy (token) ;
+                token = NULL ;
+        }
+
+        status = cr_tknzr_get_next_token (PRIVATE (a_this)->tknzr,
+                                          &token) ;
+        ENSURE_PARSING_COND (status == CR_OK 
+                             && token 
+                             && token->type == CBO_TK) ;
+
+
+        if (token)
+        {
+                cr_token_destroy (token) ;
+                token = NULL ;
+        }
+
+        /*
+         *here, call the relevant SAC handler.
+         */
+
+        if (PRIVATE (a_this)->sac_handler->start_font_face)
+        {
+                PRIVATE (a_this)->sac_handler->start_font_face 
+                        (PRIVATE (a_this)->sac_handler) ;
+        }
+
+        PRIVATE (a_this)->state = TRY_PARSE_FONT_FACE_STATE ;
+
+        /*
+         *and resume the parsing.
+         */
+        cr_parser_try_to_skip_spaces_and_comments (a_this) ;
+
+        
+        status = cr_parser_parse_declaration (a_this, &property, 
+                                              &css_expression) ;
+
+        if (status == CR_OK)
+        {
+                /*
+                 *here, call the relevant SAC handler.
+                 */
+                cr_term_ref (css_expression) ;
+
+                if (PRIVATE (a_this)->sac_handler->property)
+                {
+                        PRIVATE (a_this)->sac_handler->property
+                                (PRIVATE (a_this)->sac_handler,
+                                 property, css_expression) ;
+                }
+                ENSURE_PARSING_COND (css_expression && property) ;
+        }
+
+        /*free the data structures allocated during last parsing.*/
+        if (property)
+        {
+                g_string_free (property, TRUE) ;
+                property = NULL ;
+        }
+
+        if (css_expression)
+        {
+                cr_term_unref (css_expression) ;
+                css_expression = NULL ;
+        }
+
+        for (;;)
+        {
+                PEEK_NEXT_CHAR (a_this, &next_char) ;
+
+                if (next_char == ';')
+                {
+                        READ_NEXT_CHAR (a_this, &cur_char) ;
+                }
+                else
+                {
+                        break ;
+                }
+
+                cr_parser_try_to_skip_spaces_and_comments (a_this) ;
+
+                status = cr_parser_parse_declaration (a_this, &property, 
+                                                      &css_expression) ;
+
+                if (status != CR_OK) break ;
+
+                /*
+                 *here, call the relevant SAC handler.
+                 */
+                cr_term_ref (css_expression) ;
+
+                if (PRIVATE (a_this)->sac_handler->property)
+                {
+                        PRIVATE (a_this)->sac_handler->property
+                                (PRIVATE (a_this)->sac_handler,
+                                 property, css_expression) ;
+                }
+
+                /*
+                 *Then, free the data structures allocated during 
+                 *last parsing.
+                 */
+                if (property)
+                {
+                        g_string_free (property, TRUE) ;
+                        property = NULL ;
+                }
+
+                if (css_expression)
+                {
+                        cr_term_unref (css_expression) ;
+                        css_expression = NULL ;
+                }
+        }
+
+        cr_parser_try_to_skip_spaces_and_comments (a_this) ;
+
+        READ_NEXT_CHAR (a_this, &cur_char) ;
+
+        ENSURE_PARSING_COND (cur_char == '}') ;
+
+        /*
+         *here, call the relevant SAC handler.
+         */
+
+        if (PRIVATE (a_this)->sac_handler->end_font_face)
+        {
+                PRIVATE (a_this)->sac_handler->end_font_face 
+                        (PRIVATE (a_this)->sac_handler) ;
+        }
+
+        cr_parser_try_to_skip_spaces_and_comments (a_this) ;
+
+        if (token)
+        {
+                cr_token_destroy (token) ;
+                token = NULL ;
+        }
+
+        cr_parser_clear_errors (a_this) ;
+
+        PRIVATE (a_this)->state = FONT_FACE_PARSED_STATE ;
 
         return CR_OK ;
-}
 
+ error:
+
+        if (token)
+        {
+                cr_token_destroy (token) ;
+                token = NULL ;
+        }
+
+        if (property)
+        {
+                g_string_free (property, TRUE) ;
+                property = NULL ;
+        }
+
+        if (css_expression)
+        {
+                cr_term_destroy (css_expression) ;
+                css_expression = NULL ;
+        }
+
+        cr_tknzr_set_cur_pos (PRIVATE (a_this)->tknzr, &init_pos) ;
+
+        return status ;
+}
 
 /**
  *Parses the data that comes from the
@@ -5084,38 +5125,6 @@ cr_parser_parse_buf (CRParser *a_this, const guchar *a_buf,
 
         tknzr = cr_tknzr_new_from_buf (a_buf,a_len,
                                        a_enc, FALSE) ;
-
-        g_return_val_if_fail (tknzr != NULL, CR_ERROR) ;
-
-        status = cr_parser_set_tknzr (a_this, tknzr) ;
-        g_return_val_if_fail (status == CR_OK, CR_ERROR) ;
-
-        status = cr_parser_parse (a_this) ;
-
-        return status ;
-}
-
-
-/**
- *Parses a the given in parameter.
- *@param a_this a pointer to the current instance of #CRParser.
- *@param a_file_uri the uri to the file to load. For the time being,
- *only local files are supported.
- *@return CR_OK upon successfull completion, an error code otherwise.
- */
-enum CRStatus
-cr_parser_parse_file (CRParser *a_this, 
-                      const guchar *a_file_uri, 
-                      enum CREncoding a_enc)
-{
-        enum CRStatus status = CR_ERROR ;
-        CRTknzr *tknzr = NULL ;
-
-        g_return_val_if_fail (a_this && PRIVATE (a_this)
-                              && a_file_uri,
-                              CR_BAD_PARAM_ERROR) ;
-
-        tknzr = cr_tknzr_new_from_uri (a_file_uri, a_enc) ;
 
         g_return_val_if_fail (tknzr != NULL, CR_ERROR) ;
 

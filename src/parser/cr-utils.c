@@ -71,8 +71,8 @@
  *otherwise.
  */
 enum CRStatus
-cr_utils_utf8_str_len_as_ucs4 (guchar *a_in_start,
-                               guchar *a_in_end,
+cr_utils_utf8_str_len_as_ucs4 (const guchar *a_in_start,
+                               const guchar *a_in_end,
                                gulong *a_len)
 {        
         guchar *byte_ptr = NULL ;
@@ -88,7 +88,7 @@ cr_utils_utf8_str_len_as_ucs4 (guchar *a_in_start,
 			      CR_BAD_PARAM_ERROR) ;
 	*a_len = 0 ;
 	
-	for (byte_ptr = a_in_start ;
+	for (byte_ptr = (guchar*)a_in_start ;
 	     byte_ptr <= a_in_end ;
              byte_ptr++) 
         {
@@ -211,7 +211,8 @@ cr_utils_utf8_str_len_as_ucs4 (guchar *a_in_start,
  *@return CR_OK upon successfull completion, an error code otherwise.
  */
 enum CRStatus
-cr_utils_ucs4_str_len_as_utf8 (guint32 *a_in_start, guint32 *a_in_end,
+cr_utils_ucs4_str_len_as_utf8 (const guint32 *a_in_start, 
+                               const guint32 *a_in_end,
                                gulong *a_len)
 {
 	gint len = 0 ;
@@ -220,7 +221,7 @@ cr_utils_ucs4_str_len_as_utf8 (guint32 *a_in_start, guint32 *a_in_end,
 	g_return_val_if_fail (a_in_start && a_in_end && a_len,
 			      CR_BAD_PARAM_ERROR) ;
 
-	for (char_ptr = a_in_start ;
+	for (char_ptr = (guint32*)a_in_start ;
 	     char_ptr <= a_in_end ;
 	     char_ptr ++) 
         {
@@ -268,7 +269,8 @@ cr_utils_ucs4_str_len_as_utf8 (guint32 *a_in_start, guint32 *a_in_end,
  *@return CR_OK upon successfull completion, an error code otherwise.
  */
 enum CRStatus
-cr_utils_ucs1_str_len_as_utf8 (guchar *a_in_start, guchar *a_in_end,
+cr_utils_ucs1_str_len_as_utf8 (const guchar *a_in_start, 
+                               const guchar *a_in_end,
                                gulong *a_len)
 {
         gint len = 0 ;
@@ -277,7 +279,7 @@ cr_utils_ucs1_str_len_as_utf8 (guchar *a_in_start, guchar *a_in_end,
 	g_return_val_if_fail (a_in_start && a_in_end && a_len,
 			      CR_BAD_PARAM_ERROR) ;
 
-	for (char_ptr = a_in_start ;
+	for (char_ptr = (guchar *)a_in_start ;
 	     char_ptr <= a_in_end ;
 	     char_ptr ++) 
         {
@@ -313,8 +315,10 @@ cr_utils_ucs1_str_len_as_utf8 (guchar *a_in_start, guchar *a_in_end,
  *@return CR_OK upon successfull completion, an error code otherwise.
  */
 enum CRStatus
-cr_utils_utf8_to_ucs4 (guchar * a_in, gulong *a_in_len,
-                       guint32 *a_out, gulong *a_out_len)
+cr_utils_utf8_to_ucs4 (const guchar * a_in, 
+                       gulong *a_in_len,
+                       guint32 *a_out, 
+                       gulong *a_out_len)
 {
 	gulong in_len = 0, out_len = 0, in_index = 0, out_index = 0 ;
         enum CRStatus status = CR_OK ;
@@ -486,7 +490,8 @@ cr_utils_utf8_to_ucs4 (guchar * a_in, gulong *a_in_len,
  *@return CR_OK upon successfull completion, an error code otherwise.
  */
 enum CRStatus
-cr_utils_read_char_from_utf8_buf (guchar * a_in, gulong a_in_len,
+cr_utils_read_char_from_utf8_buf (const guchar * a_in, 
+                                  gulong a_in_len,
                                   guint32 *a_out, gulong *a_consumed)
 {
 	gulong in_len = 0, in_index = 0, nb_bytes_2_decode = 0 ;
@@ -643,8 +648,8 @@ cr_utils_read_char_from_utf8_buf (guchar * a_in, gulong a_in_len,
  *
  */
 enum CRStatus
-cr_utils_utf8_str_len_as_ucs1 (guchar *a_in_start,
-                               guchar *a_in_end,
+cr_utils_utf8_str_len_as_ucs1 (const guchar *a_in_start,
+                               const guchar *a_in_end,
                                gulong *a_len)
 {
 	/*
@@ -666,7 +671,7 @@ cr_utils_utf8_str_len_as_ucs1 (guchar *a_in_start,
 			      CR_BAD_PARAM_ERROR) ;
 	*a_len = 0 ;
 	
-	for (byte_ptr = a_in_start ;
+	for (byte_ptr = (guchar*)a_in_start ;
 	     byte_ptr <= a_in_end ;
              byte_ptr++) 
         {
@@ -804,7 +809,8 @@ cr_utils_utf8_str_len_as_ucs1 (guchar *a_in_start,
  *
  */
 enum CRStatus
-cr_utils_utf8_str_to_ucs4 (guchar * a_in, gulong *a_in_len,
+cr_utils_utf8_str_to_ucs4 (const guchar * a_in, 
+                           gulong *a_in_len,
                            guint32 **a_out, gulong *a_out_len)
 {
         enum CRStatus status = CR_OK ;
@@ -845,8 +851,10 @@ cr_utils_utf8_str_to_ucs4 (guchar * a_in, gulong *a_in_len,
  *@return CR_OK upon successfull completion, an error code otherwise.
  */
 enum CRStatus
-cr_utils_ucs4_to_utf8 (guint32 *a_in, gulong *a_in_len,
-                       guchar *a_out, gulong *a_out_len)
+cr_utils_ucs4_to_utf8 (const guint32 *a_in, 
+                       gulong *a_in_len,
+                       guchar *a_out, 
+                       gulong *a_out_len)
 {
         gulong in_len = 0, in_index = 0, out_index = 0 ;
         enum CRStatus status = CR_OK ;
@@ -954,7 +962,8 @@ cr_utils_ucs4_to_utf8 (guint32 *a_in, gulong *a_in_len,
  *@return CR_OK upon successfull completion, an error code otherwise.
  */
 enum CRStatus
-cr_utils_ucs4_str_to_utf8 (guint32 *a_in, gulong *a_in_len,
+cr_utils_ucs4_str_to_utf8 (const guint32 *a_in, 
+                           gulong *a_in_len,
                            guchar **a_out, gulong *a_out_len)
 {        
         enum CRStatus status = CR_OK ;
@@ -997,8 +1006,10 @@ cr_utils_ucs4_str_to_utf8 (guint32 *a_in, gulong *a_in_len,
  *
  */
 enum CRStatus
-cr_utils_ucs1_to_utf8 (guchar *a_in, gulong *a_in_len,
-                       guchar *a_out, gulong *a_out_len)
+cr_utils_ucs1_to_utf8 (const guchar *a_in, 
+                       gulong *a_in_len,
+                       guchar *a_out, 
+                       gulong *a_out_len)
 {
         gulong out_index = 0, in_index = 0, in_len = 0, out_len = 0 ;
         enum CRStatus status = CR_OK ;
@@ -1054,8 +1065,10 @@ cr_utils_ucs1_to_utf8 (guchar *a_in, gulong *a_in_len,
  *
  */
 enum CRStatus
-cr_utils_ucs1_str_to_utf8 (guchar *a_in, gulong *a_in_len,
-                           guchar **a_out, gulong *a_out_len)
+cr_utils_ucs1_str_to_utf8 (const guchar *a_in, 
+                           gulong *a_in_len,
+                           guchar **a_out, 
+                           gulong *a_out_len)
 {
         gulong in_len = 0, out_len = 0 ;
         enum CRStatus status = CR_OK ;
@@ -1113,8 +1126,10 @@ cr_utils_ucs1_str_to_utf8 (guchar *a_in, gulong *a_in_len,
  *@return CR_OK upon successfull completion, an error code otherwise.
  */
 enum CRStatus
-cr_utils_utf8_to_ucs1 (guchar * a_in, gulong * a_in_len,
-                       guchar *a_out, gulong *a_out_len)
+cr_utils_utf8_to_ucs1 (const guchar * a_in, 
+                       gulong * a_in_len,
+                       guchar *a_out, 
+                       gulong *a_out_len)
 {
 	gulong in_index = 0, out_index = 0, in_len = 0, out_len = 0 ;
         enum CRStatus status = CR_OK ;
@@ -1281,8 +1296,10 @@ cr_utils_utf8_to_ucs1 (guchar * a_in, gulong * a_in_len,
  *returns CR_OK.
  */
 enum CRStatus
-cr_utils_utf8_str_to_ucs1 (guchar * a_in, gulong * a_in_len,
-                           guchar **a_out, gulong *a_out_len)
+cr_utils_utf8_str_to_ucs1 (const guchar * a_in, 
+                           gulong * a_in_len,
+                           guchar **a_out, 
+                           gulong *a_out_len)
 {
         enum CRStatus status = CR_OK ;
 
@@ -1443,6 +1460,32 @@ cr_utils_n_to_0_dot_n (glong a_n)
         while (ABS (result) > 1)
         {
                 result = result / 10 ;
+        }
+
+        return result ;
+}
+
+/**
+ *Duplicates a list of GString instances.
+ *@return the duplicated list of GString instances or NULL if
+ *something bad happened.
+ *@param a_list_of_strings the list of strings to be duplicated.
+ */
+GList *
+cr_dup_glist_of_string (GList *a_list_of_strings)
+{
+        GList *cur = NULL, *result = NULL ;
+
+        g_return_val_if_fail (a_list_of_strings, NULL) ;
+
+        for (cur = a_list_of_strings ; cur ; cur = cur->next)
+        {
+                GString *str = NULL ;
+                
+                str = g_string_new_len (((GString *)cur->data)->str,
+                                        ((GString *)cur->data)->len) ;
+                if (str)
+                        result = g_list_append (result, str) ;
         }
 
         return result ;

@@ -472,16 +472,7 @@ start_media (CRDocHandler *a_this, GList *a_media_list)
                 GList *cur = NULL ;
 
                 /*duplicate the media_list*/
-                for (cur = a_media_list; cur ; cur = cur->next)
-                {
-                        GString *str = NULL ;
-                        
-                        str = g_string_new_len (((GString*)cur->data)->str,
-                                                ((GString*)cur->data)->len) ;
-                        if (str)                                
-                                media_list = g_list_append (media_list, 
-                                                            str) ;
-                }
+                media_list = cr_dup_glist_of_string (a_media_list) ;
         }
 
         ctxt->cur_media_stmt = 

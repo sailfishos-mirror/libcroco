@@ -237,6 +237,9 @@ cr_statement_new_ruleset (CRStyleSheet *a_sheet,
                           CRSelector *a_sel_list, 
 			  CRDeclaration *a_decl_list,
 			  CRStatement *a_media_rule) ;
+CRStatement *
+cr_statement_ruleset_parse_from_buf (const guchar * a_buf,
+				     enum CREncoding a_enc) ;
 
 CRStatement*
 cr_statement_new_at_import_rule (CRStyleSheet *a_container_sheet,
@@ -252,6 +255,9 @@ cr_statement_new_at_media_rule (CRStyleSheet *a_sheet,
 CRStatement *
 cr_statement_new_at_charset_rule (CRStyleSheet *a_sheet,
                                   GString *a_charset) ;
+CRStatement *
+cr_statement_at_media_rule_parse_from_buf (const guchar *a_buf,
+					   enum CREncoding a_enc) ;
 
 CRStatement *
 cr_statement_new_at_font_face_rule (CRStyleSheet *a_sheet,
@@ -282,9 +288,7 @@ CRStatement *
 cr_statement_unlink (CRStatement *a_this,
 		     CRStatement *a_to_unlink) ;
 
-CRStatement *
-cr_statement_ruleset_parse_from_buf (const guchar * a_buf,
-				     enum CREncoding a_enc) ;
+
 enum CRStatus
 cr_statement_ruleset_set_sel_list (CRStatement *a_this,
 				   CRSelector *a_sel_list) ;

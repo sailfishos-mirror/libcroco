@@ -57,6 +57,123 @@ cr_statement_dump_import_rule (CRStatement *a_this, FILE *a_fp,
 			       gulong a_indent) ;
 
 static void
+parse_at_media_start_media_cb (CRDocHandler *a_this,
+			       GList *a_media_list)
+{
+	enum CRStatus status = CR_OK ;
+	CRStatement *at_media = NULL ;
+	GList *media_list = NULL ;
+
+	g_return_if_fail (a_this && a_this->priv) ;
+
+	if (a_media_list)
+	{
+		/*duplicate media list*/
+		media_list = cr_dup_glist_of_string (a_media_list) ;
+	}
+
+	g_return_if_fail (media_list) ;
+
+	/*make sure cr_statement_new_at_media_rule works in this case.*/
+	at_media = cr_statement_new_at_media_rule (NULL, NULL,
+						   media_list) ;
+
+	status = cr_doc_handler_set_ctxt (a_this, at_media) ;
+	g_return_if_fail (status == CR_OK) ;	
+}
+
+static void
+parse_at_media_start_selector_cb (CRDocHandler *a_this, 
+				  CRSelector *a_sellist)
+{
+	enum CRStatus status = CR_OK ;
+	CRStatement *at_media = NULL, *ruleset = NULL ;
+	
+	g_return_if_fail (a_this 
+			  && a_this->priv
+			  && a_sellist) ;
+	
+	status = cr_doc_handler_get_ctxt (a_this, 
+					  (gpointer*)&at_media) ;
+	g_return_if_fail (status == CR_OK && at_media) ;
+	g_return_if_fail (at_media->type == AT_MEDIA_RULE_STMT) ;
+	ruleset = cr_statement_new_ruleset (NULL, a_sellist,
+					    NULL, at_media) ;
+	g_return_if_fail (ruleset) ;
+	status = cr_doc_handler_set_ctxt (a_this, ruleset) ;
+	g_return_if_fail (status == CR_OK) ;
+}
+
+static void
+parse_at_media_property_cb (CRDocHandler *a_this,
+			    GString *a_name, CRTerm *a_value)
+{
+	enum CRStatus status = CR_OK ;
+	/*
+	 *the current ruleset stmt, child of the 
+	 *current at-media being parsed.
+	 */
+	CRStatement *stmt = NULL;
+	GString *name = NULL ;
+
+	g_return_if_fail (a_this && a_name) ;
+	
+	name = g_string_new_len (a_name->str, a_name->len) ;
+	g_return_if_fail (name) ;
+	
+	status = cr_doc_handler_get_ctxt (a_this, (gpointer*)&stmt) ;
+	g_return_if_fail (status == CR_OK && stmt) ;
+	g_return_if_fail (stmt->type == RULESET_STMT) ;
+
+	status = cr_statement_ruleset_append_decl2
+		(stmt, name, a_value) ;
+	g_return_if_fail (status == CR_OK) ;
+
+	
+}
+
+static void
+parse_at_media_end_selector_cb (CRDocHandler *a_this,
+				CRSelector *a_sellist)
+{
+	enum CRStatus status = CR_OK ;
+	/*
+	 *the current ruleset stmt, child of the 
+	 *current at-media being parsed.
+	 */
+	CRStatement *stmt = NULL ;
+   
+	g_return_if_fail (a_this && a_sellist) ;
+
+	status = cr_doc_handler_get_ctxt (a_this, 
+					  (gpointer *)stmt) ;
+	g_return_if_fail (status == CR_OK && stmt 
+			  && stmt->type == RULESET_STMT) ;
+	g_return_if_fail (stmt->kind.ruleset->parent_media_rule) ;
+
+	status = cr_doc_handler_set_ctxt 
+		(a_this, 
+		 stmt->kind.ruleset->parent_media_rule) ;
+	g_return_if_fail (status == CR_OK) ;
+}
+
+static void
+parse_at_media_end_media_cb (CRDocHandler *a_this,
+			     GList *a_media_list)
+{
+	enum CRStatus status = CR_OK ;
+	CRStatement *at_media = NULL ;
+	g_return_if_fail (a_this && a_this->priv) ;
+
+	status = cr_doc_handler_get_ctxt (a_this, 
+					  (gpointer*)&at_media) ;
+	g_return_if_fail (status == CR_OK && at_media) ;
+	
+	status = cr_doc_handler_set_result (a_this, at_media) ;
+}
+
+
+static void
 parse_ruleset_start_selector_cb (CRDocHandler *a_this, 
 				 CRSelector *a_sellist)
 {
@@ -66,8 +183,6 @@ parse_ruleset_start_selector_cb (CRDocHandler *a_this,
 			  && a_this->priv
 			  && a_sellist) ;
 	
-	cr_selector_ref (a_sellist) ;
-		
 	ruleset = cr_statement_new_ruleset (NULL, a_sellist,
 					    NULL, NULL) ;
 	g_return_if_fail (ruleset) ;
@@ -92,13 +207,9 @@ parse_ruleset_property_cb (CRDocHandler *a_this,
 	g_return_if_fail (status == CR_OK
 			  && ruleset && ruleset->type == RULESET_STMT) ;
 
-	if (a_value)
-	{
-		cr_term_ref (a_value) ;
-	}
-
-	status = cr_statement_ruleset_append_decl2 (ruleset, stringue, a_value) ;
-	g_return_if_fail (status == CR_OK) ;	
+	status = cr_statement_ruleset_append_decl2 
+		(ruleset, stringue, a_value) ;
+	g_return_if_fail (status == CR_OK) ;
 }
 
 static void
@@ -576,10 +687,6 @@ cr_statement_ruleset_parse_from_buf (const guchar * a_buf,
 	return result ;
 }
 
-/**********************
- *public functions
- **********************/
-
 /**
  *Creates a new instance of #CRStatement of type
  *#CRRulSet.
@@ -638,6 +745,83 @@ cr_statement_new_ruleset (CRStyleSheet * a_sheet,
 	cr_statement_set_parent_sheet (result, a_sheet) ;
 
 	return result ;
+}
+
+/**
+ *Parses a buffer that contains an "@media" declaration
+ *and builds an @media css statement.
+ *@param a_buf the input to parse.
+ *@param a_enc the encoding of the buffer.
+ *@return the @media statement, or NULL if the buffer could not
+ *be successfully parsed.
+ */
+CRStatement *
+cr_statement_at_media_rule_parse_from_buf (const guchar *a_buf,
+					   enum CREncoding a_enc)
+{
+	CRParser *parser = NULL ;
+	CRStatement *result = NULL ;
+	CRDocHandler *sac_handler = NULL ;
+	enum CRStatus status = CR_OK ;
+
+	parser = cr_parser_new_from_buf (a_buf, strlen (a_buf),
+					 a_enc, FALSE) ;
+	if (!parser)
+	{
+		cr_utils_trace_info ("Instanciation of the parser failed") ;
+		goto cleanup ;
+	}
+
+	sac_handler = cr_doc_handler_new () ;
+	if (!sac_handler)
+	{
+		cr_utils_trace_info ("Instanciation of the sac handler failed") ;
+		goto cleanup ;
+	}
+
+	sac_handler->start_media = 
+		parse_at_media_start_media_cb ;
+	sac_handler->start_selector = 
+		parse_at_media_start_selector_cb ;
+	sac_handler->property =
+		parse_at_media_property_cb ;
+	sac_handler->end_selector =
+		parse_at_media_end_selector_cb ;
+	sac_handler->end_media = 
+		parse_at_media_end_media_cb ;
+
+	status = cr_parser_set_sac_handler (parser, sac_handler) ;
+	if (status != CR_OK)
+		goto cleanup ;
+	
+	status = cr_parser_try_to_skip_spaces_and_comments (parser) ;
+	if (status != CR_OK)
+		goto cleanup ;
+
+	status = cr_parser_parse_media (parser) ;
+	if (status != CR_OK)
+		goto cleanup ;
+	
+	status = cr_doc_handler_get_result (sac_handler, 
+					    (gpointer*)&result) ;
+	if (status != CR_OK)
+		goto cleanup ;
+
+	
+ cleanup:
+
+	if (parser)
+	{
+		cr_parser_destroy (parser) ;
+		parser = NULL ;
+	}
+	if (sac_handler)
+	{
+		cr_doc_handler_unref (sac_handler) ;
+		sac_handler = NULL ;
+	}
+
+	return result ;	
 }
 
 /**

@@ -1,7 +1,9 @@
 
 *coding:)
 
-Provide support for font selection. (hard)
+test/debug the new cr_statement_at_media_rule_parse_from_buf().
+
+Provide support for font selection. (hard, started well underway.)
  First make sure to be able to gather all the font related property
   values.
  Then, figure out how to implement a font selector that uses pango.

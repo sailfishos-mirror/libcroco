@@ -78,6 +78,10 @@ enum CRStatus
 cr_tknzr_peek_byte (CRTknzr *a_this, gulong a_offset, 
                     guchar *a_byte) ;
 
+guchar
+cr_tknzr_peek_byte2 (CRTknzr *a_this, gulong a_offset, 
+                     gboolean *a_eof) ;
+
 enum CRStatus
 cr_tknzr_set_cur_pos (CRTknzr *a_this, CRInputPos *a_pos) ;
 

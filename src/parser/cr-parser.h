@@ -113,6 +113,22 @@ cr_parser_parse_declaration (CRParser *a_this, GString **a_property,
 enum CRStatus
 cr_parser_parse_ruleset (CRParser *a_this) ;
 
+enum CRStatus
+cr_parser_parse_import (CRParser *a_this, GList ** a_media_list,
+                        GString **a_import_string) ;
+
+enum CRStatus
+cr_parser_parse_media (CRParser *a_this) ;
+
+enum CRStatus
+cr_parser_parse_page (CRParser *a_this) ;
+
+enum CRStatus
+cr_parser_parse_charset (CRParser *a_this, GString **a_value) ;
+
+enum CRStatus
+cr_parser_parse_font_face (CRParser *a_this) ;
+
 void
 cr_parser_destroy (CRParser *a_this) ;
         

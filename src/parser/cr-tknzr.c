@@ -1938,6 +1938,28 @@ cr_tknzr_peek_byte (CRTknzr *a_this, gulong a_offset, guchar *a_byte)
 }
 
 /**
+ *Same as cr_tknzr_peek_byte() but this api returns the byte peeked.
+ *@param a_this the current instance of #CRTknzr.
+ *@param a_offset the offset of the peeked byte starting from the current
+ *byte in the parser input stream.
+ *@param a_eof out parameter. If not NULL, is set to TRUE if we reached end of
+ *file, FALE otherwise. If the caller sets it to NULL, this parameter 
+ *is just ignored.
+ *@return the peeked byte.
+ */
+guchar
+cr_tknzr_peek_byte2 (CRTknzr *a_this, gulong a_offset, 
+                     gboolean *a_eof)
+{
+        g_return_val_if_fail (a_this && PRIVATE (a_this) 
+                              && PRIVATE (a_this)->input,
+                              0) ;
+
+        return cr_input_peek_byte2 (PRIVATE (a_this)->input,
+                                    a_offset, a_eof) ;        
+}
+
+/**
  *Gets the number of bytes left in the topmost input stream
  *associated to this parser.
  *@param a_this the current instance of #CRTknzr
