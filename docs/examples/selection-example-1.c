@@ -5,7 +5,7 @@
  *
  * To compile it using gcc, type
  *
- * gcc -g -Wall `croco-config --cflags`  `croco-config --libs` -o selection-example-1 selection-example-1.c
+ * gcc -g -Wall `croco-0.6-config --cflags`  `croco-0.6-config --libs` -o selection-example-1 selection-example-1.c
  *
  * Initial author: Stefan Seefeld.
  */

@@ -20,7 +20,7 @@
  *
  *To compile this file, type:
  *
- *gcc -g  -Wall -o sac-example-2 `croco-config --cflags`  `croco-config --libs` sac-example-2.c
+ *gcc -g  -Wall -o sac-example-2 `croco-0.6-config --cflags`  `croco-0.6-config --libs` sac-example-2.c
  *
  *Make sure you have compiled and installed libcroco prior to trying to
  *compile this file :)
@@ -131,7 +131,7 @@ start_selector_cb (CRDocHandler *a_handler,
  */
 static void
 property_cb (CRDocHandler *a_handler,
-             GString *a_name,
+             CRString *a_name,
              CRTerm *a_value,
              gboolean a_important)
 {
@@ -139,11 +139,11 @@ property_cb (CRDocHandler *a_handler,
         
         context = (struct MyFooContext *)a_handler->app_data ;
 
-        if (!context || !a_name || !a_name->str)
+        if (!context || !a_name)
                 return ;
         context->nb_props_per_ruleset ++ ;
         
-        printf ("%s : ", a_name->str) ;
+        printf ("%s : ", cr_string_peek_raw_str (a_name)) ;
         cr_term_dump (a_value, stdout) ;
         printf ("\n") ;
 }

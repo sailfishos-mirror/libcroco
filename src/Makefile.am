@@ -1,5 +1,6 @@
 #Headers files to be distributed
-crocoincdir=$(includedir)/libcroco/@PACKAGE@
+INSTALL_DIR_NAME=@PACKAGE@-@LIBCROCO_MAJOR_VERSION@.@LIBCROCO_MINOR_VERSION@
+crocoincdir=$(includedir)/$(INSTALL_DIR_NAME)/libcroco
 crocoinc_HEADERS= libcroco.h \
 cr-additional-sel.h \
 cr-attr-sel.h \
@@ -85,10 +86,10 @@ cr-parsing-location.h \
 cr-string.c \
 cr-string.h
 
-lib_LTLIBRARIES=libcroco.la
-libcroco_la_SOURCES= $(SRCS)
+lib_LTLIBRARIES=libcroco-0.6.la
+libcroco_0_6_la_SOURCES= $(SRCS)
 
 INCLUDES=-I$(top_srcdir) -I$(top_srcdir)/intl \
 @GLIB2_CFLAGS@ @LIBXML2_CFLAGS@
-libcroco_la_LDFLAGS=-version-info @LIBCROCO_VERSION_INFO@ \
+libcroco_0_6_la_LDFLAGS=-version-info @LIBCROCO_VERSION_INFO@ \
 @GLIB2_CFLAGS@

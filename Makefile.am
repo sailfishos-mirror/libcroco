@@ -1,17 +1,39 @@
 SUBDIRS = src csslint docs
 SUBDIRS += tests
 
+PKG_CONFIG_FILE_UNINSTALLED=libcroco-@LIBCROCO_MAJOR_VERSION@.@LIBCROCO_MINOR_VERSION@-uninstalled.pc
+PKG_CONFIG_FILE=libcroco-@LIBCROCO_MAJOR_VERSION@.@LIBCROCO_MINOR_VERSION@.pc
+
 pkgconfigdir=$(libdir)/pkgconfig
-pkgconfig_DATA=libcroco.pc
+pkgconfig_DATA=$(PKG_CONFIG_FILE)
 
-extraincludedir=$(includedir)/@PACKAGE@
+INCLUDE_DIR_NAME=@PACKAGE@-@LIBCROCO_MAJOR_VERSION@.@LIBCROCO_MINOR_VERSION@
+extraincludedir=$(includedir)/$INCLUDE_DIR_NAME
 
-bin_SCRIPTS=croco-config
+CROCO_CONFIG_FILE_UNINSTALLED=croco-@LIBCROCO_MAJOR_VERSION@.@LIBCROCO_MINOR_VERSION@-config-uninstalled
+CROCO_CONFIG_FILE=croco-@LIBCROCO_MAJOR_VERSION@.@LIBCROCO_MINOR_VERSION@-config
+bin_SCRIPTS=$(CROCO_CONFIG_FILE)
 
-man_MANS = croco-config.1
+#man_MANS = croco-config.1
 
-EXTRA_DIST= croco-config.in libcroco.pc libcroco.spec TODO Doxyfile \
-HACKING COPYING.LIB COPYING  libcroco.spec $(man_MANS)
+EXTRA_DIST= croco-config.in $(PKG_CONFIG_FILE) TODO Doxyfile \
+HACKING COPYING.LIB COPYING  libcroco.spec
+
+all-local: $(PKG_CONFIG_FILE_UNINSTALLED) $(PKG_CONFIG_FILE) \
+$(CROCO_CONFIG_FILE_UNINSTALLED) $(CROCO_CONFIG_FILE)
+
+
+%-@LIBCROCO_MAJOR_VERSION@.@LIBCROCO_MINOR_VERSION@.pc: %.pc
+	cp $< $@
+
+%-@LIBCROCO_MAJOR_VERSION@.@LIBCROCO_MINOR_VERSION@-uninstalled.pc: %.pc
+	cp $< $@
+
+%-@LIBCROCO_MAJOR_VERSION@.@LIBCROCO_MINOR_VERSION@-config: %-config
+	cp $< $@
+
+%-@LIBCROCO_MAJOR_VERSION@.@LIBCROCO_MINOR_VERSION@-config-uninstalled: %-config
+	cp $< $@
 
 cleantar:
 	@(rm -f libcroco*.tar.gz)

@@ -101,7 +101,7 @@ PKG_CHECK_MODULES(LIBXML2, [libxml-2.0 >= $LIBXML2_VERSION],
 AC_SUBST(LIBXML2_VERSION)
 AC_SUBST(CROCO_HAVE_LIBXML2)
 
-CROCO_LIB=libcroco.la
+CROCO_LIB=libcroco-$LIBCROCO_MAJOR_VERSION.$LIBCROCO_MINOR_VERSION.la
 AC_SUBST(CROCO_LIB)
 
 
@@ -131,8 +131,8 @@ dnl
 dnl Define the CROCO_LIBS and CROCO_CFLAGS variables. These will be used
 dnl by client application to know where to find croco include files and libs.
 dnl
-CROCO_LIBS="-L${libdir} -lcroco"
-CROCO_CFLAGS="-I${includedir}/libcroco"
+CROCO_LIBS="-L${libdir} -lcroco-$LIBCROCO_MAJOR_VERSION.$LIBCROCO_MINOR_VERSION"
+CROCO_CFLAGS="-I${includedir}/libcroco-$LIBCROCO_MAJOR_VERSION.$LIBCROCO_MINOR_VERSION"
 
 AC_SUBST(LIBXML2_LIBS)
 AC_SUBST(LIBXML2_CFLAGS)
@@ -153,6 +153,7 @@ docs/examples/Makefile
 tests/Makefile
 tests/test-inputs/Makefile
 tests/test-output-refs/Makefile
+tests/global-vars.sh
 src/Makefile
 src/libcroco-config.h
 csslint/Makefile

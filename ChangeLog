@@ -1,3 +1,18 @@
+2004-06-09  Dodji Seketeli  <dodji@gnome.org>
+
+	* configure.in: fixed the pkg-config and croco-0.6-config output.
+	* docs/exmaples/*.c: updated the comments.
+
+2004-06-08  Dodji Seketeli  <dodji@gnome.org>
+
+	* tests/global-vars.sh.in,csslint/Makefile.am,Makefile.am,src/Makefile.am:
+	Make libcroco be parallel installable.
+	That is, make libcroco.so become libcroco-$(major)-$(minor),
+	same thing for the usr/include/libcroco dir, the pkgconfig and
+	croco-config file. Removed tests/global-vars.sh and generate it
+	it from global-vars.sh.in
+	Bump version number to 0.5.2
+	
 2004-05-31  Dodji Seketeli  <dodji@gnome.org>
 
 	* docs/examples/selection-example-1.c:
