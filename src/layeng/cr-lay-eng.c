@@ -34,6 +34,18 @@
 
 #define PRIVATE(a_this) ((a_this)->priv)
 
+const gulong gv_predefined_abs_font_size_tab [NB_PREDEFINED_ABSOLUTE_FONT_SIZES]
+=
+{
+        7, /*FONT_SIZE_XX_SMALL*/
+        9,/*FONT_SIZE_X_SMALL*/
+        11, /*FONT_SIZE_SMALL*/
+        14, /*FONT_MEDIUM*/
+        17, /*FONT_LARGE*/
+        20, /*FONT_X_LARGE*/
+        24 /*FONT_XX_LARGE*/        
+} ;
+
 /**
  *@file
  *The definition of the #CRLayEng class.
@@ -922,7 +934,7 @@ layout_text_in_box (CRLayEng *a_this, CRBox *a_text_box)
                 pango_attr_list_new () ;
         g_return_val_if_fail (pgo_attr_list, CR_ERROR) ;
 
-        status = cr_style_to_pango_font_attributes 
+        status = cr_lay_eng_style_to_pango_font_attribute
                 (a_text_box->style, pgo_attr_list,
                  strlen (a_text_box->content->u.text)) ;
 
@@ -1593,6 +1605,216 @@ cr_lay_eng_layout_box_tree (CRLayEng *a_this,
         return status ;
 }
 
+
+/**
+ *@param a_style the style data structure to consider.
+ *@param a_pgo_attrs the output pango attributes list populated
+ *in case of successful completion
+ *@param a_text_len the length of the text the style is to be
+ *applied to. (in number of bytes, not number of characters)
+ *@return CR_OK upon successful completion, an error code otherwise.
+ */
+enum CRStatus
+cr_lay_eng_style_to_pango_font_attribute (CRStyle *a_style,
+                                          PangoAttrList *a_pgo_attrs,
+                                          gulong a_text_len)
+{
+        enum CRStatus status = CR_OK ;
+        PangoAttribute * pgo_attr = NULL ;
+        PangoFontDescription *pgo_font_desc = NULL ;
+        PangoStyle pgo_style = PANGO_STYLE_NORMAL ;
+        guchar *font_family = NULL ;
+        PangoWeight pgo_weight = PANGO_WEIGHT_NORMAL ;
+
+        g_return_val_if_fail (a_pgo_attrs
+                              && a_style,
+                              CR_BAD_PARAM_ERROR) ;
+
+        pgo_font_desc = pango_font_description_new () ;
+        if (!pgo_font_desc)
+        {
+                cr_utils_trace_info ("Could not instanciate " 
+                                     "pango font description") ;
+                return CR_ERROR ;
+        }
+
+        if (a_style->font_size)
+        /*set font size*/
+                switch (a_style->font_size->type)
+                {
+                case PREDEFINED_ABSOLUTE_FONT_SIZE:
+                        if ( !(a_style->font_size->value.predefined 
+                               < NB_PREDEFINED_ABSOLUTE_FONT_SIZES))
+                        {
+                                status = CR_OUT_OF_BOUNDS_ERROR ;
+                                goto cleanup ;
+                        }
+                        pango_font_description_set_size 
+                                (pgo_font_desc, 
+                                 gv_predefined_abs_font_size_tab
+                                 [a_style->font_size->value.predefined]
+                                 * PANGO_SCALE) ;
+                        break ;
+
+                case ABSOLUTE_FONT_SIZE:
+                        if (!a_style->font_size->value.absolute)
+                        {
+                                status = CR_BAD_PARAM_ERROR ;
+                                goto cleanup ;
+                        }
+                        pango_font_description_set_size 
+                                (pgo_font_desc, 
+                                 a_style->font_size->value.absolute->val 
+                                 * PANGO_SCALE) ;
+                        break ;
+
+                case RELATIVE_FONT_SIZE:
+                        cr_utils_trace_info ("relative font size are not supported "
+                                             "yes") ;
+
+                        break ;
+
+                case INHERITED_FONT_SIZE:
+                        cr_utils_trace_info ("inherited font size are not supported "
+                                             "yes") ;
+                        break ;
+                }
+
+
+        /*set font family*/
+        if (a_style->font_family)
+                font_family = cr_font_family_to_string (a_style->font_family,
+                                                        TRUE) ;
+        if (font_family)
+        {
+                pango_font_description_set_family (pgo_font_desc,
+                                                   font_family) ;
+        }
+        
+        /*set style*/
+        switch (a_style->font_style)
+        {
+        case FONT_STYLE_NORMAL:
+                pgo_style = PANGO_STYLE_NORMAL ;
+                break ;
+
+        case FONT_STYLE_ITALIC:
+                pgo_style = PANGO_STYLE_ITALIC ;
+                break ;
+
+        case FONT_STYLE_OBLIQUE:
+                pgo_style = PANGO_STYLE_OBLIQUE ;
+                break ;
+
+        case FONT_STYLE_INHERIT:
+                cr_utils_trace_info ("font-style: inherit not supported yet") ;
+                break ;
+
+        default:
+                cr_utils_trace_info ("unknown font-sytle property value") ;
+                break ;
+        }
+
+        pango_font_description_set_style (pgo_font_desc,
+                                          pgo_style) ;
+
+        /*set font weight*/
+        switch (a_style->font_weight)
+        {
+        case FONT_WEIGHT_NORMAL:
+                pgo_weight = PANGO_WEIGHT_NORMAL ;
+                break ;
+
+        case FONT_WEIGHT_BOLD:
+                pgo_weight = PANGO_WEIGHT_BOLD;
+                break ;
+
+        case FONT_WEIGHT_BOLDER:
+                cr_utils_trace_info 
+                        ("font-weight: bolder is not supported yet");
+                break ;
+
+        case FONT_WEIGHT_LIGHTER:
+                cr_utils_trace_info 
+                        ("font-weight: lighter is not supported yet");
+                break ;
+
+        case FONT_WEIGHT_100:
+                pgo_weight = 100 ;
+                break ;
+
+        case FONT_WEIGHT_200:
+                pgo_weight = 200;
+                break ;
+
+        case FONT_WEIGHT_300:
+                pgo_weight = 300 ;
+                break ;
+
+        case FONT_WEIGHT_400:
+                pgo_weight = 400 ;
+                break ;
+
+        case FONT_WEIGHT_500:
+                pgo_weight = 500 ;
+                break ;
+
+        case FONT_WEIGHT_600:
+                pgo_weight = 600 ;
+                break ;
+
+        case FONT_WEIGHT_700:
+                pgo_weight = 700 ;
+                break ;
+
+        case FONT_WEIGHT_800:
+                pgo_weight = 800 ;
+                break ;
+
+        case FONT_WEIGHT_900:
+                pgo_weight = 900 ;
+                break ;
+
+        case FONT_WEIGHT_INHERIT:
+                cr_utils_trace_info 
+                        ("font-weight: inherit is not supported yet.") ;
+                break ;
+
+        default:
+                cr_utils_trace_info ("unknown property value") ;
+                break ;
+        }
+
+        pango_font_description_set_weight (pgo_font_desc,
+                                           pgo_weight) ;
+
+        pgo_attr = pango_attr_font_desc_new (pgo_font_desc) ;        
+        if (!pgo_attr)
+        {
+                status = CR_INSTANCIATION_FAILED_ERROR ;
+                goto cleanup ;
+        }
+        pgo_attr->start_index = 0 ;
+        pgo_attr->end_index = a_text_len ;
+        pango_attr_list_change (a_pgo_attrs, pgo_attr) ;
+        pgo_attr = NULL ;
+        
+        
+ cleanup:
+        
+        if (pgo_attr)
+        {
+                pango_attribute_destroy (pgo_attr) ;
+                pgo_attr = NULL ;
+        }
+        if (pgo_font_desc)
+        {
+                pango_font_description_free (pgo_font_desc) ;
+                pgo_font_desc = NULL ;
+        }
+
+        return status ;
+}
 
 /**
  *Destuctor of #CRLayEng.

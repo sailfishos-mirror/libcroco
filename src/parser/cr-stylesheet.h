@@ -30,6 +30,8 @@
 #include "cr-utils.h"
 #include "cr-statement.h"
 
+G_BEGIN_DECLS
+
 /**
  *@file
  *The declaration of the #CRStyleSheet class.
@@ -97,5 +99,7 @@ cr_stylesheet_unref (CRStyleSheet *a_this) ;
 
 void
 cr_stylesheet_destroy (CRStyleSheet *a_this) ;
+
+G_END_DECLS
 
 #endif /*__CR_STYLESHEET_H__*/

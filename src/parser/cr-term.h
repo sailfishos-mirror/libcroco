@@ -33,7 +33,7 @@
 #ifndef __CR_TERM_H__
 #define __CR_TERM_H__
 
-G_END_DECLS
+G_BEGIN_DECLS
 
 /**
  *@file
@@ -97,7 +97,7 @@ struct _CRTerm
         /**
          *The operator associated to the current term.
          */
-        enum Operator operator ;
+        enum Operator the_operator ;
 
 
         /**

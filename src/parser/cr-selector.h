@@ -35,7 +35,8 @@
  *The declaration file of the #CRSelector file.
  */
 
-#define G_BEGIN_DECLS
+G_BEGIN_DECLS
+
 typedef struct _CRSelector CRSelector ;
 
 /**
@@ -99,6 +100,6 @@ cr_selector_unref (CRSelector *a_this) ;
 void
 cr_selector_destroy (CRSelector *a_this) ;
 
-#define G_END_DECLS
+G_END_DECLS
 
 #endif /*__CR_SELECTOR_H__*/

@@ -3714,10 +3714,10 @@ cr_parser_parse_expr (CRParser *a_this, CRTerm **a_expr)
                 switch (operator)
                 {
                 case '/':
-                        expr2->operator = DIVIDE ;
+                        expr2->the_operator = DIVIDE ;
                         break ;
                 case ',':
-                        expr2->operator = COMMA ;
+                        expr2->the_operator = COMMA ;
 
                 default:
                         break ;

@@ -321,7 +321,7 @@ cr_term_to_string (CRTerm *a_this)
                     && (cur->content.rgb == NULL))
                         continue ;
                 
-                switch (cur->operator)
+                switch (cur->the_operator)
                 {
                 case DIVIDE:
                         g_string_append_printf (str_buf, " / ") ;

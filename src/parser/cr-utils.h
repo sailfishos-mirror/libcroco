@@ -23,8 +23,8 @@
 #ifndef __CR_DEFS_H__
 #define __CR_DEFS_H__
 
-#include "libcroco-config.h"
 #include <stdio.h>
+#include "libcroco-config.h"
 #include <glib.h>
 
 

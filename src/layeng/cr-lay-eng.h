@@ -26,6 +26,7 @@
 #define __CR_LAY_ENG_H__
 
 #include <libxml/tree.h>
+#include <pango/pango.h>
 #include "cr-utils.h"
 #include "cr-cascade.h"
 #include "cr-box.h"
@@ -65,6 +66,10 @@ enum CRStatus
 cr_lay_eng_layout_box_tree (CRLayEng *a_this,
                             CRBox *a_box_tree) ;
 
+enum CRStatus
+cr_lay_eng_style_to_pango_font_attribute (CRStyle *a_style,
+                                          PangoAttrList *a_pgo_attrs,
+                                          gulong a_text_len) ;
 void
 cr_lay_eng_destroy (CRLayEng *a_this) ;
 
