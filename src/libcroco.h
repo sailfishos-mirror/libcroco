@@ -39,5 +39,6 @@
 #include "cr-prop-list.h"
 #include "cr-sel-eng.h"
 #include "cr-style.h"
+#include "cr-string.h"
 
 #endif /*__LIBCROCO_H__*/
