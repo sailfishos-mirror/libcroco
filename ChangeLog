@@ -6,6 +6,9 @@
 	xml rendering/layout engine.
 	Libcroco now needs libxml2 and glib only.
 	Sewfox need libgnomecanvas2.
+	* autogen.sh: updated this to reflect this big change
+	* tests/test-output-refs/test7.out: removed this test
+	as it does not belong to libcroco anymore.
 
 2004-01-16  Dodji Seketeli  <dodji@gnome.org>
 
