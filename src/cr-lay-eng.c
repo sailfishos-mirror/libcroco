@@ -167,7 +167,7 @@ cr_lay_eng_create_box_tree_real (CRLayEng * a_this,
                          *be updated later via the cr_box_reflow() method.
                          */
                         cur_box = cr_box_new (style) ;
-                        if (cur_box)
+                        if (!cur_box)
                         {
                                 cr_utils_trace_info
                                         ("Could not create a box") ;

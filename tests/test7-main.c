@@ -111,6 +111,13 @@ test_cr_lay_eng_build_annotated_tree (void)
 		goto cleanup ;
 	}
 
+        if (box_tree)
+        {
+                cr_box_dump_to_file (box_tree, 0, stdout) ;
+                cr_box_destroy (box_tree) ;
+                box_tree = NULL ;
+        }
+
  cleanup:
 	if (cascade)
 	{

@@ -230,6 +230,11 @@ cr_box_to_string (CRBox *a_this,
                   GString **a_string) ;
 
 enum CRStatus
+cr_box_dump_to_file (CRBox *a_this, 
+                     gulong a_nb_indent,
+                     FILE *a_filep) ;
+
+enum CRStatus
 cr_box_append_child (CRBox *a_this, CRBox *a_to_append) ;
 
 void

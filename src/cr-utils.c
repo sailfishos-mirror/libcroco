@@ -1427,9 +1427,11 @@ cr_utils_dump_n_chars2 (guchar a_char,
 {
         glong i = 0 ;
 
+        g_return_if_fail (a_string) ;
+
         for (i = 0 ; i < a_nb ; i++)
         {
-                g_string_printf (a_string, "%c", a_char) ;
+                g_string_append_printf (a_string, "%c", a_char) ;
         }
 }
 

@@ -376,8 +376,8 @@ cr_box_edge_to_string (CRBoxEdge *a_this,
                                 (long int)a_this->height) ;
         cr_utils_dump_n_chars2 (' ', 
                                 result, a_nb_indent) ;
-        g_string_printf (result, "x_offset: %ld\n", 
-                         (long int)a_this->x_offset) ;
+        g_string_append_printf (result, "x_offset: %ld\n", 
+                                (long int)a_this->x_offset) ;
         cr_utils_dump_n_chars2 (' ', result, 
                                 a_nb_indent) ;
         g_string_append_printf (result, "y_offset: %ld\n", 
@@ -434,6 +434,8 @@ CRBoxContent *
 cr_box_content_new_from_text (guchar *a_text)
 {
         CRBoxContent *result = NULL ;
+
+        g_return_val_if_fail (a_text, NULL) ;
 
         result = g_try_malloc (sizeof (CRBoxContent)) ;
         if (!result)
@@ -588,6 +590,7 @@ cr_box_to_string (CRBox *a_this,
                   GString **a_string)
 {
         GString *result = NULL ;
+        CRBox *cur_box = NULL ;
 
         g_return_val_if_fail (a_this && a_string, 
                               CR_BAD_PARAM_ERROR) ;
@@ -604,55 +607,143 @@ cr_box_to_string (CRBox *a_this,
                         cr_utils_trace_info ("Out of memory") ;
                         return CR_ERROR ;
                 }
+                *a_string = result ;
         }        
 
-        cr_utils_dump_n_chars2 (' ', result, a_nb_indent) ;
-
-        switch (a_this->type)
+        for (cur_box = a_this ; cur_box ; cur_box = cur_box->next)
         {
-        case BOX_TYPE_BLOCK:
-                g_string_printf (result, "BLOCK") ;                
-                break ;
+                cr_utils_dump_n_chars2 (' ', result, a_nb_indent) ;
 
-        case BOX_TYPE_ANONYMOUS_BLOCK:
-                g_string_printf (result, "ANONYMOUS BLOCK") ;
-                break ;
+                switch (cur_box->type)
+                {
+                case BOX_TYPE_BLOCK:
+                        g_string_append_printf (result, "BLOCK") ;                
+                        break ;
 
-        case BOX_TYPE_INLINE:
-                g_string_printf (result, "INLINE") ;
-                break ;
+                case BOX_TYPE_ANONYMOUS_BLOCK:
+                        g_string_append_printf (result, "ANONYMOUS BLOCK") ;
+                        break ;
 
-        case BOX_TYPE_ANONYMOUS_INLINE:
-                g_string_printf (result, "ANONYMOUS INLINE") ;
-                break ;
+                case BOX_TYPE_INLINE:
+                        g_string_append_printf (result, "INLINE") ;
+                        break ;
 
-        case BOX_TYPE_COMPACT:
-                g_string_printf (result, "COMPACT") ;
-                break ;
+                case BOX_TYPE_ANONYMOUS_INLINE:
+                        g_string_append_printf (result, "ANONYMOUS INLINE") ;
+                        break ;
 
-        case BOX_TYPE_RUN_IN:
-                g_string_printf (result, "RUN IN") ;
-                break ;
+                case BOX_TYPE_COMPACT:
+                        g_string_append_printf (result, "COMPACT") ;
+                        break ;
 
-        default:
-                g_string_printf (result, "UNKNOWN") ;
-                break ;
+                case BOX_TYPE_RUN_IN:
+                        g_string_append_printf (result, "RUN IN") ;
+                        break ;
+
+                default:
+                        g_string_append_printf (result, "UNKNOWN") ;
+                        break ;
+                }
+                g_string_append_printf (result, " box\n") ;
+                cr_utils_dump_n_chars2 (' ', result, a_nb_indent) ;
+                g_string_append_printf (result, "{") ;
+        
+                cr_utils_dump_n_chars2 (' ', result, a_nb_indent + 2) ;
+                g_string_append_printf (result, "/*****%s begin*****/\n", 
+                                        "outer_edge") ;
+                cr_box_edge_to_string (&cur_box->outer_edge,
+                                       a_nb_indent + 2, &result) ;
+                cr_utils_dump_n_chars2 (' ', result, a_nb_indent + 2) ;
+                g_string_append_printf (result, "/*****%s end*****/\n", 
+                                        "outer_edge") ;
+
+                cr_utils_dump_n_chars2 (' ', result, a_nb_indent + 2) ;
+                g_string_append_printf (result, "/*****%s begin*****/\n", 
+                                        "border_edge") ;
+                cr_box_edge_to_string (&cur_box->border_edge, 
+                                       a_nb_indent + 2, &result) ;
+                cr_utils_dump_n_chars2 (' ', result, a_nb_indent + 2) ;
+                g_string_append_printf (result, "/*****%s end*****/\n", 
+                                        "border_edge") ;
+
+                cr_utils_dump_n_chars2 (' ', result, a_nb_indent + 2) ;
+                g_string_append_printf (result, "/*****%s begin*****/\n", 
+                                        "padding_edge") ;
+                cr_box_edge_to_string (&cur_box->padding_edge,
+                                       a_nb_indent + 2, &result) ;
+                cr_utils_dump_n_chars2 (' ', result, a_nb_indent + 2) ;
+                g_string_append_printf (result, "/*****%s end*****/\n", 
+                                        "padding_edge") ;
+
+                cr_utils_dump_n_chars2 (' ', result, a_nb_indent + 2) ;
+                g_string_append_printf (result, "/*****%s begin*****/\n", 
+                                        "inner_edge") ;
+                cr_box_edge_to_string (&cur_box->inner_edge,
+                                       a_nb_indent + 2, &result) ;
+                cr_utils_dump_n_chars2 (' ', result, a_nb_indent + 2) ;
+                g_string_append_printf (result, "/*****%s end*****/\n", 
+                                        "inner_edge") ;
+
+                if (cur_box->children)
+                {
+                        g_string_append_printf (result, "\n") ;
+                        cr_box_to_string (cur_box->children,
+                                          a_nb_indent + 2, &result) ;
+                        g_string_append_printf (result, "\n") ;
+                }
+
+                g_string_append_printf (result, "\n") ;
+                cr_utils_dump_n_chars2 (' ', result, a_nb_indent) ;
+                g_string_append_printf (result, "}\n") ;
         }
-        g_string_printf (result, " box\n") ;
-        cr_utils_dump_n_chars2 (' ', result, a_nb_indent) ;
-        g_string_printf (result, "{") ;
-        
-        cr_utils_dump_n_chars2 (' ', result, a_nb_indent) ;
-        g_string_printf (result, "*****%s*****\n", "outer_edge") ;
-        cr_box_edge_to_string (&a_this->outer_edge,
-                               a_nb_indent, &result) ;
-
-        
-        g_string_printf (result, "\n") ;
-        cr_utils_dump_n_chars2 (' ', result, a_nb_indent) ;
-        g_string_printf (result, "}") ;
 
         return CR_OK ;
+}
+
+enum CRStatus
+cr_box_dump_to_file (CRBox *a_this, 
+                     gulong a_nb_indent,
+                     FILE *a_filep)
+{
+        GString *str = NULL ;
+        enum CRStatus status = CR_OK ;
+
+        g_return_val_if_fail (a_this && a_filep,
+                              CR_BAD_PARAM_ERROR) ;
+
+        status = cr_box_to_string (a_this, a_nb_indent, &str) ;
+
+        if (status != CR_OK)
+        {
+                cr_utils_trace_info ("An error occured "
+                                     "during in memory serialisation") ;
+                goto cleanup ;
+        }
+
+        if (!str || !str->str)
+        {
+                cr_utils_trace_info ("Error: Box could not be serialised") ;
+                goto cleanup ;
+        }
+
+        if (!fwrite (str->str, 1, str->len, a_filep))
+        {
+                cr_utils_trace_info ("An error occured during"
+                                     "serialisation into file") ;
+                status = CR_ERROR ;
+                goto cleanup ;
+        }
+
+        status = CR_OK ;
+
+ cleanup:
+
+        if (str)
+        {
+                g_string_free (str, TRUE) ;
+                str = NULL ;
+        }
+        return status ;
 }
 
 /**
