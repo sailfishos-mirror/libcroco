@@ -25,6 +25,16 @@ AM_CONFIG_HEADER(libcroco-config.h)
 
 AM_MAINTAINER_MODE
 
+dnl
+dnl First, here goes the list
+dnl of the version of the libraries we depend
+dnl on.
+dnl
+
+GLIB2_VERSION=2.0
+LIBXML2_VERSION=2.5.1
+LIBGNOMEUI_VERSION=2.0.3
+
 dnl Checks for programs.
 AC_PROG_CC
 AC_PROG_INSTALL
@@ -63,7 +73,6 @@ dnl *************************************************
 dnl
 dnl check glib-2.0 version
 dnl
-GLIB2_VERSION=2.0
 have_glib2=no
 PKG_CHECK_MODULES(GLIB2, 
 		  [glib-2.0 >= $GLIB2_VERSION],
@@ -77,7 +86,7 @@ fi
 AC_SUBST(GLIB2_VERSION)
 
 dnl check libxml2 version
-LIBXML2_VERSION=2.5.1
+
 have_libxml2=no
 PKG_CHECK_MODULES(LIBXML2, [libxml-2.0 >= $LIBXML2_VERSION],
 			   [have_libxml2=yes
@@ -186,9 +195,21 @@ if test "$WITH_TESTS" = "yes" ; then
 		LAYENG_TESTS="test7" ;
 	fi
 fi
+
 AC_SUBST(CORE_TESTS)
 AC_SUBST(SELENG_TESTS)
 AC_SUBST(LAYENG_TESTS)
+
+
+if test "$WITH_LAYENG" = "yes" ; then
+	PKG_CHECK_MODULES(LIBGNOMEUI2,
+			 [libgnomeui-2.0 >= $LIBGNOMEUI_VERSION],
+			 [have_libgnomeui2=yes AC_DEFINE(HAVE_LIBGNOMEUI2, 1, [usr libgnomeui2])],
+			 have_libgnomeui2=no)
+	if test "$have_libgnomeui2" = "no" ; then
+		AC_MSG_ERROR([*** libgnomeui2 not found. See http://www.gnome.org])
+	fi
+fi
 
 dnl By default compile in debug mode
 CFLAGS="-g -Wunused -Wimplicit -Wreturn-type -Wswitch \

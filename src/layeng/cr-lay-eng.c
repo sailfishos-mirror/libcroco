@@ -26,6 +26,7 @@
  *$Id$
  */
 
+#include <gnome.h>
 #include <string.h>
 #include "cr-lay-eng.h"
 #include "cr-sel-eng.h"
@@ -61,6 +62,10 @@ cr_lay_eng_get_box_rightmost_x (CRBox *a_this) ;
 
 static enum CRStatus
 cr_lay_eng_layout_box_normal (CRBox *a_this) ;
+
+static enum CRStatus
+compute_text_box_inner_edge_size (CRBox *a_this) ;
+
 
 /**********************
  *Private methods.
@@ -337,6 +342,57 @@ cr_lay_eng_get_box_rightmost_x (CRBox *a_this)
                 a_this->outer_edge.width) ;
 }
 
+static enum CRStatus
+compute_text_box_inner_edge_size (CRBox *a_this)
+{
+        enum CRStatus status = CR_OK ;
+        GtkWidget *label = NULL ;
+        PangoLayout *pgo_layout = NULL ;
+        PangoRectangle ink_rect = {0}, logical_rect = {0} ;
+        guchar *text = NULL ;
+
+        g_return_val_if_fail (a_this 
+                              && a_this->content
+                              && a_this->content->type == TEXT_CONTENT_TYPE,
+                              CR_BAD_PARAM_ERROR) ;
+        
+        if (a_this->content->u.text == NULL 
+            || strlen (a_this->content->u.text) == 0)
+        {
+                a_this->inner_edge.width = 0 ;
+                a_this->inner_edge.height = 0 ;
+                return CR_OK ;
+        }
+
+        text = a_this->content->u.text ;
+
+        label = gtk_label_new (NULL) ;        
+        g_return_val_if_fail (label, CR_ERROR) ;
+
+        pgo_layout = gtk_widget_create_pango_layout (label, text) ;
+        pango_layout_get_pixel_extents (pgo_layout, &ink_rect,
+                                        &logical_rect) ;
+
+        a_this->inner_edge.width = logical_rect.width ;
+        a_this->inner_edge.height = logical_rect.height ;
+
+ cleanup:
+
+        if (label)
+        {
+                gtk_widget_destroy (label) ;
+                label = NULL ;
+        }
+
+        if (pgo_layout)
+        {
+                g_object_unref (G_OBJECT (pgo_layout)) ;
+                pgo_layout = NULL ;
+        }
+
+        return status ;
+}
+
 /**
  *Lay the box out according to "Normal flow"
  *as decribed in css2 spec chap 9.4.
@@ -382,7 +438,7 @@ cr_lay_eng_layout_box_normal (CRBox *a_this)
 
                 /*
                  *position the 'x' of the top
-                 *left corner of this box
+                 *leftmost corner of this box
                  *at the leftmost abscissa of it's 
                  *containing box.
                  *Position the 'y' of 
@@ -466,8 +522,51 @@ cr_lay_eng_layout_box_normal (CRBox *a_this)
                          *TODO: compute it's width and height.
                          *then, when computed, update the
                          *children max width size in the parent box.
-                         */                        
+                         */
+                        if (a_this->content)
+                        {
+                                switch (a_this->content->type)
+                                {
+                                case TEXT_CONTENT_TYPE:
+                                        compute_text_box_inner_edge_size
+                                                (a_this) ;
+                                        break ;
+
+                                case IMAGE_CONTENT_TYPE:
+                                        cr_utils_trace_info 
+                                                ("image content not "
+                                                 "supported yet") ;
+                                        break ;
+                                case NO_CONTENT_TYPE:
+                                        cr_utils_trace_info
+                                                ("incoherent box model. "
+                                                 "We should have either "
+                                                 "image or text here. "
+                                                 "found NO_CONTENT_TYPE "
+                                                 "intead") ;
+                                        break ;
+                                default:
+                                        cr_utils_trace_info 
+                                                ("Unknown content type") ;
+                                        break ;
+                                }
+                        }
                 }
+
+                /*
+                 *now that we have the width/height of the inner box,
+                 *let's compute the width/height of the padding box,
+                 *border box and outer box.
+                 */
+                a_this->padding_edge.width = a_this->inner_edge.width +
+                        a_this->style->padding_right.val +
+                        a_this->style->padding_left.val ;
+
+                a_this->padding_edge.height = a_this->inner_edge.height +
+                        a_this->style->padding_top.val +
+                        a_this->style->padding_bottom.val ;
+
+                /*TODO continue the calculus of the widths/height*/
 
                 /*******************************************
                  *Inner edge position (x,y) computing is 
@@ -483,6 +582,49 @@ cr_lay_eng_layout_box_normal (CRBox *a_this)
         case BOX_TYPE_RUN_IN:
         case BOX_TYPE_INLINE:
         case BOX_TYPE_ANONYMOUS_INLINE:
+        {
+                CRBox *cont_box = NULL, *prev_box = NULL ;
+                
+                cont_box = a_this->parent ;
+                prev_box = a_this->prev ;
+
+                /************************************
+                 *We are in an inline formating context 
+                 ************************************/
+
+                /*
+                 *position the 'x' of the top
+                 *leftmost corner of this box
+                 *one pixel right after the rightmost x
+                 *of the preceding box.
+                 *Position the 'y' of this box to
+                 *the y of the previous box.
+                 */
+                if (!prev_box)
+                {
+                        a_this->outer_edge.x = 0 ;
+                        a_this->outer_edge.y = 0 ;
+                }
+                else
+                {
+                        a_this->outer_edge.x = 
+                                cr_lay_eng_get_box_rightmost_x
+                                (prev_box) + 1 ;
+                        a_this->outer_edge.y = prev_box->outer_edge.y ;
+                }
+
+                /*TODO*/
+                /*******************************************
+                 *Now, compute the inner edge of this box;
+                 *which means 
+                 *1/set the left border and 
+                 *left padding edges.
+                 *2/compute the left most x and topmost y of
+                 *the inner box and.
+                 *3/Compute the outer edge of the containing
+                 *box; this is recursive.
+                 *******************************************/
+        }
                 break ;
 
         default:
