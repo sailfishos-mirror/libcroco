@@ -27,6 +27,7 @@
 #define __CR_STYLE_H__
 
 #include "cr-utils.h"
+#include "cr-statement.h"
 
 /**
  *@file
@@ -161,6 +162,17 @@ struct _CRStyle
 
         CRLength width ;
 } ;
+
+
+CRStyle *
+cr_style_new (void) ;
+
+enum CRStatus
+cr_style_new_from_ruleset (CRStatement *a_this, 
+			   CRStyle **a_style) ;
+
+void
+cr_style_destroy (CRStyle *a_this) ;
 
 G_END_DECLS
 

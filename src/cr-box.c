@@ -31,6 +31,12 @@
 #include <string.h>
 #include "cr-box.h"
 
+
+/**
+ *@file
+ *The definition file of the #CRBox class.
+ */
+
 /**
  *Instanciates a new box.
  *Everything is initialized to zero in it.

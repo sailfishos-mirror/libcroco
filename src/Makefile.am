@@ -25,6 +25,7 @@ libcroco_la_SOURCES= \
 	cr-stylesheet.c \
 	cr-om-parser.c \
 	cr-sel-eng.c \
+	cr-style.c \
 	cr-box.c \
 	*.h
 

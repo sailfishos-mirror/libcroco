@@ -1,11 +1,7 @@
 
 *coding:)
 
- Test and debug the selectors evaluation functionalities contained
- in the new cr-sel-eng.[ch] (boring but highly critical and usefull).
-
- Continue the testing of the css2 parsing using the test4 test.
- The test4 test justs reads a css2 stylesheets and dumps it on stdout. 
+Code the cr_style_new_from_ruleset() fonction.
  
 *Doc:)
 
