@@ -1,3 +1,9 @@
+2003-03-02  Dodji  <dodji@seketeli.org>
+
+	* src/cr-sel-eng.c (cr_sel_eng_get_rulesets_real): 
+	started to code an implementation of a ruleset "requester".
+	Still have to debug all this.
+
 2002-09-25  dodji  <dodji@seketeli.org>
 
 	* src/cr-utils.h: updated this file to define stuffs needed by

@@ -53,6 +53,21 @@ sel_matches_node_real (CRSelEng *a_this, CRSimpleSel *a_sel,
                        xmlNode *a_node, gboolean *a_result,
                        gboolean a_recurse) ;
 
+struct _CRSelEngPriv
+{
+        /*not used yet*/
+        gboolean case_sensitive ;
+
+        CRStyleSheet *sheet ;
+
+        /**
+         *where to store the next statement
+         *to be visited so that we can remember
+         *it from one method call to another.
+         */
+        CRStatement *cur_stmt ;
+};
+
 static gboolean
 class_add_sel_matches_node (CRAdditionalSel *a_add_sel,
                             xmlNode *a_node)
@@ -475,10 +490,164 @@ sel_matches_node_real (CRSelEng *a_this, CRSimpleSel *a_sel,
         return CR_OK ;
 }
 
-struct _CRSelEngPriv
-{
 
-};
+/**
+ *Returns  array of the ruleset statements that matches the
+ *given xml node.
+ *The engine keeps in memory the last statement he
+ *visited during the match. So, the next call
+ *to this function will eventually return a rulesets list starting
+ *from the last ruleset statement visited during the previous call.
+ *The enable users to get matching rulesets in an incremental way.
+ *
+ *@param a_sel_eng the current selection engine
+ *@param a_node the xml node for which the request
+ *is being made.
+ *@param a_sel_list the list of selectors to perform the search in.
+ *@param a_rulesets in/out parameter. A pointer to the
+ *returned array of rulesets statements that match the xml node
+ *given in parameter. The caller allocates the array before calling this
+ *function.
+ *@param a_len in/out parameter the length (in sizeof (#CRStatement*)) 
+ *of the returned array.
+ *(the length of a_rulesets, more precisely).
+ *The caller must set it to the length of a_ruleset prior to calling this
+ *function. In return, the function sets it to the length 
+ *(in sizeof (#CRStatement)) of the actually returned CRStatement array.
+ *@return CR_OK if everything went well, an error code otherwise.
+ */
+static enum CRStatus
+cr_sel_eng_get_rulesets_real (CRSelEng *a_this, 
+                              CRStyleSheet *a_stylesheet,
+                              xmlNode *a_node,
+                              CRStatement **a_rulesets, 
+                              glong *a_len)
+{
+        CRStatement *cur_stmt = NULL ;
+        CRSelector *sel_list = NULL, *cur_sel = NULL ;
+        gboolean matches = FALSE ;
+        enum CRStatus status = CR_OK ;
+        glong i = 0;
+
+        g_return_val_if_fail (a_this
+                              && a_stylesheet
+                              && a_stylesheet->statements
+                              && a_node
+                              && a_rulesets,
+                              CR_BAD_PARAM_ERROR) ;
+
+        /*
+         *if this stylesheet is "new one"
+         *let's remember it for subsequent calls.
+         */
+        if (PRIVATE (a_this)->sheet != a_stylesheet)
+        {
+                PRIVATE (a_this)->sheet = a_stylesheet ;
+                PRIVATE (a_this)->cur_stmt =  a_stylesheet->statements ;
+        }
+
+        /*
+         *walk through the list of statements and,
+         *get the selectors list inside the statements that
+         *contain some, and try to match our xml node in these
+         *selectors lists.
+         */
+        for (cur_stmt = PRIVATE (a_this)->cur_stmt, i = 0 ;
+             (PRIVATE (a_this)->cur_stmt = cur_stmt) && i < *a_len ; 
+             cur_stmt = cur_stmt->next)
+        {
+                /*
+                 *initialyze the selector list in which we will
+                 *really perform the search.
+                 */
+                sel_list = NULL ;
+
+                /*
+                 *get the the damn selector list in 
+                 *which we have to look
+                 */
+                switch (cur_stmt->type)
+                {
+                case RULESET_STMT:
+                        if (cur_stmt->kind.ruleset 
+                            && cur_stmt->kind.ruleset->sel_list)
+                        {
+                                sel_list = cur_stmt->kind.ruleset->sel_list ;
+                        }
+                        break ;
+                
+                case AT_MEDIA_RULE_STMT:
+                        if (cur_stmt->kind.media_rule
+                            && cur_stmt->kind.media_rule->rulesets
+                            && cur_stmt->kind.media_rule->rulesets->
+                            kind.ruleset
+                            &&cur_stmt->kind.media_rule->rulesets->
+                                kind.ruleset->sel_list)
+                        {
+                                sel_list = 
+                                        cur_stmt->kind.media_rule->
+                                        rulesets->kind.ruleset->sel_list ;
+                        }
+                        break ;
+
+                case AT_IMPORT_RULE_STMT:
+                        /*
+                         *some recursivity may be needed here.
+                         *I don't like this :(
+                         */
+                        break ;
+                default:
+                        break ;
+                }
+
+                if (!sel_list)
+                        continue ;
+
+                /*
+                 *now, we have a selector list to look in.
+                 *let's walk through  it and try to match the xml_node
+                 *on each item of the list.
+                 */
+                for (cur_sel = sel_list ; cur_sel ; cur_sel = cur_sel->next)
+                {
+                        if (!cur_sel->simple_sel)
+                                continue ;
+
+                        status = cr_sel_eng_sel_matches_node 
+                                (a_this, cur_sel->simple_sel,
+                                 a_node, &matches) ;
+
+                        if (status == CR_OK && matches == TRUE)
+                        {
+                                /*
+                                 *bingo, we found one ruleset that
+                                 *matches that fucking node.
+                                 *lets put it in the out array.
+                                 */
+
+                                if (i < *a_len)
+                                {
+                                        a_rulesets[i] = cur_stmt ;
+                                        i++ ;
+                                }
+                        }
+                }
+        }
+
+        if (!PRIVATE (a_this)->cur_stmt)
+        {
+                /*
+                 *we reached the end of stylesheet
+                 *no need to store any info.
+                 */
+                PRIVATE (a_this)->sheet = NULL ;
+        }
+
+        *a_len = i ;
+
+        return CR_OK ;
+}
+
 
 
 /**
@@ -498,6 +667,16 @@ cr_sel_eng_new (void)
 		return NULL ;
 	}
 	memset (result, 0, sizeof (CRSelEng)) ;
+
+        PRIVATE (result) = g_try_malloc (sizeof (CRSelEngPriv)) ;
+        if (!PRIVATE (result))
+	{
+		cr_utils_trace_info ("Out of memory") ;
+                g_free (result) ;
+		return NULL ;
+	}
+        memset (result, 0, sizeof (CRSelEngPriv)) ;
+
 	return result ;
 }
 
@@ -506,6 +685,14 @@ cr_sel_eng_new (void)
  *Evaluates a chained list of simple selectors (known as a css2 selector).
  *Says wheter if this selector matches the xml node given in parameter or
  *not.
+ *@param a_this the selection engine.
+ *@param a_sel the simple selector against which the xml node 
+ *is going to be matched.
+ *@param a_node the node against which the selector is going to be matched.
+ *@param a_result out parameter. The result of the match. Is set to
+ *TRUE if the selector matches the node, FALSE otherwise. This value
+ *is considered if and only if this functions returns CR_OK.
+ *@return the CR_OK if the selection ran correctly, an error code otherwise.
  */
 enum CRStatus
 cr_sel_eng_sel_matches_node (CRSelEng *a_this, CRSimpleSel *a_sel,
@@ -520,6 +707,7 @@ cr_sel_eng_sel_matches_node (CRSelEng *a_this, CRSimpleSel *a_sel,
         return sel_matches_node_real (a_this, a_sel, a_node,
                                       a_result, TRUE) ;
 }
+
 
 /**
  *The destructor of #CRSelEng

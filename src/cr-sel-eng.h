@@ -27,7 +27,7 @@
 #define __CR_SEL_ENG_H__
 
 #include "cr-utils.h"
-#include "cr-simple-sel.h"
+#include "cr-stylesheet.h"
 
 #ifdef HAVE_LIBXML2
  #include <libxml/tree.h>
