@@ -1,6 +1,10 @@
+2004-02-08  dodji  <dodji@gnome.org>
+
+	* src/cr-style.c: more style structure debugging materials.
+
 2004-02-08  Dodji Seketeli  <dodji@gnome.org>
 
-	* src/cr-style.c: more style structure debugging material.
+	* src/cr-style.c: more style structure debugging materials.
 
 2004-02-07  Dodji Seketeli  <dodji@gnome.org>
 

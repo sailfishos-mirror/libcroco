@@ -2647,8 +2647,14 @@ cr_style_float_type_to_string (enum CRFloatType a_code,
 }
 
 /**
- *TODO: code this style dumping function (much needed for debugging reasons),
- *this is a blocking feature.
+ *Serializes in instance of #CRStyle into
+ *a string
+ *@param a_this the instance of #CRStyle to serialize
+ *@param a_str the string to serialise the style into.
+ *if *a_str is NULL, a new GString is instanciated, otherwise
+ *the style serialisation is appended to the existed *a_str
+ *@param the number of white space char to use for indentation.
+ *@return CR_OK upon successful completion, an error code otherwise.
  */
 enum CRStatus
 cr_style_to_string (CRStyle *a_this,
@@ -2764,10 +2770,85 @@ cr_style_to_string (CRStyle *a_this,
         }
         g_string_append_printf (str, "\n") ;
         
-        /*
-         *TODO: dump the other fields of CRStyle starting from
-         *font_size
-         */
+        cr_utils_dump_n_chars2 (' ', str, indent) ;
+        tmp_str = cr_font_size_to_string (a_this->font_size) ;
+        if (tmp_str)
+        {
+                g_string_append_printf (str, "font-size: %s", tmp_str) ;
+        }
+        else
+        {
+                g_string_append_printf (str, "font-size: NULL") ;
+        }
+        tmp_str = NULL ;
+        g_string_append_printf (str, "\n") ;
+
+        cr_utils_dump_n_chars2 (' ', str, indent) ;
+        tmp_str = cr_font_size_adjust_to_string (a_this->font_size_adjust) ;
+        if (tmp_str)
+        {
+                g_string_append_printf (str, "font-size-adjust: %s", tmp_str) ;
+        }
+        else
+        {
+                g_string_append_printf (str, "font-size-adjust: NULL") ;
+        }
+        tmp_str = NULL ;
+        g_string_append_printf (str, "\n") ;
+
+        cr_utils_dump_n_chars2 (' ', str, indent) ;
+        tmp_str = (gchar*)cr_font_style_to_string (a_this->font_style) ;
+        if (tmp_str)
+        {
+                g_string_append_printf (str, "font-size: %s", tmp_str) ;
+        }
+        else
+        {
+                g_string_append_printf (str, "font-size: NULL") ;
+        }
+        tmp_str = NULL ;
+        g_string_append_printf (str, "\n") ;
+        
+        cr_utils_dump_n_chars2 (' ', str, indent) ;
+        tmp_str = (gchar*)cr_font_variant_to_string (a_this->font_variant) ;
+        if (tmp_str)
+        {
+                g_string_append_printf (str, "font-variant: %s", tmp_str) ;
+        }
+        else
+        {
+                g_string_append_printf (str, "font-variant: NULL") ;
+        }
+        tmp_str = NULL ;
+        g_string_append_printf (str, "\n") ;
+
+        cr_utils_dump_n_chars2 (' ', str, indent) ;
+        tmp_str = (gchar*)cr_font_weight_to_string (a_this->font_weight) ;
+        if (tmp_str)
+        {
+                g_string_append_printf (str, "font-weight: %s", tmp_str) ;
+        }
+        else
+        {
+                g_string_append_printf (str, "font-weight: NULL") ;
+        }
+        tmp_str = NULL ;
+        g_string_append_printf (str, "\n") ;
+        
+
+        cr_utils_dump_n_chars2 (' ', str, indent) ;
+        tmp_str = (gchar*)cr_font_stretch_to_string (a_this->font_stretch)  ;
+        if (tmp_str)
+        {
+                g_string_append_printf (str, "font-stretch: %s", tmp_str) ;
+        }
+        else
+        {
+                g_string_append_printf (str, "font-stretch: NULL") ;
+        }
+        tmp_str = NULL ;
+        g_string_append_printf (str, "\n") ;
+
         cr_utils_dump_n_chars2 (' ', str, a_nb_indent) ;
         g_string_append_printf (str, "}") ;
 
