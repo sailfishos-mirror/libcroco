@@ -73,8 +73,8 @@ The core of the parser.
 
 The main job of this class is to provide a cr_parser_parse_stylesheet() 
 method. During the parsing (the execution of the cr_parser_stylesheet())
-the parser sents events to notify the application when it encounters
-remarquable CSS constructions. This is the SAC (Simple API for CSS) API model.
+the parser sends events to notify the application when it encounters
+remarkable CSS constructions. This is the SAC (Simple API for CSS) API model.
 
 To achieve that task, almost each production of the CSS grammar 
 has a matching parsing function (or method) in this class.
@@ -143,5 +143,4 @@ to:
 II.4 The selection Engine.
 --------------------------
 
-
- 
+Hmmh, I should kick my ass to write this down ... 

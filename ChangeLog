@@ -1,3 +1,7 @@
+2003-12-21  Dodji Seketeli  <dodji@gnome.org>
+
+	* docs/design/parser-architecture.txt: fixed some typos.
+
 2003-12-14  Dodji Seketeli <dodji@gnome.org>
 
 	* docs/examples/selection-example-1.c:
