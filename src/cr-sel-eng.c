@@ -53,7 +53,7 @@ struct _CRSelEngPriv {
         CRStatement *cur_stmt;
         GList *pcs_handlers;
         gint pcs_handlers_size;
-};
+} ;
 
 static gboolean class_add_sel_matches_node (CRAdditionalSel * a_add_sel,
                                             xmlNode * a_node);
@@ -68,6 +68,7 @@ static enum CRStatus sel_matches_node_real (CRSelEng * a_this,
                                             CRSimpleSel * a_sel,
                                             xmlNode * a_node,
                                             gboolean * a_result,
+                                            gboolean a_eval_sel_list_from_end,
                                             gboolean a_recurse);
 
 static enum CRStatus cr_sel_eng_get_matched_rulesets_real (CRSelEng * a_this,
@@ -78,19 +79,9 @@ static enum CRStatus cr_sel_eng_get_matched_rulesets_real (CRSelEng * a_this,
                                                            a_rulesets,
                                                            gulong * a_len);
 
-#ifndef NEW_PROPERTIES_GETTER
-static enum CRStatus put_css_properties_in_hashtable (GHashTable **
-                                                      a_props_hashtable,
-                                                      CRStatement *
-                                                      a_ruleset);
-static void set_style_from_props_hash_hr_func (gpointer a_prop,
-                                               gpointer a_decl,
-                                               gpointer a_style);
-#else
 static enum CRStatus put_css_properties_in_props_list (CRPropList ** a_props,
                                                        CRStatement *
                                                        a_ruleset);
-#endif
 
 static gboolean pseudo_class_add_sel_matches_node (CRSelEng * a_this,
                                                    CRAdditionalSel *
@@ -125,23 +116,26 @@ lang_pseudo_class_handler (CRSelEng * a_this,
                               && a_sel && a_sel->content.pseudo
                               && a_sel->content.pseudo
                               && a_sel->content.pseudo->name
+                              && a_sel->content.pseudo->name->stryng
                               && a_node, CR_BAD_PARAM_ERROR);
 
-        if (strncmp (a_sel->content.pseudo->name->str, "lang", 4)
+        if (strncmp (a_sel->content.pseudo->name->stryng->str, 
+                     "lang", 4)
             || !a_sel->content.pseudo->type == FUNCTION_PSEUDO) {
                 cr_utils_trace_info ("This handler is for :lang only");
                 return CR_BAD_PSEUDO_CLASS_SEL_HANDLER_ERROR;
         }
         /*lang code should exist and be at least of length 2 */
         if (!a_sel->content.pseudo->extra
-            || a_sel->content.pseudo->extra->len < 2)
+            || !a_sel->content.pseudo->extra->stryng
+            || a_sel->content.pseudo->extra->stryng->len < 2)
                 return FALSE;
         for (; node; node = get_next_parent_element_node (node)) {
                 val = xmlGetProp (node, "lang");
                 if (val
                     && !strncmp (val,
-                                 a_sel->content.pseudo->extra->str,
-                                 a_sel->content.pseudo->extra->len)) {
+                                 a_sel->content.pseudo->extra->stryng->str,
+                                 a_sel->content.pseudo->extra->stryng->len)) {
                         result = TRUE;
                 }
                 if (val) {
@@ -163,9 +157,11 @@ first_child_pseudo_class_handler (CRSelEng * a_this,
                               && a_sel && a_sel->content.pseudo
                               && a_sel->content.pseudo
                               && a_sel->content.pseudo->name
+                              && a_sel->content.pseudo->name->stryng
                               && a_node, CR_BAD_PARAM_ERROR);
 
-        if (strcmp (a_sel->content.pseudo->name->str, "first-child")
+        if (strcmp (a_sel->content.pseudo->name->stryng->str,
+                    "first-child")
             || !a_sel->content.pseudo->type == IDENT_PSEUDO) {
                 cr_utils_trace_info ("This handler is for :first-child only");
                 return CR_BAD_PSEUDO_CLASS_SEL_HANDLER_ERROR;
@@ -190,11 +186,12 @@ pseudo_class_add_sel_matches_node (CRSelEng * a_this,
                               && a_add_sel
                               && a_add_sel->content.pseudo
                               && a_add_sel->content.pseudo->name
-                              && a_add_sel->content.pseudo->name->str
+                              && a_add_sel->content.pseudo->name->stryng
+                              && a_add_sel->content.pseudo->name->stryng->str
                               && a_node, CR_BAD_PARAM_ERROR);
 
         status = cr_sel_eng_get_pseudo_class_selector_handler
-                (a_this, a_add_sel->content.pseudo->name->str,
+                (a_this, a_add_sel->content.pseudo->name->stryng->str,
                  a_add_sel->content.pseudo->type, &handler);
         if (status != CR_OK || !handler)
                 return FALSE;
@@ -218,7 +215,8 @@ class_add_sel_matches_node (CRAdditionalSel * a_add_sel, xmlNode * a_node)
         g_return_val_if_fail (a_add_sel
                               && a_add_sel->type == CLASS_ADD_SELECTOR
                               && a_add_sel->content.class_name
-                              && a_add_sel->content.class_name->str
+                              && a_add_sel->content.class_name->stryng
+                              && a_add_sel->content.class_name->stryng->str
                               && a_node, FALSE);
 
         if (xmlHasProp (a_node, "class")) {
@@ -228,11 +226,11 @@ class_add_sel_matches_node (CRAdditionalSel * a_add_sel, xmlNode * a_node)
                                && cr_utils_is_white_space (*cur) 
                                == TRUE)
                                 cur++;
-                        if (!*cur)
-                                break;
-                        if (!strncmp (cur, a_add_sel->content.class_name->str,
-                                      a_add_sel->content.class_name->len)) {
-                                cur += a_add_sel->content.class_name->len;
+
+                        if (!strncmp (cur, 
+                                      a_add_sel->content.class_name->stryng->str,
+                                      a_add_sel->content.class_name->stryng->len)) {
+                                cur += a_add_sel->content.class_name->stryng->len;
                                 if ((cur && !*cur)
                                     || cr_utils_is_white_space (*cur) == TRUE)
                                         result = TRUE;
@@ -241,7 +239,6 @@ class_add_sel_matches_node (CRAdditionalSel * a_add_sel, xmlNode * a_node)
                                 break ;
                 }
         }
-
         if (klass) {
                 xmlFree (klass);
                 klass = NULL;
@@ -265,7 +262,8 @@ id_add_sel_matches_node (CRAdditionalSel * a_add_sel, xmlNode * a_node)
         g_return_val_if_fail (a_add_sel
                               && a_add_sel->type == ID_ADD_SELECTOR
                               && a_add_sel->content.id_name
-                              && a_add_sel->content.id_name->str
+                              && a_add_sel->content.id_name->stryng
+                              && a_add_sel->content.id_name->stryng->str
                               && a_node, FALSE);
         g_return_val_if_fail (a_add_sel
                               && a_add_sel->type == ID_ADD_SELECTOR
@@ -273,12 +271,11 @@ id_add_sel_matches_node (CRAdditionalSel * a_add_sel, xmlNode * a_node)
 
         if (xmlHasProp (a_node, "id")) {
                 id = xmlGetProp (a_node, "id");
-                if (!strncmp (id, a_add_sel->content.id_name->str,
-                              a_add_sel->content.id_name->len)) {
+                if (!strncmp (id, a_add_sel->content.id_name->stryng->str,
+                              a_add_sel->content.id_name->stryng->len)) {
                         result = TRUE;
                 }
         }
-
         if (id) {
                 xmlFree (id);
                 id = NULL;
@@ -308,10 +305,13 @@ attr_add_sel_matches_node (CRAdditionalSel * a_add_sel, xmlNode * a_node)
              cur_sel; cur_sel = cur_sel->next) {
                 switch (cur_sel->match_way) {
                 case SET:
-                        if (!cur_sel->name || !cur_sel->name->str)
+                        if (!cur_sel->name 
+                            || !cur_sel->name->stryng
+                            || !cur_sel->name->stryng->str)
                                 return FALSE;
 
-                        if (!xmlHasProp (a_node, cur_sel->name->str))
+                        if (!xmlHasProp (a_node,
+                                         cur_sel->name->stryng->str))
                                 return FALSE;
                         break;
 
@@ -319,20 +319,27 @@ attr_add_sel_matches_node (CRAdditionalSel * a_add_sel, xmlNode * a_node)
                         {
                                 xmlChar *value = NULL;
 
-                                if (!cur_sel->name || !cur_sel->name->str
+                                if (!cur_sel->name 
+                                    || !cur_sel->name->stryng
+                                    || !cur_sel->name->stryng->str
                                     || !cur_sel->value
-                                    || !cur_sel->value->str)
+                                    || !cur_sel->value->stryng
+                                    || !cur_sel->value->stryng->str)
                                         return FALSE;
 
-                                if (!xmlHasProp (a_node, cur_sel->name->str))
+                                if (!xmlHasProp 
+                                    (a_node, 
+                                     cur_sel->name->stryng->str))
                                         return FALSE;
 
-                                value = xmlGetProp (a_node,
-                                                    cur_sel->name->str);
+                                value = xmlGetProp 
+                                        (a_node,
+                                         cur_sel->name->stryng->str);
 
                                 if (value
-                                    && strncmp (value, cur_sel->value->str,
-                                                cur_sel->value->len)) {
+                                    && strcmp 
+                                    (value, 
+                                     cur_sel->value->stryng->str)) {
                                         xmlFree (value);
                                         return FALSE;
                                 }
@@ -348,10 +355,13 @@ attr_add_sel_matches_node (CRAdditionalSel * a_add_sel, xmlNode * a_node)
                                         *cur = NULL;
                                 gboolean found = FALSE;
 
-                                if (!xmlHasProp (a_node, cur_sel->name->str))
+                                if (!xmlHasProp 
+                                    (a_node, 
+                                     cur_sel->name->stryng->str))
                                         return FALSE;
-                                value = xmlGetProp (a_node,
-                                                    cur_sel->name->str);
+                                value = xmlGetProp 
+                                        (a_node,
+                                         cur_sel->name->stryng->str);
 
                                 if (!value)
                                         return FALSE;
@@ -379,13 +389,12 @@ attr_add_sel_matches_node (CRAdditionalSel * a_add_sel, xmlNode * a_node)
                                         while (cr_utils_is_white_space
                                                (*cur) == FALSE && *cur)
                                                 cur++;
-                                        if (!*cur)
-                                                break;
                                         cur--;
                                         ptr2 = cur;
 
                                         if (!strncmp
-                                            (ptr1, cur_sel->value->str,
+                                            (ptr1, 
+                                             cur_sel->value->stryng->str,
                                              ptr2 - ptr1 + 1)) {
                                                 found = TRUE;
                                                 break;
@@ -409,10 +418,13 @@ attr_add_sel_matches_node (CRAdditionalSel * a_add_sel, xmlNode * a_node)
                                         *cur = NULL;
                                 gboolean found = FALSE;
 
-                                if (!xmlHasProp (a_node, cur_sel->name->str))
+                                if (!xmlHasProp 
+                                    (a_node, 
+                                     cur_sel->name->stryng->str))
                                         return FALSE;
-                                value = xmlGetProp (a_node,
-                                                    cur_sel->name->str);
+                                value = xmlGetProp 
+                                        (a_node,
+                                         cur_sel->name->stryng->str);
 
                                 /*
                                  *here, make sure value is an hyphen
@@ -426,14 +438,12 @@ attr_add_sel_matches_node (CRAdditionalSel * a_add_sel, xmlNode * a_node)
 
                                         while (*cur != '-' && *cur)
                                                 cur++;
-                                        if (!*cur)
-                                                break;
                                         cur--;
                                         ptr2 = cur;
 
                                         if (g_strstr_len
                                             (ptr1, ptr2 - ptr1 + 1,
-                                             cur_sel->value->str)
+                                             cur_sel->value->stryng->str)
                                             == (gchar *) ptr1) {
                                                 found = TRUE;
                                                 break;
@@ -466,49 +476,65 @@ additional_selector_matches_node (CRSelEng * a_this,
                                   CRAdditionalSel * a_add_sel,
                                   xmlNode * a_node)
 {
-        if (!a_add_sel) {
-                return FALSE;
-        }
+        CRAdditionalSel *cur_add_sel = NULL, *tail = NULL ;
+        gboolean evaluated = FALSE ;
 
-        if (a_add_sel->type == NO_ADD_SELECTOR) {
-                return FALSE;
-        }
+        for (tail = a_add_sel ; 
+             tail && tail->next; 
+             tail = tail->next) ;
 
-        if (a_add_sel->type == CLASS_ADD_SELECTOR
-            && a_add_sel->content.class_name
-            && a_add_sel->content.class_name->str) {
-                if (class_add_sel_matches_node (a_add_sel, a_node) == FALSE) {
+        g_return_val_if_fail (tail, FALSE) ;
+
+        for (cur_add_sel = tail ;
+             cur_add_sel ;
+             cur_add_sel = cur_add_sel->prev) {
+
+                evaluated = TRUE ;
+                if (cur_add_sel->type == NO_ADD_SELECTOR) {
                         return FALSE;
                 }
-                return TRUE;
-        } else if (a_add_sel->type == ID_ADD_SELECTOR
-                   && a_add_sel->content.id_name
-                   && a_add_sel->content.id_name->str) {
-                if (id_add_sel_matches_node (a_add_sel, a_node) == FALSE) {
+
+                if (cur_add_sel->type == CLASS_ADD_SELECTOR
+                    && cur_add_sel->content.class_name
+                    && cur_add_sel->content.class_name->stryng
+                    && cur_add_sel->content.class_name->stryng->str) {
+                        if (class_add_sel_matches_node (cur_add_sel,
+                                                        a_node) == FALSE) {
+                                return FALSE;
+                        }
+                        continue ;
+                } else if (cur_add_sel->type == ID_ADD_SELECTOR
+                           && cur_add_sel->content.id_name
+                           && cur_add_sel->content.id_name->stryng
+                           && cur_add_sel->content.id_name->stryng->str) {
+                        if (id_add_sel_matches_node (cur_add_sel, a_node) == FALSE) {
+                                return FALSE;
+                        }
+                        continue ;
+                } else if (cur_add_sel->type == ATTRIBUTE_ADD_SELECTOR
+                           && cur_add_sel->content.attr_sel) {
+                        /*
+                         *here, call a function that does the match
+                         *against an attribute additionnal selector
+                         *and an xml node.
+                         */
+                        if (attr_add_sel_matches_node (cur_add_sel, a_node)
+                            == FALSE) {
+                                return FALSE;
+                        }
+                        continue ;
+                } else if (cur_add_sel->type == PSEUDO_CLASS_ADD_SELECTOR
+                           && cur_add_sel->content.pseudo) {
+                        if (pseudo_class_add_sel_matches_node
+                            (a_this, cur_add_sel, a_node) == TRUE) {
+                                return TRUE;
+                        }
                         return FALSE;
                 }
-                return TRUE;
-        } else if (a_add_sel->type == ATTRIBUTE_ADD_SELECTOR
-                   && a_add_sel->content.attr_sel) {
-                /*
-                 *here, call a function that does the match
-                 *against an attribute additionnal selector
-                 *and an xml node.
-                 */
-                if (attr_add_sel_matches_node (a_add_sel, a_node)
-                    == FALSE) {
-                        return FALSE;
-                }
-                return TRUE;
-        } else if (a_add_sel->type == PSEUDO_CLASS_ADD_SELECTOR
-                   && a_add_sel->content.pseudo) {
-                if (pseudo_class_add_sel_matches_node
-                    (a_this, a_add_sel, a_node) == TRUE) {
-                        return TRUE;
-                }
-                return FALSE;
         }
-        return FALSE;
+        if (evaluated == TRUE)
+                return TRUE;
+        return FALSE ;
 }
 
 static xmlNode *
@@ -589,6 +615,7 @@ get_next_parent_element_node (xmlNode * a_node)
 static enum CRStatus
 sel_matches_node_real (CRSelEng * a_this, CRSimpleSel * a_sel,
                        xmlNode * a_node, gboolean * a_result,
+                       gboolean a_eval_sel_list_from_end,
                        gboolean a_recurse)
 {
         CRSimpleSel *cur_sel = NULL;
@@ -603,7 +630,7 @@ sel_matches_node_real (CRSelEng * a_this, CRSimpleSel * a_sel,
         if (a_node->type != XML_ELEMENT_NODE)
                 return CR_OK;
 
-        if (a_recurse == TRUE) {
+        if (a_eval_sel_list_from_end == TRUE) {
                 /*go and get the last simple selector of the list */
                 for (cur_sel = a_sel;
                      cur_sel && cur_sel->next; cur_sel = cur_sel->next) ;
@@ -612,46 +639,48 @@ sel_matches_node_real (CRSelEng * a_this, CRSimpleSel * a_sel,
         }
 
         for (cur_node = a_node; cur_sel; cur_sel = cur_sel->prev) {
-                if (cur_sel->type_mask & UNIVERSAL_SELECTOR) {
-                        goto walk_a_step_in_expr;
-                } else if (cur_sel->type_mask & TYPE_SELECTOR) {
-                        if (cur_sel && cur_sel->name && cur_sel->name->str) {
-                                if (!strcmp (cur_sel->name->str,
-                                             cur_node->name)) {
-                                        /*
-                                         *this simple selector
-                                         *matches the current xml node
-                                         *Let's see if the preceding
-                                         *simple selectors also match
-                                         *their xml node counterpart.
-                                         */
-                                        if (cur_sel->add_sel) {
-                                                if (additional_selector_matches_node (a_this, cur_sel->add_sel, cur_node) == TRUE) {
-                                                        goto walk_a_step_in_expr;
-                                                } else {
-                                                        goto done;
-                                                }
-                                        } else {
-                                                goto walk_a_step_in_expr;
-                                        }
+                if (((cur_sel->type_mask & TYPE_SELECTOR)
+                     && (cur_sel->name 
+                         && cur_sel->name->stryng
+                         && cur_sel->name->stryng->str)
+                     && (!strcmp (cur_sel->name->stryng->str,
+                                  cur_node->name)))
+                    || (cur_sel->type_mask & UNIVERSAL_SELECTOR)) {
+                        /*
+                         *this simple selector
+                         *matches the current xml node
+                         *Let's see if the preceding
+                         *simple selectors also match
+                         *their xml node counterpart.
+                         */
+                        if (cur_sel->add_sel) {
+                                if (additional_selector_matches_node (a_this, cur_sel->add_sel, 
+                                                                      cur_node) == TRUE) {
+                                        goto walk_a_step_in_expr;
+                                } else {
+                                        goto done;
                                 }
+                        } else {
+                                goto walk_a_step_in_expr;
+                        }                                
+                } 
+                if (!(cur_sel->type_mask & TYPE_SELECTOR)
+                    && !(cur_sel->type_mask & UNIVERSAL_SELECTOR)) {
+                        if (!cur_sel->add_sel) {
                                 goto done;
+                        }
+                        if (additional_selector_matches_node
+                            (a_this, cur_sel->add_sel, cur_node)
+                            == TRUE) {
+                                goto walk_a_step_in_expr;
                         } else {
                                 goto done;
                         }
-                }
-
-                if (!cur_sel->add_sel) {
-                        goto done;
-                }
-                if (additional_selector_matches_node
-                    (a_this, cur_sel->add_sel, cur_node) == TRUE) {
-                        goto walk_a_step_in_expr;
                 } else {
-                        goto done;
+                        goto done ;
                 }
 
-              walk_a_step_in_expr:
+        walk_a_step_in_expr:
                 if (a_recurse == FALSE) {
                         *a_result = TRUE;
                         goto done;
@@ -670,44 +699,46 @@ sel_matches_node_real (CRSelEng * a_this, CRSimpleSel * a_sel,
                         break;
 
                 case COMB_WS:  /*descendant selector */
-                        {
-                                xmlNode *n = NULL;
-                                enum CRStatus status = CR_OK;
-                                gboolean matches = FALSE;
+                {
+                        xmlNode *n = NULL;
+                        enum CRStatus status = CR_OK;
+                        gboolean matches = FALSE;
 
-                                /*
-                                 *walk the xml tree upward looking for a parent
-                                 *node that matches the preceding selector.
-                                 */
-                                for (n = cur_node->parent; n; n = n->parent) {
-                                        status = sel_matches_node_real
-                                                (a_this, cur_sel->prev,
-                                                 n, &matches, FALSE);
-                                        if (status != CR_OK)
-                                                goto done;
-                                        if (matches == TRUE) {
-                                                cur_node = n;
-                                                break;
-                                        }
-                                }
+                        /*
+                         *walk the xml tree upward looking for a parent
+                         *node that matches the preceding selector.
+                         */
+                        for (n = cur_node->parent; n; n = n->parent) {
+                                status = sel_matches_node_real
+                                        (a_this, cur_sel->prev,
+                                         n, &matches, FALSE, TRUE);
 
-                                if (!n) {
-                                        /*
-                                         *didn't find any ancestor that matches
-                                         *the previous simple selector.
-                                         */
+                                if (status != CR_OK)
                                         goto done;
+
+                                if (matches == TRUE) {
+                                        cur_node = n ;
+                                        break;
                                 }
-                                /*
-                                 *in this case, the preceding simple sel
-                                 *will have been interpreted twice, which
-                                 *is a cpu and mem waste ... I need to find
-                                 *another way to do this. Anyway, this is
-                                 *my first attempt to write this function and
-                                 *I am a bit clueless.
-                                 */
-                                break;
                         }
+
+                        if (!n) {
+                                /*
+                                 *didn't find any ancestor that matches
+                                 *the previous simple selector.
+                                 */
+                                goto done;
+                        }
+                        /*
+                         *in this case, the preceding simple sel
+                         *will have been interpreted twice, which
+                         *is a cpu and mem waste ... I need to find
+                         *another way to do this. Anyway, this is
+                         *my first attempt to write this function and
+                         *I am a bit clueless.
+                         */
+                        break;
+                }
 
                 case COMB_PLUS:
                         cur_node = get_prev_element_node (cur_node);
@@ -733,9 +764,10 @@ sel_matches_node_real (CRSelEng * a_this, CRSimpleSel * a_sel,
          */
         *a_result = TRUE;
 
-      done:
+ done:
         return CR_OK;
 }
+
 
 /**
  *Returns  array of the ruleset statements that matches the
@@ -921,131 +953,6 @@ cr_sel_eng_get_matched_rulesets_real (CRSelEng * a_this,
         return CR_OK;
 }
 
-#ifndef NEW_PROPERTIES_GETTER
-/**
- *Walks through the property/value pairs of a ruleset
- *statement and put the properties found into a hashtable.
- *Each key of the hashtable is a css property. The
- *associated value is a pointer to the current #CRDeclaration.
- *This function is where the cascading property sorting is done.
- *
- *@param a_props_hashtable in/out parameter. The hashtable into
- *which the the property/Declaration pairs will be added.
- *Note that each hashtable key (a statement property) is a null terminated 
- *instance of guchar *.
- *Each value associated to a key is an instance of #CRDeclaration. 
- *The declaration is actually the css declaration (rule) 
- *that contains the property (the key).
- *@param a_ruleset the ruleset from wich the properties are gathered.
- *@return CR_OK upon successfull completion, an error code otherwise.
- */
-static enum CRStatus
-put_css_properties_in_hashtable (GHashTable ** a_props_hashtable,
-                                 CRStatement * a_stmt)
-{
-        GHashTable *props_hash = NULL;
-        CRDeclaration *cur_decl = NULL;
-
-        g_return_val_if_fail (a_props_hashtable && a_stmt
-                              && a_stmt->type == RULESET_STMT
-                              && a_stmt->kind.ruleset, CR_BAD_PARAM_ERROR);
-
-        if (!*a_props_hashtable) {
-                *a_props_hashtable = g_hash_table_new (g_str_hash,
-                                                       g_str_equal);
-        }
-        props_hash = *a_props_hashtable;
-
-        for (cur_decl = a_stmt->kind.ruleset->decl_list;
-             cur_decl; cur_decl = cur_decl->next) {
-                CRDeclaration *decl = NULL;
-
-                if (!cur_decl->property || !cur_decl->property->str)
-                        continue;
-
-                /*
-                 *First, test if the property is not
-                 *already present in our properties hashtable.
-                 *If yes, apply the cascading rules to
-                 *compute the precedence. If not, insert
-                 *the property into the hashtable.
-                 */
-                decl = g_hash_table_lookup
-                        (props_hash, cur_decl->property->str);
-
-                if (!decl) {
-                        g_hash_table_replace
-                                (props_hash,
-                                 cur_decl->property->str, cur_decl);
-                        continue;
-                }
-
-                /*
-                 *A property with the same name already exists.
-                 *We must apply here 
-                 *some cascading rules
-                 *to compute the precedence.
-                 */
-
-                /*
-                 *first, look at the origin.
-                 *6.4.1 says: 
-                 *"for normal declarations, 
-                 *author style sheets override user 
-                 *style sheets which override 
-                 *the default style sheet."
-                 */
-                if (decl->parent_statement
-                    && decl->parent_statement->parent_sheet
-                    && (decl->parent_statement->parent_sheet->origin
-                        < a_stmt->parent_sheet->origin)) {
-                        g_hash_table_insert
-                                (props_hash,
-                                 cur_decl->property->str, cur_decl);
-                        continue;
-                } else if (decl->parent_statement
-                           && decl->parent_statement->parent_sheet
-                           && (decl->parent_statement->
-                               parent_sheet->origin
-                               > a_stmt->parent_sheet->origin)) {
-                        /*TODO: support !important rule. */
-                        continue;
-                }
-
-                /*
-                 *A property with the same
-                 *name and the same origin already exist.
-                 *shit. This is lasting longer than expected ...
-                 *Luckily, the spec says in 6.4.1:
-                 *"more specific selectors will override 
-                 *more general ones"
-                 *and
-                 *"if two rules have the same weight, 
-                 *origin and specificity, 
-                 *the latter specified wins"
-                 */
-                if (a_stmt->specificity
-                    >= decl->parent_statement->specificity) {
-                        g_hash_table_insert
-                                (props_hash,
-                                 cur_decl->property->str, cur_decl);
-                }
-        }
-        return CR_OK;
-}
-
-static void
-set_style_from_props_hash_hr_func (gpointer a_prop, gpointer a_decl,
-                                   gpointer a_style)
-{
-        CRDeclaration *decl = a_decl;
-        CRStyle *style = a_style;
-
-        g_return_if_fail (a_decl && a_prop && a_style);
-
-        cr_style_set_style_from_decl (style, decl);
-}
-#else
 static enum CRStatus
 put_css_properties_in_props_list (CRPropList ** a_props, CRStatement * a_stmt)
 {
@@ -1067,7 +974,9 @@ put_css_properties_in_props_list (CRPropList ** a_props, CRStatement * a_stmt)
                 decl = NULL;
                 pair = NULL;
 
-                if (!cur_decl->property || !cur_decl->property->str)
+                if (!cur_decl->property 
+                    || !cur_decl->property->stryng
+                    || !cur_decl->property->stryng->str)
                         continue;
                 /*
                  *First, test if the property is not
@@ -1076,7 +985,9 @@ put_css_properties_in_props_list (CRPropList ** a_props, CRStatement * a_stmt)
                  *compute the precedence. If not, insert
                  *the property into the list
                  */
-                cr_prop_list_lookup_prop (props, cur_decl->property, &pair);
+                cr_prop_list_lookup_prop (props,
+                                          cur_decl->property, 
+                                          &pair);
 
                 if (!pair) {
                         tmp_props = cr_prop_list_append2
@@ -1185,7 +1096,6 @@ set_style_from_props (CRStyle * a_style, CRPropList * a_props)
                 decl = NULL;
         }
 }
-#endif
 
 /****************************************
  *PUBLIC METHODS
@@ -1391,7 +1301,9 @@ cr_sel_eng_matches_node (CRSelEng * a_this, CRSimpleSel * a_sel,
                 return CR_OK;
         }
 
-        return sel_matches_node_real (a_this, a_sel, a_node, a_result, TRUE);
+        return sel_matches_node_real (a_this, a_sel, 
+                                      a_node, a_result, 
+                                      TRUE, TRUE);
 }
 
 /**
@@ -1475,114 +1387,7 @@ cr_sel_eng_get_matched_rulesets (CRSelEng * a_this,
         return status;
 }
 
-#ifndef NEW_PROPERTIES_GETTER
-enum CRStatus
-cr_sel_eng_get_matched_properties_from_cascade (CRSelEng * a_this,
-                                                CRCascade * a_cascade,
-                                                xmlNode * a_node,
-                                                GHashTable **
-                                                a_props_hashtable)
-{
-        CRStatement **stmts_tab = NULL;
-        enum CRStatus status = CR_OK;
-        gulong tab_size = 0,
-                tab_len = 0,
-                i = 0,
-                index = 0;
-        enum CRStyleOrigin origin = 0;
-        gushort stmts_chunck_size = 8;
-        CRStyleSheet *sheet = NULL;
 
-        g_return_val_if_fail (a_this
-                              && a_cascade
-                              && a_node
-                              && a_props_hashtable, CR_BAD_PARAM_ERROR);
-
-        for (origin = ORIGIN_UA; origin < NB_ORIGINS; origin++) {
-                sheet = cr_cascade_get_sheet (a_cascade, origin);
-                if (!sheet)
-                        continue;
-                if (tab_size - index < 1) {
-                        stmts_tab = g_try_realloc
-                                (stmts_tab, (tab_size + stmts_chunck_size)
-                                 * sizeof (CRStatement *));
-                        if (!stmts_tab) {
-                                cr_utils_trace_info ("Out of memory");
-                                status = CR_ERROR;
-                                goto error;
-                        }
-                        tab_size += stmts_chunck_size;
-                        /*
-                         *compute the max size left for
-                         *cr_sel_eng_get_matched_rulesets_real()'s output tab 
-                         */
-                        tab_len = tab_size - index;
-                }
-                while ((status = cr_sel_eng_get_matched_rulesets_real
-                        (a_this, sheet, a_node, stmts_tab + index, &tab_len))
-                       == CR_OUTPUT_TOO_SHORT_ERROR) {
-                        stmts_tab = g_try_realloc
-                                (stmts_tab, (tab_size + stmts_chunck_size)
-                                 * sizeof (CRStatement *));
-                        if (!stmts_tab) {
-                                cr_utils_trace_info ("Out of memory");
-                                status = CR_ERROR;
-                                goto error;
-                        }
-                        tab_size += stmts_chunck_size;
-                        index += tab_len;
-                        /*
-                         *compute the max size left for
-                         *cr_sel_eng_get_matched_rulesets_real()'s output tab 
-                         */
-                        tab_len = tab_size - index;
-                }
-                if (status != CR_OK) {
-                        cr_utils_trace_info ("Error while running "
-                                             "selector engine");
-                        goto error;
-                }
-                index += tab_len;
-                tab_len = tab_size - index;
-        }
-
-        /*
-         *TODO, walk down the stmts_tab and build the
-         *property_name/declaration hashtable.
-         *Make sure one can walk from the declaration to
-         *the stylesheet.
-         */
-        for (i = 0; i < index; i++) {
-                CRStatement *stmt = stmts_tab[i];
-
-                if (!stmt)
-                        continue;
-                switch (stmt->type) {
-                case RULESET_STMT:
-                        if (!stmt->parent_sheet)
-                                continue;
-                        status = put_css_properties_in_hashtable
-                                (a_props_hashtable, stmt);
-                        break;
-                default:
-                        break;
-                }
-
-        }
-
-        return CR_OK;
-      error:
-
-        if (stmts_tab) {
-                g_free (stmts_tab);
-                stmts_tab = NULL;
-
-        }
-
-        return status;
-}
-
-#else
 enum CRStatus
 cr_sel_eng_get_matched_properties_from_cascade (CRSelEng * a_this,
                                                 CRCascade * a_cascade,
@@ -1683,60 +1488,36 @@ cr_sel_eng_get_matched_properties_from_cascade (CRSelEng * a_this,
 
         return status;
 }
-#endif
 
 enum CRStatus
 cr_sel_eng_get_matched_style (CRSelEng * a_this,
                               CRCascade * a_cascade,
                               xmlNode * a_node,
-                              CRStyle * a_parent_style, CRStyle ** a_style)
+                              CRStyle * a_parent_style, 
+                              CRStyle ** a_style,
+                              gboolean a_set_props_to_initial_values)
 {
         enum CRStatus status = CR_OK;
 
-#ifndef NEW_PROPERTIES_GETTER
-        GHashTable *props_hash = NULL;
-#else
         CRPropList *props = NULL;
-#endif
 
         g_return_val_if_fail (a_this && a_cascade
                               && a_node && a_style, CR_BAD_PARAM_ERROR);
-#ifndef NEW_PROPERTIES_GETTER
-        status = cr_sel_eng_get_matched_properties_from_cascade
-                (a_this, a_cascade, a_node, &props_hash);
-#else
+
         status = cr_sel_eng_get_matched_properties_from_cascade
                 (a_this, a_cascade, a_node, &props);
-#endif
+
         g_return_val_if_fail (status == CR_OK, status);
-
-#ifndef NEW_PROPERTIES_GETTER
-        if (props_hash && g_hash_table_size (props_hash)) {
-
-                if (!*a_style) {
-                        *a_style = cr_style_new ();
-                        g_return_val_if_fail (*a_style, CR_ERROR);
-                } else {
-                        cr_style_set_props_to_defaults (*a_style);
-                }
-                (*a_style)->parent_style = a_parent_style;
-
-                g_hash_table_foreach (props_hash, ((GHFunc)
-                                                   set_style_from_props_hash_hr_func),
-                                      *a_style);
-        }
-        if (props_hash) {
-                g_hash_table_destroy (props_hash);
-                props_hash = NULL;
-        }
-#else
         if (props) {
-
                 if (!*a_style) {
-                        *a_style = cr_style_new ();
+                        *a_style = cr_style_new (a_set_props_to_initial_values) ;
                         g_return_val_if_fail (*a_style, CR_ERROR);
                 } else {
-                        cr_style_set_props_to_defaults (*a_style);
+                        if (a_set_props_to_initial_values == TRUE) {
+                                cr_style_set_props_to_initial_values (*a_style) ;
+                        } else {
+                                cr_style_set_props_to_default_values (*a_style);
+                        }
                 }
                 (*a_style)->parent_style = a_parent_style;
 
@@ -1746,7 +1527,6 @@ cr_sel_eng_get_matched_style (CRSelEng * a_this,
                         props = NULL;
                 }
         }
-#endif
         return CR_OK;
 }
 

@@ -25,6 +25,8 @@ cr-fonts.h \
 cr-sel-eng.h \
 cr-style.h \
 cr-prop-list.h \
+cr-parsing-location.h \
+cr-string.h \
 libcroco-config.h
 
 
@@ -77,7 +79,11 @@ cr-sel-eng.h \
 cr-fonts.c \
 cr-fonts.h \
 cr-prop-list.c \
-cr-prop-list.h
+cr-prop-list.h \
+cr-parsing-location.c \
+cr-parsing-location.h \
+cr-string.c \
+cr-string.h
 
 lib_LTLIBRARIES=libcroco.la
 libcroco_la_SOURCES= $(SRCS)

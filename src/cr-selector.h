@@ -3,8 +3,6 @@
 /*
  * This file is part of The Croco Library
  *
- * Copyright (C) 2002-2003 Dodji Seketeli <dodji@seketeli.org>
- *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of version 2.1 of the GNU Lesser General Public
  * License as published by the Free Software Foundation.
@@ -18,17 +16,19 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
  * USA
+ *
+ *
+ * Author: Dodji Seketeli
+ * See COPYRIGHTS file for copyright information.
  */
 
-/*
- *$Id$
- */
 #ifndef __CR_SELECTOR_H__
 #define __CR_SELECTOR_H__
 
 #include <stdio.h>
 #include "cr-utils.h"
 #include "cr-simple-sel.h"
+#include "cr-parsing-location.h"
 
 /**
  *@file
@@ -64,41 +64,31 @@ struct _CRSelector
 	/**The next selector list element*/
 	CRSelector *next ;
 	CRSelector *prev ;
-
+	CRParsingLocation location ;
 	glong ref_count ;
 };
 
-CRSelector*
-cr_selector_new (CRSimpleSel *a_sel_expr) ;
+CRSelector* cr_selector_new (CRSimpleSel *a_sel_expr) ;
 
-CRSelector *
-cr_selector_parse_from_buf (const guchar * a_char_buf,
-			    enum CREncoding a_enc) ;
+CRSelector * cr_selector_parse_from_buf (const guchar * a_char_buf,
+					 enum CREncoding a_enc) ;
 
-CRSelector*
-cr_selector_append (CRSelector *a_this, CRSelector *a_new) ;
+CRSelector* cr_selector_append (CRSelector *a_this, CRSelector *a_new) ;
 
-CRSelector*
-cr_selector_append_simple_sel (CRSelector *a_this,
-			       CRSimpleSel *a_simple_sel) ;
+CRSelector* cr_selector_append_simple_sel (CRSelector *a_this,
+					   CRSimpleSel *a_simple_sel) ;
 
-CRSelector*
-cr_selector_prepend (CRSelector *a_this, CRSelector *a_new) ;
+CRSelector* cr_selector_prepend (CRSelector *a_this, CRSelector *a_new) ;
 
-guchar *
-cr_selector_to_string (CRSelector *a_this) ;
+guchar * cr_selector_to_string (CRSelector *a_this) ;
 
-void
-cr_selector_dump (CRSelector *a_this, FILE *a_fp) ;
+void cr_selector_dump (CRSelector *a_this, FILE *a_fp) ;
 
-void
-cr_selector_ref (CRSelector *a_this) ;
+void cr_selector_ref (CRSelector *a_this) ;
 
-gboolean
-cr_selector_unref (CRSelector *a_this) ;
+gboolean cr_selector_unref (CRSelector *a_this) ;
 
-void
-cr_selector_destroy (CRSelector *a_this) ;
+void cr_selector_destroy (CRSelector *a_this) ;
 
 G_END_DECLS
 

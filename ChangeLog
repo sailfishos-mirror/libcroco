@@ -1,6 +1,237 @@
-2004-03-16  Dodji  <dodji@gnome.org>
+2004-04-18  Dodji Seketeli  <dodji@gnome.org>
 
-	* ============== 0.5 release============================
+	* configure.in: bumped version number 0.6.0 and lib version
+	info to 3:0:0
+
+2004-04-17  Dodji Seketeli  <dodji@gnome.org>
+
+	* src/cr-parser.c: 
+	(cr_parser_parse_stylesheet):
+	Correctly detect @import run parsing errors.
+	This fixes http://bugzilla.gnome.org/show_bug.cgi?id=140334 .
+	
+	* src/cr-parser.c: 
+	(cr_parser_parse_simple_selector):
+	correctly detect when class additional selector parsing
+	fails.
+	(cr_parser_parse_simple_sels):
+	Make sure a pointer is not null before derefencing it.
+	append a simple sel to the list of simple sels only if 
+	the simple sel is not NULL.
+	This entry fixes http://bugzilla.gnome.org/show_bug.cgi?id=140317
+	.	
+
+	* src/cr-statement.[ch]:
+	(cr_statement_list_to_string):
+	added this to "to_string" a list of statements.
+	(cr_statement_media_rule_to_string): dump the 
+	*list of statements* contained in the media rule, and
+	not only the first one.
+	This entry fixes http://bugzilla.gnome.org/show_bug.cgi?id=139891 .
+	* tests/*: added the test-several-media.sh regression test.
+
+	* src/cr-om-parser.c: 
+	(end_media): set the "current statement" and
+	"current media statement" context variable to NULL
+	at the end a media statement.
+	This fixes http://bugzilla.gnome.org/show_bug.cgi?id=139889 .
+
+2004-04-16  Dodji Seketeli  <dodji@gnome.org>
+ 
+ 	* src/cr-num.c:
+ 	remove the '...' construction. This fixes
+ 	http://bugzilla.gnome.org/show_bug.cgi?id=138267.
+
+2004-04-16  Dodji Seketeli  <dodji@gnome.org>
+
+	* src/cr-tknzr.c:
+	(cr_tknzr_parse_num): make sure to update the
+	parsing location of the parsed CRNum.	
+	(cr_tknzr_get_next_token):
+	record parsing location of number tokens.
+	These fix http://bugzilla.gnome.org/show_bug.cgi?id=139878.
+
+2004-04-11  Dodji Seketeli  <dodji@gnome.org>
+
+	* tests/test-output-refs/test-sel-child-class.out:
+	added the reference output of the new test-sel-child-class
+	regression test.
+
+	* tests/test-inputs/sel-child-class.css
+	* tests/test-inputs/sel-child-class.xml
+	* tests/test-sel-child-class.sh: added these new files.
+	* src/cr-rgb.c:
+	(cr_rgb_set): set the inherit field to FALSE when we set
+	an rgb.
+	(cr_rgb_set_to_inherit): added this to flag the instance
+	of CRRgb as being set to 'inherit'.
+	(cr_rgb_is_set_to_inherit): added this to test if an instance
+	of CRRgb is set to 'inherit' or not.
+	* src/cr-sel-eng.c: fixed a subtle bug here in the
+	way we evaluate the descendant selector. This bug
+	is catched by regression test test-sel-child-class.sh.
+	* src/cr-style.c: 
+	(cr_style_set_props_to_default_values): set the rgb properties
+	to inherit.
+	(cr_style_resolve_inherited_properties): rgb props that are set
+	to 'inherit' must be resolved.
+
+2004-04-10  Dodji Seketeli  <dodji@gnome.org>
+
+	* src/cr-parser.c: 
+	(cr_parser_parse_stylesheet): 
+	Fixed http://bugzilla.gnome.org/show_bug.cgi?id=139615 .
+	* src/cr-sel-eng.[ch]: made some cleanups here.
+	* src/cr-style.c: 
+	(set_prop_border_width_from_value):
+	added this to support the "border-width" property.
+	(set_prop_border_style_from_value):
+	added this to support the "border-style" property.
+	(cr_style_new): modify the signature of this constructor
+	to have more control on the properties inheritance process.
+	(cr_style_set_props_to_default_values): renamed
+	cr_style_set_props_to_defaults for better legibility.
+	(cr_style_set_style_from_decl): added the support for
+	"border-style" and "border-width" properties.
+
+2004-04-09  Dodji Seketeli  <dodji@gnome.org>
+
+	* src/cr-om-parser.c:
+	(import_style): fixed a minor parsing bug.
+
+2004-04-08  Dodji Seketeli  <dodji@gnome.org>
+
+	* this entry is about a patch sent by Benjamin Dauvergne for
+	the support of css properties inheritance. (mainly).
+	* src/cr-additional-sel.c: replaced g_string_append_prinf(),
+	by g_string_append_c() or g_string_append(), when it's relevant.
+	* src/cr-declaration.c: port this over the new CRString.
+	* src/cr-fonts.c: smallish cosmetic changes.
+	* src/cr-fonts.h: added the FONT_FAMILY_INHERIT value to
+	enum CRFontFamilyType and FONT_SIZE_INHERIT to
+	enum CRPredefinedAbsoluteFontSize.
+	* src/cr-num.h: added NUM_INHERIT to enum CRNumType.
+	* src/cr-pseudo.c: same g_string_append_printf() removal scheme
+	as above.
+	* src/cr-rgb.[ch]: I removed the :1 option done on the 
+	CRRgb::is_percentage boolean. We will start looking at this
+	kind of optimization when the whole stuff works and after proper
+	profiling.
+	(cr_rgb_set_from_term): I made a small fix here:
+	write !strcmp() and not strcmp() otherwise color setting
+	won't work.
+	* src/cr-selector.c, src/cr-simple-sel.c, src/cr-statement.c: 
+	g_string_append_printf() removal.
+	* src/cr-style.c: a lot of cleanup in the inheritance resolution
+	handling.
+	(cr_style_set_props_to_default): added this new method to set
+	the style of the root element node.
+	(cr_style_resolve_inheritance): (this function was initially named
+	cr_style_propagate_from_parent() by Benjamin, but I renamed 
+	it to enhance code legibility at least for people who know the
+	css spec.
+	Renamed the CRStyle::relative boolean member by a
+	CRStyle::inherited_props_resolved boolean to enhance code legibility.
+
+2004-04-03  Dodji Seketeli  <dodji@gnome.org>
+
+	* src/libcroco-config.h: removed this from archive.
+
+	* src/cr-sel-eng.c: 
+	(class_add_sel_matches_node): make this correctly handle
+	class list especially when it's the last element that is
+	to be selected.
+	(attr_add_sel_matches_nod):
+	  * in [attr=val] attr selector,
+	  make sure [attr=val] doesn't get selected when only
+	[attr=value] should, for instance. 
+	  * fix [att~=foo bar] making sure that bar 
+	  can also be selected.
+	  * fix [att|=en-US] making sure that the last element
+	  of the dash separated list of elements can also be
+	  selected.
+	(additional_selector_matches_node): 
+	add support for linked additional selectors 
+	e.g: [attr=sel][attr=foo].
+	(sel_matches_node_real):
+	Even a selector of type UNVIVERSAL_SELECTOR can have
+	additional selectors. This was a long standing bug.
+
+2004-04-01  Dodji Seketeli  <dodji@gnome.org>
+
+	* csslint/csslint.c: much more work on the --dump-location option.
+	This can be tested by users now.
+	* src/cr-parser.c: 
+	(cr_parser_parse_atrule_core): fixed a parsing bug here.
+	(cr_parser_parse_any_core): COMMENT_TK is part of an ANY production.
+	(cr_parser_parse_stylesheet): @charset not located at (1,1) should not
+	make the parser ignore the next statement.
+	(cr_parser_parse_page): better parsing of @page statement.
+	* cr-tknzr.c:
+	(cr_tknzr_parse_uri): fix parsing location gathering for uris.
+	* src/cr-token.c: added a TODO notice here.
+
+	
+2004-03-29  Dodji Seketeli  <dodji@gnome.org>
+
+	* csslint/csslint.c: started to add the --dump-location option.
+	It dumps the parsing location information for selectors and 
+	property declarations. I still need to do the same for
+	the other css constructions. Also cleaned up csslint a bit.
+	* src/cr-additional-sel.[ch]: 
+	(cr_additional_sel_one_to_string): added this new method to to_string
+	only one additional selector.
+	* src/cr-input.c: initialise the line/col to 1 at the origin.
+	* src/cr-parser.c: 
+	(cr_parser_parse_simple_selector): collect parsing location
+	for the additional attribute selector.
+	* src/cr-parsing-location.[ch]:
+	(cr_parsing_location_to_string): added this method to
+	serialise the CRParsingLocation class.
+	(cr_parsing_location_dump) : added this new method.
+	* src/cr-simple-sel.c:
+	(cr_simple_sel_one_to_string): added this method to serialise
+	only one simple selector.
+	* src/cr-string.[ch]: 
+	(cr_string_peek_char_buf): added this method to peek the
+	internal char string owned by CRString.
+	* src/cr-term.c: 
+	(cr_term_one_to_string): added this method to serialise
+	only one term.
+	* src/cr-tknzr.c: 
+	(cr_tknzr_parse_name): fixed a bug here in the parsing 
+	location gathering.
+	(cr_tknzr_parse_hash): fixed another bug in the parsing 
+	location gathering.
+	
+2004-03-27  Dodji Seketeli  <dodji@gnome.org>
+
+	* src/cr-attr-sel.h,src/cr-doc-handler.h,
+	src/cr-om-parser.c,src/cr-parser.[ch],
+	src/cr-statement.[ch),src/cr-term.h,
+	tests/test2-main.c,tests/test3-main.c:
+	First attempt to have provide real
+	parsing location information at the SAC level.
+	I still need to write a test app for this and debug
+	the feature.
+
+2004-03-24  Dodji Seketeli  <dodji@gnome.org>
+	
+	* src/cr-input.[ch],src/cr-parser.[ch],
+	src/cr-tknzr.[ch],src/cr-token.[ch],src/cr-parsing-location.c:
+	Enable parsing location retrieval from CRInput, CRTknzr and CRparser.
+	Record parsing location in every single token returned by
+	CRTknzr::get_next_token().
+
+2004-03-22  Dodji Seketeli <dodji@gnome.org>
+
+	* added a field of type CRParsingLocation field to almost
+	any language construction parsed into an abstract
+	datastructure. This is a huge changeset.
+
+2004-03-16  Dodji Seketeli <dodji@gnome.org>
+
+	* ==================== 0.5 release ====================
 
 	* croco-config.in: fixed this to include libxml2 and glib
 	into cflags and libs.
@@ -10,7 +241,7 @@
 	memleaks where needed.
 	* src/cr-sel-eng.c: killed a memleak in the selection engine.
 
-2004-03-15  Dodji  <dodji@gnome.org>
+2004-03-15  Dodji Seketeli <dodji@gnome.org>
 
 	* tests/Makefile.am: added the tests/valgrind-version.sh file in
 	the distribution.
@@ -19,7 +250,7 @@
 	* tests/valgrind-version.sh: added this file to test the version of
 	the currently installed version of valgrind.
 
-2004-03-14  Dodji  <dodji@gnome.org>
+2004-03-14  Dodji Seketeli <dodji@gnome.org>
 
 	* src/cr-style.c: 
 	(cr_style_set_props_to_defaults): added more default props 
@@ -34,7 +265,7 @@
 	methods. Modified the patch to comply with libcroco
 	coding style and to kill a compiler warning.
 
-2004-03-13  Dodji  <dodji@gnome.org>
+2004-03-13  Dodji Seketeli <dodji@gnome.org>
 
 	* Makefile.am,tests/Makefile.am,tests/test-output-refs/Makefile.am: 
 	Added some distribution plumbing.
@@ -47,7 +278,7 @@
 	* vg.supp: added this to suppress glib normal leaks
 	from the leak report.
 
-2004-03-12  Dodji  <dodji@gnome.org>
+2004-03-12  Dodji Seketeli <dodji@gnome.org>
 
 	* src/cr-declaration.c,src/cr-doc-handler.c,
 	src/cr-input.[ch],src/cr-parser.c,src/cr-rgb.c,
@@ -59,7 +290,7 @@
 
 	* tests/testctl: added better valgrind error reporting.
 
-2004-03-11  Dodji  <dodji@gnome.org>
+2004-03-11  Dodji Seketeli <dodji@gnome.org>
 
 	* Makefile.am: now, tests are to be run by doing "make test".
 	Also, cleans up the previous test output before actually running.
@@ -79,7 +310,7 @@
 
 	* tests/testctl: don't activate valgrind tests by default.
 
-2004-03-10  Dodji  <dodji@gnome.org>
+2004-03-10  Dodji Seketeli <dodji@gnome.org>
 
 	* src/cr-statement.[ch]: 
 	(cr_statement_to_string): do not add leading end of lines.
@@ -106,7 +337,7 @@
 	use it.
 	* src/cr-term.c: merge from libcroco--mainline--0.1
 
-2004-03-09  Dodji  <dodji@gnome.org>
+2004-03-09  Dodji Seketeli <dodji@gnome.org>
 
 	* src/cr-term.[ch]: applied a patch from Rob BUIS that adds
 	two new methods:
@@ -129,7 +360,7 @@
 	* {arch}/=tagging-method: changed this to make objects generation by the
 	compilation accepted by tla.
 
-2004-03-08  Dodji  <dodji@gnome.org>
+2004-03-08  Dodji Seketeli <dodji@gnome.org>
 
 	* Merged in the following patches:
         => dodji@seketeli.org--2004-xml-style-d/libcroco--dodji-d--0.1--base-0
@@ -485,7 +716,7 @@
 2004-01-04  Dodji Seketeli  <dodji@gnome.org>
 
 	* src/parser/cr-declaration.c: 
-	(cr_declaration_unlin): fixed a bug spoted by
+	(cr_declaration_unlink): fixed a bug spoted by
 	Rob BUIS.
 
 2003-12-27  Dodji Seketeli  <dodji@gnome.org>

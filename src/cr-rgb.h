@@ -26,6 +26,7 @@
 #include <stdio.h>
 #include <glib.h>
 #include "cr-utils.h"
+#include "cr-parsing-location.h"
 
 G_BEGIN_DECLS
 
@@ -43,6 +44,8 @@ struct _CRRgb
         glong green ;
         glong blue ;
         gboolean is_percentage ;
+	gboolean inherit ;
+        CRParsingLocation location ;
 } ;
 
 CRRgb * cr_rgb_new (void) ;
@@ -58,7 +61,11 @@ enum CRStatus cr_rgb_compute_from_percentage (CRRgb *a_this) ;
 enum CRStatus cr_rgb_set (CRRgb *a_this, gulong a_red,
                           gulong a_green, gulong a_blue,
                           gboolean a_is_percentage) ;
-        
+
+enum CRStatus  cr_rgb_set_to_inherit (CRRgb *a_this) ;
+
+gboolean cr_rgb_is_set_to_inherit (CRRgb *a_this) ;
+
 enum CRStatus cr_rgb_set_from_rgb (CRRgb *a_this, CRRgb *a_rgb) ;
 
 enum CRStatus cr_rgb_set_from_name (CRRgb *a_this, const guchar *a_color_name) ;

@@ -17,12 +17,8 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
  * USA
  * 
+ * Author: Dodji Seketeli
  * See the COPYRIGHTS file for copyrights information.
- */
-
-
-/*
- *$Id$
  */
 
 #ifndef __CR_INPUT_SRC_H__
@@ -31,6 +27,7 @@
 
 #include <glib.h>
 #include "cr-utils.h"
+#include "cr-parsing-location.h"
 
 G_BEGIN_DECLS
 
@@ -67,7 +64,8 @@ CRInput *
 cr_input_new_from_buf (guchar *a_buf, gulong a_len,
                        enum CREncoding a_enc, gboolean a_free_buf) ;
 CRInput *
-cr_input_new_from_uri (const gchar *a_file_uri, enum CREncoding a_enc) ;
+cr_input_new_from_uri (const gchar *a_file_uri, 
+                       enum CREncoding a_enc) ;
 
 void
 cr_input_destroy (CRInput *a_this) ;
@@ -124,9 +122,13 @@ cr_input_set_cur_index (CRInput *a_this, glong a_index) ;
 
 enum CRStatus
 cr_input_get_cur_pos (CRInput *a_this, CRInputPos * a_pos) ;
-        
+
 enum CRStatus
 cr_input_set_cur_pos (CRInput *a_this, CRInputPos *a_pos) ;
+
+enum CRStatus
+cr_input_get_parsing_location (CRInput *a_this, 
+                               CRParsingLocation *a_loc) ;
 
 enum CRStatus
 cr_input_get_end_of_line (CRInput *a_this, gboolean *a_eol) ;

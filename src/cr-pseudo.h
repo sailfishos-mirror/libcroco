@@ -3,8 +3,6 @@
 /*
  * This file is part of The Croco Library
  *
- * Copyright (C) 2002-2003 Dodji Seketeli <dodji at seketeli.org>
- *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of version 2.1 of the GNU Lesser General Public
  * License as published by the Free Software Foundation.
@@ -18,10 +16,8 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
  * USA
- */
-
-/*
- *$Id$
+ * 
+ * See COPYRIGHTS file for copyright information
  */
 
 #ifndef __CR_PSEUDO_H__
@@ -30,6 +26,7 @@
 #include <stdio.h>
 #include <glib.h>
 #include "cr-attr-sel.h"
+#include "cr-parsing-location.h"
 
 G_BEGIN_DECLS
 
@@ -49,21 +46,18 @@ typedef struct _CRPseudo CRPseudo ;
 struct _CRPseudo
 {
         enum CRPseudoType type ;
-        GString *name ;
-        GString *extra ;
+        CRString *name ;
+        CRString *extra ;
+        CRParsingLocation location ;
 } ;
 
-CRPseudo *
-cr_pseudo_new (void) ;
+CRPseudo * cr_pseudo_new (void) ;
 
-guchar *
-cr_pseudo_to_string (CRPseudo *a_this) ;
+guchar * cr_pseudo_to_string (CRPseudo *a_this) ;
 
-void
-cr_pseudo_dump (CRPseudo *a_this, FILE *a_fp) ;
+void cr_pseudo_dump (CRPseudo *a_this, FILE *a_fp) ;
 
-void
-cr_pseudo_destroy (CRPseudo *a_this) ;
+void cr_pseudo_destroy (CRPseudo *a_this) ;
 
 G_END_DECLS
 

@@ -20,8 +20,9 @@
  * See COPRYRIGHTS file for copyright information.
  */
 
-#include "cr-doc-handler.h"
 #include <string.h>
+#include "cr-doc-handler.h"
+#include "cr-parser.h"
 
 /**
  *@file
@@ -31,8 +32,10 @@
  *to custom values.
  */
 
+#define PRIVATE(obj) (obj)->priv
+
 struct _CRDocHandlerPriv {
- /**
+	/**
 	 *This pointer is to hold an application parsing context.
 	 *For example, it used by the Object Model parser to 
 	 *store it parsing context. #CRParser does not touch it, but
@@ -42,11 +45,16 @@ struct _CRDocHandlerPriv {
 	 */
         gpointer context;
 
- /**
+	/**
 	 *The place where #CROMParser puts the result of its parsing, if
 	 *any.
 	 */
         gpointer result;
+	/**
+	 *a pointer to the parser used to parse
+	 *the current document.
+	 */
+	CRParser *parser ;
 };
 
 /**
@@ -208,8 +216,7 @@ cr_doc_handler_unref (CRDocHandler * a_this)
                 cr_doc_handler_destroy (a_this);
                 return TRUE;
         }
-
-        return FALSE;
+        return FALSE ;
 }
 
 /**
@@ -227,4 +234,19 @@ cr_doc_handler_destroy (CRDocHandler * a_this)
                 a_this->priv = NULL;
         }
         g_free (a_this);
+}
+
+/**
+ *Associates a parser to the current document handler
+ *@param a_this the current instance of document handler.
+ *@param a_parser the parser to associate.
+ */
+void
+cr_doc_handler_associate_a_parser (CRDocHandler *a_this,
+				   gpointer a_parser)
+{
+	g_return_if_fail (a_this && PRIVATE (a_this) 
+			  && a_parser) ;
+
+	PRIVATE (a_this)->parser = a_parser ;
 }

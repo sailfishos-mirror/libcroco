@@ -3,8 +3,6 @@
 /*
  * This file is part of The Croco Library
  *
- * Copyright (C) 2002-2003 Dodji Seketeli <dodji@seketeli.org>
- *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of version 2.1 of the GNU Lesser General Public
  * License as published by the Free Software Foundation.
@@ -18,11 +16,11 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
  * USA
+ *
+ * Author: Dodji Seketeli
+ * See COPYRIGHTS file for copyright information.
  */
 
-/*
- *$Id$
- */
 
 #ifndef __CR_SEL_H__
 #define __CR_SEL_H__
@@ -30,6 +28,7 @@
 #include <stdio.h>
 #include <glib.h>
 #include "cr-additional-sel.h"
+#include "cr-parsing-location.h"
 
 G_BEGIN_DECLS
 
@@ -76,7 +75,7 @@ struct _CRSimpleSel
 {
         enum SimpleSelectorType type_mask ;
         gboolean is_case_sentive ;
-        GString * name ;        
+        CRString * name ;
         /**
          *The combinator that separates
          *this simple selector from the previous
@@ -102,33 +101,28 @@ struct _CRSimpleSel
 
         CRSimpleSel *next ;
         CRSimpleSel *prev ;
+        CRParsingLocation location ;
 } ;
 
-CRSimpleSel *
-cr_simple_sel_new (void) ;
+CRSimpleSel * cr_simple_sel_new (void) ;
 
-CRSimpleSel *
-cr_simple_sel_append_simple_sel (CRSimpleSel *a_this, 
-                                 CRSimpleSel *a_sel) ;
+CRSimpleSel * cr_simple_sel_append_simple_sel (CRSimpleSel *a_this, 
+                                               CRSimpleSel *a_sel) ;
 
-CRSimpleSel *
-cr_simple_sel_prepend_simple_sel (CRSimpleSel *a_this, 
-                                  CRSimpleSel *a_sel) ;
+CRSimpleSel * cr_simple_sel_prepend_simple_sel (CRSimpleSel *a_this, 
+                                                CRSimpleSel *a_sel) ;
 
-guchar *
-cr_simple_sel_to_string (CRSimpleSel *a_this) ;
+guchar * cr_simple_sel_to_string (CRSimpleSel *a_this) ;
 
-enum CRStatus
-cr_simple_sel_dump (CRSimpleSel *a_this, FILE *a_fp) ;
+guchar * cr_simple_sel_one_to_string (CRSimpleSel * a_this) ;
 
-enum CRStatus
-cr_simple_sel_dump_attr_sel_list (CRSimpleSel *a_this) ;
+enum CRStatus cr_simple_sel_dump (CRSimpleSel *a_this, FILE *a_fp) ;
 
-enum CRStatus
-cr_simple_sel_compute_specificity (CRSimpleSel *a_this) ;
+enum CRStatus cr_simple_sel_dump_attr_sel_list (CRSimpleSel *a_this) ;
 
-void
-cr_simple_sel_destroy (CRSimpleSel *a_this) ;
+enum CRStatus cr_simple_sel_compute_specificity (CRSimpleSel *a_this) ;
+
+void cr_simple_sel_destroy (CRSimpleSel *a_this) ;
 
 G_END_DECLS
 

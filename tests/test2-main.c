@@ -110,10 +110,12 @@ test_end_document (CRDocHandler * a_handler)
 
 static void
 test_import_style (CRDocHandler * a_handler,
-                   GList * a_media_list, GString * a_uri,
-                   GString * a_uri_default_ns)
+                   GList * a_media_list, 
+                   CRString * a_uri,
+                   CRString * a_uri_default_ns,
+                   CRParsingLocation *a_location)
 {
-        g_return_if_fail (a_handler);
+        g_return_if_fail (a_handler) ;
 
         fprintf (stdout, "****************\n");
         fprintf (stdout, "import_style\n");
@@ -128,8 +130,8 @@ test_import_style (CRDocHandler * a_handler,
                         if (cur->data) {
                                 guchar *str =
                                         g_strndup
-                                        (((GString *) cur->data)->str,
-                                         ((GString *) cur->data)->len);
+                                        (((CRString *) cur->data)->stryng->str,
+                                         ((CRString *) cur->data)->stryng->len);
 
                                 if (str) {
                                         fprintf (stdout, str);
@@ -143,10 +145,9 @@ test_import_style (CRDocHandler * a_handler,
                 fprintf (stdout, "\ndefault namespace:\n");
                 fprintf (stdout, "--------------------\n");
 
-                if (a_uri_default_ns && a_uri_default_ns->str) {
-                        guchar *str = g_strndup (a_uri_default_ns->str,
-                                                 a_uri_default_ns->len);
-
+                if (a_uri_default_ns) {
+                        guchar *str = cr_string_dup2 
+                                (a_uri_default_ns) ;
                         if (str) {
                                 fprintf (stdout, str);
                                 fprintf (stdout, "\n");
@@ -155,37 +156,35 @@ test_import_style (CRDocHandler * a_handler,
                         }
                 }
         }
-
         fprintf (stdout, "******************\n\n");
         a_uri = NULL;           /*keep compiler happy */
 }
 
 static void
 test_namespace_declaration (CRDocHandler * a_handler,
-                            GString * a_prefix, GString * a_uri)
+                            CRString * a_prefix, 
+                            CRString * a_uri,
+                            CRParsingLocation *a_location)
 {
         g_return_if_fail (a_handler);
 
         fprintf (stdout, "***************\n");
         fprintf (stdout, "namespace_declaration:\n");
 
-        if (a_prefix && a_prefix->str) {
+        if (a_prefix) {
                 guchar *prefix = NULL;
 
-                prefix = g_strndup (a_prefix->str, a_prefix->len);
-
+                prefix = cr_string_dup2 (a_prefix) ;
                 if (prefix) {
                         fprintf (stdout, "prefix: %s\n", prefix);
                         g_free (prefix);
                         prefix = NULL;
                 }
         }
-
-        if (a_uri && a_uri->str) {
+        if (a_uri) {
                 guchar *uri = NULL;
 
-                uri = g_strndup (a_uri->str, a_uri->len);
-
+                uri = cr_string_dup2 (a_uri) ;
                 if (uri) {
                         fprintf (stdout, "uri: %s\n", uri);
                         g_free (uri);
@@ -199,33 +198,32 @@ test_namespace_declaration (CRDocHandler * a_handler,
 }
 
 static void
-test_comment (CRDocHandler * a_handler, GString * a_comment)
+test_comment (CRDocHandler * a_handler, 
+              CRString * a_comment)
 {
         g_return_if_fail (a_handler);
 
         fprintf (stdout, "***************\n");
         fprintf (stdout, "comment:\n");
-
-        if (a_comment && a_comment->str) {
+        if (a_comment) {
                 guchar *comment = NULL;
 
-                comment = g_strndup (a_comment->str, a_comment->len);
+                comment = cr_string_dup2 (a_comment);
 
                 if (comment) {
                         fprintf (stdout, "\n/*----------------------\n");
                         fprintf (stdout, "%s\n", comment);
                         fprintf (stdout, "-------------------------*/\n");
-
                         g_free (comment);
                         comment = NULL;
                 }
         }
-
         fprintf (stdout, "***************\n\n");
 }
 
 static void
-test_start_selector (CRDocHandler * a_handler, CRSelector * a_selector_list)
+test_start_selector (CRDocHandler * a_handler, 
+                     CRSelector * a_selector_list)
 {
         g_return_if_fail (a_handler);
 
@@ -241,7 +239,8 @@ test_start_selector (CRDocHandler * a_handler, CRSelector * a_selector_list)
 }
 
 static void
-test_end_selector (CRDocHandler * a_handler, CRSelector * a_selector_list)
+test_end_selector (CRDocHandler * a_handler, 
+                   CRSelector * a_selector_list)
 {
         g_return_if_fail (a_handler);
 
@@ -257,39 +256,42 @@ test_end_selector (CRDocHandler * a_handler, CRSelector * a_selector_list)
 }
 
 static void
-test_property (CRDocHandler * a_handler, GString * a_name,
-               CRTerm * a_expr, gboolean a_important)
+test_property (CRDocHandler * a_handler, 
+               CRString * a_name,
+               CRTerm * a_expr, 
+               gboolean a_important)
 {
         g_return_if_fail (a_handler);
 
         fprintf (stdout, "***************\n");
         fprintf (stdout, "property\n");
 
-        if (a_name && a_name->str) {
-                guchar *name = g_strndup (a_name->str, a_name->len);
+        if (a_name 
+            && a_name->stryng
+            && a_name->stryng->str) {
+                guchar *name = g_strndup 
+                        (a_name->stryng->str, 
+                         a_name->stryng->len);
 
                 if (name) {
                         fprintf (stdout, name);
                 }
-
                 if (a_expr) {
                         fprintf (stdout, ": ");
                         cr_term_dump (a_expr, stdout);
                 }
-
                 if (name) {
                         g_free (name);
                         name = NULL;
                 }
-
                 fprintf (stdout, "\n");
         }
-
         fprintf (stdout, "***************\n\n");
 }
 
 static void
-test_start_font_face (CRDocHandler * a_handler)
+test_start_font_face (CRDocHandler * a_handler,
+                      CRParsingLocation *a_location)
 {
         g_return_if_fail (a_handler);
 
@@ -310,7 +312,9 @@ test_end_font_face (CRDocHandler * a_handler)
 }
 
 static void
-test_start_media (CRDocHandler * a_handler, GList * a_media_list)
+test_start_media (CRDocHandler * a_handler, 
+                  GList * a_media_list,
+                  CRParsingLocation *a_location)
 {
         g_return_if_fail (a_handler);
 
@@ -324,27 +328,23 @@ test_start_media (CRDocHandler * a_handler, GList * a_media_list)
                 for (cur = a_media_list; cur; cur = cur->next) {
                         if (cur->data == NULL)
                                 continue;
-
-                        medium = g_strndup (((GString *) cur->data)->str,
-                                            ((GString *) cur->data)->len);
-
+                        medium = cr_string_dup2 
+                                ((CRString *) cur->data);
                         if (medium == NULL)
                                 continue;
-
                         fprintf (stdout, "medium: %s\n", medium);
-
                         if (medium) {
                                 g_free (medium);
                                 medium = NULL;
                         }
                 }
         }
-
         fprintf (stdout, "***************\n\n");
 }
 
 static void
-test_end_media (CRDocHandler * a_handler, GList * a_media_list)
+test_end_media (CRDocHandler * a_handler, 
+                GList * a_media_list)
 {
         g_return_if_fail (a_handler);
 
@@ -359,14 +359,11 @@ test_end_media (CRDocHandler * a_handler, GList * a_media_list)
                         if (cur->data == NULL)
                                 continue;
 
-                        medium = g_strndup (((GString *) cur->data)->str,
-                                            ((GString *) cur->data)->len);
-
+                        medium = g_strndup (((CRString *) cur->data)->stryng->str,
+                                            ((CRString *) cur->data)->stryng->len);
                         if (medium == NULL)
                                 continue;
-
                         fprintf (stdout, "medium: %s\n", medium);
-
                         if (medium) {
                                 g_free (medium);
                                 medium = NULL;
@@ -379,7 +376,9 @@ test_end_media (CRDocHandler * a_handler, GList * a_media_list)
 
 static void
 test_start_page (CRDocHandler * a_handler,
-                 GString * a_name, GString * a_pseudo_page)
+                 CRString * a_name, 
+                 CRString * a_pseudo_page,
+                 CRParsingLocation *a_location)
 {
         guchar *name = NULL,
                 *pseudo_page = NULL;
@@ -389,30 +388,23 @@ test_start_page (CRDocHandler * a_handler,
         fprintf (stdout, "***************\n");
         fprintf (stdout, "start_page\n");
 
-        if (a_name && a_name->str) {
-                name = g_strndup (a_name->str, a_name->len);
+        if (a_name) {
+                name = cr_string_dup2 (a_name) ;
         }
-
-        if (a_pseudo_page && a_pseudo_page->str) {
-                pseudo_page = g_strndup (a_pseudo_page->str,
-                                         a_pseudo_page->len);
+        if (a_pseudo_page) {
+                pseudo_page = cr_string_dup2 (a_pseudo_page);
         }
-
         if (name) {
                 fprintf (stdout, "%s", name);
         }
-
         if (pseudo_page) {
                 fprintf (stdout, ": %s\n", pseudo_page);
         }
-
         fprintf (stdout, "***************\n\n");
-
         if (name) {
                 g_free (name);
                 name = NULL;
         }
-
         if (pseudo_page) {
                 g_free (pseudo_page);
                 pseudo_page = NULL;
@@ -421,7 +413,8 @@ test_start_page (CRDocHandler * a_handler,
 
 static void
 test_end_page (CRDocHandler * a_handler,
-               GString * a_name, GString * a_pseudo_page)
+               CRString * a_name, 
+               CRString * a_pseudo_page)
 {
         guchar *name = NULL,
                 *pseudo_page = NULL;
@@ -431,31 +424,24 @@ test_end_page (CRDocHandler * a_handler,
         fprintf (stdout, "***************\n");
         fprintf (stdout, "end_page\n");
 
-        if (a_name && a_name->str) {
-                name = g_strndup (a_name->str, a_name->len);
+        if (a_name) {
+                name = cr_string_dup2 (a_name) ;
         }
-
-        if (a_pseudo_page && a_pseudo_page->str) {
-                pseudo_page = g_strndup (a_pseudo_page->str,
-                                         a_pseudo_page->len);
+        if (a_pseudo_page) {
+                pseudo_page = cr_string_dup2 (a_pseudo_page) ;
         }
-
         if (name) {
                 fprintf (stdout, "%s", name);
         }
-
         if (pseudo_page) {
                 fprintf (stdout, ": %s\n", pseudo_page);
 
         }
-
         fprintf (stdout, "***************\n\n");
-
         if (name) {
                 g_free (name);
                 name = NULL;
         }
-
         if (pseudo_page) {
                 g_free (pseudo_page);
                 pseudo_page = NULL;
@@ -463,7 +449,8 @@ test_end_page (CRDocHandler * a_handler,
 }
 
 static void
-test_ignorable_at_rule (CRDocHandler * a_handler, GString * a_name)
+test_ignorable_at_rule (CRDocHandler * a_handler, 
+                        CRString * a_name)
 {
         guchar *name = NULL;
 
@@ -472,14 +459,12 @@ test_ignorable_at_rule (CRDocHandler * a_handler, GString * a_name)
         fprintf (stdout, "*********************\n");
         fprintf (stdout, "ignorable_at_rule\n");
 
-        if (a_name && a_name->str) {
-                name = g_strndup (a_name->str, a_name->len);
+        if (a_name) {
+                name = cr_string_dup2 (a_name);
         }
-
         if (name) {
                 fprintf (stdout, "%s\n", name);
         }
-
         fprintf (stdout, "*********************\n\n");
 }
 

@@ -19,12 +19,10 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
  * USA
  *
+ * Author: Dodji Seketeli.
  * see COPYRIGTHS file for copyright information
  */
 
-/*
- *$Id$
- */
 #include <string.h>
 #include "cr-style.h"
 
@@ -52,10 +50,12 @@ enum CRPropertyID {
         PROP_ID_BORDER_RIGHT_WIDTH,
         PROP_ID_BORDER_BOTTOM_WIDTH,
         PROP_ID_BORDER_LEFT_WIDTH,
+        PROP_ID_BORDER_WIDTH,
         PROP_ID_BORDER_TOP_STYLE,
         PROP_ID_BORDER_RIGHT_STYLE,
         PROP_ID_BORDER_BOTTOM_STYLE,
         PROP_ID_BORDER_LEFT_STYLE,
+        PROP_ID_BORDER_STYLE,
         PROP_ID_BORDER_TOP_COLOR,
         PROP_ID_BORDER_RIGHT_COLOR,
         PROP_ID_BORDER_BOTTOM_COLOR,
@@ -84,6 +84,7 @@ enum CRPropertyID {
         PROP_ID_FONT_SIZE,
         PROP_ID_FONT_STYLE,
         PROP_ID_FONT_WEIGHT,
+	PROP_ID_WHITE_SPACE,
         /*should be the last one. */
         NB_PROP_IDS
 };
@@ -105,10 +106,12 @@ static CRPropertyDesc gv_prop_table[] = {
         {"border-right-width", PROP_ID_BORDER_RIGHT_WIDTH},
         {"border-bottom-width", PROP_ID_BORDER_BOTTOM_WIDTH},
         {"border-left-width", PROP_ID_BORDER_LEFT_WIDTH},
+        {"border-width", PROP_ID_BORDER_WIDTH},
         {"border-top-style", PROP_ID_BORDER_TOP_STYLE},
         {"border-right-style", PROP_ID_BORDER_RIGHT_STYLE},
         {"border-bottom-style", PROP_ID_BORDER_BOTTOM_STYLE},
         {"border-left-style", PROP_ID_BORDER_LEFT_STYLE},
+        {"border-style", PROP_ID_BORDER_STYLE},
         {"border-top", PROP_ID_BORDER_TOP},
         {"border-right", PROP_ID_BORDER_RIGHT},
         {"border-bottom", PROP_ID_BORDER_BOTTOM},
@@ -128,11 +131,16 @@ static CRPropertyDesc gv_prop_table[] = {
         {"float", PROP_ID_FLOAT},
         {"width", PROP_ID_WIDTH},
         {"color", PROP_ID_COLOR},
+        {"border-top-color", PROP_ID_BORDER_TOP_COLOR},
+        {"border-right-color", PROP_ID_BORDER_RIGHT_COLOR},
+        {"border-bottom-color", PROP_ID_BORDER_BOTTOM_COLOR},
+        {"border-left-color", PROP_ID_BORDER_LEFT_COLOR},
         {"background-color", PROP_ID_BACKGROUND_COLOR},
         {"font-family", PROP_ID_FONT_FAMILY},
         {"font-size", PROP_ID_FONT_SIZE},
         {"font-style", PROP_ID_FONT_STYLE},
         {"font-weight", PROP_ID_FONT_WEIGHT},
+	{"white-space", PROP_ID_WHITE_SPACE},
         /*must be the last one */
         {NULL, 0}
 };
@@ -231,76 +239,82 @@ static const gchar *border_style_prop_code_to_string (enum CRBorderStyleProp
                                                       a_code);
 
 static enum CRStatus
-  set_prop_padding_x_from_value (CRStyle * a_style,
+set_prop_padding_x_from_value (CRStyle * a_style,
                                  CRTerm * a_value, enum CRDirection a_dir);
 
 static enum CRStatus
-  set_prop_border_x_width_from_value (CRStyle * a_style,
-                                      CRTerm * a_value,
-                                      enum CRDirection a_dir);
+set_prop_border_x_width_from_value (CRStyle * a_style,
+                                    CRTerm * a_value,
+                                    enum CRDirection a_dir);
+static enum CRStatus
+set_prop_border_width_from_value (CRStyle *a_style,
+                                  CRTerm *a_value) ;
 
 static enum CRStatus
-  set_prop_border_x_style_from_value (CRStyle * a_style,
-                                      CRTerm * a_value,
-                                      enum CRDirection a_dir);
+set_prop_border_x_style_from_value (CRStyle * a_style,
+                                    CRTerm * a_value,
+                                    enum CRDirection a_dir);
+static enum CRStatus
+set_prop_border_style_from_value (CRStyle *a_style,
+                                  CRTerm *a_value) ;
 
 static enum CRStatus
-  set_prop_margin_x_from_value (CRStyle * a_style, CRTerm * a_value,
+set_prop_margin_x_from_value (CRStyle * a_style, CRTerm * a_value,
                                 enum CRDirection a_dir);
 
 static enum CRStatus
-  set_prop_display_from_value (CRStyle * a_style, CRTerm * a_value);
+set_prop_display_from_value (CRStyle * a_style, CRTerm * a_value);
 
 static enum CRStatus
-  set_prop_position_from_value (CRStyle * a_style, CRTerm * a_value);
+set_prop_position_from_value (CRStyle * a_style, CRTerm * a_value);
 
 static enum CRStatus
-  set_prop_x_from_value (CRStyle * a_style, CRTerm * a_value,
+set_prop_x_from_value (CRStyle * a_style, CRTerm * a_value,
                          enum CRDirection a_dir);
 
 static enum CRStatus
-  set_prop_float (CRStyle * a_style, CRTerm * a_value);
+set_prop_float (CRStyle * a_style, CRTerm * a_value);
 
 static enum CRStatus
-  set_prop_width (CRStyle * a_style, CRTerm * a_value);
+set_prop_width (CRStyle * a_style, CRTerm * a_value);
 
 static enum CRStatus
-  set_prop_color (CRStyle * a_style, CRTerm * a_value);
+set_prop_color (CRStyle * a_style, CRTerm * a_value);
 
 static enum CRStatus
-  set_prop_background_color (CRStyle * a_style, CRTerm * a_value);
+set_prop_background_color (CRStyle * a_style, CRTerm * a_value);
 
 static enum CRStatus
-  set_prop_border_x_color_from_value (CRStyle * a_style, CRTerm * a_value,
+set_prop_border_x_color_from_value (CRStyle * a_style, CRTerm * a_value,
                                       enum CRDirection a_dir);
 
 static enum CRStatus
-  set_prop_border_x_from_value (CRStyle * a_style, CRTerm * a_value,
+set_prop_border_x_from_value (CRStyle * a_style, CRTerm * a_value,
                                 enum CRDirection a_dir);
 
 static enum CRStatus
-  set_prop_border_from_value (CRStyle * a_style, CRTerm * a_value);
+set_prop_border_from_value (CRStyle * a_style, CRTerm * a_value);
 
 static enum CRStatus
-  set_prop_padding_from_value (CRStyle * a_style, CRTerm * a_value);
+set_prop_padding_from_value (CRStyle * a_style, CRTerm * a_value);
 
 static enum CRStatus
-  set_prop_margin_from_value (CRStyle * a_style, CRTerm * a_value);
+set_prop_margin_from_value (CRStyle * a_style, CRTerm * a_value);
 
 static enum CRStatus
-  set_prop_font_family_from_value (CRStyle * a_style, CRTerm * a_value);
+set_prop_font_family_from_value (CRStyle * a_style, CRTerm * a_value);
 
 static enum CRStatus
-  init_style_font_size_field (CRStyle * a_style);
+init_style_font_size_field (CRStyle * a_style);
 
 static enum CRStatus
-  set_prop_font_size_from_value (CRStyle * a_style, CRTerm * a_value);
+set_prop_font_size_from_value (CRStyle * a_style, CRTerm * a_value);
 
 static enum CRStatus
-  set_prop_font_style_from_value (CRStyle * a_style, CRTerm * a_value);
+set_prop_font_style_from_value (CRStyle * a_style, CRTerm * a_value);
 
 static enum CRStatus
-  set_prop_font_weight_from_value (CRStyle * a_style, CRTerm * a_value);
+set_prop_font_weight_from_value (CRStyle * a_style, CRTerm * a_value);
 
 static const gchar *
 num_prop_code_to_string (enum CRNumProp a_code)
@@ -419,8 +433,7 @@ set_prop_padding_x_from_value (CRStyle * a_style,
                                CRTerm * a_value, enum CRDirection a_dir)
 {
         enum CRStatus status = CR_OK;
-        CRNum *num_val = NULL,
-                *parent_num_val = NULL;
+        CRNum *num_val = NULL;
 
         g_return_val_if_fail (a_style && a_value, CR_BAD_PARAM_ERROR);
 
@@ -430,35 +443,18 @@ set_prop_padding_x_from_value (CRStyle * a_style,
         switch (a_dir) {
         case DIR_TOP:
                 num_val = &a_style->num_props[NUM_PROP_PADDING_TOP].sv;
-                parent_num_val =
-                        &a_style->parent_style->
-                        num_props[NUM_PROP_PADDING_TOP].sv;
                 break;
 
         case DIR_RIGHT:
                 num_val = &a_style->num_props[NUM_PROP_PADDING_RIGHT].sv;
-                parent_num_val =
-                        &a_style->parent_style->
-                        num_props[NUM_PROP_PADDING_RIGHT].sv;
-
-                num_val = &a_style->num_props[NUM_PROP_PADDING_RIGHT].sv;
-                parent_num_val =
-                        &a_style->parent_style->
-                        num_props[NUM_PROP_PADDING_RIGHT].sv;
                 break;
 
         case DIR_BOTTOM:
                 num_val = &a_style->num_props[NUM_PROP_PADDING_BOTTOM].sv;
-                parent_num_val =
-                        &a_style->parent_style->
-                        num_props[NUM_PROP_PADDING_BOTTOM].sv;
                 break;
 
         case DIR_LEFT:
                 num_val = &a_style->num_props[NUM_PROP_PADDING_LEFT].sv;
-                parent_num_val =
-                        &a_style->parent_style->
-                        num_props[NUM_PROP_PADDING_LEFT].sv;
                 break;
 
         default:
@@ -467,11 +463,12 @@ set_prop_padding_x_from_value (CRStyle * a_style,
 
         if (a_value->type == TERM_IDENT) {
                 if (a_value->content.str
-                    && a_value->content.str->str
-                    && !strncmp ((guchar *) "inherited",
-                                 a_value->content.str->str,
-                                 strlen ("inherited"))) {
-                        cr_num_copy (num_val, parent_num_val);
+                    && a_value->content.str->stryng
+		    && a_value->content.str->stryng->str
+                    && !strncmp ((guchar *) "inherit",
+                                 a_value->content.str->stryng->str,
+                                 sizeof ("inherit")-1)) {
+			status = cr_num_set (num_val, 0.0, NUM_INHERIT);
                         return CR_OK;
                 } else
                         return CR_UNKNOWN_TYPE_ERROR;
@@ -502,7 +499,8 @@ set_prop_padding_x_from_value (CRStyle * a_style,
 
 static enum CRStatus
 set_prop_border_x_width_from_value (CRStyle * a_style,
-                                    CRTerm * a_value, enum CRDirection a_dir)
+                                    CRTerm * a_value, 
+                                    enum CRDirection a_dir)
 {
         enum CRStatus status = CR_OK;
         CRNum *num_val = NULL;
@@ -532,20 +530,23 @@ set_prop_border_x_width_from_value (CRStyle * a_style,
         }
 
         if (a_value->type == TERM_IDENT) {
-                if (a_value->content.str && a_value->content.str->str) {
+                if (a_value->content.str 
+                    && a_value->content.str->stryng
+                    && a_value->content.str->stryng->str) {
                         if (!strncmp ("thin",
-                                      a_value->content.str->str,
-                                      strlen ("thin"))) {
+                                      a_value->content.str->stryng->str,
+                                      sizeof ("thin")-1)) {
                                 cr_num_set (num_val, BORDER_THIN,
                                             NUM_LENGTH_PX);
-                        } else if (!strncmp ("medium",
-                                             a_value->content.str->str,
-                                             strlen ("medium"))) {
+                        } else if (!strncmp 
+                                   ("medium",
+                                    a_value->content.str->stryng->str,
+                                             sizeof ("medium")-1)) {
                                 cr_num_set (num_val, BORDER_MEDIUM,
                                             NUM_LENGTH_PX);
                         } else if (!strncmp ("thick",
-                                             a_value->content.str->str,
-                                             strlen ("thick"))) {
+                                             a_value->content.str->stryng->str,
+                                             sizeof ("thick")-1)) {
                                 cr_num_set (num_val, BORDER_THICK,
                                             NUM_LENGTH_PX);
                         } else {
@@ -565,12 +566,55 @@ set_prop_border_x_width_from_value (CRStyle * a_style,
 }
 
 static enum CRStatus
+set_prop_border_width_from_value (CRStyle *a_style,
+                                  CRTerm *a_value)
+{
+        CRTerm *cur_term = NULL ;
+        enum CRDirection direction = DIR_TOP ;
+
+        g_return_val_if_fail (a_style && a_value,
+                              CR_BAD_PARAM_ERROR) ;
+        cur_term = a_value ;
+
+        if (!cur_term)
+                return CR_ERROR ;
+
+        for (direction = DIR_TOP ; 
+             direction < NB_DIRS ; direction ++) {
+                set_prop_border_x_width_from_value (a_style, 
+                                                    cur_term,
+                                                    direction) ;
+        }
+
+        cur_term = cur_term->next ;
+        if (!cur_term)
+                return CR_OK ;
+        set_prop_border_x_width_from_value (a_style, cur_term,
+                                            DIR_RIGHT) ;
+        set_prop_border_x_width_from_value (a_style, cur_term,
+                                            DIR_LEFT) ;
+
+        cur_term = cur_term->next ;
+        if (!cur_term)
+                return CR_OK ;
+        set_prop_border_x_width_from_value (a_style, cur_term,
+                                            DIR_BOTTOM) ;
+
+        cur_term = cur_term->next ;
+        if (!cur_term)
+                return CR_OK ;
+        set_prop_border_x_width_from_value (a_style, cur_term,
+                                            DIR_LEFT) ;
+
+        return CR_OK ;
+}
+
+static enum CRStatus
 set_prop_border_x_style_from_value (CRStyle * a_style,
                                     CRTerm * a_value, enum CRDirection a_dir)
 {
         enum CRStatus status = CR_OK;
-        enum CRBorderStyle *border_style_ptr = NULL,
-                *parent_border_style_ptr = NULL;
+        enum CRBorderStyle *border_style_ptr = NULL;
 
         g_return_val_if_fail (a_style && a_value, CR_BAD_PARAM_ERROR);
 
@@ -578,35 +622,21 @@ set_prop_border_x_style_from_value (CRStyle * a_style,
         case DIR_TOP:
                 border_style_ptr = &a_style->
                         border_style_props[BORDER_STYLE_PROP_TOP];
-                parent_border_style_ptr = (a_style->parent_style) ?
-                        &a_style->parent_style->
-                        border_style_props[BORDER_STYLE_PROP_TOP] : NULL;
-
                 break;
 
         case DIR_RIGHT:
                 border_style_ptr =
                         &a_style->border_style_props[BORDER_STYLE_PROP_RIGHT];
-
-                parent_border_style_ptr = (a_style->parent_style) ?
-                        &a_style->parent_style->
-                        border_style_props[BORDER_STYLE_PROP_RIGHT] : NULL;
                 break;
 
         case DIR_BOTTOM:
                 border_style_ptr = &a_style->
                         border_style_props[BORDER_STYLE_PROP_BOTTOM];
-                parent_border_style_ptr = (a_style->parent_style) ?
-                        &a_style->parent_style->
-                        border_style_props[BORDER_STYLE_PROP_BOTTOM] : NULL;
                 break;
 
         case DIR_LEFT:
                 border_style_ptr = &a_style->
                         border_style_props[BORDER_STYLE_PROP_LEFT];
-                parent_border_style_ptr = (a_style->parent_style) ?
-                        &a_style->parent_style->
-                        border_style_props[BORDER_STYLE_PROP_LEFT] : NULL;
                 break;
 
         default:
@@ -617,39 +647,46 @@ set_prop_border_x_style_from_value (CRStyle * a_style,
                 return CR_UNKNOWN_TYPE_ERROR;
         }
 
-        if (!strncmp ("none", a_value->content.str->str, strlen ("none"))) {
+        if (!strncmp ("none", 
+                      a_value->content.str->stryng->str, 
+                      sizeof ("none")-1)) {
                 *border_style_ptr = BORDER_STYLE_NONE;
         } else if (!strncmp ("hidden",
-                             a_value->content.str->str, strlen ("hidden"))) {
+                             a_value->content.str->stryng->str, 
+                             sizeof ("hidden")-1)) {
                 *border_style_ptr = BORDER_STYLE_HIDDEN;
         } else if (!strncmp ("dotted",
-                             a_value->content.str->str, strlen ("dotted"))) {
+                             a_value->content.str->stryng->str, 
+                             sizeof ("dotted")-1)) {
                 *border_style_ptr = BORDER_STYLE_DOTTED;
         } else if (!strncmp ("dashed",
-                             a_value->content.str->str, strlen ("dashed"))) {
+                             a_value->content.str->stryng->str, sizeof ("dashed")-1)) {
                 *border_style_ptr = BORDER_STYLE_DASHED;
         } else if (!strncmp ("solid",
-                             a_value->content.str->str, strlen ("solid"))) {
+                             a_value->content.str->stryng->str, sizeof ("solid")-1)) {
                 *border_style_ptr = BORDER_STYLE_SOLID;
         } else if (!strncmp ("double",
-                             a_value->content.str->str, strlen ("double"))) {
+                             a_value->content.str->stryng->str, sizeof ("double")-1)) {
                 *border_style_ptr = BORDER_STYLE_DOUBLE;
         } else if (!strncmp ("groove",
-                             a_value->content.str->str, strlen ("groove"))) {
+                             a_value->content.str->stryng->str, sizeof ("groove")-1)) {
                 *border_style_ptr = BORDER_STYLE_GROOVE;
         } else if (!strncmp ("ridge",
-                             a_value->content.str->str, strlen ("ridge"))) {
+                             a_value->content.str->stryng->str, 
+                             sizeof ("ridge")-1)) {
                 *border_style_ptr = BORDER_STYLE_RIDGE;
         } else if (!strncmp ("inset",
-                             a_value->content.str->str, strlen ("inset"))) {
+                             a_value->content.str->stryng->str, 
+                             sizeof ("inset")-1)) {
                 *border_style_ptr = BORDER_STYLE_INSET;
         } else if (!strncmp ("outset",
-                             a_value->content.str->str, strlen ("outset"))) {
+                             a_value->content.str->stryng->str, 
+                             sizeof ("outset")-1)) {
                 *border_style_ptr = BORDER_STYLE_OUTSET;
         } else if (!strncmp ("inherit",
-                             a_value->content.str->str, strlen ("inherit"))) {
-                if (parent_border_style_ptr)
-                        *border_style_ptr = *parent_border_style_ptr;
+                             a_value->content.str->stryng->str, 
+                             sizeof ("inherit")-1)) {
+		*border_style_ptr = BORDER_STYLE_INHERIT;
         } else {
                 status = CR_UNKNOWN_TYPE_ERROR;
         }
@@ -658,43 +695,78 @@ set_prop_border_x_style_from_value (CRStyle * a_style,
 }
 
 static enum CRStatus
+set_prop_border_style_from_value (CRStyle *a_style,
+                                  CRTerm *a_value)
+{
+        CRTerm *cur_term = NULL ;
+        enum CRDirection direction = DIR_TOP ;
+
+        g_return_val_if_fail (a_style && a_value, 
+                              CR_BAD_PARAM_ERROR) ;
+
+        cur_term = a_value ;
+        if (!cur_term || cur_term->type != TERM_IDENT) {
+                return CR_ERROR ;
+        }
+        
+        for (direction = DIR_TOP ; 
+             direction < NB_DIRS ;
+             direction ++) {
+                set_prop_border_x_style_from_value (a_style, 
+                                                    cur_term,
+                                                    direction) ;
+        }
+        
+        cur_term = cur_term->next ;
+        if (!cur_term || cur_term->type != TERM_IDENT) {
+                return CR_OK ;
+        }
+        
+        set_prop_border_x_style_from_value (a_style, cur_term, 
+                                            DIR_RIGHT) ;
+        set_prop_border_x_style_from_value (a_style, cur_term, 
+                                            DIR_LEFT) ;
+
+        cur_term = cur_term->next ;
+        if (!cur_term || cur_term->type != TERM_IDENT) {
+                return CR_OK ;
+        }        
+        set_prop_border_x_style_from_value (a_style, cur_term,
+                                           DIR_BOTTOM) ;
+        
+        cur_term = cur_term->next ;
+        if (!cur_term || cur_term->type != TERM_IDENT) {
+                return CR_OK ;
+        }
+        set_prop_border_x_style_from_value (a_style, cur_term,
+                                            DIR_LEFT) ;
+        return CR_OK ;
+}
+
+static enum CRStatus
 set_prop_margin_x_from_value (CRStyle * a_style, CRTerm * a_value,
                               enum CRDirection a_dir)
 {
         enum CRStatus status = CR_OK;
-        CRNum *num_val = NULL,
-                *parent_num_val = NULL;
+        CRNum *num_val = NULL;
 
         g_return_val_if_fail (a_style && a_value, CR_BAD_PARAM_ERROR);
 
         switch (a_dir) {
         case DIR_TOP:
                 num_val = &a_style->num_props[NUM_PROP_MARGIN_TOP].sv;
-                parent_num_val =
-                        &a_style->parent_style->
-                        num_props[NUM_PROP_MARGIN_TOP].sv;
                 break;
 
         case DIR_RIGHT:
                 num_val = &a_style->num_props[NUM_PROP_MARGIN_RIGHT].sv;
-
-                parent_num_val =
-                        &a_style->parent_style->
-                        num_props[NUM_PROP_MARGIN_RIGHT].sv;
                 break;
 
         case DIR_BOTTOM:
                 num_val = &a_style->num_props[NUM_PROP_MARGIN_BOTTOM].sv;
-                parent_num_val =
-                        &a_style->parent_style->
-                        num_props[NUM_PROP_MARGIN_BOTTOM].sv;
                 break;
 
         case DIR_LEFT:
                 num_val = &a_style->num_props[NUM_PROP_MARGIN_LEFT].sv;
-                parent_num_val =
-                        &a_style->parent_style->
-                        num_props[NUM_PROP_MARGIN_LEFT].sv;
                 break;
 
         default:
@@ -704,14 +776,15 @@ set_prop_margin_x_from_value (CRStyle * a_style, CRTerm * a_value,
         switch (a_value->type) {
         case TERM_IDENT:
                 if (a_value->content.str
-                    && a_value->content.str->str
-                    && !strncmp (a_value->content.str->str,
-                                 "inherit", strlen ("inherit"))) {
-                        status = cr_num_copy (num_val, parent_num_val);
+                    && a_value->content.str->stryng
+                    && a_value->content.str->stryng->str
+                    && !strncmp (a_value->content.str->stryng->str,
+                                 "inherit", sizeof ("inherit")-1)) {
+			status = cr_num_set (num_val, 0.0, NUM_AUTO);
                 } else if (a_value->content.str
-                           && a_value->content.str->str
-                           && !strncmp (a_value->content.str->str,
-                                        "auto", strlen ("auto"))) {
+                           && a_value->content.str->stryng
+                           && !strncmp (a_value->content.str->stryng->str,
+                                        "auto", sizeof ("auto")-1)) {
                         status = cr_num_set (num_val, 0.0, NUM_AUTO);
                 } else {
                         status = CR_UNKNOWN_TYPE_ERROR;
@@ -737,7 +810,6 @@ struct CRPropDisplayValPair {
 static enum CRStatus
 set_prop_display_from_value (CRStyle * a_style, CRTerm * a_value)
 {
-        enum CRDisplayType default_display_val = DISPLAY_INLINE;
         static const struct CRPropDisplayValPair disp_vals_map[] = {
                 {"none", DISPLAY_NONE},
                 {"inline", DISPLAY_INLINE},
@@ -761,37 +833,24 @@ set_prop_display_from_value (CRStyle * a_style, CRTerm * a_value)
 
         g_return_val_if_fail (a_style && a_value, CR_BAD_PARAM_ERROR);
 
-        /*Sets to its default value according to the css2 spec. */
-        a_style->display = default_display_val;
-
         switch (a_value->type) {
         case TERM_IDENT:
                 {
                         int i = 0;
 
                         if (!a_value->content.str
-                            || !a_value->content.str->str)
+                            || !a_value->content.str->stryng
+                            || !a_value->content.str->stryng->str)
                                 break;
 
                         for (i = 0; disp_vals_map[i].prop_name; i++) {
-                                if (!strncmp (disp_vals_map[i].prop_name,
-                                              a_value->content.str->str,
-                                              strlen
-                                              (disp_vals_map[i].prop_name))) {
+                                if (!strncmp 
+                                    (disp_vals_map[i].prop_name,
+                                     a_value->content.str->stryng->str,
+                                     strlen (disp_vals_map[i].prop_name))) {
                                         a_style->display =
                                                 disp_vals_map[i].type;
                                         break;
-                                }
-                        }
-
-                        if (a_style->display == DISPLAY_INHERIT) {
-                                if (a_style->parent_style) {
-                                        a_style->display =
-                                                a_style->parent_style->
-                                                display;
-                                } else {
-                                        a_style->display =
-                                                default_display_val;
                                 }
                         }
                 }
@@ -818,15 +877,12 @@ set_prop_position_from_value (CRStyle * a_style, CRTerm * a_value)
                 {"relative", POSITION_RELATIVE},
                 {"absolute", POSITION_ABSOLUTE},
                 {"fixed", POSITION_FIXED},
-                {"inherited", POSITION_INHERIT},
+                {"inherit", POSITION_INHERIT},
                 {NULL, POSITION_STATIC}
                 /*must alwas be the last one */
         };
 
         g_return_val_if_fail (a_value, CR_BAD_PARAM_ERROR);
-
-        /*set to it's default value according to the css2 spec */
-        a_style->position = POSITION_STATIC;
 
         switch (a_value->type) {
         case TERM_IDENT:
@@ -834,27 +890,19 @@ set_prop_position_from_value (CRStyle * a_style, CRTerm * a_value)
                         int i = 0;
 
                         if (!a_value->content.str
-                            || !a_value->content.str->str)
+                            || !a_value->content.str->stryng
+                            || !a_value->content.str->stryng->str)
                                 break;
 
                         for (i = 0; position_vals_map[i].name; i++) {
                                 if (!strncmp (position_vals_map[i].name,
-                                              a_value->content.str->str,
+                                              a_value->content.str->stryng->str,
                                               strlen (position_vals_map[i].
                                                       name))) {
                                         a_style->position =
                                                 position_vals_map[i].type;
                                         status = CR_OK;
                                         break;
-                                }
-                        }
-                        if (a_style->position == POSITION_INHERIT) {
-                                if (a_style->parent_style) {
-                                        a_style->position =
-                                                a_style->parent_style->
-                                                position;
-                                } else {
-                                        a_style->position = POSITION_STATIC;
                                 }
                         }
                 }
@@ -871,8 +919,7 @@ static enum CRStatus
 set_prop_x_from_value (CRStyle * a_style, CRTerm * a_value,
                        enum CRDirection a_dir)
 {
-        CRNum *box_offset = NULL,
-                *parent_box_offset = NULL;
+        CRNum *box_offset = NULL;
 
         g_return_val_if_fail (a_style && a_value, CR_BAD_PARAM_ERROR);
 
@@ -884,32 +931,17 @@ set_prop_x_from_value (CRStyle * a_style, CRTerm * a_value,
         switch (a_dir) {
         case DIR_TOP:
                 box_offset = &a_style->num_props[NUM_PROP_TOP].sv;
-                if (a_style->parent_style)
-                        parent_box_offset =
-                                &a_style->parent_style->
-                                num_props[NUM_PROP_TOP].sv;
                 break;
 
         case DIR_RIGHT:
                 box_offset = &a_style->num_props[NUM_PROP_RIGHT].sv;
-                if (a_style->parent_style)
-                        parent_box_offset = &a_style->parent_style->
-                                num_props[NUM_PROP_RIGHT].sv;
                 break;
 
         case DIR_BOTTOM:
                 box_offset = &a_style->num_props[NUM_PROP_BOTTOM].sv;
-                if (a_style->parent_style)
-                        parent_box_offset =
-                                &a_style->parent_style->
-                                num_props[NUM_PROP_BOTTOM].sv;
                 break;
         case DIR_LEFT:
                 box_offset = &a_style->num_props[NUM_PROP_LEFT].sv;
-                if (a_style->parent_style)
-                        parent_box_offset =
-                                &a_style->parent_style->
-                                num_props[NUM_PROP_LEFT].sv;
                 break;
 
         default:
@@ -921,14 +953,16 @@ set_prop_x_from_value (CRStyle * a_style, CRTerm * a_value,
         if (a_value->type == TERM_NUMBER && a_value->content.num) {
                 cr_num_copy (box_offset, a_value->content.num);
         } else if (a_value->type == TERM_IDENT
-                   && a_value->content.str && a_value->content.str->str) {
+                   && a_value->content.str
+                   && a_value->content.str->stryng
+                   && a_value->content.str->stryng->str) {
                 if (!strncmp ("inherit",
-                              a_value->content.str->str,
-                              strlen ("inherit"))) {
-                        cr_num_copy (box_offset, parent_box_offset);
+                              a_value->content.str->stryng->str,
+                              sizeof ("inherit")-1)) {
+                        cr_num_set (box_offset, 0.0, NUM_INHERIT);
                 } else if (!strncmp ("auto",
-                                     a_value->content.str->str,
-                                     strlen ("auto"))) {
+                                     a_value->content.str->stryng->str,
+                                     sizeof ("auto")-1)) {
                         box_offset->type = NUM_AUTO;
                 }
         }
@@ -939,53 +973,63 @@ set_prop_x_from_value (CRStyle * a_style, CRTerm * a_value,
 static enum CRStatus
 set_prop_float (CRStyle * a_style, CRTerm * a_value)
 {
-        g_return_val_if_fail (a_style && a_value, CR_BAD_PARAM_ERROR);
+        g_return_val_if_fail (a_style && a_value, 
+                              CR_BAD_PARAM_ERROR);
 
         /*the default float type as specified by the css2 spec */
         a_style->float_type = FLOAT_NONE;
 
-        if (a_value->type != TERM_IDENT || !a_value->content.str || !a_value->content.str->str) { /*unknow type, the float type is set to it's default value */
+        if (a_value->type != TERM_IDENT 
+            || !a_value->content.str
+            || !a_value->content.str->stryng
+            || !a_value->content.str->stryng->str) { 
+                /*unknow type, the float type is set to it's default value */
                 return CR_OK;
         }
 
-        if (!strncmp ("none", a_value->content.str->str, strlen ("none"))) {
+        if (!strncmp ("none", 
+                      a_value->content.str->stryng->str, 
+                      sizeof ("none")-1)) {
                 a_style->float_type = FLOAT_NONE;
         } else if (!strncmp ("left",
-                             a_value->content.str->str, strlen ("left"))) {
+                             a_value->content.str->stryng->str, 
+                             sizeof ("left")-1)) {
                 a_style->float_type = FLOAT_LEFT;
         } else if (!strncmp ("right",
-                             a_value->content.str->str, strlen ("right"))) {
+                             a_value->content.str->stryng->str, 
+                             sizeof ("right")-1)) {
                 a_style->float_type = FLOAT_RIGHT;
         } else if (!strncmp ("inherit",
-                             a_value->content.str->str, strlen ("inherit"))) {
-                a_style->float_type = a_style->parent_style->float_type;
+                             a_value->content.str->stryng->str, 
+                             sizeof ("inherit")-1)) {
+		a_style->float_type = FLOAT_INHERIT;
         }
-
         return CR_OK;
 }
 
 static enum CRStatus
 set_prop_width (CRStyle * a_style, CRTerm * a_value)
 {
-        g_return_val_if_fail (a_style && a_value, CR_BAD_PARAM_ERROR);
+	CRNum *width = NULL;
+        g_return_val_if_fail (a_style 
+                              && a_value, 
+                              CR_BAD_PARAM_ERROR);
 
-        a_style->num_props[NUM_PROP_WIDTH].sv.type = NUM_AUTO;
+	width = &a_style->num_props[NUM_PROP_WIDTH].sv;
+	cr_num_set (width, 0.0, NUM_AUTO);
 
         if (a_value->type == TERM_IDENT) {
-                if (a_value->content.str && a_value->content.str->str) {
+                if (a_value->content.str 
+                    && a_value->content.str->stryng
+                    && a_value->content.str->stryng->str) {
                         if (!strncmp ("auto",
-                                      a_value->content.str->str,
-                                      strlen ("auto"))) {
-                                a_style->num_props[NUM_PROP_WIDTH].sv.type =
-                                        NUM_AUTO;
+                                      a_value->content.str->stryng->str,
+                                      sizeof ("auto")-1)) {
+				cr_num_set (width, 0.0, NUM_AUTO);
                         } else if (!strncmp ("inherit",
-                                             a_value->content.str->str,
-                                             strlen ("inherit"))) {
-                                cr_num_copy
-                                        (&a_style->
-                                         num_props[NUM_PROP_WIDTH].sv,
-                                         &a_style->parent_style->
-                                         num_props[NUM_PROP_WIDTH].sv);
+                                             a_value->content.str->stryng->str,
+                                             sizeof ("inherit")-1)) {
+				cr_num_set (width, 0.0, NUM_INHERIT);
                         }
                 }
         } else if (a_value->type == TERM_NUMBER) {
@@ -994,7 +1038,6 @@ set_prop_width (CRStyle * a_style, CRTerm * a_value)
                                      a_value->content.num);
                 }
         }
-
         return CR_OK;
 }
 
@@ -1004,7 +1047,8 @@ set_prop_color (CRStyle * a_style, CRTerm * a_value)
 	enum CRStatus status = CR_OK;
 	CRRgb *a_rgb = &a_style->rgb_props[RGB_PROP_COLOR].sv;
 
-	g_return_val_if_fail (a_style && a_value, CR_BAD_PARAM_ERROR);
+	g_return_val_if_fail (a_style 
+                              && a_value, CR_BAD_PARAM_ERROR);
 
 	status = cr_rgb_set_from_term (a_rgb, a_value);
 
@@ -1071,12 +1115,14 @@ set_prop_border_x_color_from_value (CRStyle * a_style, CRTerm * a_value,
         status = CR_UNKNOWN_PROP_VAL_ERROR;
 
         if (a_value->type == TERM_IDENT) {
-                if (a_value->content.str && a_value->content.str->str) {
+                if (a_value->content.str 
+                    && a_value->content.str->stryng
+                    && a_value->content.str->stryng->str) {
                         status = cr_rgb_set_from_name
-                                (rgb_color, a_value->content.str->str);
+                                (rgb_color, 
+                                 a_value->content.str->stryng->str);
 
                 }
-
                 if (status != CR_OK) {
                         cr_rgb_set_from_name (rgb_color, "black");
                 }
@@ -1086,7 +1132,6 @@ set_prop_border_x_color_from_value (CRStyle * a_style, CRTerm * a_value,
                                 (rgb_color, a_value->content.rgb);
                 }
         }
-
         return status;
 }
 
@@ -1100,7 +1145,9 @@ set_prop_border_x_from_value (CRStyle * a_style, CRTerm * a_value,
 
         g_return_val_if_fail (a_style && a_value, CR_BAD_PARAM_ERROR);
 
-        for (cur_term = a_value; cur_term; cur_term = cur_term->next) {
+        for (cur_term = a_value; 
+             cur_term; 
+             cur_term = cur_term->next) {
                 status = set_prop_border_x_width_from_value (a_style,
                                                              cur_term, a_dir);
 
@@ -1108,13 +1155,11 @@ set_prop_border_x_from_value (CRStyle * a_style, CRTerm * a_value,
                         status = set_prop_border_x_style_from_value
                                 (a_style, cur_term, a_dir);
                 }
-
                 if (status != CR_OK) {
                         status = set_prop_border_x_color_from_value
                                 (a_style, cur_term, a_dir);
                 }
         }
-
         return CR_OK;
 }
 
@@ -1126,7 +1171,9 @@ set_prop_border_from_value (CRStyle * a_style, CRTerm * a_value)
         g_return_val_if_fail (a_style && a_value, CR_BAD_PARAM_ERROR);
 
         for (direction = 0; direction < NB_DIRS; direction++) {
-                set_prop_border_x_from_value (a_style, a_value, direction);
+                set_prop_border_x_from_value (a_style, 
+                                              a_value, 
+                                              direction);
         }
 
         return CR_OK;
@@ -1138,25 +1185,28 @@ set_prop_padding_from_value (CRStyle * a_style, CRTerm * a_value)
         CRTerm *cur_term = NULL;
         enum CRDirection direction = 0;
         enum CRStatus status = CR_OK;
-
+        
         g_return_val_if_fail (a_style && a_value, CR_BAD_PARAM_ERROR);
 
         cur_term = a_value;
+
+        /*filter the eventual non NUMBER terms some user can have written here*/
         while (cur_term && cur_term->type != TERM_NUMBER) {
                 cur_term = cur_term->next;
         }
-
         if (!cur_term)
-                return CR_OK;
+                return CR_ERROR ;
 
         for (direction = 0; direction < NB_DIRS; direction++) {
                 set_prop_padding_x_from_value (a_style, cur_term, direction);
         }
         cur_term = cur_term->next;
 
+        /*filter non NUMBER terms that some users can have written here...*/
         while (cur_term && cur_term->type != TERM_NUMBER) {
                 cur_term = cur_term->next;
         }
+        /*the user can have just written padding: 1px*/
         if (!cur_term)
                 return CR_OK;
 
@@ -1176,9 +1226,7 @@ set_prop_padding_from_value (CRStyle * a_style, CRTerm * a_value)
         }
         if (!cur_term)
                 return CR_OK;
-
         status = set_prop_padding_x_from_value (a_style, cur_term, DIR_LEFT);
-
         return status;
 }
 
@@ -1192,6 +1240,7 @@ set_prop_margin_from_value (CRStyle * a_style, CRTerm * a_value)
         g_return_val_if_fail (a_style && a_value, CR_BAD_PARAM_ERROR);
 
         cur_term = a_value;
+
         while (cur_term && cur_term->type != TERM_NUMBER) {
                 cur_term = cur_term->next;
         }
@@ -1227,7 +1276,7 @@ set_prop_margin_from_value (CRStyle * a_style, CRTerm * a_value)
         if (!cur_term)
                 return CR_OK;
 
-        status = set_prop_margin_x_from_value (a_style, cur_term, DIR_LEFT);
+        status = set_prop_margin_x_from_value (a_style, cur_term, DIR_LEFT);        
 
         return status;
 }
@@ -1242,6 +1291,16 @@ set_prop_font_family_from_value (CRStyle * a_style, CRTerm * a_value)
 
         g_return_val_if_fail (a_style && a_value, CR_BAD_PARAM_ERROR);
 
+	if (a_value->type == TERM_IDENT &&
+	    a_value->content.str &&
+	    a_value->content.str->stryng &&
+	    a_value->content.str->stryng->str &&
+	    !strcmp ("inherit", a_value->content.str->stryng->str))
+	{
+		font_family = cr_font_family_new (FONT_FAMILY_INHERIT, NULL);
+		goto out;
+	}
+
         for (cur_term = a_value; cur_term; cur_term = cur_term->next) {
                 switch (cur_term->type) {
                 case TERM_IDENT:
@@ -1249,29 +1308,36 @@ set_prop_font_family_from_value (CRStyle * a_style, CRTerm * a_value)
                                 enum CRFontFamilyType font_type;
 
                                 if (cur_term->content.str
-                                    && cur_term->content.str->str
-                                    && !strcmp (cur_term->content.str->str,
-                                                "sans-serif")) {
+                                    && cur_term->content.str->stryng
+                                    && cur_term->content.str->stryng->str
+                                    && !strcmp 
+                                    (cur_term->content.str->stryng->str,
+                                     "sans-serif")) {
                                         font_type = FONT_FAMILY_SANS_SERIF;
                                 } else if (cur_term->content.str
-                                           && cur_term->content.str->str
-                                           && !strcmp (cur_term->content.str->
-                                                       str, "serif")) {
+                                           && cur_term->content.str->stryng
+                                           && cur_term->content.str->stryng->str
+                                           && !strcmp 
+                                           (cur_term->content.str->stryng->str, 
+                                            "serif")) {
                                         font_type = FONT_FAMILY_SERIF;
                                 } else if (cur_term->content.str
-                                           && cur_term->content.str->str
-                                           && !strcmp (cur_term->content.str->
-                                                       str, "cursive")) {
+                                           && cur_term->content.str->stryng
+                                           && cur_term->content.str->stryng->str
+                                           && !strcmp (cur_term->content.str->stryng->str, 
+                                                       "cursive")) {
                                         font_type = FONT_FAMILY_CURSIVE;
                                 } else if (cur_term->content.str
-                                           && cur_term->content.str->str
-                                           && !strcmp (cur_term->content.str->
-                                                       str, "fantasy")) {
+                                           && cur_term->content.str->stryng
+                                           && cur_term->content.str->stryng->str
+                                           && !strcmp (cur_term->content.str->stryng->str,
+                                                       "fantasy")) {
                                         font_type = FONT_FAMILY_FANTASY;
                                 } else if (cur_term->content.str
-                                           && cur_term->content.str->str
-                                           && !strcmp (cur_term->content.str->
-                                                       str, "monospace")) {
+                                           && cur_term->content.str->stryng
+                                           && cur_term->content.str->stryng->str
+                                           && !strcmp (cur_term->content.str->stryng->str, 
+                                                       "monospace")) {
                                         font_type = FONT_FAMILY_MONOSPACE;
                                 } else {
                                         /*
@@ -1288,10 +1354,11 @@ set_prop_font_family_from_value (CRStyle * a_style, CRTerm * a_value)
                 case TERM_STRING:
                         {
                                 if (cur_term->content.str
-                                    && cur_term->content.str->str) {
+                                    && cur_term->content.str->stryng
+                                    && cur_term->content.str->stryng->str) {
                                         cur_ff = cr_font_family_new
                                                 (FONT_FAMILY_NON_GENERIC,
-                                                 cur_term->content.str->str);
+                                                 cur_term->content.str->stryng->str);
                                 }
                         }
                         break;
@@ -1306,11 +1373,14 @@ set_prop_font_family_from_value (CRStyle * a_style, CRTerm * a_value)
                 }
         }
 
+ out:
         if (font_family) {
                 if (a_style->font_family) {
                         cr_font_family_destroy (a_style->font_family);
-                        a_style->font_family = font_family;
+                        a_style->font_family = NULL ;
                 }
+                a_style->font_family = font_family;
+                font_family = NULL ;
         }
 
         return CR_OK;
@@ -1343,8 +1413,10 @@ set_prop_font_size_from_value (CRStyle * a_style, CRTerm * a_value)
         switch (a_value->type) {
         case TERM_IDENT:
                 if (a_value->content.str
-                    && a_value->content.str->str
-                    && !strcmp (a_value->content.str->str, "xx-small")) {
+                    && a_value->content.str->stryng
+                    && a_value->content.str->stryng->str
+                    && !strcmp (a_value->content.str->stryng->str, 
+                                "xx-small")) {
                         status = init_style_font_size_field (a_style);
                         g_return_val_if_fail (status == CR_OK, status);
 
@@ -1354,9 +1426,10 @@ set_prop_font_size_from_value (CRStyle * a_style, CRTerm * a_value)
                                 FONT_SIZE_XX_SMALL;
 
                 } else if (a_value->content.str
-                           && a_value->content.str->str
-                           && !strcmp (a_value->content.str->str, "x-small"))
-                {
+                           && a_value->content.str->stryng
+                           && a_value->content.str->stryng->str
+                           && !strcmp (a_value->content.str->stryng->str, 
+                                       "x-small")) {
                         status = init_style_font_size_field (a_style);
                         g_return_val_if_fail (status == CR_OK, status);
 
@@ -1365,8 +1438,10 @@ set_prop_font_size_from_value (CRStyle * a_style, CRTerm * a_value)
                         a_style->font_size->value.predefined =
                                 FONT_SIZE_X_SMALL;
                 } else if (a_value->content.str
-                           && a_value->content.str->str
-                           && !strcmp (a_value->content.str->str, "small")) {
+                           && a_value->content.str->stryng
+                           && a_value->content.str->stryng->str
+                           && !strcmp (a_value->content.str->stryng->str, 
+                                       "small")) {
                         status = init_style_font_size_field (a_style);
                         g_return_val_if_fail (status == CR_OK, status);
 
@@ -1375,8 +1450,9 @@ set_prop_font_size_from_value (CRStyle * a_style, CRTerm * a_value)
                         a_style->font_size->value.predefined =
                                 FONT_SIZE_SMALL;
                 } else if (a_value->content.str
-                           && a_value->content.str->str
-                           && !strcmp (a_value->content.str->str, "medium")) {
+                           && a_value->content.str->stryng
+                           && a_value->content.str->stryng->str
+                           && !strcmp (a_value->content.str->stryng->str, "medium")) {
                         status = init_style_font_size_field (a_style);
                         g_return_val_if_fail (status == CR_OK, status);
 
@@ -1385,8 +1461,10 @@ set_prop_font_size_from_value (CRStyle * a_style, CRTerm * a_value)
                         a_style->font_size->value.predefined =
                                 FONT_SIZE_MEDIUM;
                 } else if (a_value->content.str
-                           && a_value->content.str->str
-                           && !strcmp (a_value->content.str->str, "large")) {
+                           && a_value->content.str->stryng
+                           && a_value->content.str->stryng->str
+                           && !strcmp (a_value->content.str->stryng->str, 
+                                       "large")) {
                         status = init_style_font_size_field (a_style);
                         g_return_val_if_fail (status == CR_OK, status);
 
@@ -1395,9 +1473,10 @@ set_prop_font_size_from_value (CRStyle * a_style, CRTerm * a_value)
                         a_style->font_size->value.predefined =
                                 FONT_SIZE_LARGE;
                 } else if (a_value->content.str
-                           && a_value->content.str->str
-                           && !strcmp (a_value->content.str->str, "x-large"))
-                {
+                           && a_value->content.str->stryng
+                           && a_value->content.str->stryng->str
+                           && !strcmp (a_value->content.str->stryng->str, 
+                                       "x-large")) {
                         status = init_style_font_size_field (a_style);
                         g_return_val_if_fail (status == CR_OK, status);
 
@@ -1406,9 +1485,10 @@ set_prop_font_size_from_value (CRStyle * a_style, CRTerm * a_value)
                         a_style->font_size->value.predefined =
                                 FONT_SIZE_X_LARGE;
                 } else if (a_value->content.str
-                           && a_value->content.str->str
-                           && !strcmp (a_value->content.str->str, "xx-large"))
-                {
+                           && a_value->content.str->stryng
+                           && a_value->content.str->stryng->str
+                           && !strcmp (a_value->content.str->stryng->str, 
+                                       "xx-large")) {
                         status = init_style_font_size_field (a_style);
                         g_return_val_if_fail (status == CR_OK, status);
 
@@ -1417,17 +1497,20 @@ set_prop_font_size_from_value (CRStyle * a_style, CRTerm * a_value)
                         a_style->font_size->value.predefined =
                                 FONT_SIZE_XX_LARGE;
                 } else if (a_value->content.str
-                           && a_value->content.str->str
-                           && !strcmp (a_value->content.str->str, "larger")) {
+                           && a_value->content.str->stryng
+                           && a_value->content.str->stryng->str
+                           && !strcmp (a_value->content.str->stryng->str, 
+                                       "larger")) {
                         status = init_style_font_size_field (a_style);
                         g_return_val_if_fail (status == CR_OK, status);
 
                         a_style->font_size->type = RELATIVE_FONT_SIZE;
                         a_style->font_size->value.relative = FONT_SIZE_LARGER;
                 } else if (a_value->content.str
-                           && a_value->content.str->str
-                           && !strcmp (a_value->content.str->str, "smaller"))
-                {
+                           && a_value->content.str->stryng
+                           && a_value->content.str->stryng->str
+                           && !strcmp (a_value->content.str->stryng->str, 
+                                       "smaller")) {
                         status = init_style_font_size_field (a_style);
                         g_return_val_if_fail (status == CR_OK, status);
 
@@ -1435,18 +1518,13 @@ set_prop_font_size_from_value (CRStyle * a_style, CRTerm * a_value)
                         a_style->font_size->value.relative =
                                 FONT_SIZE_SMALLER;
                 } else if (a_value->content.str
-                           && a_value->content.str->str
-                           && !strcmp (a_value->content.str->str, "inherit"))
-                {
+                           && a_value->content.str->stryng
+                           && a_value->content.str->stryng->str
+                           && !strcmp (a_value->content.str->stryng->str, "inherit")) {
                         status = init_style_font_size_field (a_style);
                         g_return_val_if_fail (status == CR_OK, status);
+			a_style->font_size->type = INHERITED_FONT_SIZE;
 
-                        if (a_style->parent_style
-                            && a_style->parent_style->font_style) {
-                                cr_font_size_copy
-                                        (a_style->font_size,
-                                         a_style->parent_style->font_size);
-                        }
                 } else {
                         return CR_UNKNOWN_PROP_VAL_ERROR;
                 }
@@ -1479,24 +1557,23 @@ set_prop_font_style_from_value (CRStyle * a_style, CRTerm * a_value)
 
         switch (a_value->type) {
         case TERM_IDENT:
-                if (a_value->content.str && a_value->content.str->str) {
-                        if (!strcmp (a_value->content.str->str, "normal")) {
+                if (a_value->content.str 
+                    && a_value->content.str->stryng
+                    && a_value->content.str->stryng->str) {
+                        if (!strcmp (a_value->content.str->stryng->str, "normal")) {
                                 a_style->font_style = FONT_STYLE_NORMAL;
                         } else if (!strcmp
-                                   (a_value->content.str->str, "italic")) {
+                                   (a_value->content.str->stryng->str,
+				    "italic")) {
                                 a_style->font_style = FONT_STYLE_ITALIC;
                         } else if (!strcmp
-                                   (a_value->content.str->str, "oblique")) {
+                                   (a_value->content.str->stryng->str,
+				    "oblique")) {
                                 a_style->font_style = FONT_STYLE_OBLIQUE;
                         } else if (!strcmp
-                                   (a_value->content.str->str, "inherit")) {
-                                if (!a_style->font_style)
-                                        a_style->font_style =
-                                                FONT_STYLE_NORMAL;
-                                else
-                                        a_style->font_style =
-                                                a_style->parent_style->
-                                                font_style;
+                                   (a_value->content.str->stryng->str,
+				    "inherit")) {
+				a_style->font_style = FONT_STYLE_INHERIT;
                         } else {
                                 status = CR_UNKNOWN_PROP_VAL_ERROR;
                         }
@@ -1520,18 +1597,25 @@ set_prop_font_weight_from_value (CRStyle * a_style, CRTerm * a_value)
 
         switch (a_value->type) {
         case TERM_IDENT:
-                if (a_value->content.str && a_value->content.str->str) {
-                        if (!strcmp (a_value->content.str->str, "normal")) {
+                if (a_value->content.str 
+                    && a_value->content.str->stryng
+                    && a_value->content.str->stryng->str) {
+                        if (!strcmp (a_value->content.str->stryng->str, 
+                                     "normal")) {
                                 a_style->font_weight = FONT_WEIGHT_NORMAL;
-                        } else if (!strcmp (a_value->content.str->str,
+                        } else if (!strcmp (a_value->content.str->stryng->str,
                                             "bold")) {
                                 a_style->font_weight = FONT_WEIGHT_BOLD;
-                        } else if (!strcmp (a_value->content.str->str,
+                        } else if (!strcmp (a_value->content.str->stryng->str,
                                             "bolder")) {
                                 a_style->font_weight = FONT_WEIGHT_BOLDER;
-                        } else if (!strcmp (a_value->content.str->str,
+                        } else if (!strcmp (a_value->content.str->stryng->str,
                                             "lighter")) {
                                 a_style->font_weight = FONT_WEIGHT_LIGHTER;
+			} else if (!strcmp (a_value->content.str->stryng->str,
+                                            "inherit")) {
+                                a_style->font_weight = FONT_WEIGHT_INHERIT;
+
                         } else {
                                 status = CR_UNKNOWN_PROP_VAL_ERROR;
                         }
@@ -1573,15 +1657,54 @@ set_prop_font_weight_from_value (CRStyle * a_style, CRTerm * a_value)
         return status;
 }
 
+static enum CRStatus
+set_prop_white_space_from_value (CRStyle * a_style, CRTerm * a_value)
+{
+	enum CRStatus status = CR_OK;
+
+	g_return_val_if_fail (a_style && a_value, CR_BAD_PARAM_ERROR);
+
+	switch (a_value->type) {
+	case TERM_IDENT:
+		if (a_value->content.str && a_value->content.str->stryng) {
+			if (!strcmp (a_value->content.str->stryng->str, "normal")) {
+				a_style->white_space = WHITE_SPACE_NORMAL;
+			} else if (!strcmp (a_value->content.str->stryng->str, 
+                                            "pre")) {
+				a_style->font_weight = WHITE_SPACE_PRE;
+			} else if (!strcmp (a_value->content.str->stryng->str,
+                                            "nowrap")) {
+				a_style->white_space = WHITE_SPACE_NOWRAP;
+			} else if (!strcmp (a_value->content.str->stryng->str,
+                                            "inherit")) {
+				a_style->white_space = WHITE_SPACE_INHERIT;
+			} else {
+				status = CR_UNKNOWN_PROP_VAL_ERROR;
+			}
+		}
+		break;
+	default:
+		status = CR_UNKNOWN_PROP_VAL_ERROR;
+		break;
+	}
+
+	return status;
+}
+
 /******************
  *Public methods
  ******************/
 
 /**
  *Default constructor of #CRStyle.
+ *@param a_set_props_to_initial_values if TRUE, the style properties
+ *will be set to the default values. Only the style properties of the
+ *root box should be set to their initial values.
+ *Otherwise, the style values are set to their default value.
+ *Read the CSS2 spec, chapters 6.1.1 to 6.2.
  */
 CRStyle *
-cr_style_new (void)
+cr_style_new (gboolean a_set_props_to_initial_values)
 {
         CRStyle *result = NULL;
 
@@ -1593,20 +1716,121 @@ cr_style_new (void)
         memset (result, 0, sizeof (CRStyle));
         gv_prop_hash_ref_count++;
 
-        /*set the style properties to their default values */
-        cr_style_set_props_to_defaults (result);
+        if (a_set_props_to_initial_values == TRUE) {
+                cr_style_set_props_to_initial_values (result);
+        } else {
+                cr_style_set_props_to_default_values (result);
+        }
 
         return result;
 }
 
 /**
- *Sets the style properties to their default values
- *according to the css2 spec.
+ *Sets the style properties to their default values according to the css2 spec
+ * i.e inherit if the property is inherited, its initial value otherway.
  *@param a_this the current instance of #CRStyle.
  *@return CR_OK upon successfull completion, an error code otherwise.
  */
-enum CRStatus
-cr_style_set_props_to_defaults (CRStyle * a_this)
+enum CRStatus 
+cr_style_set_props_to_default_values (CRStyle * a_this)
+{
+	glong i = 0;
+
+	g_return_val_if_fail (a_this, CR_BAD_PARAM_ERROR);
+	
+	for (i = 0; i < NB_NUM_PROPS; i++)
+	{
+		switch (i)
+		{
+		case NUM_PROP_WIDTH:
+		case NUM_PROP_TOP:
+		case NUM_PROP_RIGHT:
+		case NUM_PROP_BOTTOM:
+		case NUM_PROP_LEFT:
+			cr_num_set (&a_this->num_props[i].sv, 0, NUM_AUTO);
+			break;
+
+		case NUM_PROP_PADDING_TOP:
+		case NUM_PROP_PADDING_RIGHT:
+		case NUM_PROP_PADDING_BOTTOM:
+		case NUM_PROP_PADDING_LEFT:
+		case NUM_PROP_BORDER_TOP:
+		case NUM_PROP_BORDER_RIGHT:
+		case NUM_PROP_BORDER_BOTTOM:
+		case NUM_PROP_BORDER_LEFT:
+		case NUM_PROP_MARGIN_TOP:
+		case NUM_PROP_MARGIN_RIGHT:
+		case NUM_PROP_MARGIN_BOTTOM:
+		case NUM_PROP_MARGIN_LEFT:
+			cr_num_set (&a_this->num_props[i].sv,
+				    0, NUM_LENGTH_PX);
+			break;
+
+		default:
+			cr_utils_trace_info ("Unknown property");
+			break;
+		}
+	}
+
+	for (i = 0; i < NB_RGB_PROPS; i++) {
+                
+		switch (i) {
+			/*default foreground color is black */
+		case RGB_PROP_COLOR:
+			/*
+                         *REVIEW: color is inherited and the default value is
+			 *ua dependant.
+                         */
+			cr_rgb_set_to_inherit (&a_this->rgb_props[i].sv) ;
+			break;
+
+			/*default background color is white */
+		case RGB_PROP_BACKGROUND_COLOR:
+			/* TODO: the default value should be transparent */
+			cr_rgb_set (&a_this->rgb_props[i].sv,
+				    255, 255, 255, FALSE);
+			break;
+
+		default:
+			/* 
+                         *TODO: for BORDER_COLOR the initial value should
+			 * be the same as COLOR 
+                         */
+			cr_rgb_set (&a_this->rgb_props[i].sv, 0, 0, 0,
+				    FALSE);
+			break;
+		}
+	}
+
+	for (i = 0; i < NB_BORDER_STYLE_PROPS; i++) {
+		a_this->border_style_props[i] = BORDER_STYLE_NONE;
+	}
+
+	a_this->display = DISPLAY_INLINE;
+	a_this->position = POSITION_STATIC;
+	a_this->float_type = FLOAT_NONE;
+	a_this->parent_style = NULL;
+	a_this->font_style = FONT_STYLE_INHERIT;
+	a_this->font_variant = FONT_VARIANT_INHERIT;
+	a_this->font_weight = FONT_WEIGHT_INHERIT;
+	a_this->font_family = NULL;
+
+        /* To make the inheritance resolution possible and efficient */
+        a_this->inherited_props_resolved = FALSE ;
+	return CR_OK;
+}
+
+/**
+ *Sets the style properties to their initial value according to the css2 spec.
+ *This function should be used to initialize the style of the root element
+ *of an xml tree.
+ *Some properties are user agent dependant like font-family, and
+ *are not initialized, read the spec to make you renderer compliant.
+ *@param a_this the current instance of #CRStyle.
+ *@return CR_OK upon successfull completion, an error code otherwise.
+ */
+enum CRStatus 
+cr_style_set_props_to_initial_values (CRStyle *a_this)
 {
         glong i = 0;
 
@@ -1671,12 +1895,85 @@ cr_style_set_props_to_defaults (CRStyle * a_this)
         a_this->display = DISPLAY_BLOCK;
         a_this->position = POSITION_STATIC;
         a_this->float_type = FLOAT_NONE;
-        a_this->parent_style = NULL;
         a_this->font_style = FONT_STYLE_NORMAL;
         a_this->font_variant = FONT_VARIANT_NORMAL;
         a_this->font_weight = FONT_WEIGHT_NORMAL;
         a_this->font_stretch = FONT_STRETCH_NORMAL;
+	a_this->white_space = WHITE_SPACE_NORMAL;
+
+        a_this->inherited_props_resolved = FALSE ;
+        
         return CR_OK;
+}
+
+/**
+ *Resolves the inherited properties.
+ *The function sets the "inherited" properties to either the value of
+ *their parent properties.
+ *This function is *NOT* recursive. So the inherited properties of
+ *the parent style must have been resolved prior to calling this function.
+ *@param a_this the instance where 
+ *@return CR_OK if a root node is found and the propagation is successful,
+ *an error code otherwise
+ */
+enum CRStatus 
+cr_style_resolve_inherited_properties (CRStyle *a_this)
+{
+	enum CRStatus ret = CR_OK;
+	glong i = 0;
+
+	g_return_val_if_fail (a_this, CR_BAD_PARAM_ERROR);
+	g_return_val_if_fail (a_this->parent_style, CR_BAD_PARAM_ERROR) ;
+
+        if (a_this->inherited_props_resolved == TRUE)
+                return CR_OK ;
+
+        if (a_this->num_props[i].sv.type == NUM_INHERIT) {
+                cr_num_copy (&a_this->num_props[i].sv,
+                             &a_this->parent_style->num_props[i].sv);
+        }
+	for (i=0; i < NB_RGB_PROPS; i++) {
+		if (cr_rgb_is_set_to_inherit (&a_this->rgb_props[i].sv) == TRUE) {
+			cr_rgb_set_from_rgb(
+				&a_this->rgb_props[i].sv,
+				&a_this->parent_style->rgb_props[i].sv);
+		}
+	}
+	for (i = 0; i < NB_BORDER_STYLE_PROPS; i++) {
+		if (a_this->border_style_props[i] == BORDER_STYLE_INHERIT) {
+			a_this->border_style_props[i] =
+			  a_this->parent_style->border_style_props[i];
+		}
+	}
+
+	if (a_this->display == DISPLAY_INHERIT) {
+		a_this->display = a_this->parent_style->display;
+	}
+	if (a_this->position == POSITION_INHERIT) {
+		a_this->position = a_this->parent_style->position;
+	}
+	if (a_this->float_type == FLOAT_INHERIT) {
+		a_this->float_type = a_this->parent_style->float_type;
+	}
+	if (a_this->font_style == FONT_STYLE_INHERIT) {
+		a_this->font_style = a_this->parent_style->font_style;
+	}
+	if (a_this->font_variant == FONT_VARIANT_INHERIT) {
+		a_this->font_variant = a_this->parent_style->font_variant;
+	}
+	if (a_this->font_weight == FONT_WEIGHT_INHERIT) {
+		a_this->font_weight = a_this->parent_style->font_weight;
+	}
+	if (a_this->font_stretch == FONT_STRETCH_INHERIT) {
+		a_this->font_stretch = a_this->parent_style->font_stretch;
+	}
+	/*NULL is inherit marker for font_famiy*/
+	if (a_this->font_family == NULL)  {
+		a_this->font_family = a_this->parent_style->font_family;
+	}
+
+        a_this->inherited_props_resolved = TRUE ;
+	return ret;
 }
 
 /**
@@ -1700,9 +1997,12 @@ cr_style_set_style_from_decl (CRStyle * a_this, CRDeclaration * a_decl)
         g_return_val_if_fail (a_this && a_decl
                               && a_decl
                               && a_decl->property
-                              && a_decl->property->str, CR_BAD_PARAM_ERROR);
+                              && a_decl->property->stryng
+                              && a_decl->property->stryng->str,
+                              CR_BAD_PARAM_ERROR);
 
-        prop_id = cr_style_get_prop_id (a_decl->property->str);
+        prop_id = cr_style_get_prop_id
+                (a_decl->property->stryng->str);
 
         value = a_decl->value;
         switch (prop_id) {
@@ -1726,7 +2026,7 @@ cr_style_set_style_from_decl (CRStyle * a_this, CRDeclaration * a_decl)
                 break;
 
         case PROP_ID_PADDING:
-                status = set_prop_padding_from_value (a_this, value);
+                status = set_prop_padding_from_value (a_this, value) ;
                 break;
 
         case PROP_ID_BORDER_TOP_WIDTH:
@@ -1749,6 +2049,10 @@ cr_style_set_style_from_decl (CRStyle * a_this, CRDeclaration * a_decl)
                                                              DIR_LEFT);
                 break;
 
+        case PROP_ID_BORDER_WIDTH:
+                status = set_prop_border_width_from_value (a_this, value) ;
+                break ;
+
         case PROP_ID_BORDER_TOP_STYLE:
                 status = set_prop_border_x_style_from_value (a_this, value,
                                                              DIR_TOP);
@@ -1768,6 +2072,10 @@ cr_style_set_style_from_decl (CRStyle * a_this, CRDeclaration * a_decl)
                 status = set_prop_border_x_style_from_value (a_this, value,
                                                              DIR_LEFT);
                 break;
+
+        case PROP_ID_BORDER_STYLE:
+                status = set_prop_border_style_from_value (a_this, value) ;
+                break ;
 
         case PROP_ID_BORDER_TOP_COLOR:
                 status = set_prop_border_x_color_from_value (a_this, value,
@@ -1893,6 +2201,10 @@ cr_style_set_style_from_decl (CRStyle * a_this, CRDeclaration * a_decl)
                 status = set_prop_font_weight_from_value (a_this, value);
                 break;
 
+	case PROP_ID_WHITE_SPACE:
+		status = set_prop_white_space_from_value(a_this, value);
+		break;
+
         default:
                 return CR_UNKNOWN_TYPE_ERROR;
 
@@ -1956,7 +2268,7 @@ cr_style_dup (CRStyle * a_this)
 
         g_return_val_if_fail (a_this, NULL);
 
-        result = cr_style_new ();
+        result = cr_style_new (FALSE);
         if (!result) {
                 cr_utils_trace_info ("Out of memory");
                 return NULL;
@@ -2002,7 +2314,7 @@ cr_style_num_prop_val_to_string (CRNumPropVal * a_prop_val,
 
         str = g_string_new (NULL);
         cr_utils_dump_n_chars2 (' ', str, a_nb_indent);
-        g_string_append_printf (str, "%s", "NumPropVal {");
+        g_string_append (str, "NumPropVal {");
         tmp_str = cr_num_to_string (&a_prop_val->sv);
         if (!tmp_str) {
                 status = CR_ERROR;
@@ -2019,8 +2331,8 @@ cr_style_num_prop_val_to_string (CRNumPropVal * a_prop_val,
         g_string_append_printf (str, "av: %s ", tmp_str);
         g_free (tmp_str);
         tmp_str = NULL;
-        g_string_append_printf (str, "%s", "}");
-        g_string_append_printf (a_str, "%s", str->str);
+        g_string_append (str, "}");
+        g_string_append (a_str, str->str);
         status = CR_OK;
       cleanup:
 
@@ -2047,7 +2359,7 @@ cr_style_rgb_prop_val_to_string (CRRgbPropVal * a_prop_val,
         str = g_string_new (NULL);
 
         cr_utils_dump_n_chars2 (' ', str, a_nb_indent);
-        g_string_append_printf (str, "RGBPropVal {");
+        g_string_append (str, "RGBPropVal {");
         tmp_str = cr_rgb_to_string (&a_prop_val->sv);
         if (!tmp_str) {
                 status = CR_ERROR;
@@ -2073,8 +2385,8 @@ cr_style_rgb_prop_val_to_string (CRRgbPropVal * a_prop_val,
         g_free (tmp_str);
         tmp_str = NULL;
 
-        g_string_append_printf (str, "}");
-        g_string_append_printf (a_str, "%s", str->str);
+        g_string_append (str, "}");
+        g_string_append (a_str, str->str);
         status = CR_OK;
       cleanup:
 
@@ -2132,7 +2444,7 @@ cr_style_border_style_to_string (enum CRBorderStyle a_prop,
                 break;
         }
         cr_utils_dump_n_chars2 (' ', a_str, a_nb_indent);
-        g_string_append_printf (a_str, "%s", str);
+        g_string_append (a_str, str);
         return CR_OK;
 }
 
@@ -2204,7 +2516,7 @@ cr_style_display_type_to_string (enum CRDisplayType a_code,
                 break;
         }
         cr_utils_dump_n_chars2 (' ', a_str, a_nb_indent);
-        g_string_append_printf (a_str, str);
+        g_string_append (a_str, str);
         return CR_OK;
 
 }
@@ -2237,7 +2549,7 @@ cr_style_position_type_to_string (enum CRPositionType a_code,
                 str = (gchar *) "unknown static property";
         }
         cr_utils_dump_n_chars2 (' ', a_str, a_nb_indent);
-        g_string_append_printf (a_str, "%s", str);
+        g_string_append (a_str, str);
         return CR_OK;
 }
 
@@ -2266,9 +2578,41 @@ cr_style_float_type_to_string (enum CRFloatType a_code,
                 str = (gchar *) "unknown float property value";
                 break;
         }
+        cr_utils_dump_n_chars2 (' ', a_str, a_nb_indent);
+        g_string_append (a_str, str);
         return CR_OK;
 }
 
+enum CRStatus
+cr_style_white_space_type_to_string (enum CRWhiteSpaceType a_code,
+                                     GString * a_str, guint a_nb_indent)
+{
+        gchar *str = NULL;
+
+        g_return_val_if_fail (a_str, CR_BAD_PARAM_ERROR);
+
+        switch (a_code) {
+        case WHITE_SPACE_NORMAL:
+                str = (gchar *) "normal";
+		break;
+	case WHITE_SPACE_PRE:
+		str = (gchar *) "pre";
+		break;
+	case WHITE_SPACE_NOWRAP:
+		str = (gchar *) "nowrap";
+		break;
+	case WHITE_SPACE_INHERIT:
+		str = (gchar *) "inherited";
+		break;
+	default:
+		str = (gchar *) "unknow white space property value";
+		break;
+	}
+	cr_utils_dump_n_chars2 (' ', a_str, a_nb_indent);
+	g_string_append (a_str, str);
+	return CR_OK;
+}
+ 
 /**
  *Serializes in instance of #CRStyle into
  *a string
@@ -2296,7 +2640,7 @@ cr_style_to_string (CRStyle * a_this, GString ** a_str, guint a_nb_indent)
                 str = *a_str;
         }
         cr_utils_dump_n_chars2 (' ', str, a_nb_indent);
-        g_string_append_printf (str, "style {\n");
+        g_string_append (str, "style {\n");
 
         /*loop over the num_props and to_string() them */
         for (i = NUM_PROP_TOP; i < NB_NUM_PROPS; i++) {
@@ -2310,13 +2654,13 @@ cr_style_to_string (CRStyle * a_this, GString ** a_str, guint a_nb_indent)
                 if (tmp_str) {
                         g_string_append_printf (str, "%s: ", tmp_str);
                 } else {
-                        g_string_append_printf (str, "%s", "NULL");
+                        g_string_append (str, "NULL");
                 }
                 tmp_str = NULL;
                 cr_style_num_prop_val_to_string (&a_this->num_props[i], str,
                                                  a_nb_indent +
                                                  INTERNAL_INDENT);
-                g_string_append_printf (str, "\n");
+                g_string_append (str, "\n");
         }
         /*loop over the rgb_props and to_string() them all */
         for (i = RGB_PROP_BORDER_TOP_COLOR; i < NB_RGB_PROPS; i++) {
@@ -2325,13 +2669,13 @@ cr_style_to_string (CRStyle * a_this, GString ** a_str, guint a_nb_indent)
                 if (tmp_str) {
                         g_string_append_printf (str, "%s: ", tmp_str);
                 } else {
-                        g_string_append_printf (str, "%s", "NULL: ");
+                        g_string_append (str, "NULL: ");
                 }
                 tmp_str = NULL;
                 cr_style_rgb_prop_val_to_string (&a_this->rgb_props[i], str,
                                                  a_nb_indent +
                                                  INTERNAL_INDENT);
-                g_string_append_printf (str, "\n");
+                g_string_append (str, "\n");
         }
         /*loop over the border_style_props and to_string() them */
         for (i = BORDER_STYLE_PROP_TOP; i < NB_BORDER_STYLE_PROPS; i++) {
@@ -2340,103 +2684,109 @@ cr_style_to_string (CRStyle * a_this, GString ** a_str, guint a_nb_indent)
                 if (tmp_str) {
                         g_string_append_printf (str, "%s: ", tmp_str);
                 } else {
-                        g_string_append_printf (str, "NULL: ");
+                        g_string_append (str, "NULL: ");
                 }
                 tmp_str = NULL;
                 cr_style_border_style_to_string (a_this->
                                                  border_style_props[i], str,
                                                  0);
-                g_string_append_printf (str, "\n");
+                g_string_append (str, "\n");
         }
         cr_utils_dump_n_chars2 (' ', str, indent);
-        g_string_append_printf (str, "display: ");
+        g_string_append (str, "display: ");
         cr_style_display_type_to_string (a_this->display, str, 0);
-        g_string_append_printf (str, "\n");
+        g_string_append (str, "\n");
 
         cr_utils_dump_n_chars2 (' ', str, indent);
-        g_string_append_printf (str, "position: ");
+        g_string_append (str, "position: ");
         cr_style_position_type_to_string (a_this->position, str, 0);
-        g_string_append_printf (str, "\n");
+        g_string_append (str, "\n");
 
         cr_utils_dump_n_chars2 (' ', str, indent);
-        g_string_append_printf (str, "float-type: ");
+        g_string_append (str, "float-type: ");
         cr_style_float_type_to_string (a_this->float_type, str, 0);
-        g_string_append_printf (str, "\n");
+        g_string_append (str, "\n");
+
+	cr_utils_dump_n_chars2 (' ', str, indent);
+	g_string_append (str, "white-space: ");
+	cr_style_white_space_type_to_string (a_this->white_space, str, 0);
+	g_string_append (str, "\n");
 
         cr_utils_dump_n_chars2 (' ', str, indent);
-        g_string_append_printf (str, "font-family: ");
+        g_string_append (str, "font-family: ");
         tmp_str = cr_font_family_to_string (a_this->font_family, TRUE);
         if (tmp_str) {
-                g_string_append_printf (str, "%s", tmp_str);
+                g_string_append (str, tmp_str);
                 g_free (tmp_str);
                 tmp_str = NULL;
         } else {
-                g_string_append_printf (str, "NULL");
+                g_string_append (str, "NULL");
         }
-        g_string_append_printf (str, "\n");
+        g_string_append (str, "\n");
 
         cr_utils_dump_n_chars2 (' ', str, indent);
         tmp_str = cr_font_size_to_string (a_this->font_size);
         if (tmp_str) {
                 g_string_append_printf (str, "font-size: %s", tmp_str);
         } else {
-                g_string_append_printf (str, "font-size: NULL");
+                g_string_append (str, "font-size: NULL");
         }
         tmp_str = NULL;
-        g_string_append_printf (str, "\n");
+        g_string_append (str, "\n");
 
         cr_utils_dump_n_chars2 (' ', str, indent);
         tmp_str = cr_font_size_adjust_to_string (a_this->font_size_adjust);
         if (tmp_str) {
                 g_string_append_printf (str, "font-size-adjust: %s", tmp_str);
         } else {
-                g_string_append_printf (str, "font-size-adjust: NULL");
+                g_string_append (str, "font-size-adjust: NULL");
         }
         tmp_str = NULL;
-        g_string_append_printf (str, "\n");
+        g_string_append (str, "\n");
 
         cr_utils_dump_n_chars2 (' ', str, indent);
         tmp_str = (gchar *) cr_font_style_to_string (a_this->font_style);
         if (tmp_str) {
-                g_string_append_printf (str, "font-size: %s", tmp_str);
+                g_string_append_printf (str, "font-style: %s", tmp_str);
         } else {
-                g_string_append_printf (str, "font-size: NULL");
+                g_string_append (str, "font-style: NULL");
         }
         tmp_str = NULL;
-        g_string_append_printf (str, "\n");
+        g_string_append (str, "\n");
 
         cr_utils_dump_n_chars2 (' ', str, indent);
         tmp_str = (gchar *) cr_font_variant_to_string (a_this->font_variant);
         if (tmp_str) {
                 g_string_append_printf (str, "font-variant: %s", tmp_str);
         } else {
-                g_string_append_printf (str, "font-variant: NULL");
+                g_string_append (str, "font-variant: NULL");
         }
         tmp_str = NULL;
-        g_string_append_printf (str, "\n");
+        g_string_append (str, "\n");
 
         cr_utils_dump_n_chars2 (' ', str, indent);
         tmp_str = (gchar *) cr_font_weight_to_string (a_this->font_weight);
         if (tmp_str) {
                 g_string_append_printf (str, "font-weight: %s", tmp_str);
         } else {
-                g_string_append_printf (str, "font-weight: NULL");
+                g_string_append (str, "font-weight: NULL");
         }
         tmp_str = NULL;
-        g_string_append_printf (str, "\n");
+        g_string_append (str, "\n");
 
         cr_utils_dump_n_chars2 (' ', str, indent);
         tmp_str = (gchar *) cr_font_stretch_to_string (a_this->font_stretch);
         if (tmp_str) {
                 g_string_append_printf (str, "font-stretch: %s", tmp_str);
         } else {
-                g_string_append_printf (str, "font-stretch: NULL");
+                g_string_append (str, "font-stretch: NULL");
         }
         tmp_str = NULL;
-        g_string_append_printf (str, "\n");
+        g_string_append (str, "\n");
+
 
         cr_utils_dump_n_chars2 (' ', str, a_nb_indent);
-        g_string_append_printf (str, "}");
+        g_string_append (str, "}");
 
         return CR_OK;
 }
@@ -2452,3 +2802,4 @@ cr_style_destroy (CRStyle * a_this)
 
         g_free (a_this);
 }
+

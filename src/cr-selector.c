@@ -3,8 +3,6 @@
 /*
  * This file is part of The Croco Library
  *
- * Copyright (C) 2002-2003 Dodji Seketeli <dodji@seketeli.org>
- *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of version 2.1 of the GNU Lesser General Public
  * License as published by the Free Software Foundation.
@@ -18,11 +16,10 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
  * USA
+ *
+ * See COPYRIGHTS file for copyright information.
  */
 
-/*
- *$Id$
- */
 #include <string.h>
 #include "cr-selector.h"
 #include "cr-parser.h"
@@ -145,11 +142,10 @@ cr_selector_to_string (CRSelector * a_this)
 
                                 if (tmp_str) {
                                         if (cur->prev)
-                                                g_string_append_printf
-                                                        (str_buf, ", ");
+                                                g_string_append (str_buf, 
+								 ", ");
 
-                                        g_string_append_printf
-                                                (str_buf, "%s", tmp_str);
+                                        g_string_append (str_buf, tmp_str);
 
                                         g_free (tmp_str);
                                         tmp_str = NULL;

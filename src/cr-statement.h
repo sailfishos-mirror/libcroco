@@ -17,6 +17,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
  * USA
  * 
+ * Author: Dodji Seketeli
  * See COPYRIGHTS file for copyright information.
  */
 
@@ -92,7 +93,7 @@ typedef struct _CRAtImportRule CRAtImportRule ;
 struct _CRAtImportRule
 {
 	/**the url of the import rule*/
-	GString *url ;
+	CRString *url ;
 
         GList *media_list ;
 
@@ -121,15 +122,15 @@ struct _CRAtPageRule
 	CRDeclaration *decl_list ;
 
 	/**page selector. Is a pseudo selector*/
-	GString *name ;
-	GString *pseudo ;
+	CRString *name ;
+	CRString *pseudo ;
 } ;
 
 /**The @charset rule abstraction*/
 typedef struct _CRAtCharsetRule CRAtCharsetRule ;
 struct _CRAtCharsetRule
 {
-	GString * charset ;
+	CRString * charset ;
 };
 
 /**The abstaction of the @font-face rule.*/
@@ -215,6 +216,8 @@ struct _CRStatement
 	CRStatement *next ;
 	CRStatement *prev ;
 
+        CRParsingLocation location ;
+
         /**
          *a custom pointer useable by
          *applications that use libcroco.
@@ -251,7 +254,7 @@ cr_statement_ruleset_parse_from_buf (const guchar * a_buf,
 
 CRStatement*
 cr_statement_new_at_import_rule (CRStyleSheet *a_container_sheet,
-                                 GString *a_url,
+                                 CRString *a_url,
                                  GList *a_media_list,
 				 CRStyleSheet *a_imported_sheet) ;
 
@@ -269,7 +272,7 @@ cr_statement_at_media_rule_parse_from_buf (const guchar *a_buf,
 
 CRStatement *
 cr_statement_new_at_charset_rule (CRStyleSheet *a_sheet,
-                                  GString *a_charset) ;
+                                  CRString *a_charset) ;
 CRStatement *
 cr_statement_at_charset_rule_parse_from_buf (const guchar *a_buf,
 					     enum CREncoding a_encoding);
@@ -285,8 +288,8 @@ cr_statement_font_face_rule_parse_from_buf (const guchar *a_buf,
 CRStatement *
 cr_statement_new_at_page_rule (CRStyleSheet *a_sheet,
                                CRDeclaration *a_decl_list,
-			       GString *a_name,
-			       GString *a_pseudo) ;
+			       CRString *a_name,
+			       CRString *a_pseudo) ;
 CRStatement *
 cr_statement_at_page_rule_parse_from_buf (const guchar *a_buf,
 					  enum CREncoding a_encoding)  ;
@@ -328,7 +331,7 @@ cr_statement_ruleset_get_declarations (CRStatement *a_this,
 
 enum CRStatus
 cr_statement_ruleset_append_decl2 (CRStatement *a_this,
-				   GString *a_prop, CRTerm *a_value) ;
+				   CRString *a_prop, CRTerm *a_value) ;
 
 enum CRStatus
 cr_statement_ruleset_append_decl (CRStatement *a_this,
@@ -344,11 +347,11 @@ cr_statement_at_import_rule_get_imported_sheet (CRStatement *a_this,
 
 enum CRStatus
 cr_statement_at_import_rule_set_url (CRStatement *a_this,
-				     GString *a_url) ;
+				     CRString *a_url) ;
 
 enum CRStatus
 cr_statement_at_import_rule_get_url (CRStatement *a_this,
-				     GString **a_url) ;
+				     CRString **a_url) ;
 
 gint
 cr_statement_at_media_nr_rules (CRStatement *a_this) ;
@@ -374,11 +377,11 @@ cr_statement_at_page_rule_get_declarations (CRStatement *a_this,
 
 enum CRStatus
 cr_statement_at_charset_rule_set_charset (CRStatement *a_this,
-					  GString *a_charset) ;
+					  CRString *a_charset) ;
 
 enum CRStatus
 cr_statement_at_charset_rule_get_charset (CRStatement *a_this,
-					  GString **a_charset) ;
+					  CRString **a_charset) ;
 
 enum CRStatus
 cr_statement_at_font_face_rule_set_decls (CRStatement *a_this,
@@ -390,11 +393,14 @@ cr_statement_at_font_face_rule_get_decls (CRStatement *a_this,
 
 enum CRStatus
 cr_statement_at_font_face_rule_add_decl (CRStatement *a_this,
-					 GString *a_prop,
+					 CRString *a_prop,
 					 CRTerm *a_value) ;
 
 gchar *
 cr_statement_to_string (CRStatement * a_this, gulong a_indent) ;
+
+gchar*
+cr_statement_list_to_string (CRStatement *a_this, gulong a_indent) ;
 
 void
 cr_statement_dump (CRStatement *a_this, FILE *a_fp, gulong a_indent) ;

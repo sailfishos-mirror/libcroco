@@ -15,6 +15,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
  * USA
  *
+ * Author: Dodji Seketeli
  * See COPYRIGHTS file for copyrights information.
  */
 
@@ -24,7 +25,7 @@
 #define PRIVATE(a_obj) (a_obj)->priv
 
 struct _CRPropListPriv {
-        GString *prop;
+        CRString *prop;
         CRDeclaration *decl;
         CRPropList *next;
         CRPropList *prev;
@@ -100,7 +101,8 @@ cr_prop_list_append (CRPropList * a_this, CRPropList * a_to_append)
  */
 CRPropList *
 cr_prop_list_append2 (CRPropList * a_this,
-                      GString * a_prop, CRDeclaration * a_decl)
+                      CRString * a_prop, 
+		      CRDeclaration * a_decl)
 {
         CRPropList *list = NULL,
                 *result = NULL;
@@ -147,7 +149,7 @@ cr_prop_list_prepend (CRPropList * a_this, CRPropList * a_to_prepend)
  */
 CRPropList *
 cr_prop_list_prepend2 (CRPropList * a_this,
-                       GString * a_prop, CRDeclaration * a_decl)
+                       CRString * a_prop, CRDeclaration * a_decl)
 {
         CRPropList *list = NULL,
                 *result = NULL;
@@ -169,7 +171,7 @@ cr_prop_list_prepend2 (CRPropList * a_this,
  *@param a_prop the property to set
  */
 enum CRStatus
-cr_prop_list_set_prop (CRPropList * a_this, GString * a_prop)
+cr_prop_list_set_prop (CRPropList * a_this, CRString * a_prop)
 {
         g_return_val_if_fail (a_this && PRIVATE (a_this)
                               && a_prop, CR_BAD_PARAM_ERROR);
@@ -187,7 +189,7 @@ cr_prop_list_set_prop (CRPropList * a_this, GString * a_prop)
  *otherwise.
  */
 enum CRStatus
-cr_prop_list_get_prop (CRPropList * a_this, GString ** a_prop)
+cr_prop_list_get_prop (CRPropList * a_this, CRString ** a_prop)
 {
         g_return_val_if_fail (a_this && PRIVATE (a_this)
                               && a_prop, CR_BAD_PARAM_ERROR);
@@ -228,7 +230,7 @@ cr_prop_list_get_decl (CRPropList * a_this, CRDeclaration ** a_decl)
  */
 enum CRStatus
 cr_prop_list_lookup_prop (CRPropList * a_this,
-                          GString * a_prop, CRPropList ** a_pair)
+                          CRString * a_prop, CRPropList ** a_pair)
 {
         CRPropList *cur = NULL;
 
@@ -241,9 +243,12 @@ cr_prop_list_lookup_prop (CRPropList * a_this,
 
         for (cur = a_this; cur; cur = PRIVATE (cur)->next) {
                 if (PRIVATE (cur)->prop
-                    && PRIVATE (cur)->prop->str
-                    && a_prop->str
-                    && !strcmp (PRIVATE (cur)->prop->str, a_prop->str))
+		    && PRIVATE (cur)->prop->stryng
+                    && PRIVATE (cur)->prop->stryng->str
+		    && a_prop->stryng
+                    && a_prop->stryng->str
+                    && !strcmp (PRIVATE (cur)->prop->stryng->str, 
+				a_prop->stryng->str))
                         break;
         }
 

@@ -15,6 +15,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
  * USA
  *
+ * Author: Dodji Seketeli
  * See COPYRIGHTS file for copyrights information.
  */
 
@@ -23,6 +24,7 @@
 
 #include "cr-utils.h"
 #include "cr-declaration.h"
+#include "cr-string.h"
 
 G_BEGIN_DECLS
 
@@ -38,24 +40,24 @@ CRPropList * cr_prop_list_append (CRPropList *a_this,
 				  CRPropList *a_to_append) ;
 
 CRPropList * cr_prop_list_append2 (CRPropList *a_this,
-				   GString *a_prop,
+				   CRString *a_prop,
 				   CRDeclaration *a_decl) ;
 
 CRPropList * cr_prop_list_prepend (CRPropList *a_this,
 				   CRPropList *a_to_append) ;
 
 CRPropList *  cr_prop_list_prepend2 (CRPropList *a_this,
-				     GString *a_prop,
+				     CRString *a_prop,
 				     CRDeclaration *a_decl) ;
 
 enum CRStatus cr_prop_list_set_prop (CRPropList *a_this,
-				     GString *a_prop) ;
+				     CRString *a_prop) ;
 
 enum CRStatus cr_prop_list_get_prop (CRPropList *a_this,
-				     GString **a_prop) ;
+				     CRString **a_prop) ;
 
 enum CRStatus cr_prop_list_lookup_prop (CRPropList *a_this,
-					GString *a_prop,
+					CRString *a_prop,
 					CRPropList**a_pair) ;
 
 CRPropList * cr_prop_list_get_next (CRPropList *a_this) ;

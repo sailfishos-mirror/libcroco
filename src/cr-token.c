@@ -3,8 +3,6 @@
 /*
  * This file is part of The Croco Library
  *
- * Copyright (C) 2002-2003 Dodji Seketeli <dodji@seketeli.org>
- *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of version 2.1 of the GNU Lesser General Public
  * License as published by the Free Software Foundation.
@@ -18,10 +16,9 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
  * USA
- */
-
-/*
- *$Id$
+ * 
+ * Author: Dodji Seketeli
+ * see COPYRIGHTS file for copyright information.
  */
 
 /**
@@ -31,6 +28,10 @@
  */
 #include <string.h>
 #include "cr-token.h"
+
+/*
+ *TODO: write a CRToken::to_string() method.
+ */
 
 /**
  *Frees the attributes of the current instance
@@ -70,7 +71,7 @@ cr_token_clear (CRToken * a_this)
         case COMMENT_TK:
         case ATKEYWORD_TK:
                 if (a_this->u.str) {
-                        g_string_free (a_this->u.str, TRUE);
+                        cr_string_destroy (a_this->u.str);
                         a_this->u.str = NULL;
                 }
                 break;
@@ -98,7 +99,7 @@ cr_token_clear (CRToken * a_this)
                 }
 
                 if (a_this->dimen) {
-                        g_string_free (a_this->dimen, TRUE);
+                        cr_string_destroy (a_this->dimen);
                         a_this->dimen = NULL;
                 }
 
@@ -241,21 +242,18 @@ cr_token_set_dashmatch (CRToken * a_this)
 }
 
 enum CRStatus
-cr_token_set_comment (CRToken * a_this, GString * a_str)
+cr_token_set_comment (CRToken * a_this, CRString * a_str)
 {
         g_return_val_if_fail (a_this, CR_BAD_PARAM_ERROR);
 
         cr_token_clear (a_this);
-
         a_this->type = COMMENT_TK;
-
-        a_this->u.str = a_str;
-
+        a_this->u.str = a_str ;
         return CR_OK;
 }
 
 enum CRStatus
-cr_token_set_string (CRToken * a_this, GString * a_str)
+cr_token_set_string (CRToken * a_this, CRString * a_str)
 {
         g_return_val_if_fail (a_this, CR_BAD_PARAM_ERROR);
 
@@ -263,49 +261,42 @@ cr_token_set_string (CRToken * a_this, GString * a_str)
 
         a_this->type = STRING_TK;
 
-        a_this->u.str = a_str;
+        a_this->u.str = a_str ;
 
         return CR_OK;
 }
 
 enum CRStatus
-cr_token_set_ident (CRToken * a_this, GString * a_ident)
+cr_token_set_ident (CRToken * a_this, CRString * a_ident)
 {
         g_return_val_if_fail (a_this, CR_BAD_PARAM_ERROR);
 
         cr_token_clear (a_this);
-
         a_this->type = IDENT_TK;
-
         a_this->u.str = a_ident;
-
         return CR_OK;
 }
 
 
 enum CRStatus
-cr_token_set_function (CRToken * a_this, GString * a_fun_name)
+cr_token_set_function (CRToken * a_this, CRString * a_fun_name)
 {
-        g_return_val_if_fail (a_this, CR_BAD_PARAM_ERROR);
+        g_return_val_if_fail (a_this,
+                              CR_BAD_PARAM_ERROR);
 
         cr_token_clear (a_this);
-
         a_this->type = FUNCTION_TK;
-
-        a_this->u.str = a_fun_name;
-
+        a_this->u.str  = a_fun_name;
         return CR_OK;
 }
 
 enum CRStatus
-cr_token_set_hash (CRToken * a_this, GString * a_hash)
+cr_token_set_hash (CRToken * a_this, CRString * a_hash)
 {
         g_return_val_if_fail (a_this, CR_BAD_PARAM_ERROR);
 
         cr_token_clear (a_this);
-
         a_this->type = HASH_TK;
-
         a_this->u.str = a_hash;
 
         return CR_OK;
@@ -317,9 +308,7 @@ cr_token_set_rgb (CRToken * a_this, CRRgb * a_rgb)
         g_return_val_if_fail (a_this, CR_BAD_PARAM_ERROR);
 
         cr_token_clear (a_this);
-
         a_this->type = RGB_TK;
-
         a_this->u.rgb = a_rgb;
 
         return CR_OK;
@@ -367,7 +356,6 @@ cr_token_set_font_face_sym (CRToken * a_this)
         g_return_val_if_fail (a_this, CR_BAD_PARAM_ERROR);
 
         cr_token_clear (a_this);
-
         a_this->type = FONT_FACE_SYM_TK;
 
         return CR_OK;
@@ -379,23 +367,19 @@ cr_token_set_charset_sym (CRToken * a_this)
         g_return_val_if_fail (a_this, CR_BAD_PARAM_ERROR);
 
         cr_token_clear (a_this);
-
         a_this->type = CHARSET_SYM_TK;
 
         return CR_OK;
 }
 
 enum CRStatus
-cr_token_set_atkeyword (CRToken * a_this, GString * a_atname)
+cr_token_set_atkeyword (CRToken * a_this, CRString * a_atname)
 {
         g_return_val_if_fail (a_this, CR_BAD_PARAM_ERROR);
 
         cr_token_clear (a_this);
-
         a_this->type = ATKEYWORD_TK;
-
         a_this->u.str = a_atname;
-
         return CR_OK;
 }
 
@@ -403,11 +387,8 @@ enum CRStatus
 cr_token_set_important_sym (CRToken * a_this)
 {
         g_return_val_if_fail (a_this, CR_BAD_PARAM_ERROR);
-
         cr_token_clear (a_this);
-
         a_this->type = IMPORTANT_SYM_TK;
-
         return CR_OK;
 }
 
@@ -415,13 +396,9 @@ enum CRStatus
 cr_token_set_ems (CRToken * a_this, CRNum * a_num)
 {
         g_return_val_if_fail (a_this, CR_BAD_PARAM_ERROR);
-
         cr_token_clear (a_this);
-
         a_this->type = EMS_TK;
-
         a_this->u.num = a_num;
-
         return CR_OK;
 }
 
@@ -429,13 +406,9 @@ enum CRStatus
 cr_token_set_exs (CRToken * a_this, CRNum * a_num)
 {
         g_return_val_if_fail (a_this, CR_BAD_PARAM_ERROR);
-
         cr_token_clear (a_this);
-
         a_this->type = EXS_TK;
-
         a_this->u.num = a_num;
-
         return CR_OK;
 }
 
@@ -448,7 +421,6 @@ cr_token_set_length (CRToken * a_this, CRNum * a_num,
         cr_token_clear (a_this);
 
         a_this->type = LENGTH_TK;
-
         a_this->extra_type = a_et;
         a_this->u.num = a_num;
 
@@ -501,16 +473,14 @@ cr_token_set_freq (CRToken * a_this, CRNum * a_num,
 }
 
 enum CRStatus
-cr_token_set_dimen (CRToken * a_this, CRNum * a_num, GString * a_dim)
+cr_token_set_dimen (CRToken * a_this, CRNum * a_num, 
+                    CRString * a_dim)
 {
         g_return_val_if_fail (a_this, CR_BAD_PARAM_ERROR);
-
         cr_token_clear (a_this);
-
         a_this->type = DIMEN_TK;
         a_this->u.num = a_num;
         a_this->dimen = a_dim;
-
         return CR_OK;
 
 }
@@ -537,12 +507,11 @@ cr_token_set_number (CRToken * a_this, CRNum * a_num)
 
         a_this->type = NUMBER_TK;
         a_this->u.num = a_num;
-
         return CR_OK;
 }
 
 enum CRStatus
-cr_token_set_uri (CRToken * a_this, GString * a_uri)
+cr_token_set_uri (CRToken * a_this, CRString * a_uri)
 {
         g_return_val_if_fail (a_this, CR_BAD_PARAM_ERROR);
 

@@ -17,9 +17,9 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
  * USA
  *
+ * Author: Dodji Seketeli.
  * See COPYRIGHTS files for copyrights information.
  */
-
 
 #include <string.h>
 #include "cr-statement.h"
@@ -35,7 +35,8 @@
 static void cr_statement_clear (CRStatement * a_this);
 
 static void  
-parse_font_face_start_font_face_cb (CRDocHandler * a_this)
+parse_font_face_start_font_face_cb (CRDocHandler * a_this,
+                                    CRParsingLocation *a_location)
 {
         CRStatement *stmt = NULL;
         enum CRStatus status = CR_OK;
@@ -72,11 +73,11 @@ parse_font_face_unrecoverable_error_cb (CRDocHandler * a_this)
 
 static void
 parse_font_face_property_cb (CRDocHandler * a_this,
-                             GString * a_name,
+                             CRString * a_name,
                              CRTerm * a_value, gboolean a_important)
 {
         enum CRStatus status = CR_OK;
-        GString *name = NULL;
+        CRString *name = NULL;
         CRDeclaration *decl = NULL;
         CRStatement *stmt = NULL;
         CRStatement **stmtptr = NULL;
@@ -88,7 +89,7 @@ parse_font_face_property_cb (CRDocHandler * a_this,
         g_return_if_fail (status == CR_OK && stmt);
         g_return_if_fail (stmt->type == AT_FONT_FACE_RULE_STMT);
 
-        name = g_string_new_len (a_name->str, a_name->len);
+        name = cr_string_dup (a_name) ;
         g_return_if_fail (name);
         decl = cr_declaration_new (stmt, name, a_value);
         if (!decl) {
@@ -110,7 +111,7 @@ parse_font_face_property_cb (CRDocHandler * a_this,
                 decl = NULL;
         }
         if (name) {
-                g_string_free (name, TRUE);
+                cr_string_destroy (name);
                 name = NULL;
         }
 }
@@ -135,19 +136,21 @@ parse_font_face_end_font_face_cb (CRDocHandler * a_this)
 
 static void
 parse_page_start_page_cb (CRDocHandler * a_this,
-                          GString * a_name, GString * a_pseudo_page)
+                          CRString * a_name, 
+                          CRString * a_pseudo_page,
+                          CRParsingLocation *a_location)
 {
         CRStatement *stmt = NULL;
         enum CRStatus status = CR_OK;
-        GString *page_name = NULL, *pseudo_name = NULL ;
+        CRString *page_name = NULL, *pseudo_name = NULL ;
 
         if (a_name)
-                page_name = g_string_new_len (a_name->str,
-                                              a_name->len) ;
+                page_name = cr_string_dup (a_name) ;
         if (a_pseudo_page)
-                pseudo_name = g_string_new_len (a_pseudo_page->str,
-                                                a_pseudo_page->len) ;
-        stmt = cr_statement_new_at_page_rule (NULL, NULL, page_name,
+                pseudo_name = cr_string_dup (a_pseudo_page) ;
+
+        stmt = cr_statement_new_at_page_rule (NULL, NULL, 
+                                              page_name,
                                               pseudo_name);
         page_name = NULL ;
         pseudo_name = NULL ;
@@ -181,10 +184,10 @@ parse_page_unrecoverable_error_cb (CRDocHandler * a_this)
 
 static void
 parse_page_property_cb (CRDocHandler * a_this,
-                        GString * a_name,
+                        CRString * a_name,
                         CRTerm * a_expression, gboolean a_important)
 {
-        GString *name = NULL;
+        CRString *name = NULL;
         CRStatement *stmt = NULL;
         CRStatement **stmtptr = NULL;
         CRDeclaration *decl = NULL;
@@ -194,7 +197,7 @@ parse_page_property_cb (CRDocHandler * a_this,
         status = cr_doc_handler_get_ctxt (a_this, (gpointer *) stmtptr);
         g_return_if_fail (status == CR_OK && stmt->type == AT_PAGE_RULE_STMT);
 
-        name = g_string_new_len (a_name->str, a_name->len);
+        name = cr_string_dup (a_name);
         g_return_if_fail (name);
 
         decl = cr_declaration_new (stmt, name, a_expression);
@@ -207,7 +210,8 @@ parse_page_property_cb (CRDocHandler * a_this,
 
 static void
 parse_page_end_page_cb (CRDocHandler * a_this,
-                        GString * a_name, GString * a_pseudo_page)
+                        CRString * a_name, 
+                        CRString * a_pseudo_page)
 {
         enum CRStatus status = CR_OK;
         CRStatement *stmt = NULL;
@@ -223,7 +227,9 @@ parse_page_end_page_cb (CRDocHandler * a_this,
 }
 
 static void
-parse_at_media_start_media_cb (CRDocHandler * a_this, GList * a_media_list)
+parse_at_media_start_media_cb (CRDocHandler * a_this, 
+                               GList * a_media_list,
+                               CRParsingLocation *a_location)
 {
         enum CRStatus status = CR_OK;
         CRStatement *at_media = NULL;
@@ -233,7 +239,8 @@ parse_at_media_start_media_cb (CRDocHandler * a_this, GList * a_media_list)
 
         if (a_media_list) {
                 /*duplicate media list */
-                media_list = cr_dup_glist_of_string (a_media_list);
+                media_list = cr_utils_dup_glist_of_cr_string 
+                        (a_media_list);
         }
 
         g_return_if_fail (media_list);
@@ -294,7 +301,7 @@ parse_at_media_start_selector_cb (CRDocHandler * a_this,
 
 static void
 parse_at_media_property_cb (CRDocHandler * a_this,
-                            GString * a_name, CRTerm * a_value,
+                            CRString * a_name, CRTerm * a_value,
                             gboolean a_important)
 {
         enum CRStatus status = CR_OK;
@@ -306,15 +313,16 @@ parse_at_media_property_cb (CRDocHandler * a_this,
         CRStatement *stmt = NULL;
         CRStatement **stmtptr = NULL;
         CRDeclaration *decl = NULL;
-        GString *name = NULL;
+        CRString *name = NULL;
 
         g_return_if_fail (a_this && a_name);
 
-        name = g_string_new_len (a_name->str, a_name->len);
+        name = cr_string_dup (a_name) ;
         g_return_if_fail (name);
 
 	stmtptr = &stmt;
-        status = cr_doc_handler_get_ctxt (a_this, (gpointer *) stmtptr);
+        status = cr_doc_handler_get_ctxt (a_this, 
+                                          (gpointer *) stmtptr);
         g_return_if_fail (status == CR_OK && stmt);
         g_return_if_fail (stmt->type == RULESET_STMT);
 
@@ -326,7 +334,8 @@ parse_at_media_property_cb (CRDocHandler * a_this,
 }
 
 static void
-parse_at_media_end_selector_cb (CRDocHandler * a_this, CRSelector * a_sellist)
+parse_at_media_end_selector_cb (CRDocHandler * a_this, 
+                                CRSelector * a_sellist)
 {
         enum CRStatus status = CR_OK;
 
@@ -351,7 +360,8 @@ parse_at_media_end_selector_cb (CRDocHandler * a_this, CRSelector * a_sellist)
 }
 
 static void
-parse_at_media_end_media_cb (CRDocHandler * a_this, GList * a_media_list)
+parse_at_media_end_media_cb (CRDocHandler * a_this, 
+                             GList * a_media_list)
 {
         enum CRStatus status = CR_OK;
         CRStatement *at_media = NULL;
@@ -360,9 +370,9 @@ parse_at_media_end_media_cb (CRDocHandler * a_this, GList * a_media_list)
         g_return_if_fail (a_this && a_this->priv);
 
 	at_media_ptr = &at_media;
-        status = cr_doc_handler_get_ctxt (a_this, (gpointer *) at_media_ptr);
+        status = cr_doc_handler_get_ctxt (a_this, 
+                                          (gpointer *) at_media_ptr);
         g_return_if_fail (status == CR_OK && at_media);
-
         status = cr_doc_handler_set_result (a_this, at_media);
 }
 
@@ -403,24 +413,25 @@ parse_ruleset_unrecoverable_error_cb (CRDocHandler * a_this)
 
 static void
 parse_ruleset_property_cb (CRDocHandler * a_this,
-                           GString * a_name,
+                           CRString * a_name,
                            CRTerm * a_value, gboolean a_important)
 {
         enum CRStatus status = CR_OK;
         CRStatement *ruleset = NULL;
         CRStatement **rulesetptr = NULL;
         CRDeclaration *decl = NULL;
-        GString *stringue = NULL;
+        CRString *stringue = NULL;
 
         g_return_if_fail (a_this && a_this->priv && a_name);
 
-        stringue = g_string_new (a_name->str);
+        stringue = cr_string_dup (a_name);
         g_return_if_fail (stringue);
 
 	rulesetptr = &ruleset;
         status = cr_doc_handler_get_result (a_this, (gpointer *) rulesetptr);
         g_return_if_fail (status == CR_OK
-                          && ruleset && ruleset->type == RULESET_STMT);
+                          && ruleset 
+                          && ruleset->type == RULESET_STMT);
 
         decl = cr_declaration_new (ruleset, stringue, a_value);
         g_return_if_fail (decl);
@@ -430,7 +441,8 @@ parse_ruleset_property_cb (CRDocHandler * a_this,
 }
 
 static void
-parse_ruleset_end_selector_cb (CRDocHandler * a_this, CRSelector * a_sellist)
+parse_ruleset_end_selector_cb (CRDocHandler * a_this, 
+                               CRSelector * a_sellist)
 {
         CRStatement *result = NULL;
         CRStatement **resultptr = NULL;
@@ -442,7 +454,8 @@ parse_ruleset_end_selector_cb (CRDocHandler * a_this, CRSelector * a_sellist)
         status = cr_doc_handler_get_result (a_this, (gpointer *) resultptr);
 
         g_return_if_fail (status == CR_OK
-                          && result && result->type == RULESET_STMT);
+                          && result 
+                          && result->type == RULESET_STMT);
 }
 
 static void
@@ -473,7 +486,8 @@ cr_statement_clear (CRStatement * a_this)
                 if (!a_this->kind.import_rule)
                         return;
                 if (a_this->kind.import_rule->url) {
-                        g_string_free (a_this->kind.import_rule->url, TRUE);
+                        cr_string_destroy 
+                                (a_this->kind.import_rule->url) ;
                         a_this->kind.import_rule->url = NULL;
                 }
                 g_free (a_this->kind.import_rule);
@@ -494,8 +508,7 @@ cr_statement_clear (CRStatement * a_this)
                         for (cur = a_this->kind.media_rule->media_list;
                              cur; cur = cur->next) {
                                 if (cur->data) {
-                                        g_string_free ((GString *) cur->data,
-                                                       TRUE);
+                                        cr_string_destroy ((CRString *) cur->data);
                                         cur->data = NULL;
                                 }
 
@@ -517,14 +530,15 @@ cr_statement_clear (CRStatement * a_this)
                         a_this->kind.page_rule->decl_list = NULL;
                 }
                 if (a_this->kind.page_rule->name) {
-                        g_string_free (a_this->kind.page_rule->name, TRUE);
+                        cr_string_destroy 
+                                (a_this->kind.page_rule->name);
                         a_this->kind.page_rule->name = NULL;
                 }
                 if (a_this->kind.page_rule->pseudo) {
-                        g_string_free (a_this->kind.page_rule->pseudo, TRUE);
+                        cr_string_destroy
+                                (a_this->kind.page_rule->pseudo);
                         a_this->kind.page_rule->pseudo = NULL;
                 }
-
                 g_free (a_this->kind.page_rule);
                 a_this->kind.page_rule = NULL;
                 break;
@@ -534,8 +548,8 @@ cr_statement_clear (CRStatement * a_this)
                         return;
 
                 if (a_this->kind.charset_rule->charset) {
-                        g_string_free
-                                (a_this->kind.charset_rule->charset, TRUE);
+                        cr_string_destroy
+                                (a_this->kind.charset_rule->charset);
                         a_this->kind.charset_rule->charset = NULL;
                 }
                 g_free (a_this->kind.charset_rule);
@@ -586,25 +600,25 @@ cr_statement_ruleset_to_string (CRStatement * a_this, glong a_indent)
                         cr_selector_to_string (a_this->kind.ruleset->
                                                sel_list);
                 if (tmp_str) {
-                        g_string_append_printf (stringue, "%s", tmp_str);
+                        g_string_append (stringue, tmp_str);
                         g_free (tmp_str);
                         tmp_str = NULL;
                 }
         }
-        g_string_append_printf (stringue, " {\n");
+        g_string_append (stringue, " {\n");
         if (a_this->kind.ruleset->decl_list) {
                 tmp_str = cr_declaration_list_to_string2
                         (a_this->kind.ruleset->decl_list,
                          a_indent + DECLARATION_INDENT_NB, TRUE);
                 if (tmp_str) {
-                        g_string_append_printf (stringue, "%s", tmp_str);
+                        g_string_append (stringue, tmp_str);
                         g_free (tmp_str);
                         tmp_str = NULL;
                 }
-                g_string_append_printf (stringue, "%s", "\n");
+                g_string_append (stringue, "\n");
                 cr_utils_dump_n_chars2 (' ', stringue, a_indent);
         }
-        g_string_append_printf (stringue, "%s", "}");
+        g_string_append (stringue, "}");
         result = stringue->str;
 
         if (stringue) {
@@ -644,17 +658,17 @@ cr_statement_font_face_rule_to_string (CRStatement * a_this,
                 if (a_indent)
                         cr_utils_dump_n_chars2 (' ', stringue, 
                                         a_indent);
-                g_string_append_printf (stringue, "@font-face {\n");
+                g_string_append (stringue, "@font-face {\n");
                 tmp_str = cr_declaration_list_to_string2 
                         (a_this->kind.font_face_rule->decl_list,
                          a_indent + DECLARATION_INDENT_NB, TRUE) ;
                 if (tmp_str) {
-                        g_string_append_printf (stringue, "%s"
-                                                ,tmp_str) ;
+                        g_string_append (stringue,
+                                         tmp_str) ;
                         g_free (tmp_str) ;
                         tmp_str = NULL ;
                 }
-                g_string_append_printf (stringue, "\n}");
+                g_string_append (stringue, "\n}");
         }
         if (stringue) {
                 result = stringue->str ;
@@ -683,9 +697,11 @@ cr_statement_charset_to_string (CRStatement *a_this,
                               NULL) ;
 
         if (a_this->kind.charset_rule
-            && a_this->kind.charset_rule->charset) {
-                str = g_strndup (a_this->kind.charset_rule->charset->str,
-                                 a_this->kind.charset_rule->charset->len);
+            && a_this->kind.charset_rule->charset
+            && a_this->kind.charset_rule->charset->stryng
+            && a_this->kind.charset_rule->charset->stryng->str) {
+                str = g_strndup (a_this->kind.charset_rule->charset->stryng->str,
+                                 a_this->kind.charset_rule->charset->stryng->len);
                 g_return_val_if_fail (str, NULL);
                 stringue = g_string_new (NULL) ;
                 g_return_val_if_fail (stringue, NULL) ;
@@ -721,32 +737,33 @@ cr_statement_at_page_rule_to_string (CRStatement *a_this,
         stringue = g_string_new (NULL) ;
 
         cr_utils_dump_n_chars2 (' ', stringue, a_indent) ;
-        g_string_append_printf (stringue, "@page");
-
-        if (a_this->kind.page_rule->name) {
-                g_string_append_printf 
-                        (stringue, " %s",
-                         a_this->kind.page_rule->name->str) ;
+        g_string_append (stringue, "@page");
+	if (a_this->kind.page_rule->name
+	    && a_this->kind.page_rule->name->stryng) {
+		g_string_append_printf 
+		  (stringue, " %s",
+		   a_this->kind.page_rule->name->stryng->str) ;
         } else {
-                g_string_append_printf (stringue, " ");
+                g_string_append (stringue, " ");
         }
-        if (a_this->kind.page_rule->pseudo) {
-                g_string_append_printf 
-                        (stringue,  " :%s",
-                         a_this->kind.page_rule->pseudo->str) ;
+	if (a_this->kind.page_rule->pseudo
+	    && a_this->kind.page_rule->pseudo->stryng) {
+		g_string_append_printf 
+		  (stringue,  " :%s",
+		   a_this->kind.page_rule->pseudo->stryng->str) ;
         }
         if (a_this->kind.page_rule->decl_list) {
                 gchar *str = NULL ;
-                g_string_append_printf (stringue, " {\n");
+                g_string_append (stringue, " {\n");
                 str = cr_declaration_list_to_string2
                         (a_this->kind.page_rule->decl_list,
                          a_indent + DECLARATION_INDENT_NB, TRUE) ;
                 if (str) {
-                        g_string_append_printf (stringue, "%s", str) ;
+                        g_string_append (stringue, str) ;
                         g_free (str) ;
                         str = NULL ;
                 }
-                g_string_append_printf (stringue, "%s", "\n}\n");
+                g_string_append (stringue, "\n}\n");
         }
         result = stringue->str ;
         g_string_free (stringue, FALSE) ;
@@ -781,9 +798,8 @@ cr_statement_media_rule_to_string (CRStatement *a_this,
                 for (cur = a_this->kind.media_rule->media_list; cur;
                      cur = cur->next) {
                         if (cur->data) {
-                                guchar *str = g_strndup
-                                        (((GString *) cur->data)->str,
-                                         ((GString *) cur->data)->len);
+                                guchar *str = cr_string_dup2
+                                        ((CRString *) cur->data);
 
                                 if (str) {
                                         if (cur->prev) {
@@ -800,7 +816,7 @@ cr_statement_media_rule_to_string (CRStatement *a_this,
                         }
                 }
                 g_string_append (stringue, " {\n");
-                str = cr_statement_to_string
+                str = cr_statement_list_to_string
                         (a_this->kind.media_rule->rulesets,
                          a_indent + DECLARATION_INDENT_NB) ;
                 if (str) {
@@ -830,11 +846,12 @@ cr_statement_import_rule_to_string (CRStatement *a_this,
                               && a_this->kind.import_rule,
                               NULL) ;
 
-        if (a_this->kind.import_rule->url) { 
+        if (a_this->kind.import_rule->url
+            && a_this->kind.import_rule->url->stryng) { 
                 stringue = g_string_new (NULL) ;
                 g_return_val_if_fail (stringue, NULL) ;
-                str = g_strndup (a_this->kind.import_rule->url->str,
-                                 a_this->kind.import_rule->url->len);
+                str = g_strndup (a_this->kind.import_rule->url->stryng->str,
+                                 a_this->kind.import_rule->url->stryng->len);
                 cr_utils_dump_n_chars2 (' ', stringue, a_indent);
                 if (str) {
                         g_string_append_printf (stringue,
@@ -851,16 +868,20 @@ cr_statement_import_rule_to_string (CRStatement *a_this,
                         for (cur = a_this->kind.import_rule->media_list;
                              cur; cur = cur->next) {
                                 if (cur->data) {
-                                        GString *gstr = cur->data;
+                                        CRString *crstr = cur->data;
 
                                         if (cur->prev) {
                                                 g_string_append 
                                                         (stringue, ", ");
                                         }
-                                        g_string_append_len 
-                                                (stringue,
-                                                 gstr->str,
-                                                 gstr->len) ;
+                                        if (crstr 
+                                            && crstr->stryng
+                                            && crstr->stryng->str) {
+                                                g_string_append_len 
+                                                        (stringue,
+                                                         crstr->stryng->str,
+                                                         crstr->stryng->len) ;
+                                        }
                                 }
                         }
                 }
@@ -1257,7 +1278,7 @@ cr_statement_new_at_media_rule (CRStyleSheet * a_sheet,
  */
 CRStatement *
 cr_statement_new_at_import_rule (CRStyleSheet * a_container_sheet,
-                                 GString * a_url,
+                                 CRString * a_url,
                                  GList * a_media_list,
                                  CRStyleSheet * a_imported_sheet)
 {
@@ -1307,7 +1328,8 @@ cr_statement_at_import_rule_parse_from_buf (const guchar * a_buf,
         CRParser *parser = NULL;
         CRStatement *result = NULL;
         GList *media_list = NULL;
-        GString *import_string = NULL;
+        CRString *import_string = NULL;
+        CRParsingLocation location = {0} ;
 
         parser = cr_parser_new_from_buf ((guchar*)a_buf, strlen (a_buf),
                                          a_encoding, FALSE);
@@ -1320,18 +1342,23 @@ cr_statement_at_import_rule_parse_from_buf (const guchar * a_buf,
         if (status != CR_OK)
                 goto cleanup;
 
-        status = cr_parser_parse_import (parser, &media_list, &import_string);
+        status = cr_parser_parse_import (parser,
+                                         &media_list, 
+                                         &import_string,
+                                         &location);
         if (status != CR_OK || !import_string)
                 goto cleanup;
 
         result = cr_statement_new_at_import_rule (NULL, import_string,
                                                   media_list, NULL);
         if (result) {
+                cr_parsing_location_copy (&result->location,
+                                          &location) ;
                 import_string = NULL;
                 media_list = NULL;
         }
 
-      cleanup:
+ cleanup:
         if (parser) {
                 cr_parser_destroy (parser);
                 parser = NULL;
@@ -1342,7 +1369,7 @@ cr_statement_at_import_rule_parse_from_buf (const guchar * a_buf,
                 for (cur = media_list; media_list;
                      media_list = g_list_next (media_list)) {
                         if (media_list->data) {
-                                g_string_free (media_list->data, TRUE);
+                                cr_string_destroy ((CRString*)media_list->data);
                                 media_list->data = NULL;
                         }
                 }
@@ -1350,7 +1377,7 @@ cr_statement_at_import_rule_parse_from_buf (const guchar * a_buf,
                 media_list = NULL;
         }
         if (import_string) {
-                g_string_free (import_string, TRUE);
+                cr_string_destroy (import_string);
                 import_string = NULL;
         }
 
@@ -1370,7 +1397,7 @@ cr_statement_at_import_rule_parse_from_buf (const guchar * a_buf,
 CRStatement *
 cr_statement_new_at_page_rule (CRStyleSheet * a_sheet,
                                CRDeclaration * a_decl_list,
-                               GString * a_name, GString * a_pseudo)
+                               CRString * a_name, CRString * a_pseudo)
 {
         CRStatement *result = NULL;
 
@@ -1484,7 +1511,8 @@ cr_statement_at_page_rule_parse_from_buf (const guchar * a_buf,
  *if an error arises.
  */
 CRStatement *
-cr_statement_new_at_charset_rule (CRStyleSheet * a_sheet, GString * a_charset)
+cr_statement_new_at_charset_rule (CRStyleSheet * a_sheet, 
+                                  CRString * a_charset)
 {
         CRStatement *result = NULL;
 
@@ -1528,7 +1556,7 @@ cr_statement_at_charset_rule_parse_from_buf (const guchar * a_buf,
         enum CRStatus status = CR_OK;
         CRParser *parser = NULL;
         CRStatement *result = NULL;
-        GString *charset = NULL;
+        CRString *charset = NULL;
 
         g_return_val_if_fail (a_buf, NULL);
 
@@ -1543,7 +1571,7 @@ cr_statement_at_charset_rule_parse_from_buf (const guchar * a_buf,
         cr_parser_try_to_skip_spaces_and_comments (parser);
         if (status != CR_OK)
                 goto cleanup;
-        status = cr_parser_parse_charset (parser, &charset);
+        status = cr_parser_parse_charset (parser, &charset, NULL);
         if (status != CR_OK || !charset)
                 goto cleanup;
 
@@ -1558,7 +1586,7 @@ cr_statement_at_charset_rule_parse_from_buf (const guchar * a_buf,
                 parser = NULL;
         }
         if (charset) {
-                g_string_free (charset, TRUE);
+                cr_string_destroy (charset);
         }
 
         return result;
@@ -1945,7 +1973,8 @@ cr_statement_ruleset_set_decl_list (CRStatement * a_this,
  */
 enum CRStatus
 cr_statement_ruleset_append_decl2 (CRStatement * a_this,
-                                   GString * a_prop, CRTerm * a_value)
+                                   CRString * a_prop, 
+                                   CRTerm * a_value)
 {
         CRDeclaration *new_decls = NULL;
 
@@ -1953,7 +1982,8 @@ cr_statement_ruleset_append_decl2 (CRStatement * a_this,
                               && a_this->kind.ruleset, CR_BAD_PARAM_ERROR);
 
         new_decls = cr_declaration_append2
-                (a_this->kind.ruleset->decl_list, a_prop, a_value);
+                (a_this->kind.ruleset->decl_list, 
+                 a_prop, a_value);
         g_return_val_if_fail (new_decls, CR_ERROR);
         a_this->kind.ruleset->decl_list = new_decls;
 
@@ -2034,7 +2064,8 @@ cr_statement_at_import_rule_get_imported_sheet (CRStatement * a_this,
  *@return CR_OK upon successfull completion, an error code otherwise.
  */
 enum CRStatus
-cr_statement_at_import_rule_set_url (CRStatement * a_this, GString * a_url)
+cr_statement_at_import_rule_set_url (CRStatement * a_this, 
+                                     CRString * a_url)
 {
         g_return_val_if_fail (a_this
                               && a_this->type == AT_IMPORT_RULE_STMT
@@ -2042,7 +2073,7 @@ cr_statement_at_import_rule_set_url (CRStatement * a_this, GString * a_url)
                               CR_BAD_PARAM_ERROR);
 
         if (a_this->kind.import_rule->url) {
-                g_string_free (a_this->kind.import_rule->url, TRUE);
+                cr_string_destroy (a_this->kind.import_rule->url);
         }
 
         a_this->kind.import_rule->url = a_url;
@@ -2057,7 +2088,8 @@ cr_statement_at_import_rule_set_url (CRStatement * a_this, GString * a_url)
  *and only if the function returned CR_OK.
  */
 enum CRStatus
-cr_statement_at_import_rule_get_url (CRStatement * a_this, GString ** a_url)
+cr_statement_at_import_rule_get_url (CRStatement * a_this, 
+                                     CRString ** a_url)
 {
         g_return_val_if_fail (a_this
                               && a_this->type == AT_IMPORT_RULE_STMT
@@ -2158,7 +2190,7 @@ cr_statement_at_page_rule_get_declarations (CRStatement * a_this,
  */
 enum CRStatus
 cr_statement_at_charset_rule_set_charset (CRStatement * a_this,
-                                          GString * a_charset)
+                                          CRString * a_charset)
 {
         g_return_val_if_fail (a_this
                               && a_this->type == AT_CHARSET_RULE_STMT
@@ -2166,9 +2198,8 @@ cr_statement_at_charset_rule_set_charset (CRStatement * a_this,
                               CR_BAD_PARAM_ERROR);
 
         if (a_this->kind.charset_rule->charset) {
-                g_string_free (a_this->kind.charset_rule->charset, TRUE);
+                cr_string_destroy (a_this->kind.charset_rule->charset);
         }
-
         a_this->kind.charset_rule->charset = a_charset;
         return CR_OK;
 }
@@ -2182,7 +2213,7 @@ cr_statement_at_charset_rule_set_charset (CRStatement * a_this,
  */
 enum CRStatus
 cr_statement_at_charset_rule_get_charset (CRStatement * a_this,
-                                          GString ** a_charset)
+                                          CRString ** a_charset)
 {
         g_return_val_if_fail (a_this
                               && a_this->type == AT_CHARSET_RULE_STMT
@@ -2251,7 +2282,7 @@ cr_statement_at_font_face_rule_get_decls (CRStatement * a_this,
  */
 enum CRStatus
 cr_statement_at_font_face_rule_add_decl (CRStatement * a_this,
-                                         GString * a_prop, CRTerm * a_value)
+                                         CRString * a_prop, CRTerm * a_value)
 {
         CRDeclaration *decls = NULL;
 
@@ -2261,7 +2292,8 @@ cr_statement_at_font_face_rule_add_decl (CRStatement * a_this,
                               CR_BAD_PARAM_ERROR);
 
         decls = cr_declaration_append2
-                (a_this->kind.font_face_rule->decl_list, a_prop, a_value);
+                (a_this->kind.font_face_rule->decl_list, 
+                 a_prop, a_value);
 
         g_return_val_if_fail (decls, CR_ERROR);
 
@@ -2323,6 +2355,39 @@ cr_statement_to_string (CRStatement * a_this, gulong a_indent)
                 cr_utils_trace_info ("Statement unrecognized");
                 break;
         }
+        return str ;
+}
+
+gchar*
+cr_statement_list_to_string (CRStatement *a_this, gulong a_indent)
+{
+        CRStatement *cur_stmt = NULL ;
+        GString *stringue = NULL ;
+        gchar *str = NULL ;
+
+        g_return_val_if_fail (a_this, NULL) ;
+
+        stringue = g_string_new (NULL) ;
+        if (!stringue) {
+                cr_utils_trace_info ("Out of memory") ;
+                return NULL ;
+        }
+        for (cur_stmt = a_this ; cur_stmt;
+             cur_stmt = cur_stmt->next) {
+                str = cr_statement_to_string (cur_stmt, a_indent) ;
+                if (str) {
+                        if (!cur_stmt->prev) {
+                                g_string_append (stringue, str) ;
+                        } else {
+                                g_string_append_printf 
+                                        (stringue, "\n%s", str) ;
+                        }
+                        g_free (str) ;
+                        str = NULL ;
+                }                
+        }
+        str = stringue->str ;
+        g_string_free (stringue, FALSE) ;
         return str ;
 }
 

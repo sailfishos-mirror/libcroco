@@ -79,7 +79,9 @@ struct _CRDocHandler
 	 *@param a_this the document handler.
 	 *@param a_charset the declared charset.
 	 */
-	void (*charset) (CRDocHandler *a_this, GString *a_charset) ;
+	void (*charset) (CRDocHandler *a_this, 
+			 CRString *a_charset,
+			 CRParsingLocation *a_charset_sym_location) ;
 
 	/**
 	 *Is called to notify an import statement in 
@@ -90,17 +92,20 @@ struct _CRDocHandler
 	 *destination media for style information.
 	 *@param a_uri the uri of the imported style sheet.
 	 *@param a_uri_default_ns the default namespace of URI
+	 *@param a_location the parsing location of the '@import' 
+	 *keyword.
 	 *of the imported style sheet.
 	 */
 	void (*import_style) (CRDocHandler *a_this,
 			      GList *a_media_list,
-			      GString *a_uri,
-			      GString *a_uri_default_ns) ;
+			      CRString *a_uri,
+			      CRString *a_uri_default_ns,
+			      CRParsingLocation *a_location) ;
 
 	void (*import_style_result) (CRDocHandler *a_this,
 				     GList *a_media_list,
-				     GString *a_uri,
-				     GString *a_uri_default_ns,
+				     CRString *a_uri,
+				     CRString *a_uri_default_ns,
 				     CRStyleSheet *a_sheet) ;
 
 	/**
@@ -109,10 +114,12 @@ struct _CRDocHandler
 	 *@param a_this the current instance of #CRDocHandler.
 	 *@param a_prefix the prefix of the namespace.
 	 *@param a_uri the uri of the namespace.
+	 *@param a_location the location of the "@namespace" keyword.
 	 */
 	void (*namespace_declaration) (CRDocHandler *a_this,
-				       GString *a_prefix,
-				       GString *a_uri) ;
+				       CRString *a_prefix,
+				       CRString *a_uri,
+				       CRParsingLocation *a_location) ;
 		
 	/**
 	 *Is called to notify a comment.
@@ -121,18 +128,16 @@ struct _CRDocHandler
 	 *@param a_comment the comment.
 	 */
 	void (*comment) (CRDocHandler *a_this,
-			 GString *a_comment) ;
+			 CRString *a_comment) ;
 
 	/**
 	 *Is called to notify the beginning of a rule
 	 *statement.
 	 *@param a_this the current instance of #CRDocHandler.
 	 *@param a_selector_list the list of selectors that precedes
-	 *the rule declarations. The GList named a_selector_list
-	 *is a chained list of instances of #CRSimpleSel
-	 *
+	 *the rule declarations.
 	 */
-	void (*start_selector) (CRDocHandler * a_this, 
+	void (*start_selector) (CRDocHandler * a_this,
 				CRSelector *a_selector_list) ;
 
 	/**
@@ -158,7 +163,7 @@ struct _CRDocHandler
 	 *
 	 */
 	void (*property) (CRDocHandler *a_this,
-			  GString *a_name,
+			  CRString *a_name,
 			  CRTerm *a_expression,
 			  gboolean a_is_important) ;
 	/**
@@ -170,8 +175,11 @@ struct _CRDocHandler
 	 *
 	 *@param a_this a pointer to the current instance of
 	 *#CRDocHandler.
+	 *@param a_location the parsing location of the "@font-face"
+	 *keyword.
 	 */
-	void (*start_font_face) (CRDocHandler *a_this) ;
+	void (*start_font_face) (CRDocHandler *a_this,
+				 CRParsingLocation *a_location) ;
 
 	/**
 	 *Is called to notify the end of a font face statement.
@@ -189,12 +197,14 @@ struct _CRDocHandler
 	 *event.
 	 *@param a_this a pointer to the current instance of 
 	 *#CRDocHandler.
-	 *@param a_media_list a double linked list of GString * objects.
-	 *Each GString objects is actually a destination media for
+	 *@param a_media_list a double linked list of 
+	 #CRString * objects.
+	 *Each CRString objects is actually a destination media for
 	 *the style information.
 	 */
 	void (*start_media) (CRDocHandler *a_this,
-			     GList *a_media_list) ;
+			     GList *a_media_list,
+			     CRParsingLocation *a_location) ;
 
 	/**
 	 *Is called to notify the end of a media statement.
@@ -217,10 +227,12 @@ struct _CRDocHandler
 	 *#CRDocHandler.
 	 *@param a_name the name of the page (if any, null otherwise).
 	 *@param a_pseudo_page the pseudo page (if any, null otherwise).
+	 *@param a_location the parsing location of the "@page" keyword.
 	 */
 	void (*start_page) (CRDocHandler *a_this,
-			    GString *a_name, 
-			    GString *a_pseudo_page) ;
+			    CRString *a_name, 
+			    CRString *a_pseudo_page,
+			    CRParsingLocation *a_location) ;
 
 	/**
 	 *Is called to notify the end of a page statement.
@@ -230,15 +242,15 @@ struct _CRDocHandler
 	 *@parap a_pseudo_page the pseudo page (if any, null otherwise).
 	 */
 	void (*end_page) (CRDocHandler *a_this,
-			  GString *a_name,
-			  GString *pseudo_page) ;
+			  CRString *a_name,
+			  CRString *pseudo_page) ;
 		
 	/**
 	 *Is Called to notify an unknown at-rule not supported
 	 *by this parser.
 	 */
 	void (*ignorable_at_rule) (CRDocHandler *a_this,
-				   GString *a_name) ;
+				   CRString *a_name) ;
 
 	/**
 	 *Is called to notify a parsing error. After this error
@@ -262,22 +274,21 @@ struct _CRDocHandler
 
 CRDocHandler * cr_doc_handler_new (void) ;
 
-enum CRStatus
-cr_doc_handler_set_result (CRDocHandler *a_this, gpointer a_result) ;
+enum CRStatus cr_doc_handler_set_result (CRDocHandler *a_this, gpointer a_result) ;
 
-enum CRStatus
-cr_doc_handler_get_result (CRDocHandler *a_this, gpointer * a_result) ;
+enum CRStatus cr_doc_handler_get_result (CRDocHandler *a_this, gpointer * a_result) ;
 
-enum CRStatus
-cr_doc_handler_set_ctxt (CRDocHandler *a_this, gpointer a_ctxt) ;
+enum CRStatus cr_doc_handler_set_ctxt (CRDocHandler *a_this, gpointer a_ctxt) ;
 
-enum CRStatus
-cr_doc_handler_get_ctxt (CRDocHandler *a_this, gpointer * a_ctxt) ;
+enum CRStatus cr_doc_handler_get_ctxt (CRDocHandler *a_this, gpointer * a_ctxt) ;
 
-enum CRStatus
-cr_doc_handler_set_default_sac_handler (CRDocHandler *a_this) ;
+enum CRStatus cr_doc_handler_set_default_sac_handler (CRDocHandler *a_this) ;
+
+void cr_doc_handler_associate_a_parser (CRDocHandler *a_this,
+					gpointer a_parser) ;
 
 void cr_doc_handler_ref (CRDocHandler *a_this) ;
+
 gboolean cr_doc_handler_unref (CRDocHandler *a_this) ;
 
 void cr_doc_handler_destroy (CRDocHandler *a_this) ;

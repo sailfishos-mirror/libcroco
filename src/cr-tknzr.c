@@ -17,11 +17,8 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
  * USA
  *
+ * Author: Dodji Seketeli
  * See the COPYRIGHTS file for copyrights information.
- */
-
-/*
- *$Id$
  */
 
 /**
@@ -213,29 +210,36 @@ CHECK_PARSING_STATUS (status, TRUE) ; \
 #define ENSURE_PARSING_COND(condition) \
 if (! (condition)) {status = CR_PARSING_ERROR; goto error ;}
 
-static enum CRStatus
-  cr_tknzr_parse_nl (CRTknzr * a_this, guchar ** a_start, guchar ** a_end);
+static enum CRStatus  cr_tknzr_parse_nl (CRTknzr * a_this, 
+                                         guchar ** a_start, 
+                                         guchar ** a_end,
+                                         CRParsingLocation *a_location);
 
-static enum CRStatus
-  cr_tknzr_parse_w (CRTknzr * a_this, guchar ** a_start, guchar ** a_end);
+static enum CRStatus cr_tknzr_parse_w (CRTknzr * a_this, 
+                                       guchar ** a_start, 
+                                       guchar ** a_end,
+                                       CRParsingLocation *a_location) ;
 
-static enum CRStatus
-  cr_tknzr_parse_unicode_escape (CRTknzr * a_this, guint32 * a_unicode);
+static enum CRStatus cr_tknzr_parse_unicode_escape (CRTknzr * a_this, 
+                                                    guint32 * a_unicode,
+                                                    CRParsingLocation *a_location) ;
 
-static enum CRStatus
-  cr_tknzr_parse_escape (CRTknzr * a_this, guint32 * a_esc_code);
+static enum CRStatus cr_tknzr_parse_escape (CRTknzr * a_this, 
+                                            guint32 * a_esc_code,
+                                            CRParsingLocation *a_location);
 
-static enum CRStatus
-  cr_tknzr_parse_string (CRTknzr * a_this, GString ** a_str);
+static enum CRStatus cr_tknzr_parse_string (CRTknzr * a_this, 
+                                            CRString ** a_str);
 
-static enum CRStatus
-  cr_tknzr_parse_comment (CRTknzr * a_this, GString ** a_comment);
+static enum CRStatus cr_tknzr_parse_comment (CRTknzr * a_this, 
+                                             CRString ** a_comment);
 
-static enum CRStatus
-  cr_tknzr_parse_nmstart (CRTknzr * a_this, guint32 * a_char);
+static enum CRStatus cr_tknzr_parse_nmstart (CRTknzr * a_this, 
+                                             guint32 * a_char, 
+                                             CRParsingLocation *a_location);
 
-static enum CRStatus
-  cr_tknzr_parse_num (CRTknzr * a_this, CRNum ** a_num);
+static enum CRStatus cr_tknzr_parse_num (CRTknzr * a_this,
+                                         CRNum ** a_num);
 
 /**********************************
  *PRIVATE methods
@@ -254,7 +258,10 @@ static enum CRStatus
  *Can also point to NULL is there is no white space actually.
  */
 static enum CRStatus
-cr_tknzr_parse_w (CRTknzr * a_this, guchar ** a_start, guchar ** a_end)
+cr_tknzr_parse_w (CRTknzr * a_this, 
+                  guchar ** a_start, 
+                  guchar ** a_end, 
+                  CRParsingLocation *a_location)
 {
         guint32 cur_char = 0;
         CRInputPos init_pos;
@@ -262,7 +269,8 @@ cr_tknzr_parse_w (CRTknzr * a_this, guchar ** a_start, guchar ** a_end)
 
         g_return_val_if_fail (a_this && PRIVATE (a_this)
                               && PRIVATE (a_this)->input
-                              && a_start && a_end, CR_BAD_PARAM_ERROR);
+                              && a_start && a_end, 
+                              CR_BAD_PARAM_ERROR);
 
         RECORD_INITIAL_POS (a_this, &init_pos);
 
@@ -275,7 +283,10 @@ cr_tknzr_parse_w (CRTknzr * a_this, guchar ** a_start, guchar ** a_end)
                 status = CR_PARSING_ERROR;
                 goto error;
         }
-
+        if (a_location) {
+                cr_tknzr_get_parsing_location (a_this, 
+                                               a_location) ;
+        }
         RECORD_CUR_BYTE_ADDR (a_this, a_start);
         *a_end = *a_start;
 
@@ -322,7 +333,10 @@ cr_tknzr_parse_w (CRTknzr * a_this, guchar ** a_start, guchar ** a_end)
  *@result CR_OK uppon successfull completion, an error code otherwise.
  */
 static enum CRStatus
-cr_tknzr_parse_nl (CRTknzr * a_this, guchar ** a_start, guchar ** a_end)
+cr_tknzr_parse_nl (CRTknzr * a_this, 
+                   guchar ** a_start, 
+                   guchar ** a_end, 
+                   CRParsingLocation *a_location)
 {
         CRInputPos init_pos;
         guchar next_chars[2] = { 0 };
@@ -338,6 +352,10 @@ cr_tknzr_parse_nl (CRTknzr * a_this, guchar ** a_start, guchar ** a_end)
 
         if ((next_chars[0] == '\r' && next_chars[1] == '\n')) {
                 SKIP_BYTES (a_this, 1);
+                if (a_location) {
+                        cr_tknzr_get_parsing_location 
+                                (a_this, a_location) ;
+                }
                 SKIP_CHARS (a_this, 1);
 
                 RECORD_CUR_BYTE_ADDR (a_this, a_end);
@@ -346,7 +364,10 @@ cr_tknzr_parse_nl (CRTknzr * a_this, guchar ** a_start, guchar ** a_end)
         } else if (next_chars[0] == '\n'
                    || next_chars[0] == '\r' || next_chars[0] == '\f') {
                 SKIP_CHARS (a_this, 1);
-
+                if (a_location) {
+                        cr_tknzr_get_parsing_location 
+                                (a_this, a_location) ;
+                }
                 RECORD_CUR_BYTE_ADDR (a_this, a_start);
                 *a_end = *a_start;
                 status = CR_OK;
@@ -354,13 +375,10 @@ cr_tknzr_parse_nl (CRTknzr * a_this, guchar ** a_start, guchar ** a_end)
                 status = CR_PARSING_ERROR;
                 goto error;
         }
+        return CR_OK ;
 
-        return CR_OK;
-
-      error:
-
-        cr_tknzr_set_cur_pos (a_this, &init_pos);
-
+ error:
+        cr_tknzr_set_cur_pos (a_this, &init_pos) ;
         return status;
 }
 
@@ -409,71 +427,70 @@ cr_tknzr_try_to_skip_spaces (CRTknzr * a_this)
  *simply and in a straight forward manner.
  */
 static enum CRStatus
-cr_tknzr_parse_comment (CRTknzr * a_this, GString ** a_comment)
+cr_tknzr_parse_comment (CRTknzr * a_this, 
+                        CRString ** a_comment)
 {
         enum CRStatus status = CR_OK;
         CRInputPos init_pos;
-        guint32 cur_char = 0;
-        GString *comment = NULL;
+        guint32 cur_char = 0, next_char= 0;
+        CRString *comment = NULL;
+        CRParsingLocation loc = {0} ;
 
         g_return_val_if_fail (a_this && PRIVATE (a_this)
-                              && PRIVATE (a_this)->input, CR_BAD_PARAM_ERROR);
+                              && PRIVATE (a_this)->input, 
+                              CR_BAD_PARAM_ERROR);
 
-        RECORD_INITIAL_POS (a_this, &init_pos);
-
-        READ_NEXT_CHAR (a_this, &cur_char);
+        RECORD_INITIAL_POS (a_this, &init_pos);        
+        READ_NEXT_CHAR (a_this, &cur_char) ;        
         ENSURE_PARSING_COND (cur_char == '/');
+        cr_tknzr_get_parsing_location (a_this, &loc) ;
 
         READ_NEXT_CHAR (a_this, &cur_char);
         ENSURE_PARSING_COND (cur_char == '*');
-
-        comment = g_string_new (NULL);
-
+        comment = cr_string_new ();
         for (;;) {
                 READ_NEXT_CHAR (a_this, &cur_char);
 
                 /*make sure there are no nested comments */
                 if (cur_char == '/') {
-
                         READ_NEXT_CHAR (a_this, &cur_char);
                         ENSURE_PARSING_COND (cur_char != '*');
-
-                        g_string_append_c (comment, '/');
-                        g_string_append_unichar (comment, cur_char);
-
+                        g_string_append_c (comment->stryng, '/');
+                        g_string_append_unichar (comment->stryng, 
+                                                 cur_char);
                         continue;
                 }
 
                 /*Detect the end of the comments region */
                 if (cur_char == '*') {
-                        READ_NEXT_CHAR (a_this, &cur_char);
+                        PEEK_NEXT_CHAR (a_this, &next_char);
 
-                        if (cur_char == '/') {
+                        if (next_char == '/') {
                                 /*
                                  *end of comments region
                                  *Now, call the right SAC callback.
                                  */
+                                SKIP_CHARS (a_this, 1) ;
                                 status = CR_OK;
                                 break;
                         } else {
-                                g_string_append_c (comment, '*');
-
+                                g_string_append_c (comment->stryng, 
+                                                   '*');
                         }
                 }
-
-                g_string_append_unichar (comment, cur_char);
+                g_string_append_unichar (comment->stryng, cur_char);
         }
 
         if (status == CR_OK) {
-                *a_comment = comment;
-
+                cr_parsing_location_copy (&comment->location, 
+                                          &loc) ;
+                *a_comment = comment;                
                 return CR_OK;
         }
-
-      error:
+ error:
 
         if (comment) {
-                g_string_free (comment, TRUE);
+                cr_string_destroy (comment);
                 comment = NULL;
         }
 
@@ -499,7 +516,9 @@ cr_tknzr_parse_comment (CRTknzr * a_this, GString ** a_comment)
  *lower level error occured.
  */
 static enum CRStatus
-cr_tknzr_parse_unicode_escape (CRTknzr * a_this, guint32 * a_unicode)
+cr_tknzr_parse_unicode_escape (CRTknzr * a_this, 
+                               guint32 * a_unicode,
+                               CRParsingLocation *a_location)
 {
         guint32 cur_char;
         CRInputPos init_pos;
@@ -521,7 +540,10 @@ cr_tknzr_parse_unicode_escape (CRTknzr * a_this, guint32 * a_unicode)
                 status = CR_PARSING_ERROR;
                 goto error;
         }
-
+        if (a_location) {
+                cr_tknzr_get_parsing_location 
+                        (a_this, a_location) ;
+        }
         PEEK_NEXT_CHAR (a_this, &cur_char);
 
         for (occur = 0, unicode = 0; ((cur_char >= '0' && cur_char <= '9')
@@ -555,7 +577,8 @@ cr_tknzr_parse_unicode_escape (CRTknzr * a_this, guint32 * a_unicode)
                  *appear just after the unicode
                  *escape.
                  */
-                cr_tknzr_parse_w (a_this, &tmp_char_ptr1, &tmp_char_ptr2);
+                cr_tknzr_parse_w (a_this, &tmp_char_ptr1, 
+                                  &tmp_char_ptr2, NULL);
                 status = CR_OK;
         } else {
                 /*
@@ -565,7 +588,7 @@ cr_tknzr_parse_unicode_escape (CRTknzr * a_this, guint32 * a_unicode)
                  *must be a white space.
                  */
                 status = cr_tknzr_parse_w (a_this, &tmp_char_ptr1,
-                                           &tmp_char_ptr2);
+                                           &tmp_char_ptr2, NULL);
         }
 
         if (status == CR_OK) {
@@ -589,7 +612,8 @@ cr_tknzr_parse_unicode_escape (CRTknzr * a_this, guint32 * a_unicode)
  *@param a_this the current instance of #CRTknzr .
  */
 static enum CRStatus
-cr_tknzr_parse_escape (CRTknzr * a_this, guint32 * a_esc_code)
+cr_tknzr_parse_escape (CRTknzr * a_this, guint32 * a_esc_code,
+                       CRParsingLocation *a_location)
 {
         enum CRStatus status = CR_OK;
         guint32 cur_char = 0;
@@ -612,11 +636,15 @@ cr_tknzr_parse_escape (CRTknzr * a_this, guint32 * a_esc_code)
         if ((next_chars[1] >= '0' && next_chars[1] <= '9')
             || (next_chars[1] >= 'a' && next_chars[1] <= 'f')
             || (next_chars[1] >= 'A' && next_chars[1] <= 'F')) {
-                status = cr_tknzr_parse_unicode_escape (a_this, a_esc_code);
+                status = cr_tknzr_parse_unicode_escape (a_this, a_esc_code, 
+                                                        a_location);
         } else {
                 /*consume the '\' char */
                 READ_NEXT_CHAR (a_this, &cur_char);
-
+                if (a_location) {
+                        cr_tknzr_get_parsing_location (a_this, 
+                                                       a_location) ;
+                }
                 /*then read the char after the '\' */
                 READ_NEXT_CHAR (a_this, &cur_char);
 
@@ -624,19 +652,14 @@ cr_tknzr_parse_escape (CRTknzr * a_this, guint32 * a_esc_code)
                         status = CR_PARSING_ERROR;
                         goto error;
                 }
-
                 *a_esc_code = cur_char;
 
         }
-
         if (status == CR_OK) {
                 return CR_OK;
         }
-
-      error:
-
+ error:
         cr_tknzr_set_cur_pos (a_this, &init_pos);
-
         return status;
 }
 
@@ -656,20 +679,19 @@ cr_tknzr_parse_escape (CRTknzr * a_this, guint32 * a_esc_code)
  *@return CR_OK upon successfull completion, an error code otherwise.
  */
 static enum CRStatus
-cr_tknzr_parse_string (CRTknzr * a_this, GString ** a_str)
+cr_tknzr_parse_string (CRTknzr * a_this, CRString ** a_str)
 {
         guint32 cur_char = 0,
                 delim = 0;
         CRInputPos init_pos;
         enum CRStatus status = CR_OK;
-        GString *str = NULL;
+        CRString *str = NULL;
 
         g_return_val_if_fail (a_this && PRIVATE (a_this)
                               && PRIVATE (a_this)->input
                               && a_str, CR_BAD_PARAM_ERROR);
 
         RECORD_INITIAL_POS (a_this, &init_pos);
-
         READ_NEXT_CHAR (a_this, &cur_char);
 
         if (cur_char == '"')
@@ -680,9 +702,11 @@ cr_tknzr_parse_string (CRTknzr * a_this, GString ** a_str)
                 status = CR_PARSING_ERROR;
                 goto error;
         }
-
-        str = g_string_new (NULL);
-
+        str = cr_string_new ();
+        if (str) {
+                cr_tknzr_get_parsing_location 
+                        (a_this, &str->location) ;
+        }
         for (;;) {
                 guchar next_chars[2] = { 0 };
 
@@ -695,16 +719,18 @@ cr_tknzr_parse_string (CRTknzr * a_this, GString ** a_str)
                         guint32 esc_code = 0;
 
                         if (next_chars[1] == '\'' || next_chars[1] == '"') {
-                                g_string_append_unichar (str, next_chars[1]);
+                                g_string_append_unichar (str->stryng, 
+                                                         next_chars[1]);
                                 SKIP_BYTES (a_this, 2);
                                 status = CR_OK;
                         } else {
                                 status = cr_tknzr_parse_escape
-                                        (a_this, &esc_code);
+                                        (a_this, &esc_code, NULL);
 
                                 if (status == CR_OK) {
                                         g_string_append_unichar
-                                                (str, esc_code);
+                                                (str->stryng, 
+                                                 esc_code);
                                 }
                         }
 
@@ -717,20 +743,21 @@ cr_tknzr_parse_string (CRTknzr * a_this, GString ** a_str)
 
                                 status = cr_tknzr_parse_nl
                                         (a_this, &tmp_char_ptr1,
-                                         &tmp_char_ptr2);
+                                         &tmp_char_ptr2, NULL);
                         }
 
                         CHECK_PARSING_STATUS (status, FALSE);
                 } else if (strchr ("\t !#$%&", next_chars[0])
                            || (next_chars[0] >= '(' && next_chars[0] <= '~')) {
                         READ_NEXT_CHAR (a_this, &cur_char);
-                        g_string_append_unichar (str, cur_char);
+                        g_string_append_unichar (str->stryng, 
+                                                 cur_char);
                         status = CR_OK;
                 }
 
                 else if (cr_utils_is_nonascii (next_chars[0])) {
                         READ_NEXT_CHAR (a_this, &cur_char);
-                        g_string_append_unichar (str, cur_char);
+                        g_string_append_unichar (str->stryng, cur_char);
                 } else if (next_chars[0] == delim) {
                         READ_NEXT_CHAR (a_this, &cur_char);
                         break;
@@ -745,22 +772,22 @@ cr_tknzr_parse_string (CRTknzr * a_this, GString ** a_str)
                         *a_str = str;
                         str = NULL;
                 } else {
-                        *a_str = g_string_append_len (*a_str,
-                                                      str->str, str->len);
-                        g_string_free (str, TRUE);
+                        (*a_str)->stryng = g_string_append_len
+                                ((*a_str)->stryng,
+                                 str->stryng->str, 
+                                 str->stryng->len);
+                        cr_string_destroy (str);
                 }
                 return CR_OK;
         }
 
-      error:
+ error:
 
         if (str) {
-                g_string_free (str, TRUE);
+                cr_string_destroy (str) ;
                 str = NULL;
         }
-
         cr_tknzr_set_cur_pos (a_this, &init_pos);
-
         return status;
 }
 
@@ -778,7 +805,9 @@ cr_tknzr_parse_string (CRTknzr * a_this, GString ** a_str)
  *an error code otherwise.
  */
 static enum CRStatus
-cr_tknzr_parse_nmstart (CRTknzr * a_this, guint32 * a_char)
+cr_tknzr_parse_nmstart (CRTknzr * a_this, 
+                        guint32 * a_char,
+                        CRParsingLocation *a_location)
 {
         CRInputPos init_pos;
         enum CRStatus status = CR_OK;
@@ -794,7 +823,8 @@ cr_tknzr_parse_nmstart (CRTknzr * a_this, guint32 * a_char)
         PEEK_NEXT_CHAR (a_this, &next_char);
 
         if (next_char == '\\') {
-                status = cr_tknzr_parse_escape (a_this, a_char);
+                status = cr_tknzr_parse_escape (a_this, a_char,
+                                                a_location);
 
                 if (status != CR_OK)
                         goto error;
@@ -804,6 +834,10 @@ cr_tknzr_parse_nmstart (CRTknzr * a_this, guint32 * a_char)
                    || ((next_char >= 'A') && (next_char <= 'Z'))
                 ) {
                 READ_NEXT_CHAR (a_this, &cur_char);
+                if (a_location) {
+                        cr_tknzr_get_parsing_location (a_this, 
+                                                       a_location) ;
+                }
                 *a_char = cur_char;
                 status = CR_OK;
         } else {
@@ -839,7 +873,8 @@ cr_tknzr_parse_nmstart (CRTknzr * a_this, guint32 * a_char)
  *an error code otherwise.
  */
 static enum CRStatus
-cr_tknzr_parse_nmchar (CRTknzr * a_this, guint32 * a_char)
+cr_tknzr_parse_nmchar (CRTknzr * a_this, guint32 * a_char,
+                       CRParsingLocation *a_location)
 {
         guint32 cur_char = 0,
                 next_char = 0;
@@ -851,13 +886,14 @@ cr_tknzr_parse_nmchar (CRTknzr * a_this, guint32 * a_char)
 
         RECORD_INITIAL_POS (a_this, &init_pos);
 
-        status = cr_input_peek_char (PRIVATE (a_this)->input, &next_char);
-
+        status = cr_input_peek_char (PRIVATE (a_this)->input, 
+                                     &next_char) ;
         if (status != CR_OK)
                 goto error;
 
         if (next_char == '\\') {
-                status = cr_tknzr_parse_escape (a_this, a_char);
+                status = cr_tknzr_parse_escape (a_this, a_char, 
+                                                a_location);
 
                 if (status != CR_OK)
                         goto error;
@@ -872,17 +908,18 @@ cr_tknzr_parse_nmchar (CRTknzr * a_this, guint32 * a_char)
                 READ_NEXT_CHAR (a_this, &cur_char);
                 *a_char = cur_char;
                 status = CR_OK;
+                if (a_location) {
+                        cr_tknzr_get_parsing_location
+                                (a_this, a_location) ;
+                }
         } else {
                 status = CR_PARSING_ERROR;
                 goto error;
         }
-
         return CR_OK;
 
-      error:
-
+ error:
         cr_tknzr_set_cur_pos (a_this, &init_pos);
-
         return status;
 }
 
@@ -895,7 +932,7 @@ cr_tknzr_parse_nmchar (CRTknzr * a_this, guint32 * a_char)
  *@param a_this the currens instance of #CRTknzr.
  *
  *@param a_str a pointer to parsed ident. If *a_str is NULL,
- *this function allocates a new instance of GString. If not, 
+ *this function allocates a new instance of CRString. If not, 
  *the function just appends the parsed string to the one passed.
  *In both cases it is up to the caller to free *a_str.
  *
@@ -903,12 +940,13 @@ cr_tknzr_parse_nmchar (CRTknzr * a_this, guint32 * a_char)
  *otherwise.
  */
 static enum CRStatus
-cr_tknzr_parse_ident (CRTknzr * a_this, GString ** a_str)
+cr_tknzr_parse_ident (CRTknzr * a_this, CRString ** a_str)
 {
         guint32 tmp_char = 0;
-        GString *stringue = NULL ;
+        CRString *stringue = NULL ;
         CRInputPos init_pos;
         enum CRStatus status = CR_OK;
+        gboolean location_is_set = FALSE ;
 
         g_return_val_if_fail (a_this && PRIVATE (a_this)
                               && PRIVATE (a_this)->input
@@ -916,34 +954,48 @@ cr_tknzr_parse_ident (CRTknzr * a_this, GString ** a_str)
 
         RECORD_INITIAL_POS (a_this, &init_pos);
         PEEK_NEXT_CHAR (a_this, &tmp_char) ;
-        stringue = g_string_new (NULL) ;
-        g_return_val_if_fail (stringue, CR_OUT_OF_MEMORY_ERROR) ;
+        stringue = cr_string_new () ;
+        g_return_val_if_fail (stringue, 
+                              CR_OUT_OF_MEMORY_ERROR) ;
 
         if (tmp_char == '-') {
                 READ_NEXT_CHAR (a_this, &tmp_char) ;
-                g_string_append_unichar (stringue, tmp_char) ;
+                cr_tknzr_get_parsing_location
+                        (a_this, &stringue->location) ;
+                location_is_set = TRUE ;
+                g_string_append_unichar (stringue->stryng, 
+                                         tmp_char) ;
         }
-        status = cr_tknzr_parse_nmstart (a_this, &tmp_char);
+        status = cr_tknzr_parse_nmstart (a_this, &tmp_char, NULL);
         if (status != CR_OK) {
                 status = CR_PARSING_ERROR;
                 goto end ;
         }
-        g_string_append_unichar (stringue, tmp_char);
+        if (location_is_set == FALSE) {
+                cr_tknzr_get_parsing_location 
+                        (a_this, &stringue->location) ;
+                location_is_set = TRUE ;
+        }
+        g_string_append_unichar (stringue->stryng, tmp_char);
         for (;;) {
-                status = cr_tknzr_parse_nmchar (a_this, &tmp_char);
+                status = cr_tknzr_parse_nmchar (a_this, 
+                                                &tmp_char, 
+                                                NULL);
                 if (status != CR_OK) {
                         status = CR_OK ;
                         break;
                 }
-                g_string_append_unichar (stringue, tmp_char);
+                g_string_append_unichar (stringue->stryng, tmp_char);
         }
         if (status == CR_OK) {
                 if (!*a_str) {
                         *a_str = stringue ;
                 
                 } else {
-                        g_string_append_len (*a_str, stringue->str, stringue->len) ;
-                        g_string_free (stringue, TRUE) ;
+                        g_string_append_len ((*a_str)->stryng, 
+                                             stringue->stryng->str, 
+                                             stringue->stryng->len) ;
+                        cr_string_destroy (stringue) ;
                 }
                 stringue = NULL ;
         }
@@ -951,7 +1003,7 @@ cr_tknzr_parse_ident (CRTknzr * a_this, GString ** a_str)
  error:
  end:
         if (stringue) {
-                g_string_free (stringue, TRUE) ;
+                cr_string_destroy (stringue) ;
                 stringue = NULL ;
         }
         return status ;
@@ -966,51 +1018,59 @@ cr_tknzr_parse_ident (CRTknzr * a_this, GString ** a_str)
  *
  *@param a_str out parameter. A pointer to the successfully parsed
  *name. If *a_str is set to NULL, this function allocates a new instance
- *of GString. If not, it just appends the parsed name to the passed *a_str.
+ *of CRString. If not, it just appends the parsed name to the passed *a_str.
  *In both cases, it is up to the caller to free *a_str.
  *
  *@return CR_OK upon successfull completion, an error code otherwise.
  */
 static enum CRStatus
-cr_tknzr_parse_name (CRTknzr * a_this, GString ** a_str)
+cr_tknzr_parse_name (CRTknzr * a_this, 
+                     CRString ** a_str)
 {
         guint32 tmp_char = 0;
         CRInputPos init_pos;
         enum CRStatus status = CR_OK;
-        gboolean str_needs_free = FALSE;
+        gboolean str_needs_free = FALSE,
+                is_first_nmchar=TRUE ;
         glong i = 0;
+        CRParsingLocation loc = {0} ;
 
         g_return_val_if_fail (a_this && PRIVATE (a_this)
                               && PRIVATE (a_this)->input
-                              && a_str, CR_BAD_PARAM_ERROR);
+                              && a_str,
+                              CR_BAD_PARAM_ERROR) ;
 
         RECORD_INITIAL_POS (a_this, &init_pos);
 
         if (*a_str == NULL) {
-                *a_str = g_string_new (NULL);
+                *a_str = cr_string_new ();
                 str_needs_free = TRUE;
         }
-
         for (i = 0;; i++) {
-                status = cr_tknzr_parse_nmchar (a_this, &tmp_char);
-
+                if (is_first_nmchar == TRUE) {
+                        status = cr_tknzr_parse_nmchar 
+                                (a_this, &tmp_char,
+                                 &loc) ;
+                        is_first_nmchar = FALSE ;
+                } else {
+                        status = cr_tknzr_parse_nmchar 
+                                (a_this, &tmp_char, NULL) ;
+                }
                 if (status != CR_OK)
-                        break;
-
-                g_string_append_unichar (*a_str, tmp_char);
+                        break;                
+                g_string_append_unichar ((*a_str)->stryng, 
+                                         tmp_char);
         }
-
         if (i > 0) {
+                cr_parsing_location_copy 
+                        (&(*a_str)->location, &loc) ;
                 return CR_OK;
         }
-
         if (str_needs_free == TRUE && *a_str) {
-                g_string_free (*a_str, TRUE);
+                cr_string_destroy (*a_str);
                 *a_str = NULL;
         }
-
         cr_tknzr_set_cur_pos (a_this, &init_pos);
-
         return CR_PARSING_ERROR;
 }
 
@@ -1019,46 +1079,44 @@ cr_tknzr_parse_name (CRTknzr * a_this, GString ** a_str)
  *HASH ::= #{name}
  */
 static enum CRStatus
-cr_tknzr_parse_hash (CRTknzr * a_this, GString ** a_str)
+cr_tknzr_parse_hash (CRTknzr * a_this, CRString ** a_str)
 {
         guint32 cur_char = 0;
         CRInputPos init_pos;
         enum CRStatus status = CR_OK;
         gboolean str_needs_free = FALSE;
+        CRParsingLocation loc = {0} ;
 
         g_return_val_if_fail (a_this && PRIVATE (a_this)
-                              && PRIVATE (a_this)->input, CR_BAD_PARAM_ERROR);
+                              && PRIVATE (a_this)->input,
+                              CR_BAD_PARAM_ERROR);
 
         RECORD_INITIAL_POS (a_this, &init_pos);
         READ_NEXT_CHAR (a_this, &cur_char);
-
         if (cur_char != '#') {
                 status = CR_PARSING_ERROR;
                 goto error;
         }
-
         if (*a_str == NULL) {
-                *a_str = g_string_new (NULL);
+                *a_str = cr_string_new ();
                 str_needs_free = TRUE;
         }
-
+        cr_tknzr_get_parsing_location (a_this,
+                                       &loc) ;
         status = cr_tknzr_parse_name (a_this, a_str);
-
+        cr_parsing_location_copy (&(*a_str)->location, &loc) ;
         if (status != CR_OK) {
                 goto error;
         }
-
         return CR_OK;
 
-      error:
-
+ error:
         if (str_needs_free == TRUE && *a_str) {
-                g_string_free (*a_str, TRUE);
+                cr_string_destroy (*a_str);
                 *a_str = NULL;
         }
 
         cr_tknzr_set_cur_pos (a_this, &init_pos);
-
         return status;
 }
 
@@ -1072,16 +1130,21 @@ cr_tknzr_parse_hash (CRTknzr * a_this, GString ** a_str)
  *@return CR_OK upon successfull completion, an error code otherwise.
  */
 static enum CRStatus
-cr_tknzr_parse_uri (CRTknzr * a_this, GString ** a_str)
+cr_tknzr_parse_uri (CRTknzr * a_this, 
+                    CRString ** a_str)
 {
         guint32 cur_char = 0;
         CRInputPos init_pos;
         enum CRStatus status = CR_PARSING_ERROR;
         guchar tab[4] = { 0 }, *tmp_ptr1 = NULL, *tmp_ptr2 = NULL;
-        GString *str = NULL;
+        CRString *str = NULL;
+        CRParsingLocation location = {0} ;
 
-        g_return_val_if_fail (a_this && PRIVATE (a_this)
-                              && PRIVATE (a_this)->input, CR_BAD_PARAM_ERROR);
+        g_return_val_if_fail (a_this 
+                              && PRIVATE (a_this)
+                              && PRIVATE (a_this)->input
+                              && a_str, 
+                              CR_BAD_PARAM_ERROR);
 
         RECORD_INITIAL_POS (a_this, &init_pos);
 
@@ -1094,22 +1157,24 @@ cr_tknzr_parse_uri (CRTknzr * a_this, GString ** a_str)
                 status = CR_PARSING_ERROR;
                 goto error;
         }
-
-        SKIP_CHARS (a_this, 4);
-
+        /*
+         *Here, we want to skip 4 bytes ('u''r''l''(').
+         *But we also need to keep track of the parsing location
+         *of the 'u'. So, we skip 1 byte, we record the parsing
+         *location, then we skip the 3 remaining bytes.
+         */
+        SKIP_CHARS (a_this, 1);
+        cr_tknzr_get_parsing_location (a_this, &location) ;
+        SKIP_CHARS (a_this, 3);
         cr_tknzr_try_to_skip_spaces (a_this);
-
         status = cr_tknzr_parse_string (a_this, a_str);
 
         if (status == CR_OK) {
                 guint32 next_char = 0;
-
-                status = cr_tknzr_parse_w (a_this, &tmp_ptr1, &tmp_ptr2);
-
+                status = cr_tknzr_parse_w (a_this, &tmp_ptr1, 
+                                           &tmp_ptr2, NULL);
                 cr_tknzr_try_to_skip_spaces (a_this);
-
                 PEEK_NEXT_CHAR (a_this, &next_char);
-
                 if (next_char == ')') {
                         READ_NEXT_CHAR (a_this, &cur_char);
                         status = CR_OK;
@@ -1117,41 +1182,34 @@ cr_tknzr_parse_uri (CRTknzr * a_this, GString ** a_str)
                         status = CR_PARSING_ERROR;
                 }
         }
-
         if (status != CR_OK) {
-                str = g_string_new (NULL);
-
+                str = cr_string_new ();
                 for (;;) {
                         guint32 next_char = 0;
-
                         PEEK_NEXT_CHAR (a_this, &next_char);
-
                         if (strchr ("!#$%&", next_char)
                             || (next_char >= '*' && next_char <= '~')
                             || (cr_utils_is_nonascii (next_char) == TRUE)) {
                                 READ_NEXT_CHAR (a_this, &cur_char);
-                                g_string_append_unichar (str, cur_char);
+                                g_string_append_unichar 
+                                        (str->stryng, cur_char);
                                 status = CR_OK;
                         } else {
                                 guint32 esc_code = 0;
-
                                 status = cr_tknzr_parse_escape
-                                        (a_this, &esc_code);
-
+                                        (a_this, &esc_code, NULL);
                                 if (status == CR_OK) {
                                         g_string_append_unichar
-                                                (str, esc_code);
+                                                (str->stryng, 
+                                                 esc_code);
                                 } else {
                                         status = CR_OK;
                                         break;
                                 }
                         }
                 }
-
                 cr_tknzr_try_to_skip_spaces (a_this);
-
                 READ_NEXT_CHAR (a_this, &cur_char);
-
                 if (cur_char == ')') {
                         status = CR_OK;
                 } else {
@@ -1163,24 +1221,25 @@ cr_tknzr_parse_uri (CRTknzr * a_this, GString ** a_str)
                                 *a_str = str;
                                 str = NULL;
                         } else {
-                                g_string_append_len (*a_str,
-                                                     str->str, str->len);
-                                g_string_free (str, TRUE);
+                                g_string_append_len
+                                        ((*a_str)->stryng,
+                                         str->stryng->str,
+                                         str->stryng->len);
+                                cr_parsing_location_copy 
+                                        (&(*a_str)->location,
+                                         &str->location) ;
+                                cr_string_destroy (str);
                         }
                 }
         }
 
-        return CR_OK;
-
-      error:
-
+        return CR_OK ;
+ error:
         if (str) {
-                g_string_free (str, TRUE);
+                cr_string_destroy (str);
                 str = NULL;
         }
-
         cr_tknzr_set_cur_pos (a_this, &init_pos);
-
         return status;
 }
 
@@ -1204,6 +1263,7 @@ cr_tknzr_parse_rgb (CRTknzr * a_this, CRRgb ** a_rgb)
                 blue = 0,
                 i = 0;
         gboolean is_percentage = FALSE;
+        CRParsingLocation location = {0} ;
 
         g_return_val_if_fail (a_this && PRIVATE (a_this), CR_BAD_PARAM_ERROR);
 
@@ -1216,52 +1276,43 @@ cr_tknzr_parse_rgb (CRTknzr * a_this, CRRgb ** a_rgb)
         if (((next_bytes[0] == 'r') || (next_bytes[0] == 'R'))
             && ((next_bytes[1] == 'g') || (next_bytes[1] == 'G'))
             && ((next_bytes[2] == 'b') || (next_bytes[2] == 'B'))) {
-                SKIP_CHARS (a_this, 3);
+                SKIP_CHARS (a_this, 1);
+                cr_tknzr_get_parsing_location (a_this, &location) ;
+                SKIP_CHARS (a_this, 2);
         } else {
                 status = CR_PARSING_ERROR;
                 goto error;
         }
-
         READ_NEXT_BYTE (a_this, &cur_byte);
-
         ENSURE_PARSING_COND (cur_byte == '(');
 
         cr_tknzr_try_to_skip_spaces (a_this);
-
         status = cr_tknzr_parse_num (a_this, &num);
-
         ENSURE_PARSING_COND ((status == CR_OK) && (num != NULL));
 
         red = num->val;
-
         cr_num_destroy (num);
         num = NULL;
 
         PEEK_BYTE (a_this, 1, &next_bytes[0]);
-
         if (next_bytes[0] == '%') {
                 SKIP_CHARS (a_this, 1);
                 is_percentage = TRUE;
         }
-
         cr_tknzr_try_to_skip_spaces (a_this);
 
         for (i = 0; i < 2; i++) {
                 READ_NEXT_BYTE (a_this, &cur_byte);
-
                 ENSURE_PARSING_COND (cur_byte == ',');
 
                 cr_tknzr_try_to_skip_spaces (a_this);
-
                 status = cr_tknzr_parse_num (a_this, &num);
-
                 ENSURE_PARSING_COND ((status == CR_OK) && (num != NULL));
 
                 PEEK_BYTE (a_this, 1, &next_bytes[0]);
-
                 if (next_bytes[0] == '%') {
                         SKIP_CHARS (a_this, 1);
-                        is_percentage = TRUE;
+                        is_percentage = 1;
                 }
 
                 if (i == 0) {
@@ -1274,12 +1325,10 @@ cr_tknzr_parse_rgb (CRTknzr * a_this, CRRgb ** a_rgb)
                         cr_num_destroy (num);
                         num = NULL;
                 }
-
                 cr_tknzr_try_to_skip_spaces (a_this);
         }
 
         READ_NEXT_BYTE (a_this, &cur_byte);
-
         if (*a_rgb == NULL) {
                 *a_rgb = cr_rgb_new_with_vals (red, green, blue,
                                                is_percentage);
@@ -1299,18 +1348,21 @@ cr_tknzr_parse_rgb (CRTknzr * a_this, CRRgb ** a_rgb)
         }
 
         if (status == CR_OK) {
+                if (a_rgb && *a_rgb) {
+                        cr_parsing_location_copy 
+                                (&(*a_rgb)->location, 
+                                 &location) ;
+                }
                 return CR_OK;
         }
 
-      error:
-
+ error:
         if (num) {
                 cr_num_destroy (num);
                 num = NULL;
         }
 
         cr_tknzr_set_cur_pos (a_this, &init_pos);
-
         return CR_OK;
 }
 
@@ -1322,7 +1374,7 @@ cr_tknzr_parse_rgb (CRTknzr * a_this, CRRgb ** a_rgb)
  *#CRTknzr.
  *
  *@param a_str out parameter. The parsed atkeyword. If *a_str is
- *set to NULL this function allocates a new instance of GString and
+ *set to NULL this function allocates a new instance of CRString and
  *sets it to the parsed atkeyword. If not, this function just appends
  *the parsed atkeyword to the end of *a_str. In both cases it is up to
  *the caller to free *a_str.
@@ -1330,7 +1382,8 @@ cr_tknzr_parse_rgb (CRTknzr * a_this, CRRgb ** a_rgb)
  *@return CR_OK upon successfull completion, an error code otherwise.
  */
 static enum CRStatus
-cr_tknzr_parse_atkeyword (CRTknzr * a_this, GString ** a_str)
+cr_tknzr_parse_atkeyword (CRTknzr * a_this, 
+                          CRString ** a_str)
 {
         guint32 cur_char = 0;
         CRInputPos init_pos;
@@ -1351,46 +1404,43 @@ cr_tknzr_parse_atkeyword (CRTknzr * a_this, GString ** a_str)
         }
 
         if (*a_str == NULL) {
-                *a_str = g_string_new (NULL);
+                *a_str = cr_string_new ();
                 str_needs_free = TRUE;
         }
-
         status = cr_tknzr_parse_ident (a_this, a_str);
-
         if (status != CR_OK) {
                 goto error;
         }
-
         return CR_OK;
-
-      error:
+ error:
 
         if (str_needs_free == TRUE && *a_str) {
-                g_string_free (*a_str, TRUE);
+                cr_string_destroy (*a_str);
                 *a_str = NULL;
         }
-
         cr_tknzr_set_cur_pos (a_this, &init_pos);
-
         return status;
 }
 
 static enum CRStatus
-cr_tknzr_parse_important (CRTknzr * a_this)
+cr_tknzr_parse_important (CRTknzr * a_this,
+                          CRParsingLocation *a_location)
 {
         guint32 cur_char = 0;
         CRInputPos init_pos;
         enum CRStatus status = CR_OK;
 
         g_return_val_if_fail (a_this && PRIVATE (a_this)
-                              && PRIVATE (a_this)->input, CR_BAD_PARAM_ERROR);
+                              && PRIVATE (a_this)->input,
+                              CR_BAD_PARAM_ERROR);
 
         RECORD_INITIAL_POS (a_this, &init_pos);
-
         READ_NEXT_CHAR (a_this, &cur_char);
-
         ENSURE_PARSING_COND (cur_char == '!');
-
+        if (a_location) {
+                cr_tknzr_get_parsing_location (a_this, 
+                                               a_location) ;
+        }
         cr_tknzr_try_to_skip_spaces (a_this);
 
         if (BYTE (PRIVATE (a_this)->input, 1, NULL) == 'i'
@@ -1403,12 +1453,16 @@ cr_tknzr_parse_important (CRTknzr * a_this)
             && BYTE (PRIVATE (a_this)->input, 8, NULL) == 'n'
             && BYTE (PRIVATE (a_this)->input, 9, NULL) == 't') {
                 SKIP_BYTES (a_this, 9);
+                if (a_location) {
+                        cr_tknzr_get_parsing_location (a_this,
+                                                       a_location) ;
+                }
                 return CR_OK;
         } else {
                 status = CR_PARSING_ERROR;
         }
 
-      error:
+ error:
         cr_tknzr_set_cur_pos (a_this, &init_pos);
 
         return status;
@@ -1423,7 +1477,8 @@ cr_tknzr_parse_important (CRTknzr * a_this)
  *an error code otherwise.
  */
 static enum CRStatus
-cr_tknzr_parse_num (CRTknzr * a_this, CRNum ** a_num)
+cr_tknzr_parse_num (CRTknzr * a_this, 
+                    CRNum ** a_num)
 {
         enum CRStatus status = CR_PARSING_ERROR;
         enum CRNumType val_type = NUM_GENERIC;
@@ -1434,14 +1489,14 @@ cr_tknzr_parse_num (CRTknzr * a_this, CRNum ** a_num)
                 dec_part = 0,
                 next_char = 0;
         CRInputPos init_pos;
+        CRParsingLocation location = {0} ;
 
         g_return_val_if_fail (a_this && PRIVATE (a_this)
-                              && PRIVATE (a_this)->input, CR_BAD_PARAM_ERROR);
+                              && PRIVATE (a_this)->input, 
+                              CR_BAD_PARAM_ERROR);
 
         RECORD_INITIAL_POS (a_this, &init_pos);
-
-        READ_NEXT_CHAR (a_this, &cur_char);
-
+        READ_NEXT_CHAR (a_this, &cur_char);        
         if (IS_NUM (cur_char) == TRUE) {
                 int_part = int_part * 10 + (cur_char - '0');
 
@@ -1452,6 +1507,7 @@ cr_tknzr_parse_num (CRTknzr * a_this, CRNum ** a_num)
                 status = CR_PARSING_ERROR;
                 goto error;
         }
+        cr_tknzr_get_parsing_location (a_this, &location) ;
 
         for (;;) {
                 status = cr_tknzr_peek_char (a_this, &next_char);
@@ -1506,11 +1562,12 @@ cr_tknzr_parse_num (CRTknzr * a_this, CRNum ** a_num)
                         (*a_num)->val = val;
                         (*a_num)->type = val_type;
                 }
-
+                cr_parsing_location_copy (&(*a_num)->location,
+                                          &location) ;
                 return CR_OK;
         }
 
-      error:
+ error:
 
         cr_tknzr_set_cur_pos (a_this, &init_pos);
 
@@ -1547,12 +1604,9 @@ cr_tknzr_new (CRInput * a_input)
 
                 return NULL;
         }
-
         memset (result->priv, 0, sizeof (CRTknzrPriv));
-
         if (a_input)
                 cr_tknzr_set_input (result, a_input);
-
         return result;
 }
 
@@ -1575,7 +1629,8 @@ cr_tknzr_new_from_buf (guchar * a_buf, gulong a_len,
 }
 
 CRTknzr *
-cr_tknzr_new_from_uri (const guchar * a_file_uri, enum CREncoding a_enc)
+cr_tknzr_new_from_uri (const guchar * a_file_uri, 
+                       enum CREncoding a_enc)
 {
         CRTknzr *result = NULL;
         CRInput *input = NULL;
@@ -1795,6 +1850,19 @@ cr_tknzr_get_cur_pos (CRTknzr * a_this, CRInputPos * a_pos)
         return cr_input_get_cur_pos (PRIVATE (a_this)->input, a_pos);
 }
 
+enum CRStatus 
+cr_tknzr_get_parsing_location (CRTknzr *a_this,
+                               CRParsingLocation *a_loc)
+{
+        g_return_val_if_fail (a_this 
+                              && PRIVATE (a_this)
+                              && a_loc,
+                              CR_BAD_PARAM_ERROR) ;
+
+        return cr_input_get_parsing_location 
+                (PRIVATE (a_this)->input, a_loc) ;
+}
+
 enum CRStatus
 cr_tknzr_get_cur_byte_addr (CRTknzr * a_this, guchar ** a_addr)
 {
@@ -1890,12 +1958,14 @@ cr_tknzr_get_next_token (CRTknzr * a_this, CRToken ** a_tk)
         guchar next_bytes[4] = { 0 };
         gboolean reached_eof = FALSE;
         CRInput *input = NULL;
-        GString *str = NULL;
+        CRString *str = NULL;
         CRRgb *rgb = NULL;
+        CRParsingLocation location = {0} ;
 
         g_return_val_if_fail (a_this && PRIVATE (a_this)
                               && a_tk && *a_tk == NULL
-                              && PRIVATE (a_this)->input, CR_BAD_PARAM_ERROR);
+                              && PRIVATE (a_this)->input, 
+                              CR_BAD_PARAM_ERROR);
 
         if (PRIVATE (a_this)->token_cache) {
                 *a_tk = PRIVATE (a_this)->token_cache;
@@ -1932,9 +2002,14 @@ cr_tknzr_get_next_token (CRTknzr * a_this, CRToken ** a_tk)
                             && BYTE (input, 8, NULL) == 'a'
                             && BYTE (input, 9, NULL) == 'c'
                             && BYTE (input, 10, NULL) == 'e') {
-                                SKIP_CHARS (a_this, 10);
+                                SKIP_CHARS (a_this, 1);
+                                cr_tknzr_get_parsing_location 
+                                        (a_this, &location) ;
+                                SKIP_CHARS (a_this, 9);
                                 status = cr_token_set_font_face_sym (token);
                                 CHECK_PARSING_STATUS (status, TRUE);
+                                cr_parsing_location_copy (&token->location,
+                                                          &location) ;
                                 goto done;
                         }
 
@@ -1945,9 +2020,14 @@ cr_tknzr_get_next_token (CRTknzr * a_this, CRToken ** a_tk)
                             && BYTE (input, 6, NULL) == 's'
                             && BYTE (input, 7, NULL) == 'e'
                             && BYTE (input, 8, NULL) == 't') {
-                                SKIP_CHARS (a_this, 8);
+                                SKIP_CHARS (a_this, 1);
+                                cr_tknzr_get_parsing_location
+                                        (a_this, &location) ;
+                                SKIP_CHARS (a_this, 7);
                                 status = cr_token_set_charset_sym (token);
                                 CHECK_PARSING_STATUS (status, TRUE);
+                                cr_parsing_location_copy (&token->location,
+                                                          &location) ;
                                 goto done;
                         }
 
@@ -1957,9 +2037,14 @@ cr_tknzr_get_next_token (CRTknzr * a_this, CRToken ** a_tk)
                             && BYTE (input, 5, NULL) == 'o'
                             && BYTE (input, 6, NULL) == 'r'
                             && BYTE (input, 7, NULL) == 't') {
-                                SKIP_CHARS (a_this, 7);
+                                SKIP_CHARS (a_this, 1);
+                                cr_tknzr_get_parsing_location 
+                                        (a_this, &location) ;
+                                SKIP_CHARS (a_this, 6);
                                 status = cr_token_set_import_sym (token);
                                 CHECK_PARSING_STATUS (status, TRUE);
+                                cr_parsing_location_copy (&token->location,
+                                                          &location) ;
                                 goto done;
                         }
 
@@ -1968,9 +2053,14 @@ cr_tknzr_get_next_token (CRTknzr * a_this, CRToken ** a_tk)
                             && BYTE (input, 4, NULL) == 'd'
                             && BYTE (input, 5, NULL) == 'i'
                             && BYTE (input, 6, NULL) == 'a') {
-                                SKIP_CHARS (a_this, 6);
+                                SKIP_CHARS (a_this, 1);
+                                cr_tknzr_get_parsing_location (a_this, 
+                                                               &location) ;
+                                SKIP_CHARS (a_this, 5);
                                 status = cr_token_set_media_sym (token);
                                 CHECK_PARSING_STATUS (status, TRUE);
+                                cr_parsing_location_copy (&token->location, 
+                                                          &location) ;
                                 goto done;
                         }
 
@@ -1978,16 +2068,24 @@ cr_tknzr_get_next_token (CRTknzr * a_this, CRToken ** a_tk)
                             && BYTE (input, 3, NULL) == 'a'
                             && BYTE (input, 4, NULL) == 'g'
                             && BYTE (input, 5, NULL) == 'e') {
-                                SKIP_CHARS (a_this, 5);
+                                SKIP_CHARS (a_this, 1);
+                                cr_tknzr_get_parsing_location (a_this, 
+                                                               &location) ;
+                                SKIP_CHARS (a_this, 4);
                                 status = cr_token_set_page_sym (token);
                                 CHECK_PARSING_STATUS (status, TRUE);
+                                cr_parsing_location_copy (&token->location, 
+                                                          &location) ;
                                 goto done;
                         }
-
                         status = cr_tknzr_parse_atkeyword (a_this, &str);
                         if (status == CR_OK) {
                                 status = cr_token_set_atkeyword (token, str);
                                 CHECK_PARSING_STATUS (status, TRUE);
+                                if (str) {
+                                        cr_parsing_location_copy (&token->location, 
+                                                                  &str->location) ;
+                                }
                                 goto done;
                         }
                 }
@@ -1998,12 +2096,16 @@ cr_tknzr_get_next_token (CRTknzr * a_this, CRToken ** a_tk)
                 if (BYTE (input, 2, NULL) == 'r'
                     && BYTE (input, 3, NULL) == 'l'
                     && BYTE (input, 4, NULL) == '(') {
-                        GString *str = NULL;
+                        CRString *str = NULL;
 
                         status = cr_tknzr_parse_uri (a_this, &str);
                         if (status == CR_OK) {
                                 status = cr_token_set_uri (token, str);
                                 CHECK_PARSING_STATUS (status, TRUE);
+                                if (str) {
+                                        cr_parsing_location_copy (&token->location,
+                                                                  &str->location) ;
+                                }
                                 goto done;
                         }
                 } else {
@@ -2011,6 +2113,10 @@ cr_tknzr_get_next_token (CRTknzr * a_this, CRToken ** a_tk)
                         if (status == CR_OK && str) {
                                 status = cr_token_set_ident (token, str);
                                 CHECK_PARSING_STATUS (status, TRUE);
+                                if (str) {
+                                        cr_parsing_location_copy (&token->location, 
+                                                                  &str->location) ;
+                                }
                                 goto done;
                         }
                 }
@@ -2024,6 +2130,10 @@ cr_tknzr_get_next_token (CRTknzr * a_this, CRToken ** a_tk)
                         if (status == CR_OK && rgb) {
                                 status = cr_token_set_rgb (token, rgb);
                                 CHECK_PARSING_STATUS (status, TRUE);
+                                if (rgb) {
+                                        cr_parsing_location_copy (&token->location, 
+                                                                  &rgb->location) ;
+                                }
                                 rgb = NULL;
                                 goto done;
                         }
@@ -2033,6 +2143,10 @@ cr_tknzr_get_next_token (CRTknzr * a_this, CRToken ** a_tk)
                         if (status == CR_OK) {
                                 status = cr_token_set_ident (token, str);
                                 CHECK_PARSING_STATUS (status, TRUE);
+                                if (str) {
+                                        cr_parsing_location_copy (&token->location, 
+                                                                  &str->location) ;
+                                }
                                 str = NULL;
                                 goto done;
                         }
@@ -2042,9 +2156,14 @@ cr_tknzr_get_next_token (CRTknzr * a_this, CRToken ** a_tk)
         case '<':
                 if (BYTE (input, 2, NULL) == '-'
                     && BYTE (input, 3, NULL) == '-') {
-                        SKIP_CHARS (a_this, 3);
+                        SKIP_CHARS (a_this, 1);
+                        cr_tknzr_get_parsing_location (a_this, 
+                                                       &location) ;
+                        SKIP_CHARS (a_this, 2);
                         status = cr_token_set_cdo (token);
                         CHECK_PARSING_STATUS (status, TRUE);
+                        cr_parsing_location_copy (&token->location, 
+                                                  &location) ;
                         goto done;
                 }
                 break;
@@ -2052,9 +2171,14 @@ cr_tknzr_get_next_token (CRTknzr * a_this, CRToken ** a_tk)
         case '-':
                 if (BYTE (input, 2, NULL) == '-'
                     && BYTE (input, 3, NULL) == '>') {
-                        SKIP_CHARS (a_this, 3);
+                        SKIP_CHARS (a_this, 1);
+                        cr_tknzr_get_parsing_location (a_this, 
+                                                       &location) ;
+                        SKIP_CHARS (a_this, 2);
                         status = cr_token_set_cdc (token);
                         CHECK_PARSING_STATUS (status, TRUE);
+                        cr_parsing_location_copy (&token->location, 
+                                                  &location) ;
                         goto done;
                 } else {
                         status = cr_tknzr_parse_ident
@@ -2062,24 +2186,39 @@ cr_tknzr_get_next_token (CRTknzr * a_this, CRToken ** a_tk)
                         if (status == CR_OK) {
                                 cr_token_set_ident
                                         (token, str);
+                                if (str) {
+                                        cr_parsing_location_copy (&token->location, 
+                                                                  &str->location) ;
+                                }
                                 goto done;
                         }
                 }
                 break;
+
         case '~':
                 if (BYTE (input, 2, NULL) == '=') {
-                        SKIP_CHARS (a_this, 2);
+                        SKIP_CHARS (a_this, 1);
+                        cr_tknzr_get_parsing_location (a_this, 
+                                                       &location) ;
+                        SKIP_CHARS (a_this, 1);
                         status = cr_token_set_includes (token);
                         CHECK_PARSING_STATUS (status, TRUE);
+                        cr_parsing_location_copy (&token->location, 
+                                                  &location) ;
                         goto done;
                 }
                 break;
 
         case '|':
                 if (BYTE (input, 2, NULL) == '=') {
-                        SKIP_CHARS (a_this, 2);
+                        SKIP_CHARS (a_this, 1);
+                        cr_tknzr_get_parsing_location (a_this, 
+                                                       &location) ;
+                        SKIP_CHARS (a_this, 1);
                         status = cr_token_set_dashmatch (token);
                         CHECK_PARSING_STATUS (status, TRUE);
+                        cr_parsing_location_copy (&token->location,
+                                                  &location) ;
                         goto done;
                 }
                 break;
@@ -2092,6 +2231,10 @@ cr_tknzr_get_next_token (CRTknzr * a_this, CRToken ** a_tk)
                                 status = cr_token_set_comment (token, str);
                                 str = NULL;
                                 CHECK_PARSING_STATUS (status, TRUE);
+                                if (str) {
+                                        cr_parsing_location_copy (&token->location, 
+                                                                  &str->location) ;
+                                }
                                 goto done;
                         }
                 }
@@ -2099,44 +2242,72 @@ cr_tknzr_get_next_token (CRTknzr * a_this, CRToken ** a_tk)
 
         case ';':
                 SKIP_CHARS (a_this, 1);
+                cr_tknzr_get_parsing_location (a_this, 
+                                               &location) ;
                 status = cr_token_set_semicolon (token);
                 CHECK_PARSING_STATUS (status, TRUE);
+                cr_parsing_location_copy (&token->location, 
+                                          &location) ;
                 goto done;
 
         case '{':
                 SKIP_CHARS (a_this, 1);
+                cr_tknzr_get_parsing_location (a_this, 
+                                               &location) ;
                 status = cr_token_set_cbo (token);
                 CHECK_PARSING_STATUS (status, TRUE);
+                cr_tknzr_get_parsing_location (a_this, 
+                                               &location) ;
                 goto done;
 
         case '}':
                 SKIP_CHARS (a_this, 1);
+                cr_tknzr_get_parsing_location (a_this, 
+                                               &location) ;
                 status = cr_token_set_cbc (token);
                 CHECK_PARSING_STATUS (status, TRUE);
+                cr_parsing_location_copy (&token->location, 
+                                          &location) ;
                 goto done;
 
         case '(':
                 SKIP_CHARS (a_this, 1);
+                cr_tknzr_get_parsing_location (a_this, 
+                                               &location) ;
                 status = cr_token_set_po (token);
                 CHECK_PARSING_STATUS (status, TRUE);
+                cr_parsing_location_copy (&token->location, 
+                                          &location) ;
                 goto done;
 
         case ')':
                 SKIP_CHARS (a_this, 1);
+                cr_tknzr_get_parsing_location (a_this, 
+                                               &location) ;
                 status = cr_token_set_pc (token);
                 CHECK_PARSING_STATUS (status, TRUE);
+                cr_parsing_location_copy (&token->location, 
+                                          &location) ;
                 goto done;
 
         case '[':
                 SKIP_CHARS (a_this, 1);
+                cr_tknzr_get_parsing_location (a_this, 
+                                               &location) ;
                 status = cr_token_set_bo (token);
                 CHECK_PARSING_STATUS (status, TRUE);
+                cr_parsing_location_copy (&token->location, 
+                                          &location) ;
                 goto done;
 
         case ']':
                 SKIP_CHARS (a_this, 1);
+                cr_tknzr_get_parsing_location (a_this, 
+                                               &location) ;
                 status = cr_token_set_bc (token);
                 CHECK_PARSING_STATUS (status, TRUE);
+                cr_parsing_location_copy (&token->location, 
+                                          &location) ;
                 goto done;
 
         case ' ':
@@ -2148,10 +2319,13 @@ cr_tknzr_get_next_token (CRTknzr * a_this, CRToken ** a_tk)
                         guchar *start = NULL,
                                 *end = NULL;
 
-                        status = cr_tknzr_parse_w (a_this, &start, &end);
+                        status = cr_tknzr_parse_w (a_this, &start, 
+                                                   &end, &location);
                         if (status == CR_OK) {
                                 status = cr_token_set_s (token);
                                 CHECK_PARSING_STATUS (status, TRUE);
+                                cr_tknzr_get_parsing_location (a_this, 
+                                                               &location) ;
                                 goto done;
                         }
                 }
@@ -2163,6 +2337,10 @@ cr_tknzr_get_next_token (CRTknzr * a_this, CRToken ** a_tk)
                         if (status == CR_OK && str) {
                                 status = cr_token_set_hash (token, str);
                                 CHECK_PARSING_STATUS (status, TRUE);
+                                if (str) {
+                                        cr_parsing_location_copy (&token->location,
+                                                                  &str->location) ;
+                                }
                                 str = NULL;
                                 goto done;
                         }
@@ -2175,16 +2353,22 @@ cr_tknzr_get_next_token (CRTknzr * a_this, CRToken ** a_tk)
                 if (status == CR_OK && str) {
                         status = cr_token_set_string (token, str);
                         CHECK_PARSING_STATUS (status, TRUE);
+                        if (str) {
+                                cr_parsing_location_copy (&token->location, 
+                                                          &str->location) ;
+                        }
                         str = NULL;
                         goto done;
                 }
                 break;
 
         case '!':
-                status = cr_tknzr_parse_important (a_this);
+                status = cr_tknzr_parse_important (a_this, &location);
                 if (status == CR_OK) {
                         status = cr_token_set_important_sym (token);
                         CHECK_PARSING_STATUS (status, TRUE);
+                        cr_parsing_location_copy (&token->location, 
+                                                  &location) ;
                         goto done;
                 }
                 break;
@@ -2340,13 +2524,17 @@ cr_tknzr_get_next_token (CRTknzr * a_this, CRToken ** a_tk)
                                                 status = cr_token_set_number
                                                         (token, num);
                                                 num = NULL;
-                                                CHECK_PARSING_STATUS (status,
-                                                                      TRUE);
+                                                CHECK_PARSING_STATUS (status, CR_OK);
                                                 str = NULL;
                                         }
                                 }
-
-                                goto done;
+                                if (token && token->u.num) {
+                                        cr_parsing_location_copy (&token->location,
+                                                                  &token->u.num->location) ;
+                                } else {
+                                        status = CR_ERROR ;
+                                }
+                                goto done ;
                         }
                 }
                 break;
@@ -2374,17 +2562,25 @@ cr_tknzr_get_next_token (CRTknzr * a_this, CRToken ** a_tk)
                                         /*ownership is transfered
                                          *to token by cr_token_set_function.
                                          */
+                                        if (str) {
+                                                cr_parsing_location_copy (&token->location, 
+                                                                          &str->location) ;
+                                        }
                                         str = NULL;
                                 } else {
                                         status = cr_token_set_ident (token,
                                                                      str);
                                         CHECK_PARSING_STATUS (status, TRUE);
+                                        if (str) {
+                                                cr_parsing_location_copy (&token->location, 
+                                                                          &str->location) ;
+                                        }
                                         str = NULL;
                                 }
                                 goto done;
                         } else {
                                 if (str) {
-                                        g_string_free (str, TRUE);
+                                        cr_string_destroy (str);
                                         str = NULL;
                                 }
                         }
@@ -2393,10 +2589,13 @@ cr_tknzr_get_next_token (CRTknzr * a_this, CRToken ** a_tk)
         }
 
         READ_NEXT_CHAR (a_this, &next_char);
+        cr_tknzr_get_parsing_location (a_this, 
+                                       &location) ;
         status = cr_token_set_delim (token, next_char);
         CHECK_PARSING_STATUS (status, TRUE);
-
-      done:
+        cr_parsing_location_copy (&token->location, 
+                                  &location) ;
+ done:
 
         if (status == CR_OK && token) {
                 *a_tk = token;
@@ -2408,14 +2607,14 @@ cr_tknzr_get_next_token (CRTknzr * a_this, CRToken ** a_tk)
                 return CR_OK;
         }
 
-      error:
+ error:
         if (token) {
                 cr_token_destroy (token);
                 token = NULL;
         }
 
         if (str) {
-                g_string_free (str, TRUE);
+                cr_string_destroy (str);
                 str = NULL;
         }
         cr_tknzr_set_cur_pos (a_this, &init_pos);
@@ -2465,7 +2664,7 @@ cr_tknzr_parse_token (CRTknzr * a_this, enum CRTokenType a_type,
                 case FUNCTION_TK:
                 case COMMENT_TK:
                 case URI_TK:
-                        *((GString **) a_res) = token->u.str;
+                        *((CRString **) a_res) = token->u.str;
                         token->u.str = NULL;
                         status = CR_OK;
                         break;
@@ -2497,7 +2696,7 @@ cr_tknzr_parse_token (CRTknzr * a_this, enum CRTokenType a_type,
                                 goto error;
                         }
 
-                        *((GString **) a_extra_res) = token->dimen;
+                        *((CRString **) a_extra_res) = token->dimen;
                         token->u.num = NULL;
                         token->dimen = NULL;
                         status = CR_OK;

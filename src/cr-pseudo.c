@@ -3,8 +3,6 @@
 /*
  * This file is part of The Croco Library
  *
- * Copyright (C) 2002-2003 Dodji Seketeli <dodji@seketeli.org>
- *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of version 2.1 of the GNU Lesser General Public
  * License as published by the Free Software Foundation.
@@ -18,10 +16,9 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
  * USA
- */
-
-/*
- *$Id$
+ *
+ * Author: Dodji Seketeli
+ * See COPYRIGHTS file for copyright information.
  */
 
 #include "cr-pseudo.h"
@@ -62,10 +59,11 @@ cr_pseudo_to_string (CRPseudo * a_this)
                         goto error;
                 }
 
-                name = g_strndup (a_this->name->str, a_this->name->len);
+                name = g_strndup (a_this->name->stryng->str, 
+                                  a_this->name->stryng->len);
 
                 if (name) {
-                        g_string_append_printf (str_buf, "%s", name);
+                        g_string_append (str_buf, name);
                         g_free (name);
                         name = NULL;
                 }
@@ -76,11 +74,12 @@ cr_pseudo_to_string (CRPseudo * a_this)
                 if (a_this->name == NULL)
                         goto error;
 
-                name = g_strndup (a_this->name->str, a_this->name->len);
+                name = g_strndup (a_this->name->stryng->str, 
+                                  a_this->name->stryng->len);
 
                 if (a_this->extra) {
-                        arg = g_strndup (a_this->extra->str,
-                                         a_this->extra->len);
+                        arg = g_strndup (a_this->extra->stryng->str,
+                                         a_this->extra->stryng->len);
                 }
 
                 if (name) {
@@ -89,12 +88,12 @@ cr_pseudo_to_string (CRPseudo * a_this)
                         name = NULL;
 
                         if (arg) {
-                                g_string_append_printf (str_buf, "%s", arg);
+                                g_string_append (str_buf, arg);
                                 g_free (arg);
                                 arg = NULL;
                         }
 
-                        g_string_append_printf (str_buf, ")");
+                        g_string_append_c (str_buf, ')');
                 }
         }
 
@@ -141,12 +140,12 @@ cr_pseudo_destroy (CRPseudo * a_this)
         g_return_if_fail (a_this);
 
         if (a_this->name) {
-                g_string_free (a_this->name, TRUE);
+                cr_string_destroy (a_this->name);
                 a_this->name = NULL;
         }
 
         if (a_this->extra) {
-                g_string_free (a_this->extra, TRUE);
+                cr_string_destroy (a_this->extra);
                 a_this->extra = NULL;
         }
 

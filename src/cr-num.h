@@ -17,11 +17,8 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
  * USA
  *
- *see COPYRIGHTS file for copyright information
- */
-
-/*
- *$Id$
+ * Author: Dodji Seketeli
+ * See COPYRIGHTS file for copyright information
  */
 
 
@@ -36,6 +33,7 @@
 
 #include <glib.h>
 #include "cr-utils.h"
+#include "cr-parsing-location.h"
 
 G_BEGIN_DECLS
 
@@ -73,6 +71,7 @@ enum CRNumType
         NUM_FREQ_HZ,
         NUM_FREQ_KHZ,
         NUM_PERCENTAGE,
+	NUM_INHERIT,
         NUM_UNKNOWN_TYPE
 } ;
 
@@ -91,6 +90,7 @@ struct _CRNum
 {
         enum CRNumType type ;
         gdouble val ;
+        CRParsingLocation location ;
 } ;
 
 CRNum *
@@ -105,9 +105,6 @@ cr_num_dup (CRNum *a_this) ;
 
 guchar *
 cr_num_to_string (CRNum *a_this) ;
-
-void
-cr_num_set_type (CRNum *a_this, enum CRNumType a_type) ;
 
 enum CRStatus
 cr_num_copy (CRNum *a_dest, CRNum *a_src) ;

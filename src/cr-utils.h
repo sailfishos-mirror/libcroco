@@ -17,6 +17,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
  * USA
  *
+ * Author: Dodji Seketeli
  * Look at file COPYRIGHTS for copyright information
  */
 
@@ -24,9 +25,8 @@
 #define __CR_DEFS_H__
 
 #include <stdio.h>
-#include "libcroco-config.h"
 #include <glib.h>
-
+#include "libcroco-config.h"
 
 G_BEGIN_DECLS
 
@@ -239,7 +239,10 @@ gdouble
 cr_utils_n_to_0_dot_n (glong a_n) ;
 
 GList *
-cr_dup_glist_of_string (GList *a_list) ;
+cr_utils_dup_glist_of_string (GList *a_list) ;
+
+GList *
+cr_utils_dup_glist_of_cr_string (GList * a_list_of_strings) ;
 
 G_END_DECLS
 

@@ -3,7 +3,6 @@
 /*
  * This file is part of The Croco Library
  *
- * Copyright (C) 2002-2003 Dodji Seketeli <dodji@seketeli.org>
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of version 2.1 of the GNU Lesser General Public
@@ -18,6 +17,9 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
  * USA
+ *
+ * Author: Dodji Seketeli.
+ * See COPYRIGHTS file for copyright information.
  */
 
 #ifndef __CR_STYLE_H__
@@ -46,7 +48,8 @@ enum CRBorderStyle
         BORDER_STYLE_GROOVE,
         BORDER_STYLE_RIDGE,
         BORDER_STYLE_INSET,
-        BORDER_STYLE_OUTSET
+        BORDER_STYLE_OUTSET,
+	BORDER_STYLE_INHERIT
 } ;
 
 enum CRDisplayType
@@ -86,6 +89,14 @@ enum CRFloatType
         FLOAT_LEFT,
         FLOAT_RIGHT,
         FLOAT_INHERIT
+} ;
+
+enum CRWhiteSpaceType
+{
+	WHITE_SPACE_NORMAL,
+	WHITE_SPACE_PRE,
+	WHITE_SPACE_NOWRAP,
+	WHITE_SPACE_INHERIT
 } ;
 
 
@@ -254,9 +265,18 @@ struct _CRStyle
         enum CRFontWeight font_weight ;
         enum CRFontStretch font_stretch ;
 
+	/**
+	 * the 'tex' properties
+	 */
+	enum CRWhiteSpaceType white_space;
+
+        gboolean inherited_props_resolved ;
         CRStyle *parent_style ;
         gulong ref_count ;
 } ;
+
+enum CRStatus cr_style_white_space_type_to_string (enum CRWhiteSpaceType a_code,
+                                                   GString * a_str, guint a_nb_indent) ;
 
 enum CRStatus cr_style_num_prop_val_to_string (CRNumPropVal *a_prop_val,
                                                GString *a_str,
@@ -281,11 +301,16 @@ enum CRStatus cr_style_position_type_to_string (enum CRPositionType a_code,
 enum CRStatus cr_style_float_type_to_string (enum CRFloatType a_code,
                                              GString *a_str,
                                              guint a_nb_indent) ;
-CRStyle * cr_style_new (void) ;
 
-enum CRStatus cr_style_set_props_to_defaults (CRStyle *a_this) ;
+CRStyle * cr_style_new (gboolean a_set_props_to_initial_values) ;
 
-enum CRStatus cr_style_set_style_from_decl (CRStyle *a_this, CRDeclaration *a_decl) ;
+enum CRStatus cr_style_set_props_to_default_values (CRStyle *a_this) ;
+enum CRStatus cr_style_set_props_to_initial_values (CRStyle *a_this) ;
+enum CRStatus cr_style_resolve_inherited_properties (CRStyle *a_this) ;
+enum CRStatus cr_style_propagate_from_parent (CRStyle *a_this);
+
+enum CRStatus cr_style_set_style_from_decl (CRStyle *a_this, 
+					    CRDeclaration *a_decl) ;
 
 
 enum CRStatus cr_style_copy (CRStyle *a_dest, CRStyle *a_src) ;

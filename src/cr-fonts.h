@@ -44,6 +44,7 @@ enum CRFontFamilyType
 	FONT_FAMILY_FANTASY,
 	FONT_FAMILY_MONOSPACE,
 	FONT_FAMILY_NON_GENERIC,
+	FONT_FAMILY_INHERIT,
 	/**/
 	NB_FONT_FAMILIE_TYPES
 } ;
@@ -86,7 +87,7 @@ enum CRPredefinedAbsoluteFontSize
         FONT_SIZE_LARGE,
         FONT_SIZE_X_LARGE,
         FONT_SIZE_XX_LARGE,
-
+	FONT_SIZE_INHERIT,
         NB_PREDEFINED_ABSOLUTE_FONT_SIZES
 } ;
 
@@ -112,8 +113,7 @@ enum CRRelativeFontSize
  *Used to define the type of #CRFontSize .
  *See css2 spec chapter 15.2.4 to understand.
  */
-enum CRFontSizeType
-{
+enum CRFontSizeType {
         /**
          *If the type of #CRFontSize is
          *PREDEFINED_ABSOLUTE_FONT_SIZE,
@@ -148,11 +148,9 @@ enum CRFontSizeType
 } ;
 
 typedef struct _CRFontSize CRFontSize ;
-struct _CRFontSize
-{
+struct _CRFontSize {
         enum CRFontSizeType type ;
-        union 
-        {
+        union  {
                 enum CRPredefinedAbsoluteFontSize predefined ;
                 enum CRRelativeFontSize relative ;
                 CRNum * absolute ;

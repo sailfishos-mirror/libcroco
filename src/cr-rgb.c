@@ -17,6 +17,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
  * USA
  * 
+ * Author: Dodji Seketeli
  * See COPYRIGHTS file for copyrights information.
  */
 
@@ -240,24 +241,22 @@ cr_rgb_to_string (CRRgb * a_this)
         str_buf = g_string_new (NULL);
         g_return_val_if_fail (str_buf, NULL);
 
-        if (a_this->is_percentage == TRUE) {
+        if (a_this->is_percentage == 1) {
                 g_string_append_printf (str_buf, "%ld", a_this->red);
 
-                g_string_append_c (str_buf, '%');
-                g_string_append_printf (str_buf, ", ");
+                g_string_append (str_buf, "%, ");
 
                 g_string_append_printf (str_buf, "%ld", a_this->green);
-                g_string_append_c (str_buf, '%');;
-                g_string_append_printf (str_buf, ", ");
+                g_string_append (str_buf, "%, ");
 
                 g_string_append_printf (str_buf, "%ld", a_this->blue);
                 g_string_append_c (str_buf, '%');
         } else {
                 g_string_append_printf (str_buf, "%ld", a_this->red);
-                g_string_append_printf (str_buf, ", ");
+                g_string_append (str_buf, ", ");
 
                 g_string_append_printf (str_buf, "%ld", a_this->green);
-                g_string_append_printf (str_buf, ", ");
+                g_string_append (str_buf, ", ");
 
                 g_string_append_printf (str_buf, "%ld", a_this->blue);
         }
@@ -338,8 +337,33 @@ cr_rgb_set (CRRgb * a_this, gulong a_red,
         a_this->red = a_red;
         a_this->green = a_green;
         a_this->blue = a_blue;
-
+        a_this->inherit = FALSE ;
         return CR_OK;
+}
+
+/**
+ *sets the value of the rgb to inherit.
+ *Look at the css spec from chapter 6.1 to 6.2 to understand
+ *the meaning of "inherit".
+ *@param a_this the current instance of #CRRgb
+ *
+ */
+enum CRStatus 
+cr_rgb_set_to_inherit (CRRgb *a_this)
+{
+        g_return_val_if_fail (a_this, CR_BAD_PARAM_ERROR) ;
+
+        a_this->inherit = TRUE ;
+
+        return CR_OK ;
+}
+
+gboolean
+cr_rgb_is_set_to_inherit (CRRgb *a_this)
+{
+        g_return_val_if_fail (a_this, CR_BAD_PARAM_ERROR) ;
+
+        return a_this->inherit ;
 }
 
 /**
@@ -455,19 +479,41 @@ cr_rgb_set_from_term (CRRgb *a_this, const struct _CRTerm *a_value)
                 }
 		break ;
 	case TERM_IDENT:
-	        status = cr_rgb_set_from_name 
-                        (a_this,
-                         a_value->content.str->str) ;
+                if (a_value->content.str
+                    && a_value->content.str->stryng
+                    && a_value->content.str->stryng->str) {
+			if (!strncmp ("inherit",
+                                      a_value->content.str->stryng->str,
+                                      sizeof ("inherit")-1))
+			{
+				a_this->inherit = TRUE;
+			}
+			else 
+			{
+                        	status = cr_rgb_set_from_name
+				  (a_this,
+				   a_value->content.str->stryng->str) ;
+			}
+                } else {
+                        cr_utils_trace_info 
+                                ("a_value has NULL string value") ;
+                }
 		break ;
 	case TERM_HASH:
-                status = cr_rgb_set_from_hex_str
-                        (a_this, 
-                         a_value->content.str->str) ;
+                if (a_value->content.str
+                    && a_value->content.str->stryng
+                    && a_value->content.str->stryng->str) {
+                        status = cr_rgb_set_from_hex_str
+                                (a_this, 
+                                 a_value->content.str->stryng->str) ;
+                } else {
+                        cr_utils_trace_info
+                                ("a_value has NULL string value") ;
+                }
                 break ;
 	default:
                 status =  CR_UNKNOWN_TYPE_ERROR ;
 	}
-
         return status ;
 }
 
@@ -480,7 +526,6 @@ void
 cr_rgb_destroy (CRRgb * a_this)
 {
         g_return_if_fail (a_this);
-
         g_free (a_this);
 }
 

@@ -3,8 +3,6 @@
 /*
  * This file is part of The Croco Library
  *
- * Copyright (C) 2002-2003 Dodji Seketeli <dodji@seketeli.org>
- *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of version 2.1 of the GNU Lesser General Public
  * License as published by the Free Software Foundation.
@@ -18,10 +16,9 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
  * USA
- */
-
-/*
- *$Id$
+ * 
+ * Author: Dodji Seketeli
+ * See COPYRIGHTS file for copyright information.
  */
 
 #include <stdio.h>
@@ -29,6 +26,7 @@
 #include "cr-utils.h"
 #include "cr-rgb.h"
 #include "cr-num.h"
+#include "cr-string.h"
 
 #ifndef __CR_TERM_H__
 #define __CR_TERM_H__
@@ -41,7 +39,7 @@ G_BEGIN_DECLS
  */
 
 enum CRTermType
-{        
+{
         TERM_NO_TYPE = 0,
         TERM_NUMBER,
         TERM_FUNCTION,
@@ -108,7 +106,7 @@ struct _CRTerm
         union
         {
                 CRNum *num ;
-                GString * str ;
+                CRString * str ;
                 CRRgb * rgb ;
         } content ;
 
@@ -144,63 +142,48 @@ struct _CRTerm
          *term.
          */
         CRTerm *prev ;
+        CRParsingLocation location ;
 } ;
 
-CRTerm *
-cr_term_parse_expression_from_buf (const guchar *a_buf, 
-                                   enum CREncoding a_encoding) ;
-CRTerm *
-cr_term_new (void) ;
+CRTerm * cr_term_parse_expression_from_buf (const guchar *a_buf, 
+                                            enum CREncoding a_encoding) ;
+CRTerm * cr_term_new (void) ;
 
-enum CRStatus
-cr_term_set_number (CRTerm *a_this, CRNum *a_num) ;
+enum CRStatus cr_term_set_number (CRTerm *a_this, CRNum *a_num) ;
         
-enum CRStatus
-cr_term_set_function (CRTerm *a_this, GString *a_func_name,
-                      CRTerm *a_func_param) ;
+enum CRStatus cr_term_set_function (CRTerm *a_this, 
+                                    CRString *a_func_name,
+                                    CRTerm *a_func_param) ;
 
-enum CRStatus
-cr_term_set_string (CRTerm *a_this, GString *a_str) ;
+enum CRStatus cr_term_set_string (CRTerm *a_this, CRString *a_str) ;
 
-enum CRStatus
-cr_term_set_ident (CRTerm *a_this, GString *a_str) ;
+enum CRStatus cr_term_set_ident (CRTerm *a_this, CRString *a_str) ;
 
-enum CRStatus
-cr_term_set_uri (CRTerm *a_this, GString *a_str) ;
+enum CRStatus cr_term_set_uri (CRTerm *a_this, CRString *a_str) ;
         
-enum CRStatus
-cr_term_set_rgb (CRTerm *a_this, CRRgb *a_rgb) ;                
+enum CRStatus cr_term_set_rgb (CRTerm *a_this, CRRgb *a_rgb) ;
         
-enum CRStatus
-cr_term_set_hash (CRTerm *a_this, GString *a_str) ;
+enum CRStatus cr_term_set_hash (CRTerm *a_this, CRString *a_str) ;
         
-CRTerm *
-cr_term_append_term (CRTerm *a_this, CRTerm *a_new_term) ;
+CRTerm * cr_term_append_term (CRTerm *a_this, CRTerm *a_new_term) ;
 
-CRTerm *
-cr_term_prepend_term (CRTerm *a_this, CRTerm *a_new_term) ;
+CRTerm * cr_term_prepend_term (CRTerm *a_this, CRTerm *a_new_term) ;
 
+guchar * cr_term_to_string (CRTerm *a_this) ;
 
-guchar *
-cr_term_to_string (CRTerm *a_this) ;
+guchar * cr_term_one_to_string (CRTerm * a_this) ;
 
-void
-cr_term_dump (CRTerm *a_this, FILE *a_fp) ;
+void cr_term_dump (CRTerm *a_this, FILE *a_fp) ;
 
-int
-cr_term_nr_values (CRTerm *a_this) ;
+int cr_term_nr_values (CRTerm *a_this) ;
 
-CRTerm *
-cr_term_get_from_list (CRTerm *a_this, int itemnr) ;
+CRTerm * cr_term_get_from_list (CRTerm *a_this, int itemnr) ;
 
-void
-cr_term_ref (CRTerm *a_this) ;
+void cr_term_ref (CRTerm *a_this) ;
 
-gboolean
-cr_term_unref (CRTerm *a_this) ;
+gboolean cr_term_unref (CRTerm *a_this) ;
 
-void
-cr_term_destroy (CRTerm * a_term) ;
+void cr_term_destroy (CRTerm * a_term) ;
 
 G_END_DECLS
 

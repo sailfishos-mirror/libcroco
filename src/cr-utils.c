@@ -3,8 +3,6 @@
 /*
  * This file is part of The Croco Library
  *
- * Copyright (C) 2002-2003 Dodji Seketeli <dodji at seketeli.org>
- *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of version 2.1 of the GNU Lesser General Public
  * License as published by the Free Software Foundation.
@@ -18,13 +16,13 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
  * USA
- */
-
-/*
- *$Id$
+ *
+ * Author: Dodji Seketeli
+ * See COPYRIGHTS file for copyright information.
  */
 
 #include "cr-utils.h"
+#include "cr-string.h"
 
 /**
  *@file:
@@ -1313,7 +1311,7 @@ cr_utils_n_to_0_dot_n (glong a_n)
  *@param a_list_of_strings the list of strings to be duplicated.
  */
 GList *
-cr_dup_glist_of_string (GList * a_list_of_strings)
+cr_utils_dup_glist_of_string (GList * a_list_of_strings)
 {
         GList *cur = NULL,
                 *result = NULL;
@@ -1325,6 +1323,30 @@ cr_dup_glist_of_string (GList * a_list_of_strings)
 
                 str = g_string_new_len (((GString *) cur->data)->str,
                                         ((GString *) cur->data)->len);
+                if (str)
+                        result = g_list_append (result, str);
+        }
+
+        return result;
+}
+
+/**
+ *Duplicate a GList where the GList::data is a CRString.
+ *@param a_list_of_strings the list to duplicate
+ *@return the duplicated list, or NULL if something bad
+ *happened.
+ */
+GList *
+cr_utils_dup_glist_of_cr_string (GList * a_list_of_strings)
+{
+        GList *cur = NULL, *result = NULL;
+
+        g_return_val_if_fail (a_list_of_strings, NULL);
+
+        for (cur = a_list_of_strings; cur; cur = cur->next) {
+                CRString *str = NULL;
+
+                str = cr_string_dup ((CRString *) cur->data) ;
                 if (str)
                         result = g_list_append (result, str);
         }

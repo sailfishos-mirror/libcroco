@@ -17,12 +17,10 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
  * USA
  *
- *See COPYRIGHTS file for copyright information.
+ * Author: Dodji Seketeli.
+ * See COPYRIGHTS file for copyright information.
  */
 
-/*
- *$Id$
- */
 
 #include <string.h>
 #include "cr-declaration.h"
@@ -64,7 +62,7 @@ dump (CRDeclaration * a_this, FILE * a_fp, glong a_indent)
  */
 CRDeclaration *
 cr_declaration_new (CRStatement * a_statement,
-                    GString * a_property, CRTerm * a_value)
+                    CRString * a_property, CRTerm * a_value)
 {
         CRDeclaration *result = NULL;
 
@@ -111,7 +109,7 @@ cr_declaration_parse_from_buf (CRStatement * a_statement,
 {
         enum CRStatus status = CR_OK;
         CRTerm *value = NULL;
-        GString *property = NULL;
+        CRString *property = NULL;
         CRDeclaration *result = NULL;
         CRParser *parser = NULL;
         gboolean important = FALSE;
@@ -148,7 +146,7 @@ cr_declaration_parse_from_buf (CRStatement * a_statement,
         }
 
         if (property) {
-                g_string_free (property, TRUE);
+                cr_string_destroy (property);
                 property = NULL;
         }
 
@@ -174,7 +172,7 @@ cr_declaration_parse_list_from_buf (const guchar * a_str,
 
         enum CRStatus status = CR_OK;
         CRTerm *value = NULL;
-        GString *property = NULL;
+        CRString *property = NULL;
         CRDeclaration *result = NULL,
                 *cur_decl = NULL;
         CRParser *parser = NULL;
@@ -254,7 +252,7 @@ cr_declaration_parse_list_from_buf (const guchar * a_str,
         }
 
         if (property) {
-                g_string_free (property, TRUE);
+                cr_string_destroy (property);
                 property = NULL;
         }
 
@@ -404,7 +402,7 @@ cr_declaration_prepend (CRDeclaration * a_this, CRDeclaration * a_new)
  */
 CRDeclaration *
 cr_declaration_append2 (CRDeclaration * a_this,
-                        GString * a_prop, CRTerm * a_value)
+                        CRString * a_prop, CRTerm * a_value)
 {
         CRDeclaration *new_elem = NULL;
 
@@ -475,17 +473,20 @@ cr_declaration_to_string (CRDeclaration * a_this, gulong a_indent)
 
         g_return_val_if_fail (a_this, NULL);
 
-        stringue = g_string_new (NULL);
+	stringue = g_string_new (NULL);
 
-        if (a_this->property && a_this->property->str) {
-                str = g_strndup (a_this->property->str,
-                                 a_this->property->len);
-                if (str) {
-                        cr_utils_dump_n_chars2 (' ', stringue, a_indent);
-                        g_string_append_printf (stringue, "%s", str);
-                        g_free (str);
-                        str = NULL;
-                } else
+	if (a_this->property 
+	    && a_this->property->stryng
+	    && a_this->property->stryng->str) {
+		str = g_strndup (a_this->property->stryng->str,
+				 a_this->property->stryng->len);
+		if (str) {
+			cr_utils_dump_n_chars2 (' ', stringue, 
+						a_indent);
+			g_string_append (stringue, str);
+			g_free (str);
+			str = NULL;
+		} else
                         goto error;
 
                 if (a_this->value) {
@@ -584,15 +585,15 @@ cr_declaration_list_to_string2 (CRDeclaration * a_this,
                                         g_string_append_printf (stringue,
                                                                 "%s;\n", str);
                                 else
-                                        g_string_append_printf (stringue,
-                                                                "%s", str);
+                                        g_string_append (stringue,
+                                                         str);
                         } else {
                                 if (cur->next)
                                         g_string_append_printf (stringue,
                                                                 "%s;", str);
                                 else
-                                        g_string_append_printf (stringue,
-                                                                "%s", str);
+                                        g_string_append (stringue,
+                                                         str);
                         }
                         g_free (str);
                 } else
@@ -660,9 +661,16 @@ cr_declaration_get_by_prop_name (CRDeclaration * a_this,
         g_return_val_if_fail (a_this, NULL);
         g_return_val_if_fail (a_prop, NULL);
 
-        for (cur = a_this; cur; cur = cur->next)
-                if (!strcmp (cur->property->str, a_prop))
-                        return cur;
+        for (cur = a_this; cur; cur = cur->next) {
+		if (cur->property 
+		    && cur->property->stryng
+		    && cur->property->stryng->str) {
+			if (!strcmp (cur->property->stryng->str, 
+				     a_prop)) {
+				return cur;
+			}
+		}
+	}
         return NULL;
 }
 
@@ -719,7 +727,7 @@ cr_declaration_destroy (CRDeclaration * a_this)
          */
         for (cur = a_this; cur && cur->next; cur = cur->next) {
                 if (cur->property) {
-                        g_string_free (cur->property, TRUE);
+                        cr_string_destroy (cur->property);
                         cur->property = NULL;
                 }
 
@@ -731,7 +739,7 @@ cr_declaration_destroy (CRDeclaration * a_this)
 
         if (cur) {
                 if (cur->property) {
-                        g_string_free (cur->property, TRUE);
+                        cr_string_destroy (cur->property);
                         cur->property = NULL;
                 }
 

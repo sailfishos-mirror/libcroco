@@ -17,12 +17,10 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
  * USA
  *
+ * Author: Dodji Seketeli
  * See COPYRIGHTS file for copyrights information.
  */
 
-/*
- *$Id$
- */
 
 #include "cr-test-utils.h"
 #include "libcroco.h"

@@ -17,21 +17,18 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
  * USA
  *
+ * Author: Dodji Seketeli
  * See COPYRIGHTS file for copyrights information.
  */
 
 #ifndef __CR_SEL_ENG_H__
 #define __CR_SEL_ENG_H__
 
-#define NEW_PROPERTIES_GETTER 1
-
 #include "cr-utils.h"
 #include "cr-stylesheet.h"
 #include "cr-cascade.h"
 #include "cr-style.h"
-#ifdef NEW_PROPERTIES_GETTER
 #include "cr-prop-list.h"
-#endif
 
 #ifdef CROCO_HAVE_LIBXML2
  #include <libxml/tree.h>
@@ -96,24 +93,18 @@ enum CRStatus cr_sel_eng_get_matched_rulesets (CRSelEng *a_this,
                                                CRStatement ***a_rulesets,
                                                gulong *a_len) ;
 
-#ifndef NEW_PROPERTIES_GETTER
-enum CRStatus cr_sel_eng_get_matched_properties_from_cascade  (CRSelEng *a_this,
-                                                               CRCascade *a_cascade,
-                                                               xmlNode *a_node,
-                                                               GHashTable **props_decls_dict) ;
-#else
 enum CRStatus
 cr_sel_eng_get_matched_properties_from_cascade  (CRSelEng *a_this,
                                                  CRCascade *a_cascade,
                                                  xmlNode *a_node,
                                                  CRPropList **a_props) ;
-#endif
 
 enum CRStatus cr_sel_eng_get_matched_style (CRSelEng *a_this,
                                             CRCascade *a_cascade,
                                             xmlNode *a_node,
                                             CRStyle *a_parent_style,
-                                            CRStyle **a_style) ;
+                                            CRStyle **a_style,
+                                            gboolean a_set_props_to_initial_values) ;
 
 void cr_sel_eng_destroy (CRSelEng *a_this) ;
 

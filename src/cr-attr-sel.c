@@ -3,8 +3,6 @@
 /*
  * This file is part of The Croco Library
  *
- * Copyright (C) 2002-2003 Dodji Seketeli <dodji@seketeli.org>
- *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of version 2.1 of the GNU Lesser General Public
  * License as published by the Free Software Foundation.
@@ -18,10 +16,8 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
  * USA
- */
-
-/*
- *$Id$
+ * 
+ * See COPYRIGHTS file for copyrights information.
  */
 
 #include <stdio.h>
@@ -64,9 +60,12 @@ cr_attr_sel_append_attr_sel (CRAttrSel * a_this, CRAttrSel * a_attr_sel)
 {
         CRAttrSel *cur_sel = NULL;
 
-        g_return_val_if_fail (a_this && a_attr_sel, CR_BAD_PARAM_ERROR);
+        g_return_val_if_fail (a_this && a_attr_sel, 
+                              CR_BAD_PARAM_ERROR);
 
-        for (cur_sel = a_this; cur_sel->next; cur_sel = cur_sel->next) ;
+        for (cur_sel = a_this; 
+             cur_sel->next; 
+             cur_sel = cur_sel->next) ;
 
         cur_sel->next = a_attr_sel;
         a_attr_sel->prev = cur_sel;
@@ -84,9 +83,11 @@ cr_attr_sel_append_attr_sel (CRAttrSel * a_this, CRAttrSel * a_attr_sel)
  *@return CR_OK upon successfull completion, an error code otherwise.
  */
 enum CRStatus
-cr_attr_sel_prepend_attr_sel (CRAttrSel * a_this, CRAttrSel * a_attr_sel)
+cr_attr_sel_prepend_attr_sel (CRAttrSel * a_this, 
+                              CRAttrSel * a_attr_sel)
 {
-        g_return_val_if_fail (a_this && a_attr_sel, CR_BAD_PARAM_ERROR);
+        g_return_val_if_fail (a_this && a_attr_sel, 
+                              CR_BAD_PARAM_ERROR);
 
         a_attr_sel->next = a_this;
         a_this->prev = a_attr_sel;
@@ -107,15 +108,16 @@ cr_attr_sel_to_string (CRAttrSel * a_this)
 
         for (cur = a_this; cur; cur = cur->next) {
                 if (cur->prev) {
-                        g_string_append_printf (str_buf, " ");
+                        g_string_append_c (str_buf, ' ');
                 }
 
                 if (cur->name) {
                         guchar *name = NULL;
 
-                        name = g_strndup (cur->name->str, cur->name->len);
+                        name = g_strndup (cur->name->stryng->str, 
+                                          cur->name->stryng->len);
                         if (name) {
-                                g_string_append_printf (str_buf, "%s", name);
+                                g_string_append (str_buf, name);
                                 g_free (name);
                                 name = NULL;
                         }
@@ -124,24 +126,23 @@ cr_attr_sel_to_string (CRAttrSel * a_this)
                 if (cur->value) {
                         guchar *value = NULL;
 
-                        value = g_strndup (cur->value->str, cur->value->len);
+                        value = g_strndup (cur->value->stryng->str, 
+                                           cur->value->stryng->len);
                         if (value) {
                                 switch (cur->match_way) {
                                 case SET:
                                         break;
 
                                 case EQUALS:
-                                        g_string_append_printf (str_buf, "=");
+                                        g_string_append_c (str_buf, '=');
                                         break;
 
                                 case INCLUDES:
-                                        g_string_append_printf
-                                                (str_buf, "~=");
+                                        g_string_append (str_buf, "~=");
                                         break;
 
                                 case DASHMATCH:
-                                        g_string_append_printf
-                                                (str_buf, "|=");
+                                        g_string_append (str_buf, "|=");
                                         break;
 
                                 default:
@@ -199,12 +200,12 @@ cr_attr_sel_destroy (CRAttrSel * a_this)
         g_return_if_fail (a_this);
 
         if (a_this->name) {
-                g_string_free (a_this->name, TRUE);
+                cr_string_destroy (a_this->name);
                 a_this->name = NULL;
         }
 
         if (a_this->value) {
-                g_string_free (a_this->value, TRUE);
+                cr_string_destroy (a_this->value);
                 a_this->value = NULL;
         }
 

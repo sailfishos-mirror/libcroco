@@ -3,8 +3,6 @@
 /*
  * This file is part of The Croco Library
  *
- * Copyright (C) 2002-2003 Dodji Seketeli <dodji@seketeli.org>
- *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of version 2.1 of the GNU Lesser General Public
  * License as published by the Free Software Foundation.
@@ -18,6 +16,9 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
  * USA
+ *
+ * Author: Dodji Seketeli
+ * See COPYRIGHTS file for copyright information.
  */
 
 /*
@@ -106,28 +107,28 @@ cr_simple_sel_to_string (CRSimpleSel * a_this)
         str_buf = g_string_new (NULL);
         for (cur = a_this; cur; cur = cur->next) {
                 if (cur->name) {
-                        guchar *str = g_strndup (cur->name->str,
-                                                 cur->name->len);
+                        guchar *str = g_strndup (cur->name->stryng->str,
+                                                 cur->name->stryng->len);
 
                         if (str) {
                                 switch (cur->combinator) {
                                 case COMB_WS:
-                                        g_string_append_printf (str_buf, " ");
+                                        g_string_append (str_buf, " ");
                                         break;
 
                                 case COMB_PLUS:
-                                        g_string_append_printf (str_buf, "+");
+                                        g_string_append (str_buf, "+");
                                         break;
 
                                 case COMB_GT:
-                                        g_string_append_printf (str_buf, ">");
+                                        g_string_append (str_buf, ">");
                                         break;
 
                                 default:
                                         break;
                                 }
 
-                                g_string_append_printf (str_buf, "%s", str);
+                                g_string_append (str_buf, str);
                                 g_free (str);
                                 str = NULL;
                         }
@@ -138,11 +139,52 @@ cr_simple_sel_to_string (CRSimpleSel * a_this)
 
                         tmp_str = cr_additional_sel_to_string (cur->add_sel);
                         if (tmp_str) {
-                                g_string_append_printf
-                                        (str_buf, "%s", tmp_str);
+                                g_string_append (str_buf, tmp_str);
                                 g_free (tmp_str);
                                 tmp_str = NULL;
                         }
+                }
+        }
+
+        if (str_buf) {
+                result = str_buf->str;
+                g_string_free (str_buf, FALSE);
+                str_buf = NULL;
+        }
+
+        return result;
+}
+
+
+guchar *
+cr_simple_sel_one_to_string (CRSimpleSel * a_this)
+{
+        GString *str_buf = NULL;
+        guchar *result = NULL;
+
+        g_return_val_if_fail (a_this, NULL);
+
+        str_buf = g_string_new (NULL);
+        if (a_this->name) {
+                guchar *str = g_strndup (a_this->name->stryng->str,
+                                         a_this->name->stryng->len);
+
+                if (str) {
+                        g_string_append_printf (str_buf, "%s", str);
+                        g_free (str);
+                        str = NULL;
+                }
+        }
+
+        if (a_this->add_sel) {
+                guchar *tmp_str = NULL;
+
+                tmp_str = cr_additional_sel_to_string (a_this->add_sel);
+                if (tmp_str) {
+                        g_string_append_printf
+                                (str_buf, "%s", tmp_str);
+                        g_free (tmp_str);
+                        tmp_str = NULL;
                 }
         }
 
@@ -203,7 +245,9 @@ cr_simple_sel_compute_specificity (CRSimpleSel * a_this)
         for (cur_sel = a_this; cur_sel; cur_sel = cur_sel->next) {
                 if (cur_sel->type_mask | TYPE_SELECTOR) {
                         c++;    /*hmmh, is this a new language ? */
-                } else if (!cur_sel->name || !cur_sel->name->str) {
+                } else if (!cur_sel->name 
+                           || !cur_sel->name->stryng
+                           || !cur_sel->name->stryng->str) {
                         if (cur_sel->add_sel->type ==
                             PSEUDO_CLASS_ADD_SELECTOR) {
                                 /*
@@ -249,7 +293,7 @@ cr_simple_sel_destroy (CRSimpleSel * a_this)
         g_return_if_fail (a_this);
 
         if (a_this->name) {
-                g_string_free (a_this->name, TRUE);
+                cr_string_destroy (a_this->name);
                 a_this->name = NULL;
         }
 

@@ -3,8 +3,6 @@
 /*
  * This file is part of The Croco Library
  *
- * Copyright (C) 2002-2003 Dodji Seketeli <dodji@seketeli.org>
- *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of version 2.1 of the GNU Lesser General Public
  * License as published by the Free Software Foundation.
@@ -18,11 +16,11 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
  * USA
+ *
+ * Author: Dodji Seketeli
+ * See COPYRIGHTS file for copyright information.
  */
 
-/*
- *$Id$
- */
 #include <stdio.h>
 #include <string.h>
 #include "cr-term.h"
@@ -57,7 +55,7 @@ cr_term_clear (CRTerm * a_this)
         case TERM_URI:
         case TERM_HASH:
                 if (a_this->content.str) {
-                        g_string_free (a_this->content.str, TRUE);
+                        cr_string_destroy (a_this->content.str);
                         a_this->content.str = NULL;
                 }
                 break;
@@ -152,7 +150,7 @@ cr_term_set_number (CRTerm * a_this, CRNum * a_num)
 }
 
 enum CRStatus
-cr_term_set_function (CRTerm * a_this, GString * a_func_name,
+cr_term_set_function (CRTerm * a_this, CRString * a_func_name,
                       CRTerm * a_func_param)
 {
         g_return_val_if_fail (a_this, CR_BAD_PARAM_ERROR);
@@ -166,7 +164,7 @@ cr_term_set_function (CRTerm * a_this, GString * a_func_name,
 }
 
 enum CRStatus
-cr_term_set_string (CRTerm * a_this, GString * a_str)
+cr_term_set_string (CRTerm * a_this, CRString * a_str)
 {
         g_return_val_if_fail (a_this, CR_BAD_PARAM_ERROR);
 
@@ -178,7 +176,7 @@ cr_term_set_string (CRTerm * a_this, GString * a_str)
 }
 
 enum CRStatus
-cr_term_set_ident (CRTerm * a_this, GString * a_str)
+cr_term_set_ident (CRTerm * a_this, CRString * a_str)
 {
         g_return_val_if_fail (a_this, CR_BAD_PARAM_ERROR);
 
@@ -190,7 +188,7 @@ cr_term_set_ident (CRTerm * a_this, GString * a_str)
 }
 
 enum CRStatus
-cr_term_set_uri (CRTerm * a_this, GString * a_str)
+cr_term_set_uri (CRTerm * a_this, CRString * a_str)
 {
         g_return_val_if_fail (a_this, CR_BAD_PARAM_ERROR);
 
@@ -214,7 +212,7 @@ cr_term_set_rgb (CRTerm * a_this, CRRgb * a_rgb)
 }
 
 enum CRStatus
-cr_term_set_hash (CRTerm * a_this, GString * a_str)
+cr_term_set_hash (CRTerm * a_this, CRString * a_str)
 {
         g_return_val_if_fail (a_this, CR_BAD_PARAM_ERROR);
 
@@ -299,16 +297,16 @@ cr_term_to_string (CRTerm * a_this)
 
                 switch (cur->the_operator) {
                 case DIVIDE:
-                        g_string_append_printf (str_buf, " / ");
+                        g_string_append (str_buf, " / ");
                         break;
 
                 case COMMA:
-                        g_string_append_printf (str_buf, ", ");
+                        g_string_append (str_buf, ", ");
                         break;
 
                 case NO_OP:
                         if (cur->prev) {
-                                g_string_append_printf (str_buf, " ");
+                                g_string_append (str_buf, " ");
                         }
                         break;
                 default:
@@ -318,11 +316,11 @@ cr_term_to_string (CRTerm * a_this)
 
                 switch (cur->unary_op) {
                 case PLUS_UOP:
-                        g_string_append_printf (str_buf, "+");
+                        g_string_append (str_buf, "+");
                         break;
 
                 case MINUS_UOP:
-                        g_string_append_printf (str_buf, "-");
+                        g_string_append (str_buf, "-");
                         break;
 
                 default:
@@ -346,8 +344,8 @@ cr_term_to_string (CRTerm * a_this)
                 case TERM_FUNCTION:
                         if (cur->content.str) {
                                 content = g_strndup
-                                        (cur->content.str->str,
-                                         cur->content.str->len);
+                                        (cur->content.str->stryng->str,
+                                         cur->content.str->stryng->len);
                         }
 
                         if (content) {
@@ -362,14 +360,13 @@ cr_term_to_string (CRTerm * a_this)
                                                  ext_content.func_param);
 
                                         if (tmp_str) {
-                                                g_string_append_printf
-                                                        (str_buf,
-                                                         "%s", tmp_str);
+                                                g_string_append (str_buf, 
+								 tmp_str);
                                                 g_free (tmp_str);
                                                 tmp_str = NULL;
                                         }
 
-                                        g_string_append_printf (str_buf, ")");
+                                        g_string_append (str_buf, ")");
                                         g_free (content);
                                         content = NULL;
                                 }
@@ -380,8 +377,8 @@ cr_term_to_string (CRTerm * a_this)
                 case TERM_STRING:
                         if (cur->content.str) {
                                 content = g_strndup
-                                        (cur->content.str->str,
-                                         cur->content.str->len);
+                                        (cur->content.str->stryng->str,
+                                         cur->content.str->stryng->len);
                         }
 
                         if (content) {
@@ -395,8 +392,8 @@ cr_term_to_string (CRTerm * a_this)
                 case TERM_IDENT:
                         if (cur->content.str) {
                                 content = g_strndup
-                                        (cur->content.str->str,
-                                         cur->content.str->len);
+                                        (cur->content.str->stryng->str,
+                                         cur->content.str->stryng->len);
                         }
 
                         if (content) {
@@ -409,8 +406,8 @@ cr_term_to_string (CRTerm * a_this)
                 case TERM_URI:
                         if (cur->content.str) {
                                 content = g_strndup
-                                        (cur->content.str->str,
-                                         cur->content.str->len);
+                                        (cur->content.str->stryng->str,
+                                         cur->content.str->stryng->len);
                         }
 
                         if (content) {
@@ -425,7 +422,7 @@ cr_term_to_string (CRTerm * a_this)
                         if (cur->content.rgb) {
                                 guchar *tmp_str = NULL;
 
-                                g_string_append_printf (str_buf, "rgb(");
+                                g_string_append (str_buf, "rgb(");
                                 tmp_str = cr_rgb_to_string (cur->content.rgb);
 
                                 if (tmp_str) {
@@ -433,13 +430,13 @@ cr_term_to_string (CRTerm * a_this)
                                         g_free (tmp_str);
                                         tmp_str = NULL;
                                 }
-                                g_string_append_printf (str_buf, ")");
+                                g_string_append (str_buf, ")");
                         }
 
                         break;
 
                 case TERM_UNICODERANGE:
-                        g_string_append_printf
+                        g_string_append
                                 (str_buf,
                                  "?found unicoderange: dump not supported yet?");
                         break;
@@ -447,8 +444,8 @@ cr_term_to_string (CRTerm * a_this)
                 case TERM_HASH:
                         if (cur->content.str) {
                                 content = g_strndup
-                                        (cur->content.str->str,
-                                         cur->content.str->len);
+                                        (cur->content.str->stryng->str,
+                                         cur->content.str->stryng->len);
                         }
 
                         if (content) {
@@ -460,11 +457,206 @@ cr_term_to_string (CRTerm * a_this)
                         break;
 
                 default:
-                        g_string_append_printf (str_buf,
-                                                "%s",
-                                                "Unrecognized Term type");
+                        g_string_append (str_buf,
+                                         "Unrecognized Term type");
                         break;
                 }
+        }
+
+        if (str_buf) {
+                result = str_buf->str;
+                g_string_free (str_buf, FALSE);
+                str_buf = NULL;
+        }
+
+        return result;
+}
+
+guchar *
+cr_term_one_to_string (CRTerm * a_this)
+{
+        GString *str_buf = NULL;
+        guchar *result = NULL,
+                *content = NULL;
+
+        g_return_val_if_fail (a_this, NULL);
+
+        str_buf = g_string_new (NULL);
+        g_return_val_if_fail (str_buf, NULL);
+
+        if ((a_this->content.str == NULL)
+            && (a_this->content.num == NULL)
+            && (a_this->content.str == NULL)
+            && (a_this->content.rgb == NULL))
+                return NULL ;
+
+        switch (a_this->the_operator) {
+        case DIVIDE:
+                g_string_append_printf (str_buf, " / ");
+                break;
+
+        case COMMA:
+                g_string_append_printf (str_buf, ", ");
+                break;
+
+        case NO_OP:
+                if (a_this->prev) {
+                        g_string_append_printf (str_buf, " ");
+                }
+                break;
+        default:
+
+                break;
+        }
+
+        switch (a_this->unary_op) {
+        case PLUS_UOP:
+                g_string_append_printf (str_buf, "+");
+                break;
+
+        case MINUS_UOP:
+                g_string_append_printf (str_buf, "-");
+                break;
+
+        default:
+                break;
+        }
+
+        switch (a_this->type) {
+        case TERM_NUMBER:
+                if (a_this->content.num) {
+                        content = cr_num_to_string (a_this->content.num);
+                }
+
+                if (content) {
+                        g_string_append (str_buf, content);
+                        g_free (content);
+                        content = NULL;
+                }
+
+                break;
+
+        case TERM_FUNCTION:
+                if (a_this->content.str) {
+                        content = g_strndup
+                                (a_this->content.str->stryng->str,
+                                 a_this->content.str->stryng->len);
+                }
+
+                if (content) {
+                        g_string_append_printf (str_buf, "%s(",
+                                                content);
+
+                        if (a_this->ext_content.func_param) {
+                                guchar *tmp_str = NULL;
+
+                                tmp_str = cr_term_to_string
+                                        (a_this->
+                                         ext_content.func_param);
+
+                                if (tmp_str) {
+                                        g_string_append_printf
+                                                (str_buf,
+                                                 "%s", tmp_str);
+                                        g_free (tmp_str);
+                                        tmp_str = NULL;
+                                }
+
+                                g_string_append_printf (str_buf, ")");
+                                g_free (content);
+                                content = NULL;
+                        }
+                }
+
+                break;
+
+        case TERM_STRING:
+                if (a_this->content.str) {
+                        content = g_strndup
+                                (a_this->content.str->stryng->str,
+                                 a_this->content.str->stryng->len);
+                }
+
+                if (content) {
+                        g_string_append_printf (str_buf,
+                                                "\"%s\"", content);
+                        g_free (content);
+                        content = NULL;
+                }
+                break;
+
+        case TERM_IDENT:
+                if (a_this->content.str) {
+                        content = g_strndup
+                                (a_this->content.str->stryng->str,
+                                 a_this->content.str->stryng->len);
+                }
+
+                if (content) {
+                        g_string_append (str_buf, content);
+                        g_free (content);
+                        content = NULL;
+                }
+                break;
+
+        case TERM_URI:
+                if (a_this->content.str) {
+                        content = g_strndup
+                                (a_this->content.str->stryng->str,
+                                 a_this->content.str->stryng->len);
+                }
+
+                if (content) {
+                        g_string_append_printf
+                                (str_buf, "url(%s)", content);
+                        g_free (content);
+                        content = NULL;
+                }
+                break;
+
+        case TERM_RGB:
+                if (a_this->content.rgb) {
+                        guchar *tmp_str = NULL;
+
+                        g_string_append_printf (str_buf, "rgb(");
+                        tmp_str = cr_rgb_to_string (a_this->content.rgb);
+
+                        if (tmp_str) {
+                                g_string_append (str_buf, tmp_str);
+                                g_free (tmp_str);
+                                tmp_str = NULL;
+                        }
+                        g_string_append_printf (str_buf, ")");
+                }
+
+                break;
+
+        case TERM_UNICODERANGE:
+                g_string_append_printf
+                        (str_buf,
+                         "?found unicoderange: dump not supported yet?");
+                break;
+
+        case TERM_HASH:
+                if (a_this->content.str) {
+                        content = g_strndup
+                                (a_this->content.str->stryng->str,
+                                 a_this->content.str->stryng->len);
+                }
+
+                if (content) {
+                        g_string_append_printf (str_buf,
+                                                "#%s", content);
+                        g_free (content);
+                        content = NULL;
+                }
+                break;
+
+        default:
+                g_string_append_printf (str_buf,
+                                        "%s",
+                                        "Unrecognized Term type");
+                break;
         }
 
         if (str_buf) {

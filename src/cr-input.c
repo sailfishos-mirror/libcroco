@@ -3,8 +3,6 @@
 /*
  * This file is part of The Croco Library
  *
- * Copyright (C) 2002-2003 Dodji Seketeli <dodji@seketeli.org>
- *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of version 2.1 of the GNU Lesser General Public
  * License as published by the Free Software Foundation.
@@ -18,10 +16,9 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
  * USA
- */
-
-/*
- *$Id$
+ *
+ * Author: Dodji Seketeli
+ * See COPYRIGHTS file for copyright information.
  */
 
 #include "stdio.h"
@@ -63,7 +60,7 @@ struct _CRInputPriv {
         gulong line;
 
         /*
-         *The current col number.
+         *The current col number
          */
         gulong col;
 
@@ -158,8 +155,7 @@ cr_input_new_from_buf (guchar * a_buf,
                 if (a_free_buf == TRUE && a_buf) {
                         g_free (a_buf) ;
                         a_buf = NULL ;
-                }
-                PRIVATE (result)->line = 1;
+                }                
                 PRIVATE (result)->nb_bytes = PRIVATE (result)->in_buf_size;
         } else {
                 PRIVATE (result)->in_buf = (guchar *) a_buf;
@@ -167,10 +163,11 @@ cr_input_new_from_buf (guchar * a_buf,
                 PRIVATE (result)->nb_bytes = a_len;
                 PRIVATE (result)->free_in_buf = a_free_buf;
         }
-
+        PRIVATE (result)->line = 1;
+        PRIVATE (result)->col =  0;
         return result;
 
-      error:
+ error:
         if (result) {
                 cr_input_destroy (result);
                 result = NULL;
@@ -258,8 +255,7 @@ cr_input_new_from_uri (const gchar * a_file_uri, enum CREncoding a_enc)
                 buf = NULL ;
         }
 
-      cleanup:
-
+ cleanup:
         if (file_ptr) {
                 fclose (file_ptr);
                 file_ptr = NULL;
@@ -953,6 +949,35 @@ cr_input_get_cur_pos (CRInput * a_this, CRInputPos * a_pos)
         a_pos->end_of_file = PRIVATE (a_this)->end_of_input;
 
         return CR_OK;
+}
+
+/**
+ *Gets the current parsing location.
+ *The Parsing location is a public datastructure that
+ *represents the current line/column/byte offset/ in the input
+ *stream.
+ *@param a_this the current instance of #CRInput
+ *@param a_loc the set parsing location.
+ *@return CR_OK upon successful completion, an error
+ *code otherwise.
+ */
+enum CRStatus
+cr_input_get_parsing_location (CRInput *a_this,
+                               CRParsingLocation *a_loc)
+{
+        g_return_val_if_fail (a_this 
+                              && PRIVATE (a_this)
+                              && a_loc, 
+                              CR_BAD_PARAM_ERROR) ;
+
+        a_loc->line = PRIVATE (a_this)->line ;
+        a_loc->column = PRIVATE (a_this)->col ;
+        if (PRIVATE (a_this)->next_byte_index) {
+                a_loc->byte_offset = PRIVATE (a_this)->next_byte_index - 1 ;
+        } else {
+                a_loc->byte_offset = PRIVATE (a_this)->next_byte_index  ;
+        }
+        return CR_OK ;
 }
 
 /**

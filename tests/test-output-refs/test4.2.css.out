@@ -17,4 +17,8 @@
   H1 {
     font-family : "Robson Celtic", serif
   }
+  P {
+    background : black;
+    foreground : white
+  }
 }

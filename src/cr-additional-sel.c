@@ -3,8 +3,6 @@
 /*
  * This file is part of The Croco Library
  *
- * Copyright (C) 2002-2003 Dodji Seketeli <dodji@seketeli.org>
- *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of version 2.1 of the GNU Lesser General Public
  * License as published by the Free Software Foundation.
@@ -18,10 +16,10 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
  * USA
- */
-
-/*
- *$Id$
+ *
+ * Author: Dodji Seketeli
+ * See COPYRIGHTS file for copyright information.
+ *
  */
 
 #include "cr-additional-sel.h"
@@ -78,12 +76,12 @@ cr_additional_sel_new_with_type (enum AddSelectorType a_sel_type)
  */
 void
 cr_additional_sel_set_class_name (CRAdditionalSel * a_this,
-                                  GString * a_class_name)
+                                  CRString * a_class_name)
 {
         g_return_if_fail (a_this && a_this->type == CLASS_ADD_SELECTOR);
 
         if (a_this->content.class_name) {
-                g_string_free (a_this->content.class_name, TRUE);
+                cr_string_destroy (a_this->content.class_name);
         }
 
         a_this->content.class_name = a_class_name;
@@ -97,12 +95,12 @@ cr_additional_sel_set_class_name (CRAdditionalSel * a_this,
  *@param a_id the new id to set.
  */
 void
-cr_additional_sel_set_id_name (CRAdditionalSel * a_this, GString * a_id)
+cr_additional_sel_set_id_name (CRAdditionalSel * a_this, CRString * a_id)
 {
         g_return_if_fail (a_this && a_this->type == ID_ADD_SELECTOR);
 
         if (a_this->content.id_name) {
-                g_string_free (a_this->content.id_name, TRUE);
+                cr_string_destroy (a_this->content.id_name);
         }
 
         a_this->content.id_name = a_id;
@@ -222,9 +220,8 @@ cr_additional_sel_to_string (CRAdditionalSel * a_this)
 
                                 if (cur->content.class_name) {
                                         name = g_strndup
-                                                (cur->content.class_name->str,
-                                                 cur->content.class_name->
-                                                 len);
+                                                (cur->content.class_name->stryng->str,
+                                                 cur->content.class_name->stryng->len);
 
                                         if (name) {
                                                 g_string_append_printf
@@ -243,8 +240,8 @@ cr_additional_sel_to_string (CRAdditionalSel * a_this)
 
                                 if (cur->content.class_name) {
                                         name = g_strndup
-                                                (cur->content.id_name->str,
-                                                 cur->content.id_name->len);
+                                                (cur->content.id_name->stryng->str,
+                                                 cur->content.id_name->stryng->len);
 
                                         if (name) {
                                                 g_string_append_printf
@@ -280,7 +277,7 @@ cr_additional_sel_to_string (CRAdditionalSel * a_this)
                         if (cur->content.attr_sel) {
                                 guchar *tmp_str = NULL;
 
-                                g_string_append_printf (str_buf, "[");
+                                g_string_append_c (str_buf, '[');
                                 tmp_str = cr_attr_sel_to_string
                                         (cur->content.attr_sel);
                                 if (tmp_str) {
@@ -295,6 +292,105 @@ cr_additional_sel_to_string (CRAdditionalSel * a_this)
                 default:
                         break;
                 }
+        }
+
+        if (str_buf) {
+                result = str_buf->str;
+                g_string_free (str_buf, FALSE);
+                str_buf = NULL;
+        }
+
+        return result;
+}
+
+guchar * 
+cr_additional_sel_one_to_string (CRAdditionalSel *a_this)
+{
+        guchar *result = NULL;
+        GString *str_buf = NULL;
+
+        g_return_val_if_fail (a_this, NULL) ;
+
+        str_buf = g_string_new (NULL) ;
+
+        switch (a_this->type) {
+        case CLASS_ADD_SELECTOR:
+        {
+                guchar *name = NULL;
+
+                if (a_this->content.class_name) {
+                        name = g_strndup
+                                (a_this->content.class_name->stryng->str,
+                                 a_this->content.class_name->stryng->len);
+
+                        if (name) {
+                                g_string_append_printf
+                                        (str_buf, ".%s",
+                                         name);
+                                g_free (name);
+                                name = NULL;
+                        }
+                }
+        }
+        break;
+
+        case ID_ADD_SELECTOR:
+        {
+                guchar *name = NULL;
+
+                if (a_this->content.class_name) {
+                        name = g_strndup
+                                (a_this->content.id_name->stryng->str,
+                                 a_this->content.id_name->stryng->len);
+
+                        if (name) {
+                                g_string_append_printf
+                                        (str_buf, "#%s",
+                                         name);
+                                g_free (name);
+                                name = NULL;
+                        }
+                }
+        }
+
+        break;
+
+        case PSEUDO_CLASS_ADD_SELECTOR:
+        {
+                if (a_this->content.pseudo) {
+                        guchar *tmp_str = NULL;
+
+                        tmp_str = cr_pseudo_to_string
+                                (a_this->content.pseudo);
+                        if (tmp_str) {
+                                g_string_append_printf
+                                        (str_buf, ":%s",
+                                         tmp_str);
+                                g_free (tmp_str);
+                                tmp_str = NULL;
+                        }
+                }
+        }
+        break;
+
+        case ATTRIBUTE_ADD_SELECTOR:
+                if (a_this->content.attr_sel) {
+                        guchar *tmp_str = NULL;
+
+                        g_string_append_printf (str_buf, "[");
+                        tmp_str = cr_attr_sel_to_string
+                                (a_this->content.attr_sel);
+                        if (tmp_str) {
+                                g_string_append_printf
+                                        (str_buf, "%s]", tmp_str);
+                                g_free (tmp_str);
+                                tmp_str = NULL;
+                        }
+                }
+                break;
+
+        default:
+                break;
         }
 
         if (str_buf) {
@@ -341,7 +437,7 @@ cr_additional_sel_destroy (CRAdditionalSel * a_this)
 
         switch (a_this->type) {
         case CLASS_ADD_SELECTOR:
-                g_string_free (a_this->content.class_name, TRUE);
+                cr_string_destroy (a_this->content.class_name);
                 a_this->content.class_name = NULL;
                 break;
 
@@ -351,7 +447,7 @@ cr_additional_sel_destroy (CRAdditionalSel * a_this)
                 break;
 
         case ID_ADD_SELECTOR:
-                g_string_free (a_this->content.id_name, TRUE);
+                cr_string_destroy (a_this->content.id_name);
                 a_this->content.id_name = NULL;
                 break;
 

@@ -3,8 +3,6 @@
 /*
  * This file is part of The Croco Library
  *
- * Copyright (C) 2002-2003 Dodji Seketeli <dodji@seketeli.org>
- *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of version 2.1 of the GNU Lesser General Public
  * License as published by the Free Software Foundation.
@@ -18,10 +16,9 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
  * USA
- */
-
-/*
- *$Id$
+ *
+ * Author: Dodji Seketeli
+ * See COPYRIGHTS file for copyright information.
  */
 
 #include <string.h>
@@ -50,56 +47,55 @@ typedef struct _ParsingContext ParsingContext;
 
 static ParsingContext *new_parsing_context (void);
 
-static void
-  destroy_context (ParsingContext * a_ctxt);
+static void destroy_context (ParsingContext * a_ctxt);
 
-static void
-  unrecoverable_error (CRDocHandler * a_this);
+static void unrecoverable_error (CRDocHandler * a_this);
 
-static void
-  error (CRDocHandler * a_this);
+static void error (CRDocHandler * a_this);
 
-static void
-  property (CRDocHandler * a_this,
-            GString * a_name, CRTerm * a_expression, gboolean a_important);
+static void property (CRDocHandler * a_this,
+                      CRString * a_name, 
+                      CRTerm * a_expression, 
+                      gboolean a_important);
 
-static void
-  end_selector (CRDocHandler * a_this, CRSelector * a_selector_list);
+static void end_selector (CRDocHandler * a_this, 
+                          CRSelector * a_selector_list);
 
-static void
-  start_selector (CRDocHandler * a_this, CRSelector * a_selector_list);
+static void start_selector (CRDocHandler * a_this, 
+                            CRSelector * a_selector_list);
 
-static void
-  start_font_face (CRDocHandler * a_this);
+static void start_font_face (CRDocHandler * a_this,
+                             CRParsingLocation *a_location);
 
-static void
-  end_font_face (CRDocHandler * a_this);
+static void end_font_face (CRDocHandler * a_this);
 
-static void
-  end_document (CRDocHandler * a_this);
+static void end_document (CRDocHandler * a_this);
 
-static void
-  start_document (CRDocHandler * a_this);
+static void start_document (CRDocHandler * a_this);
 
-static void
-  charset (CRDocHandler * a_this, GString * a_charset);
+static void charset (CRDocHandler * a_this, 
+                     CRString * a_charset,
+                     CRParsingLocation *a_location);
 
-static void
-  start_page (CRDocHandler * a_this, GString * a_page,
-              GString * a_pseudo_page);
+static void start_page (CRDocHandler * a_this, CRString * a_page,
+                        CRString * a_pseudo_page, 
+                        CRParsingLocation *a_location);
 
-static void
-  end_page (CRDocHandler * a_this, GString * a_page, GString * a_pseudo_page);
+static void end_page (CRDocHandler * a_this, CRString * a_page, 
+                      CRString * a_pseudo_page);
 
-static void
-  start_media (CRDocHandler * a_this, GList * a_media_list);
+static void start_media (CRDocHandler * a_this, 
+                         GList * a_media_list,
+                         CRParsingLocation *a_location);
 
-static void
-  end_media (CRDocHandler * a_this, GList * a_media_list);
+static void end_media (CRDocHandler * a_this, 
+                       GList * a_media_list);
 
-static void
-  import_style (CRDocHandler * a_this, GList * a_media_list,
-                GString * a_uri, GString * a_uri_default_ns);
+static void import_style (CRDocHandler * a_this, 
+                          GList * a_media_list,
+                          CRString * a_uri, 
+                          CRString * a_uri_default_ns,
+                          CRParsingLocation *a_location);
 
 struct _ParsingContext {
         CRStyleSheet *stylesheet;
@@ -212,7 +208,8 @@ start_document (CRDocHandler * a_this)
 }
 
 static void
-start_font_face (CRDocHandler * a_this)
+start_font_face (CRDocHandler * a_this,
+                 CRParsingLocation *a_location)
 {
         enum CRStatus status = CR_OK;
         ParsingContext *ctxt = NULL;
@@ -306,12 +303,13 @@ end_document (CRDocHandler * a_this)
 }
 
 static void
-charset (CRDocHandler * a_this, GString * a_charset)
+charset (CRDocHandler * a_this, CRString * a_charset,
+         CRParsingLocation *a_location)
 {
         enum CRStatus status = CR_OK;
         CRStatement *stmt = NULL,
                 *stmt2 = NULL;
-        GString *charset = NULL;
+        CRString *charset = NULL;
 
         ParsingContext *ctxt = NULL;
         ParsingContext **ctxtptr = NULL;
@@ -322,30 +320,29 @@ charset (CRDocHandler * a_this, GString * a_charset)
         g_return_if_fail (status == CR_OK && ctxt);
         g_return_if_fail (ctxt->stylesheet);
 
-        charset = g_string_new_len (a_charset->str, a_charset->len);
-
+        charset = cr_string_dup (a_charset) ;
         stmt = cr_statement_new_at_charset_rule (ctxt->stylesheet, charset);
         g_return_if_fail (stmt);
-
         stmt2 = cr_statement_append (ctxt->stylesheet->statements, stmt);
         if (!stmt2) {
                 if (stmt) {
                         cr_statement_destroy (stmt);
                         stmt = NULL;
                 }
-
                 if (charset) {
-                        g_string_free (charset, TRUE);
+                        cr_string_destroy (charset);
                 }
                 return;
         }
-
         ctxt->stylesheet->statements = stmt2;
         stmt2 = NULL;
 }
 
 static void
-start_page (CRDocHandler * a_this, GString * a_page, GString * a_pseudo)
+start_page (CRDocHandler * a_this, 
+            CRString * a_page, 
+            CRString * a_pseudo,
+            CRParsingLocation *a_location)
 {
         enum CRStatus status = CR_OK;
         ParsingContext *ctxt = NULL;
@@ -359,28 +356,24 @@ start_page (CRDocHandler * a_this, GString * a_page, GString * a_pseudo)
 
         ctxt->cur_stmt = cr_statement_new_at_page_rule
                 (ctxt->stylesheet, NULL, NULL, NULL);
-
         if (a_page) {
                 ctxt->cur_stmt->kind.page_rule->name =
-                        g_string_new_len (a_page->str, a_page->len);
+                        cr_string_dup (a_page) ;
 
                 if (!ctxt->cur_stmt->kind.page_rule->name) {
                         goto error;
                 }
         }
-
         if (a_pseudo) {
                 ctxt->cur_stmt->kind.page_rule->pseudo =
-                        g_string_new_len (a_pseudo->str, a_pseudo->len);
-
+                        cr_string_dup (a_pseudo) ;
                 if (!ctxt->cur_stmt->kind.page_rule->pseudo) {
                         goto error;
                 }
         }
-
         return;
 
-      error:
+ error:
         if (ctxt->cur_stmt) {
                 cr_statement_destroy (ctxt->cur_stmt);
                 ctxt->cur_stmt = NULL;
@@ -388,7 +381,9 @@ start_page (CRDocHandler * a_this, GString * a_page, GString * a_pseudo)
 }
 
 static void
-end_page (CRDocHandler * a_this, GString * a_page, GString * a_pseudo_page)
+end_page (CRDocHandler * a_this, 
+          CRString * a_page, 
+          CRString * a_pseudo_page)
 {
         enum CRStatus status = CR_OK;
         ParsingContext *ctxt = NULL;
@@ -421,7 +416,9 @@ end_page (CRDocHandler * a_this, GString * a_page, GString * a_pseudo_page)
 }
 
 static void
-start_media (CRDocHandler * a_this, GList * a_media_list)
+start_media (CRDocHandler * a_this, 
+             GList * a_media_list,
+             CRParsingLocation *a_location)
 {
         enum CRStatus status = CR_OK;
         ParsingContext *ctxt = NULL;
@@ -437,12 +434,11 @@ start_media (CRDocHandler * a_this, GList * a_media_list)
                           && ctxt->cur_stmt == NULL
                           && ctxt->cur_media_stmt == NULL
                           && ctxt->stylesheet);
-
         if (a_media_list) {
                 /*duplicate the media_list */
-                media_list = cr_dup_glist_of_string (a_media_list);
+                media_list = cr_utils_dup_glist_of_cr_string 
+                        (a_media_list);
         }
-
         ctxt->cur_media_stmt =
                 cr_statement_new_at_media_rule
                 (ctxt->stylesheet, NULL, media_list);
@@ -476,21 +472,25 @@ end_media (CRDocHandler * a_this, GList * a_media_list)
         ctxt->stylesheet->statements = stmts;
         stmts = NULL;
 
-        a_media_list = NULL;    /*compiler happy */
+        ctxt->cur_stmt = NULL ;
+        ctxt->cur_media_stmt = NULL ;
+        a_media_list = NULL;
 }
 
 static void
-import_style (CRDocHandler * a_this, GList * a_media_list,
-              GString * a_uri, GString * a_uri_default_ns)
+import_style (CRDocHandler * a_this, 
+              GList * a_media_list,
+              CRString * a_uri, 
+              CRString * a_uri_default_ns,
+              CRParsingLocation *a_location)
 {
         enum CRStatus status = CR_OK;
-        GString *uri = NULL;
+        CRString *uri = NULL;
         CRStatement *stmt = NULL,
                 *stmt2 = NULL;
         ParsingContext *ctxt = NULL;
         ParsingContext **ctxtptr = NULL;
-        GList *media_list = NULL,
-                *cur = NULL;
+        GList *media_list = NULL ;
 
         g_return_if_fail (a_this);
 	ctxtptr = &ctxt;
@@ -498,20 +498,9 @@ import_style (CRDocHandler * a_this, GList * a_media_list,
         g_return_if_fail (status == CR_OK && ctxt);
         g_return_if_fail (ctxt->stylesheet);
 
-        uri = g_string_new_len (a_uri->str, a_uri->len);
-
-        for (cur = a_media_list; cur; cur = cur->next) {
-                if (cur->data) {
-                        GString *str1 = NULL,
-                                *str2 = NULL;
-
-                        str1 = (GString *) cur->data;
-                        str2 = g_string_new_len (str1->str, str1->len);
-
-                        media_list = g_list_append (media_list, str2);
-                }
-        }
-
+        uri = cr_string_dup (a_uri) ;
+        if (a_media_list)
+                media_list = cr_utils_dup_glist_of_cr_string (a_media_list) ;
         stmt = cr_statement_new_at_import_rule
                 (ctxt->stylesheet, uri, media_list, NULL);
         if (!stmt)
@@ -538,7 +527,7 @@ import_style (CRDocHandler * a_this, GList * a_media_list,
 
       error:
         if (uri) {
-                g_string_free (uri, TRUE);
+                cr_string_destroy (uri);
         }
 
         if (stmt) {
@@ -551,7 +540,7 @@ import_style (CRDocHandler * a_this, GList * a_media_list,
 static void
 start_selector (CRDocHandler * a_this, CRSelector * a_selector_list)
 {
-        enum CRStatus status = CR_OK;
+        enum CRStatus status = CR_OK ;
         ParsingContext *ctxt = NULL;
         ParsingContext **ctxtptr = NULL;
 
@@ -624,14 +613,16 @@ end_selector (CRDocHandler * a_this, CRSelector * a_selector_list)
 
 static void
 property (CRDocHandler * a_this,
-          GString * a_name, CRTerm * a_expression, gboolean a_important)
+          CRString * a_name, 
+          CRTerm * a_expression, 
+          gboolean a_important)
 {
         enum CRStatus status = CR_OK;
         ParsingContext *ctxt = NULL;
         ParsingContext **ctxtptr = NULL;
         CRDeclaration *decl = NULL,
                 *decl2 = NULL;
-        GString *str = NULL;
+        CRString *str = NULL;
 
         g_return_if_fail (a_this);
 	ctxtptr = &ctxt;
@@ -650,7 +641,7 @@ property (CRDocHandler * a_this,
                   || ctxt->cur_stmt->type == AT_PAGE_RULE_STMT));
 
         if (a_name) {
-                str = g_string_new_len (a_name->str, a_name->len);
+                str = cr_string_dup (a_name);
                 g_return_if_fail (str);
         }
 

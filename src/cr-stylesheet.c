@@ -3,7 +3,7 @@
 /*
  * This file is part of The Croco Library
  *
- * Copyright (C) 2002-2003 Dodji Seketeli <dodji seketeli.org>
+ * Copyright (C) 2002-2004 Dodji Seketeli
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of version 2.1 of the GNU Lesser General Public
