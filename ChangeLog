@@ -1,4 +1,21 @@
-2004-03-01  dodji  <dodji@gnome.org>
+2004-03-03  Dodji Seketeli  <dodji@gnome.org>
+
+	* csslint/csslint.c: added the support of selectors evaluation
+	in csslint. Now, one can do csslint --evaluate --xml <an xml file>
+	--author-sheet <a-css-sheet> --xpath <an xpath expression> .
+	This will show the css properties associated to the xml node(s) 
+	refered to by the xpath expression.
+	* src/cr-declaration.[ch]: 
+	(cr_declaration_dump_one) added this new api entry to dump
+	the first declaration of the declaration list.
+	* src/cr-prop-list.c: 
+	(cr_prop_list_unlink): fixed a stupid bug in there.
+	* src/cr-stylesheet.[ch]: 
+	(cr_stylesheets_nr_rules): there is a typo in this 
+	function name. Stylesheet's' should not take a leading 's'.
+	Changed that into cr_stylesheet_nr_rules().
+
+2004-03-01  Dodji Seketeli  <dodji@gnome.org>
 
 	* src/cr-prop-list.[ch]: added the (cr_prop_list_unlink) function.
 	* src/cr-sel-eng.c: 

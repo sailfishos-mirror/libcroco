@@ -68,61 +68,50 @@ struct _CRDeclaration
 } ;
 
 
-CRDeclaration *
-cr_declaration_new (CRStatement *a_statement,
-		    GString *a_property, 
-		    CRTerm *a_value) ;
+CRDeclaration * cr_declaration_new (CRStatement *a_statement,
+				    GString *a_property, 
+				    CRTerm *a_value) ;
 
 
-CRDeclaration *
-cr_declaration_parse_from_buf (CRStatement *a_statement,
-			       const guchar *a_str,
-			       enum CREncoding a_enc) ;
+CRDeclaration * cr_declaration_parse_from_buf (CRStatement *a_statement,
+					       const guchar *a_str,
+					       enum CREncoding a_enc) ;
 
-CRDeclaration *
-cr_declaration_parse_list_from_buf (const guchar *a_str, 
-				    enum CREncoding a_enc) ;
+CRDeclaration * cr_declaration_parse_list_from_buf (const guchar *a_str, 
+						    enum CREncoding a_enc) ;
 
-CRDeclaration *
-cr_declaration_append (CRDeclaration *a_this, CRDeclaration *a_new) ;
+CRDeclaration * cr_declaration_append (CRDeclaration *a_this, CRDeclaration *a_new) ;
 
-CRDeclaration *
-cr_declaration_append2 (CRDeclaration *a_this, GString *a_prop,
-			CRTerm *a_value) ;
+CRDeclaration * cr_declaration_append2 (CRDeclaration *a_this, GString *a_prop,
+					CRTerm *a_value) ;
 
-CRDeclaration *
-cr_declaration_prepend (CRDeclaration *a_this, CRDeclaration *a_new) ;
+CRDeclaration * cr_declaration_prepend (CRDeclaration *a_this, CRDeclaration *a_new) ;
 
-CRDeclaration *
-cr_declaration_unlink (CRDeclaration * a_decl) ;
+CRDeclaration * cr_declaration_unlink (CRDeclaration * a_decl) ;
 
 void
 cr_declaration_dump (CRDeclaration *a_this, FILE *a_fp, glong a_indent,
 		     gboolean a_one_per_line) ;
 
-int
-cr_declaration_nr_props (CRDeclaration *a_this) ;
+void cr_declaration_dump_one (CRDeclaration *a_this, 
+			      FILE *a_fp, glong a_indent) ;
 
-CRDeclaration *
-cr_declaration_get_from_list (CRDeclaration *a_this, int itemnr) ;
+gint cr_declaration_nr_props (CRDeclaration *a_this) ;
 
-CRDeclaration *
-cr_declaration_get_by_prop_name (CRDeclaration *a_this, const guchar *a_str) ;
+CRDeclaration * cr_declaration_get_from_list (CRDeclaration *a_this, int itemnr) ;
 
-guchar *
-cr_declaration_to_string (CRDeclaration *a_this,
+CRDeclaration * cr_declaration_get_by_prop_name (CRDeclaration *a_this, const guchar *a_str) ;
+
+guchar * cr_declaration_to_string (CRDeclaration *a_this,
 			  gulong a_indent) ;
-guchar *
-cr_declaration_list_to_string (CRDeclaration *a_this,
+guchar * cr_declaration_list_to_string (CRDeclaration *a_this,
 			       gulong a_indent) ;
-void 
-cr_declaration_ref (CRDeclaration *a_this) ;
+void  cr_declaration_ref (CRDeclaration *a_this) ;
 
 gboolean
 cr_declaration_unref (CRDeclaration *a_this) ;
 
-void
-cr_declaration_destroy (CRDeclaration *a_this) ;
+void cr_declaration_destroy (CRDeclaration *a_this) ;
 
 G_END_DECLS
 

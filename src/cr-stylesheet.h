@@ -85,26 +85,19 @@ struct _CRStyleSheet
 	gulong ref_count ;
 } ;
 
-CRStyleSheet *
-cr_stylesheet_new (CRStatement *a_stmts) ;
+CRStyleSheet * cr_stylesheet_new (CRStatement *a_stmts) ;
 
-void
-cr_stylesheet_dump (CRStyleSheet *a_this, FILE *a_fp) ;
+void cr_stylesheet_dump (CRStyleSheet *a_this, FILE *a_fp) ;
 
-int
-cr_stylesheet_nr_rules (CRStyleSheet *a_this) ;
+gint cr_stylesheet_nr_rules (CRStyleSheet *a_this) ;
 
-CRStatement *
-cr_stylesheet_statement_get_from_list (CRStyleSheet *a_this, int itemnr) ;
+CRStatement * cr_stylesheet_statement_get_from_list (CRStyleSheet *a_this, int itemnr) ;
 
-void
-cr_stylesheet_ref (CRStyleSheet *a_this) ;
+void cr_stylesheet_ref (CRStyleSheet *a_this) ;
 
-gboolean
-cr_stylesheet_unref (CRStyleSheet *a_this) ;
+gboolean cr_stylesheet_unref (CRStyleSheet *a_this) ;
 
-void
-cr_stylesheet_destroy (CRStyleSheet *a_this) ;
+void cr_stylesheet_destroy (CRStyleSheet *a_this) ;
 
 G_END_DECLS
 

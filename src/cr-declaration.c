@@ -531,6 +531,21 @@ cr_declaration_dump (CRDeclaration *a_this, FILE *a_fp, glong a_indent,
 }
 
 /**
+ *Dumps the first declaration of the declaration list to a file.
+ *@param a_this the current instance of #CRDeclaration.
+ *@param a_fp the destination file.
+ *@param a_indent the number of indentation white char.
+ */
+void
+cr_declaration_dump_one (CRDeclaration *a_this, 
+			 FILE *a_fp, glong a_indent)
+{
+	g_return_if_fail (a_this) ;
+
+	dump (a_this, a_fp, a_indent) ;
+}
+
+/**
  *Serializes the declaration into a string
  *@param a_this the current instance of #CRDeclaration.
  *@param a_indent the number of indentation white char

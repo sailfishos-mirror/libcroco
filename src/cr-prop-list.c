@@ -337,20 +337,20 @@ cr_prop_list_unlink (CRPropList *a_this,
 			      NULL) ;
 
 	/*some sanity checks*/
-	if (PRIVATE (a_this)->next)
+	if (PRIVATE (a_pair)->next)
 	{
-		next = PRIVATE (a_this)->next ;
+		next = PRIVATE (a_pair)->next ;
 		g_return_val_if_fail (PRIVATE (next), NULL) ;
 		g_return_val_if_fail 
-			(PRIVATE (next)->prev == a_this,
+			(PRIVATE (next)->prev == a_pair,
 			 NULL) ;				
 	}
-	if (PRIVATE (a_this)->prev)
+	if (PRIVATE (a_pair)->prev)
 	{
-		prev = PRIVATE (a_this)->prev ;
+		prev = PRIVATE (a_pair)->prev ;
 		g_return_val_if_fail (PRIVATE (prev), NULL) ;
 		g_return_val_if_fail 
-			(PRIVATE (prev)->next == a_this, NULL) ;
+			(PRIVATE (prev)->next == a_pair, NULL) ;
 	}
 	if (prev)
 	{

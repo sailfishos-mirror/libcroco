@@ -83,8 +83,8 @@ cr_stylesheet_dump (CRStyleSheet *a_this, FILE *a_fp)
  *@param a_this the current instance of #CRStyleSheet.
  *@return number of rules in the stylesheet.
  */
-int
-cr_stylesheets_nr_rules (CRStyleSheet *a_this)
+gint
+cr_stylesheet_nr_rules (CRStyleSheet *a_this)
 {
 	g_return_val_if_fail (a_this, -1) ;
 
