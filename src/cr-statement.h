@@ -185,9 +185,25 @@ struct _CRStatement
 		CRAtCharsetRule *charset_rule ;
 		CRAtFontFaceRule *font_face_rule ;
 	} kind ;
-	
+
 	CRStatement *next ;
 	CRStatement *prev ;
+
+        /**
+         *a custom pointer useable by
+         *applications that use libcroco.
+         *libcroco itself will never modify
+         *this pointer.
+         */        
+        gpointer *app_data ;
+
+        /**
+         *a custom pointer used
+         *by the upper layers of libcroco.
+         *application should never use this
+         *pointer.
+         */
+        gpointer *croco_data ;
 } ;
 
 

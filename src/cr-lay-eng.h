@@ -28,6 +28,7 @@
 #include <libxml/tree.h>
 #include "cr-utils.h"
 #include "cr-cascade.h"
+#include "cr-box.h"
 
 /**
  *@file
@@ -51,12 +52,10 @@ CRLayEng *
 cr_lay_eng_new (void) ;
 
 enum CRStatus
-cr_lay_eng_build_annotated_doc (CRLayEng *a_this,
-                                xmlDoc *a_xml_doc,
-                                CRCascade *a_cascade) ;
-enum CRStatus
-cr_lay_eng_destroy_doc_annotation (xmlDoc *a_xml_doc) ;
-
+cr_lay_eng_build_box_tree (CRLayEng *a_this,
+                           xmlDoc *a_xml_doc,
+                           CRCascade *a_cascade,
+                           CRBox **a_box_tree) ;
 void
 cr_lay_eng_destroy (CRLayEng *a_this) ;
 

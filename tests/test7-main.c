@@ -44,8 +44,8 @@ const guchar *gv_xmlbuf =
 ;
 
 const guchar *gv_cssbuf =
-"INSTRUMENT { display: inline }"
-"ARTICLE, HEADLINE, AUTHOR, PARA { display: block }"
+"INSTRUMENT { display: inline}"
+"ARTICLE, HEADLINE, AUTHOR, PARA { display: block ; position: static}"
 ;
 
 static enum CRStatus
@@ -60,6 +60,7 @@ test_cr_lay_eng_build_annotated_tree (void)
 	CRLayEng *layout_engine = NULL ;
 	xmlDoc *xml_doc = NULL ;
 	gulong len = 0 ;
+        CRBox *box_tree = NULL ;
 
 	len = strlen (gv_cssbuf) ;
 	status = cr_om_parser_simply_parse_buf ((guchar *)gv_cssbuf, len,
@@ -101,8 +102,9 @@ test_cr_lay_eng_build_annotated_tree (void)
 	}
         sheet = NULL ;
 
-	status = cr_lay_eng_build_annotated_doc (layout_engine,
-						 xml_doc, cascade) ;
+	status = cr_lay_eng_build_box_tree (layout_engine,
+                                            xml_doc, cascade,
+                                            &box_tree) ;
 	if (status != CR_OK)
 	{
 		cr_utils_trace_info ("could not build the annotated doc") ;
@@ -127,12 +129,16 @@ test_cr_lay_eng_build_annotated_tree (void)
 	}
 	if (xml_doc)
 	{
-		cr_lay_eng_destroy_doc_annotation (xml_doc) ;
 		xmlFreeDoc (xml_doc) ;
 		xml_doc = NULL ;
 	}
-	xmlCleanupParser () ;
+        if (box_tree)
+        {
+                cr_box_destroy (box_tree) ;
+                box_tree = NULL ;
+        }
 
+	xmlCleanupParser () ;
 	return status ;
 }
 

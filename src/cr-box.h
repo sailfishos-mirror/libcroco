@@ -24,6 +24,7 @@
 #define __CR_BOX_H__
 
 #include "cr-style.h"
+#include "libxml/tree.h"
 
 /*
  *$Id$
@@ -72,7 +73,7 @@ typedef struct _CRBoxEdge CRBoxEdge ;
  */
 struct _CRBoxEdge
 {
-	gulong x, y, width, height ;
+	gulong x, y, width, height, x_offset, y_offset ;
 } ;
 
 
@@ -85,6 +86,29 @@ enum CRBoxType
         BOX_TYPE_COMPACT,
         BOX_TYPE_RUN_IN
 } ;
+
+typedef struct _CRBoxData CRBoxData ;
+
+/**
+ *Some data stored in the box.
+ *these data are about the node which
+ *generated the current box.
+ */
+struct _CRBoxData
+{
+        /**
+         *The xml node which generated
+         *the css box. If NULL, it means
+         *that this node is an anonymous node
+         */
+        xmlNode *node ;
+} ;
+
+CRBoxData *
+cr_box_data_new (xmlNode *a_node)  ;
+
+void
+cr_box_data_destroy (CRBoxData *a_this) ;
 
 typedef struct _CRBox CRBox ;
 /**
@@ -163,7 +187,6 @@ struct _CRBox
 	/**
 	 *The value infered from what has been found
 	 *in the css stylesheet.
-	 *
 	 */
 	CRStyle *style ;
 
@@ -178,20 +201,29 @@ struct _CRBox
 
 	/**the children (contained) boxes*/
 	CRBox *children ;
-};
 
+        /**some custom data used by libcroco*/
+        gpointer *croco_data ;
+        /**some application data that will never 
+         *be used by libcroco. Applications
+         *are free to use it.
+         */
+        gpointer *app_data ;
+} ;
 
 CRBox *
-cr_box_new (void) ;
+cr_box_new (CRStyle *a_this) ;
 
 enum CRStatus
 cr_box_insert_sibling (CRBox *a_prev,
                        CRBox *a_next,
                        CRBox *a_to_insert) ;
 
+GString *
+cr_box_to_string (CRBox *a_this, gulong a_nb_indent) ;
+
 enum CRStatus
 cr_box_append_child (CRBox *a_this, CRBox *a_to_append) ;
-
 
 void
 cr_box_destroy (CRBox *a_this) ;

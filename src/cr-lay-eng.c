@@ -42,120 +42,103 @@
 struct _CRLayEngPriv
 {
 	CRCascade *cascade ;
+        CRSelEng *sel_eng ;
 } ;
 
-typedef struct
-{
-        CRStyle *style ;
-} CRNodeAnnotation ;
-
-static enum CRStatus
-cr_lay_eng_annotate_tree_real (CRLayEng *a_this,
-                               xmlNode *a_root_node) ;
-
-static enum CRStatus
-cr_lay_eng_destroy_tree_annotation_real (xmlNode *a_node) ;
-
-static CRNodeAnnotation *
-cr_node_annotation_new (CRStyle *a_style) ;
-
-static void
-cr_node_annotation_destroy (CRNodeAnnotation *a_this) ;
-
+static CRBox *
+cr_lay_eng_create_box_tree_real (CRLayEng * a_this,
+                                 xmlNode *a_root_node,
+                                 CRBox *a_parent_box) ;
 
 /**********************
  *Private methods.
  **********************/
 
-static CRNodeAnnotation *
-cr_node_annotation_new (CRStyle *a_style)
-{
-        CRNodeAnnotation *result = NULL ;
-
-        result = g_try_malloc (sizeof (CRNodeAnnotation)) ;
-        if (!result)
-        {
-                cr_utils_trace_info ("Out of memory") ;
-                return NULL ;
-        }
-        memset (result, 0, sizeof (CRNodeAnnotation)) ;
-
-        if (a_style)
-        {
-                result->style = a_style ;
-                cr_style_ref (a_style) ;
-        }
-
-        return result ;
-}
-
-static void
-cr_node_annotation_destroy (CRNodeAnnotation *a_this)
-{
-        g_return_if_fail (a_this) ;
-
-        if (a_this->style)
-        {
-                cr_style_unref (a_this->style) ;
-                a_this->style = NULL ;
-        }
-
-        if (a_this)
-        {
-                g_free (a_this) ;
-                a_this = NULL ;
-        }
-}
-
-static enum CRStatus
-cr_lay_eng_annotate_tree_real (CRLayEng * a_this,
-                               xmlNode *a_root_node)
+static CRBox *
+cr_lay_eng_create_box_tree_real (CRLayEng * a_this,
+                                 xmlNode *a_root_node,
+                                 CRBox *a_parent_box)
 {
         enum CRStatus status = CR_OK ;
         xmlNode *cur = NULL ;
-        CRSelEng * sel_eng = NULL ;/*selection engine*/
+        CRBox *cur_box = NULL ;
+        CRBoxData *box_data = NULL ;
 
         g_return_val_if_fail (a_this
                               && PRIVATE (a_this)
                               && PRIVATE (a_this)->cascade
-                              && a_root_node,
-                              CR_BAD_PARAM_ERROR) ;
+                              && a_root_node, NULL) ;
 
-        sel_eng = cr_sel_eng_new () ;
-
-        g_return_val_if_fail (sel_eng, CR_ERROR) ;
+        if (!PRIVATE (a_this)->sel_eng)
+        {
+                PRIVATE (a_this)->sel_eng = cr_sel_eng_new () ;
+                if (!PRIVATE (a_this)->sel_eng)
+                {
+                        cr_utils_trace_info 
+                                ("Could not create selection engine") ;
+                        cr_utils_trace_info 
+                                ("System may be out of memory") ;
+                        return NULL ;
+                }
+        }
 
         for (cur = a_root_node ; cur ; cur = cur->next)
         {
-                CRStyle *style = NULL, *parent_style = NULL ;
-                CRNodeAnnotation *annotation = NULL ;
+                CRStyle *style = NULL, *parent_style = NULL ;                
+
+                if (cur->type != XML_ELEMENT_NODE
+                    && cur->type != XML_TEXT_NODE)
+                        continue ;
 
                 /*build here the node annotation*/
-                if (cur->parent
-                    && cur->parent->_private)
-                {
-                        parent_style = 
-                                ((CRNodeAnnotation*)
-                                 cur->parent->_private)->style ;
-                }
+                if (cur->parent && a_parent_box && a_parent_box->style)
+                        parent_style = a_parent_box->style ;
 
                 status = 
                         cr_sel_eng_get_matched_style 
-                        (sel_eng, PRIVATE (a_this)->cascade,
+                        (PRIVATE (a_this)->sel_eng, 
+                         PRIVATE (a_this)->cascade,
                          cur, parent_style, &style) ;
 
-                if (status == CR_OK
-                    && style)
+                if (status != CR_OK
+                    || (style && style->display == DISPLAY_NONE))
                 {
-                        annotation =
-                                cr_node_annotation_new (style) ;
-                        if (annotation)
-                        {
-                                cur->_private = annotation ;
-                        }
-                        annotation = NULL ;
-                        style = NULL ;
+                        continue ;
                 }
+
+                /*here, build the box,
+                 *append it to the box tree
+                 *and update all it attributes but
+                 *the positioning. The positioning will
+                 *be updated later via the cr_box_reflow() method.
+                 */
+                cur_box = cr_box_new (style) ;
+                if (cur_box)
+                {
+                        cr_utils_trace_info
+                                ("Could not create a box") ;
+                        cr_utils_trace_info
+                                ("The system may be out of memory") ;
+                        return NULL ;
+                }
+
+                if (a_parent_box)
+                        cr_box_append_child (a_parent_box,
+                                             cur_box) ;
+                style = NULL ;
+
+                /*
+                 *store a pointer to the node that generated
+                 *the current box into that current box.
+                 */
+                box_data = cr_box_data_new (cur) ;
+                if (!box_data)
+                {
+                        cr_utils_trace_info ("Out of memory") ;
+                        goto error ;
+                }
+                cur_box->croco_data = (gpointer)box_data ;
+                box_data = NULL ;
 
                 if (style)
                 {
@@ -166,44 +149,28 @@ cr_lay_eng_annotate_tree_real (CRLayEng * a_this,
                 /*walk through what remains from the tree*/
                 if (cur->children)
                 {
-                        status = 
-                                cr_lay_eng_annotate_tree_real 
-                                (a_this, cur->children) ;
-
-                        if (status != CR_OK)
-                                return status ;
+                        cr_lay_eng_create_box_tree_real
+                                (a_this, cur->children, cur_box) ;
                 }
         }
 
-        if (sel_eng)
+        return cur_box ;
+
+ error:
+        if (cur_box)
         {
-                cr_sel_eng_destroy (sel_eng) ;
-                sel_eng = NULL ;
+                cr_box_destroy (cur_box) ;
+                cur_box = NULL ;                
+        }
+        if (box_data)
+        {
+                cr_box_data_destroy (box_data) ;
+                box_data = NULL ;
         }
 
-        return CR_OK ;
+        return NULL ;
 }
 
-static enum CRStatus
-cr_lay_eng_destroy_tree_annotation_real (xmlNode *a_node)
-{
-        xmlNode *cur = NULL ;
-
-        for (cur = a_node ; cur ; cur = cur->next)
-        {
-                if (cur->_private)
-                {
-                        cr_node_annotation_destroy (cur->_private) ;
-                        cur->_private = NULL ;
-                }
-                if (cur->children)
-                {
-                        cr_lay_eng_destroy_tree_annotation_real 
-                                (cur->children) ;
-                }
-        }
-        return CR_OK ;
-}
 
 /**********************
  *Public methods.
@@ -237,9 +204,10 @@ cr_lay_eng_new (void)
 
 
 enum CRStatus
-cr_lay_eng_build_annotated_doc (CRLayEng *a_this,
-                                xmlDoc *a_doc,
-                                CRCascade *a_cascade)
+cr_lay_eng_build_box_tree (CRLayEng *a_this,
+                           xmlDoc *a_doc,
+                           CRCascade *a_cascade,
+                           CRBox **a_box_model)
 {
         xmlNode *root_node = NULL ;
 
@@ -251,27 +219,25 @@ cr_lay_eng_build_annotated_doc (CRLayEng *a_this,
                 return CR_NO_ROOT_NODE_ERROR ;
 
         PRIVATE (a_this)->cascade = a_cascade ;
-        return cr_lay_eng_annotate_tree_real (a_this, root_node) ;
+
+        *a_box_model = 
+                cr_lay_eng_create_box_tree_real (a_this, root_node,
+                                                 NULL) ;
 
         return CR_OK ;
 }
 
-enum CRStatus
-cr_lay_eng_destroy_doc_annotation (xmlDoc *a_xml_doc)
-{
-        xmlNode *root_node = NULL ;
-
-        root_node = xmlDocGetRootElement (a_xml_doc) ;
-        if (!root_node)
-                return CR_OK ;
-
-        return cr_lay_eng_destroy_tree_annotation_real (root_node) ;
-}
 
 void
 cr_lay_eng_destroy (CRLayEng *a_this)
 {
 	g_return_if_fail (a_this) ;
+
+        if (PRIVATE (a_this)->sel_eng)
+        {
+                cr_sel_eng_destroy (PRIVATE (a_this)->sel_eng) ;
+                PRIVATE (a_this)->sel_eng = NULL ;
+        }
 
 	if (PRIVATE (a_this))
 	{

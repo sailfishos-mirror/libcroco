@@ -194,6 +194,10 @@ cr_style_set_style_from_decl (CRStyle *a_this, CRDeclaration *a_decl,
                               CRStyle *a_parent_style) ;
 
 enum CRStatus
+cr_style_set_style_from_ruleset (CRStyle *a_this, CRStatement *a_stmt,
+                                 CRStyle *a_parent_style) ;
+
+enum CRStatus
 cr_style_ref (CRStyle *a_this) ;
 
 gboolean

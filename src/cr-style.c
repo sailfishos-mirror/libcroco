@@ -1050,8 +1050,6 @@ cr_style_new_from_ruleset (CRStatement *a_stmt,
                            CRStyle *a_parent_style,
 			   CRStyle **a_style)
 {
-        CRDeclaration *decl = NULL ;        
-
         g_return_val_if_fail (a_stmt                    
                               && a_stmt->type == RULESET_STMT
                               && a_stmt->kind.ruleset,
@@ -1067,14 +1065,36 @@ cr_style_new_from_ruleset (CRStatement *a_stmt,
                 }
         }
 
+        return cr_style_set_style_from_ruleset (*a_style, a_stmt,
+                                                a_parent_style) ;
+}
+
+/**
+ *Sets an instance of #CRStyle from a ruleset type of css2 statement.
+ *@param a_this the current instance of #CRStyle.
+ *@param a_stmt the statement the css ruleset statement.
+ *@param a_parent_style the style of the parent node.
+ *@return CR_OK upon sucessfull statement, an error code otherwise.
+ */
+enum CRStatus
+cr_style_set_style_from_ruleset (CRStyle *a_this, CRStatement *a_stmt,
+                                 CRStyle *a_parent_style)
+{
+        CRDeclaration *decl = NULL ;
+
+        g_return_val_if_fail (a_this
+                              && a_stmt
+                              && (a_stmt->type == RULESET_STMT),
+                              CR_BAD_PARAM_ERROR) ;
+
         for (decl = a_stmt->kind.ruleset->decl_list ;
              decl ; decl = decl->next)
         {
-                cr_style_set_style_from_decl 
-                        (*a_style, decl, a_parent_style) ;
+                cr_style_set_style_from_decl
+                        (a_this, decl, a_parent_style) ;
         }
 
-	return CR_OK ;
+        return CR_OK ;
 }
 
 /**
