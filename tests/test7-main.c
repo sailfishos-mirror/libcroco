@@ -54,13 +54,29 @@ const guchar *gv_xmlbuf =
 ;
 const guchar *gv_cssbuf =
 "INSTRUMENT { display: inline}"
-"ARTICLE, HEADLINE, AUTHOR, PARA " 
-"{ " 
-" margin: 5px 35px;"
-" display: block ; " 
-" position: static; " 
-" background-color: coral ;"
-" border: solid yellow thick;"
+"ARTICLE, HEADLINE, AUTHOR, PARA"
+"{"
+" display: block ;"
+" position: static; "
+"}"
+
+"ARTICLE"
+"{"
+" background-color: white;"
+"}"
+
+"HEADLINE"
+"{"
+" background-color: blue;"
+" border: solid black thin;"
+"}"
+
+"PARA"
+"{"
+" background-color: pink;"
+" margin-left: 20px; " 
+"}"
+;
 
 /*
 " margin-top: 10px ;"
@@ -76,8 +92,8 @@ const guchar *gv_cssbuf =
 " border-left-width: thick ;"
 " border-left-style: solid ;"
 */
-"}"
-;
+
+
 
 static enum CRStatus
 test_layout_box (void)  ;

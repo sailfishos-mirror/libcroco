@@ -647,15 +647,7 @@ create_box_tree_real (CRLayEng * a_this,
                                  *by default, text/img boxes are inline.
                                  */
                                 cur_box->type = BOX_TYPE_INLINE ;
-
-                                /*
-                                 *the anonymous box
-                                 *must have no margin,
-                                 *no padding, no border,
-                                 *no border style, no offset
-                                 */
-                                init_anonymous_text_box (cur_box) ;
-
+                                
                                 /*
                                  *store a pointer to the node that generated
                                  *the current box into that current box.
@@ -670,9 +662,22 @@ create_box_tree_real (CRLayEng * a_this,
                                 cur_box->box_data = box_data ;
                                 box_data = NULL ;
 
+                                /*
+                                 *the anonymous box
+                                 *must have no margin,
+                                 *no padding, no border,
+                                 *no border style, no offset
+                                 */
+                                init_anonymous_text_box (cur_box) ;
+
+                                style_specified_2_computed_values 
+                                        (a_this, cur_box->style, a_parent_box) ;
+
                                 cr_box_append_child (a_parent_box,
                                                      cur_box) ;
                                 cur_box = NULL ;
+
+                                
                         }
                 }
                 else
