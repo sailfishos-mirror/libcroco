@@ -350,7 +350,7 @@ enum CRStatus
 cr_statement_at_import_rule_get_url (CRStatement *a_this,
 				     GString **a_url) ;
 
-int
+gint
 cr_statement_at_media_nr_rules (CRStatement *a_this) ;
 
 CRStatement *
@@ -393,10 +393,38 @@ cr_statement_at_font_face_rule_add_decl (CRStatement *a_this,
 					 GString *a_prop,
 					 CRTerm *a_value) ;
 
+gchar *
+cr_statement_to_string (CRStatement * a_this, gulong a_indent) ;
+
 void
 cr_statement_dump (CRStatement *a_this, FILE *a_fp, gulong a_indent) ;
 
-int
+void
+cr_statement_dump_ruleset (CRStatement * a_this, FILE * a_fp, 
+                           glong a_indent) ;
+
+void
+cr_statement_dump_font_face_rule (CRStatement * a_this, 
+                                  FILE * a_fp,
+                                  glong a_indent) ;
+
+void
+cr_statement_dump_page (CRStatement * a_this, FILE * a_fp, 
+                        gulong a_indent) ;
+
+
+void
+cr_statement_dump_media_rule (CRStatement * a_this, 
+                              FILE * a_fp,
+                              gulong a_indent) ;
+
+void
+cr_statement_dump_import_rule (CRStatement * a_this, FILE * a_fp,
+                               gulong a_indent) ; 
+void
+cr_statement_dump_charset (CRStatement * a_this, FILE * a_fp, 
+                           gulong a_indent) ;
+gint
 cr_statement_nr_rules (CRStatement *a_this) ;
 
 CRStatement *

@@ -27,7 +27,13 @@ TEST_OUTPUT_DIR=test-outputs
 ERROR_REPORT_FILE=tests-error.log
 COMMAND_LIST=
 COMMAND=
-RUN_VALGRIND=no
+if test x$RUN_VALGRIND = x ; then
+    RUN_VALGRIND=no
+else
+    RUN_VALGRIND=yes
+fi
+VALGRIND_LOGS_DIR=valgrind-logs
+VALGRIND=
 TEST_PROG=
 EGREP=`which egrep`
 if test "empty$EGREP" = "empty" ; then
@@ -53,8 +59,8 @@ display_usage ()
     echo "commands are:"
     echo "=============="
     echo "run           run the tests and display their result"
-    echo "mkref         run the tests but saves their output as a reference"
-    echo "mkcleanup     removes the tmp directories that may have been created"    
+    echo "ref           run the tests but saves their output as a reference"
+    echo "cleanup       removes the tmp directories that may have been created"    
     echo ""
     echo "run command options:"
     echo "--valgrind runs the test using valgrind"
@@ -87,7 +93,7 @@ parse_command_line ()
 		exit 0
 		;;
 
-	    run|mkref|mkcleanup)		
+	    run|ref|cleanup)		
 		COMMAND_LIST=$arg
 		REMAINING_ARGS=$@
 		echo "REMAINING_ARGS=$REMAINING_ARGS"
@@ -106,8 +112,9 @@ parse_command_line ()
 #builds the list of available test functions.
 build_tests_list ()
 {
-    for TEST_PROG in `ls -1 $HERE | egrep ^test\([0-9]\)+$` ; do
-	echo "$un test: $TEST_PROG"
+    for TEST_PROG in `find $HERE -type f -print | egrep ^$HERE/test\(\([-0-9a-zA-Z_]\)+\)?\(\.sh\)?$ | grep -v testctl` ; do
+	TEST_PROG=`basename $TEST_PROG`	
+	echo "run test: $TEST_PROG"
 	TEST_PROG_LIST="$TEST_PROG_LIST $TEST_PROG"
     done
 }
@@ -123,16 +130,38 @@ run_test_prog ()
     TEST_PROG=$1
     REFERENCE=$2
     DISPLAY_ON_STDOUT=$3
-
     OUTPUT_DIR=
     OUTPUT_SUFFIX=
     TEST_INPUT_LIST=
+    VALGRIND_OPTIONS="--error-limit=no --num-callers=100 --logfile=$HERE/$VALGRIND_LOGS_DIR/$TEST_PROG-valgrind.log  --leak-check=yes --show-reachable=yes --quiet --suppressions=$HERE/vg.supp"
+    if test x$RUN_VALGRIND = xno ; then
+	VALGRIND=
+    else
+	VALGRIND=`which valgrind`
+	if test x$VALGRIND = x ; then
+	    echo "Could not find valgrind in your path"
+	else
+	    VALGRIND="$VALGRIND $VALGRIND_OPTIONS"
+	    echo "Gonna run the tests with valgrind, using the following options: $VALGRIND_OPTIONS"
+	fi
+    fi
+    export VALGRIND
+    is_shell_script=`echo $TEST_PROG | egrep "(.*)?.sh"`
+    if test x$is_shell_script = x ; then
+	is_shell_script=no
+    else
+	is_shell_script=yes
+    fi
+
+    if ! test -d $HERE/$VALGRIND_LOGS_DIR ; then
+	mkdir $HERE/$VALGRIND_LOGS_DIR
+    fi
 
     for TEST_INPUT in `ls -1 $HERE/$TEST_INPUT_DIR | egrep ^${TEST_PROG}\([\.0-9]\)+\css\$` ; do
 	TEST_INPUT_LIST="$TEST_INPUT_LIST $TEST_INPUT"
     done
 
-    if test "$REFERENCE" = "yes" ; then	
+    if test "$REFERENCE" = "yes" ; then
 	OUTPUT_DIR=$HERE/$TEST_OUT_REF_DIR
 	OUTPUT_SUFFIX=.out
 
@@ -151,37 +180,52 @@ run_test_prog ()
 
     if test "empty$TEST_INPUT_LIST" != "empty" ; then
 	for TEST_INPUT in $TEST_INPUT_LIST ; do
+	    TEST_INPUT_NAME=`basename $TEST_INPUT .sh`
 	    if test "$DISPLAY_ON_STDOUT" = "yes" ; then
 		echo "###############################################"
-		echo "launching $HERE/$TEST_PROG $HERE/$TEST_INPUT_DIR/$TEST_INPUT"....
-		echo "###############################################"
-		$HERE/$TEST_PROG $HERE/$TEST_INPUT_DIR/$TEST_INPUT
+		echo "launching $VALGRIND $HERE/$TEST_PROG $HERE/$TEST_INPUT_DIR/$TEST_INPUT"....
+		echo "###############################################"		
+		if test x$is_shell_script = xyes ; then
+		    $HERE/$TEST_PROG $HERE/$TEST_INPUT_DIR/$TEST_INPUT
+		else
+		    $VALGRIND $HERE/.libs/$TEST_PROG $HERE/$TEST_INPUT_DIR/$TEST_INPUT
+		fi		
 		echo "###############################################"
 		echo  "done"
 		echo "###############################################"
 		echo ""
 	    else
-		echo "executing $HERE/$TEST_PROG $HERE/$TEST_INPUT_DIR/$TEST_INPUT > $OUTPUT_DIR/${TEST_INPUT}${OUTPUT_SUFFIX} ..."
-		$HERE/$TEST_PROG $HERE/$TEST_INPUT_DIR/$TEST_INPUT > $OUTPUT_DIR/${TEST_INPUT}${OUTPUT_SUFFIX}
+		echo "executing $VALGRIND $HERE/$TEST_PROG $HERE/$TEST_INPUT_DIR/$TEST_INPUT > $OUTPUT_DIR/${TEST_INPUT_NAME}${OUTPUT_SUFFIX} ..."
+		$VALGRIND $HERE/.libs/$TEST_PROG $HERE/$TEST_INPUT_DIR/$TEST_INPUT > $OUTPUT_DIR/${TEST_INPUT_NAME}${OUTPUT_SUFFIX}
 		echo "done"
 	    fi
 	done
     else
 	if test "$DISPLAY_ON_STDOUT" = "yes" ; then
 	    echo "####################################################"
-	    echo "launching $HERE/$TEST_PROG ..."
+	    echo "launching $VALGRIND $HERE/$TEST_PROG ..."
 	    echo "####################################################"
-	    $HERE/$TEST_PROG
+	    if test x$is_shell_script = xyes ; then
+		$HERE/$TEST_PROG
+	    else
+		$VALGRIND $HERE/.libs/$TEST_PROG
+	    fi
 	    echo "####################################################"
 	    echo "done"
 	    echo "####################################################"
 	    echo ""
 	else
-	    echo "executing $HERE/$TEST_PROG  > $OUTPUT_DIR/${TEST_INPUT}${OUTPUT_SUFFIX} ..."
-	    $HERE/$TEST_PROG > $OUTPUT_DIR/${TEST_PROG}${OUTPUT_SUFFIX}
+	    TEST_INPUT_NAME=`basename $TEST_PROG .sh`
+	    echo "executing $VALGRIND $HERE/$TEST_PROG  > $OUTPUT_DIR/${TEST_PROG}${OUTPUT_SUFFIX} ..."
+	    if test x$is_shell_script = xyes ; then
+		$HERE/$TEST_PROG > $OUTPUT_DIR/${TEST_INPUT_NAME}${OUTPUT_SUFFIX}
+	    else
+		$VALGRIND $HERE/.libs/$TEST_PROG > $OUTPUT_DIR/${TEST_INPUT_NAME}${OUTPUT_SUFFIX}
+	    fi
 	    echo "done"
 	fi
     fi
+    unset VALGRIND
 }
 
 cleanup_tests ()
@@ -189,12 +233,16 @@ cleanup_tests ()
     if test -d $HERE/$TEST_OUTPUT_DIR ; then
 	echo "removing $HERE/$TEST_OUTPUT_DIR"
 	rm -rf $HERE/$TEST_OUTPUT_DIR/*
+	rm -rf $HERE/$VALGRIND_LOGS_DIR
+    fi
+    if test -f $HERE/$ERROR_REPORT_FILE ; then
+	rm $HERE/$ERROR_REPORT_FILE
     fi
 }
 
 run_test_report ()
 {
-    diff -ur --exclude=*CVS* --exclude=*cvs* --exclude=Makefile* $HERE/$TEST_OUT_REF_DIR $HERE/$TEST_OUTPUT_DIR > /tmp/toto$$
+    diff -ur --exclude=*CVS* --exclude=*cvs* --exclude=Makefile* --exclude=.arch-ids $HERE/$TEST_OUT_REF_DIR $HERE/$TEST_OUTPUT_DIR > /tmp/toto$$
     NB_DIFF=`cat /tmp/toto$$ | wc -l`
 
     if test "$NB_DIFF" -eq 0 ; then
@@ -204,6 +252,32 @@ run_test_report ()
 	echo "SOME TESTS ARE KO :("
 	mv /tmp/toto$$ $HERE/$ERROR_REPORT_FILE
 	echo "See $HERE/$ERROR_REPORT_FILE to see what's going on"
+    fi
+
+    ###################
+    #Valgrind errors  #
+    ###################
+    memleaks=no
+    for vg_log in `find $HERE/$VALGRIND_LOGS_DIR -name "*-valgrind.log*" -print` ; do
+	if test -s $vg_log ; then
+	    leaks=`cat $vg_log | grep -i leak | grep -v no`
+	    errors=`cat $vg_log | grep -w Invalid`
+	    if test "x$leaks" = "x" -a "x$errors" = "x" ; then
+		rm -f $vg_log ;
+	    else
+		echo "valgrind reported some memory leaks/corruptions in $vg_log"
+		memleaks=yes
+	    fi
+	else
+	    rm $vg_log
+	fi
+    done
+    if test "x$RUN_VALGRIND" = "xyes" ; then
+	if test "x$memleaks" = "xno" ; then
+	    echo "Oh, YESSSSSS!, VALGRIND DID NOT DETECT ANY MEMLEAK !! You can go have a beer."
+	else
+	    echo "Please report these leaks by sending the valgrind logs to the authors of libcroco."
+	fi
     fi
 }
 
@@ -286,7 +360,7 @@ execute_command ()
 	    execute_run_cmd $@
 	    ;;
 
-	mkref)
+	ref)
 	    build_tests_list ;
 	    if test "empty$TEST_PROG_LIST" = "empty" ; then
 		echo "could not find any test to run"
@@ -298,12 +372,8 @@ execute_command ()
 	    done
 	    ;;
 
-	mkcleanup)
-	    rm -f $HERE/$TEST_OUTPUT_DIR/*
-
-	    if test -f $HERE/$ERROR_REPORT_FILE ; then
-		rm $HERE/$ERROR_REPORT_FILE
-	    fi
+	cleanup)
+	    cleanup_tests
 	    ;;
 
 	*)

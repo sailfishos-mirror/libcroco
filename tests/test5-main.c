@@ -192,7 +192,10 @@ test_sel_eng (guchar * a_file_uri)
                 cr_stylesheet_destroy (stylesheet);
                 stylesheet = NULL;
         }
-
+        if (selection_engine) {
+                cr_sel_eng_destroy (selection_engine) ;
+                selection_engine = NULL ;
+        }
         xmlCleanupParser ();
         return status;
 

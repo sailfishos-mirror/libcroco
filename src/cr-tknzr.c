@@ -765,7 +765,7 @@ cr_tknzr_parse_string (CRTknzr * a_this, GString ** a_str)
 }
 
 /**
- *Parses the an nmstart as defined by css spec [4.1.1]:
+ *Parses the an nmstart as defined by the css2 spec [4.1.1]:
  * nmstart [a-zA-Z]|{nonascii}|{escape}
  *
  *@param a_this the current instance of #CRTknzr.
@@ -890,6 +890,8 @@ cr_tknzr_parse_nmchar (CRTknzr * a_this, guint32 * a_char)
  *Parses an "ident" as defined in css spec [4.1.1]:
  *ident ::= {nmstart}{nmchar}*
  *
+ *Actually parses it using the css3 grammar:
+ *ident ::= -?{nmstart}{nmchar}*
  *@param a_this the currens instance of #CRTknzr.
  *
  *@param a_str a pointer to parsed ident. If *a_str is NULL,
@@ -904,6 +906,7 @@ static enum CRStatus
 cr_tknzr_parse_ident (CRTknzr * a_this, GString ** a_str)
 {
         guint32 tmp_char = 0;
+        GString *stringue = NULL ;
         CRInputPos init_pos;
         enum CRStatus status = CR_OK;
 
@@ -912,89 +915,48 @@ cr_tknzr_parse_ident (CRTknzr * a_this, GString ** a_str)
                               && a_str, CR_BAD_PARAM_ERROR);
 
         RECORD_INITIAL_POS (a_this, &init_pos);
+        PEEK_NEXT_CHAR (a_this, &tmp_char) ;
+        stringue = g_string_new (NULL) ;
+        g_return_val_if_fail (stringue, CR_OUT_OF_MEMORY_ERROR) ;
 
-        status = cr_tknzr_parse_nmstart (a_this, &tmp_char);
-
-        if (status != CR_OK)
-                return CR_PARSING_ERROR;
-
-        if (*a_str == NULL) {
-                *a_str = g_string_new (NULL);
+        if (tmp_char == '-') {
+                READ_NEXT_CHAR (a_this, &tmp_char) ;
+                g_string_append_unichar (stringue, tmp_char) ;
         }
-
-        g_string_append_unichar (*a_str, tmp_char);
-
-        for (;;) {
-                status = cr_tknzr_parse_nmchar (a_this, &tmp_char);
-
-                if (status != CR_OK)
-                        break;
-
-                g_string_append_unichar (*a_str, tmp_char);
-        }
-
-        return CR_OK;
-}
-
-/**
- *Parses a "vendor-specific-ident". This is only a dash followed
- *by a an identifier. This is not specified by the CSS2 spec but
- *is heavily used by a lot of user agents.
- *@param a_this the currens instance of #CRTknzr.
- *
- *@param a_str a pointer to parsed ident. If *a_str is NULL,
- *this function allocates a new instance of GString. If not, 
- *the function just appends the parsed string to the one passed.
- *In both cases it is up to the caller to free *a_str.
- *
- *@return CR_OK upon successfull completion, an error code 
- *otherwise.
- */
-static enum CRStatus
-cr_tknzr_parse_vendor_specific_ident (CRTknzr * a_this, GString ** a_str)
-{
-        guint32 tmp_char = 0;
-        CRInputPos init_pos;
-        enum CRStatus status = CR_OK;
-
-        g_return_val_if_fail (a_this && PRIVATE (a_this)
-                              && PRIVATE (a_this)->input
-                              && a_str, CR_BAD_PARAM_ERROR);
-
-        RECORD_INITIAL_POS (a_this, &init_pos);
-
-        if (BYTE (PRIVATE (a_this)->input, 1, NULL) == '-') {
-                SKIP_BYTES (a_this, 1);
-        } else {
-                return CR_PARSING_ERROR;
-        }
-
         status = cr_tknzr_parse_nmstart (a_this, &tmp_char);
         if (status != CR_OK) {
                 status = CR_PARSING_ERROR;
-                goto error;
+                goto end ;
         }
-        if (*a_str == NULL) {
-                *a_str = g_string_new (NULL);
-        }
-        g_string_append_c (*a_str, '-');
-        g_string_append_unichar (*a_str, tmp_char);
-
+        g_string_append_unichar (stringue, tmp_char);
         for (;;) {
                 status = cr_tknzr_parse_nmchar (a_this, &tmp_char);
-
-                if (status != CR_OK)
+                if (status != CR_OK) {
+                        status = CR_OK ;
                         break;
-
-                g_string_append_unichar (*a_str, tmp_char);
+                }
+                g_string_append_unichar (stringue, tmp_char);
+        }
+        if (status == CR_OK) {
+                if (!*a_str) {
+                        *a_str = stringue ;
+                
+                } else {
+                        g_string_append_len (*a_str, stringue->str, stringue->len) ;
+                        g_string_free (stringue, TRUE) ;
+                }
+                stringue = NULL ;
         }
 
-        return CR_OK;
-
-      error:
-        cr_tknzr_set_cur_pos (a_this, &init_pos);
-        return status;
+ error:
+ end:
+        if (stringue) {
+                g_string_free (stringue, TRUE) ;
+                stringue = NULL ;
+        }
+        return status ;
 }
+
 
 /**
  *Parses a "name" as defined by css spec [4.1.1]:
@@ -1595,8 +1557,9 @@ cr_tknzr_new (CRInput * a_input)
 }
 
 CRTknzr *
-cr_tknzr_new_from_buf (const guchar * a_buf, gulong a_len,
-                       enum CREncoding a_enc, gboolean a_free_at_destroy)
+cr_tknzr_new_from_buf (guchar * a_buf, gulong a_len,
+                       enum CREncoding a_enc, 
+                       gboolean a_free_at_destroy)
 {
         CRTknzr *result = NULL;
         CRInput *input = NULL;
@@ -2094,10 +2057,10 @@ cr_tknzr_get_next_token (CRTknzr * a_this, CRToken ** a_tk)
                         CHECK_PARSING_STATUS (status, TRUE);
                         goto done;
                 } else {
-                        status = cr_tknzr_parse_vendor_specific_ident
+                        status = cr_tknzr_parse_ident
                                 (a_this, &str);
                         if (status == CR_OK) {
-                                cr_token_set_vendor_specific_ident
+                                cr_token_set_ident
                                         (token, str);
                                 goto done;
                         }
@@ -2132,6 +2095,7 @@ cr_tknzr_get_next_token (CRTknzr * a_this, CRToken ** a_tk)
                                 goto done;
                         }
                 }
+                break ;
 
         case ';':
                 SKIP_CHARS (a_this, 1);
@@ -2496,7 +2460,6 @@ cr_tknzr_parse_token (CRTknzr * a_this, enum CRTokenType a_type,
 
                 case STRING_TK:
                 case IDENT_TK:
-                case VENDOR_SPECIFIC_IDENT_TK:
                 case HASH_TK:
                 case ATKEYWORD_TK:
                 case FUNCTION_TK:

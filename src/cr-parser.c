@@ -355,9 +355,6 @@ static enum CRStatus cr_parser_parse_string (CRParser * a_this,
 static enum CRStatus cr_parser_parse_ident (CRParser * a_this,
                                             GString ** a_str);
 
-static enum CRStatus cr_parser_parse_vendor_specific_ident (CRParser * a_this,
-                                                            GString ** a_str);
-
 static enum CRStatus cr_parser_parse_uri (CRParser * a_this,
                                           GString ** a_str);
 
@@ -1491,7 +1488,6 @@ cr_parser_parse_any_core (CRParser * a_this)
         case DASHMATCH_TK:
         case S_TK:
         case IMPORTANT_SYM_TK:
-        case SEMICOLON_TK:
                 status = CR_OK;
                 break;
         case FUNCTION_TK:
@@ -1756,9 +1752,6 @@ cr_parser_parse_property (CRParser * a_this, GString ** a_property)
         RECORD_INITIAL_POS (a_this, &init_pos);
 
         status = cr_parser_parse_ident (a_this, a_property);
-        if (status != CR_OK)
-                status = cr_parser_parse_vendor_specific_ident
-                        (a_this, a_property);
         CHECK_PARSING_STATUS (status, TRUE);
 
         cr_parser_try_to_skip_spaces_and_comments (a_this);
@@ -2495,35 +2488,6 @@ cr_parser_parse_ident (CRParser * a_this, GString ** a_str)
 }
 
 /**
- *Parses a "vendor-specific-ident" as not defined in the CSS2 spec.
- *It's only a dash followed by an identifier.
- *
- *@param a_this the currens instance of #CRParser.
- *
- *@param a_str a pointer to parsed ident. If *a_str is NULL,
- *this function allocates a new instance of GString. If not, 
- *the function just appends the parsed string to the one passed.
- *In both cases it is up to the caller to free *a_str.
- *
- *@return CR_OK upon successfull completion, an error code 
- *otherwise.
- */
-static enum CRStatus
-cr_parser_parse_vendor_specific_ident (CRParser * a_this, GString ** a_str)
-{
-        enum CRStatus status = CR_OK;
-
-        g_return_val_if_fail (a_this && PRIVATE (a_this)
-                              && PRIVATE (a_this)->tknzr
-                              && a_str, CR_BAD_PARAM_ERROR);
-
-        status = cr_tknzr_parse_token (PRIVATE (a_this)->tknzr,
-                                       VENDOR_SPECIFIC_IDENT_TK, NO_ET, a_str,
-                                       NULL);
-        return status;
-}
-
-/**
  *Parses a stylesheet as defined in the css2 spec in appendix D.1:
  *stylesheet ::= [ CHARSET_SYM S* STRING S* ';' ]? 
  *               [S|CDO|CDC]* [ import [S|CDO|CDC]* ]*
@@ -3021,9 +2985,10 @@ cr_parser_new (CRTknzr * a_tknzr)
  *@return the newly built parser, or NULL if an error arises.
  */
 CRParser *
-cr_parser_new_from_buf (const guchar * a_buf,
+cr_parser_new_from_buf (guchar * a_buf,
                         gulong a_len,
-                        enum CREncoding a_enc, gboolean a_free_buf)
+                        enum CREncoding a_enc, 
+                        gboolean a_free_buf)
 {
         CRParser *result = NULL;
         CRInput *input = NULL;
@@ -3372,6 +3337,7 @@ cr_parser_parse_declaration (CRParser * a_this,
 
         if (status == CR_END_OF_INPUT_ERROR)
                 goto error;
+
         CHECK_PARSING_STATUS_ERR
                 (a_this, status, FALSE,
                  "while parsing declaration: next property is malformed",
@@ -3550,8 +3516,7 @@ cr_parser_parse_ruleset (CRParser * a_this)
         PRIVATE (a_this)->state = TRY_PARSE_RULESET_STATE;
 
         status = cr_parser_parse_declaration (a_this, &property,
-                                              &expr, &is_important);
-
+                                              &expr, &is_important);        
         if (expr) {
                 cr_term_ref (expr);
         }
@@ -3561,8 +3526,7 @@ cr_parser_parse_ruleset (CRParser * a_this)
                 PRIVATE (a_this)->sac_handler->property
                         (PRIVATE (a_this)->sac_handler, property, expr,
                          is_important);
-        }
-
+        }        
         if (status == CR_OK) {
                 /*
                  *free the allocated
@@ -3573,10 +3537,21 @@ cr_parser_parse_ruleset (CRParser * a_this)
                         g_string_free (property, TRUE);
                         property = NULL;
                 }
-
                 if (expr) {
                         cr_term_unref (expr);
                         expr = NULL;
+                }
+        } else {/*status != CR_OK*/                
+                guint32 c = 0 ;
+                /*
+                 *test if we have reached '}', which
+                 *would mean that we are parsing an empty ruleset (eg. x{ })
+                 *In that case, goto end_of_ruleset.
+                 */
+                status = cr_tknzr_peek_char (PRIVATE (a_this)->tknzr, &c) ;
+                if (status == CR_OK && c == '}') {
+                        status = CR_OK ;
+                        goto end_of_ruleset ;
                 }
         }
         CHECK_PARSING_STATUS_ERR
@@ -3616,10 +3591,10 @@ cr_parser_parse_ruleset (CRParser * a_this)
                         expr = NULL;
                 }
         }
+
+ end_of_ruleset:
         cr_parser_try_to_skip_spaces_and_comments (a_this);
-
         READ_NEXT_CHAR (a_this, &cur_char);
-
         ENSURE_PARSING_COND_ERR
                 (a_this, cur_char == '}',
                  "while parsing rulset: current char must be a '}'",
@@ -3652,7 +3627,7 @@ cr_parser_parse_ruleset (CRParser * a_this)
 
         return CR_OK;
 
-      error:
+ error:
         if (start_selector == TRUE
             && PRIVATE (a_this)->sac_handler
             && PRIVATE (a_this)->sac_handler->error) {
@@ -4544,7 +4519,7 @@ cr_parser_parse_buf (CRParser * a_this,
         g_return_val_if_fail (a_this && PRIVATE (a_this)
                               && a_buf, CR_BAD_PARAM_ERROR);
 
-        tknzr = cr_tknzr_new_from_buf (a_buf, a_len, a_enc, FALSE);
+        tknzr = cr_tknzr_new_from_buf ((guchar*)a_buf, a_len, a_enc, FALSE);
 
         g_return_val_if_fail (tknzr != NULL, CR_ERROR);
 

@@ -121,7 +121,7 @@ cr_declaration_parse_from_buf (CRStatement * a_statement,
                 g_return_val_if_fail (a_statement->type == RULESET_STMT,
                                       NULL);
 
-        parser = cr_parser_new_from_buf (a_str, strlen (a_str), a_enc, FALSE);
+        parser = cr_parser_new_from_buf ((guchar*)a_str, strlen (a_str), a_enc, FALSE);
         g_return_val_if_fail (parser, NULL);
 
         status = cr_parser_try_to_skip_spaces_and_comments (parser);
@@ -183,7 +183,7 @@ cr_declaration_parse_list_from_buf (const guchar * a_str,
 
         g_return_val_if_fail (a_str, NULL);
 
-        parser = cr_parser_new_from_buf (a_str, strlen (a_str), a_enc, FALSE);
+        parser = cr_parser_new_from_buf ((guchar*)a_str, strlen (a_str), a_enc, FALSE);
         g_return_val_if_fail (parser, NULL);
         status = cr_parser_get_tknzr (parser, &tokenizer);
         if (status != CR_OK || !tokenizer) {

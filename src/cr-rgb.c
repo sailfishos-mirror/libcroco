@@ -3,8 +3,6 @@
 /*
  * This file is part of The Croco Library
  *
- * Copyright (C) 2002-2003 Dodji Seketeli <dodji@seketeli.org>
- *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of version 2.1 of the GNU Lesser General Public
  * License as published by the Free Software Foundation.
@@ -18,11 +16,10 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
  * USA
+ * 
+ * See COPYRIGHTS file for copyrights information.
  */
 
-/*
- *$Id$
- */
 
 #include <stdio.h>
 #include <string.h>
@@ -378,7 +375,7 @@ cr_rgb_set_from_name (CRRgb * a_this, const guchar * a_color_name)
         if (i < sizeof (gv_standard_colors))
                 status = CR_OK;
         else
-                status = CR_UNKNOWN_TYPE_ERROR;
+               status = CR_UNKNOWN_TYPE_ERROR;
 
         return status;
 }

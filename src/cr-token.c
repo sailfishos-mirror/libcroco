@@ -53,6 +53,13 @@ cr_token_clear (CRToken * a_this)
         case CHARSET_SYM_TK:
         case IMPORT_SYM_TK:
         case IMPORTANT_SYM_TK:
+        case SEMICOLON_TK:
+        case NO_TK:
+        case DELIM_TK:
+        case CBO_TK:
+        case CBC_TK:
+        case BO_TK:
+        case BC_TK:
                 break;
 
         case STRING_TK:
@@ -61,7 +68,7 @@ cr_token_clear (CRToken * a_this)
         case URI_TK:
         case FUNCTION_TK:
         case COMMENT_TK:
-        case VENDOR_SPECIFIC_IDENT_TK:
+        case ATKEYWORD_TK:
                 if (a_this->u.str) {
                         g_string_free (a_this->u.str, TRUE);
                         a_this->u.str = NULL;
@@ -76,6 +83,8 @@ cr_token_clear (CRToken * a_this)
         case FREQ_TK:
         case PERCENTAGE_TK:
         case NUMBER_TK:
+        case PO_TK:
+        case PC_TK:
                 if (a_this->u.num) {
                         cr_num_destroy (a_this->u.num);
                         a_this->u.num = NULL;
@@ -95,11 +104,19 @@ cr_token_clear (CRToken * a_this)
 
                 break;
 
+        case RGB_TK:
+                if (a_this->u.rgb) {
+                        cr_rgb_destroy (a_this->u.rgb) ;
+                        a_this->u.rgb = NULL ;
+                }
+                break ;
+
         case UNICODERANGE_TK:
                 /*not supported yet. */
                 break;
 
         default:
+                cr_utils_trace_info ("I don't know how to clear this token\n") ;
                 break;
         }
 
@@ -265,18 +282,6 @@ cr_token_set_ident (CRToken * a_this, GString * a_ident)
         return CR_OK;
 }
 
-enum CRStatus
-cr_token_set_vendor_specific_ident (CRToken * a_this, GString * a_ident)
-{
-        g_return_val_if_fail (a_this, CR_BAD_PARAM_ERROR);
-
-        cr_token_clear (a_this);
-
-        a_this->type = VENDOR_SPECIFIC_IDENT_TK;
-
-        a_this->u.str = a_ident;
-        return CR_OK;
-}
 
 enum CRStatus
 cr_token_set_function (CRToken * a_this, GString * a_fun_name)

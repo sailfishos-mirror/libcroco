@@ -144,11 +144,12 @@ lang_pseudo_class_handler (CRSelEng * a_this,
                                  a_sel->content.pseudo->extra->len)) {
                         result = TRUE;
                 }
+                if (val) {
+                        xmlFree (val);
+                        val = NULL;
+                }
         }
-        if (val) {
-                xmlFree (val);
-                val = NULL;
-        }
+
         return result;
 }
 
@@ -222,18 +223,22 @@ class_add_sel_matches_node (CRAdditionalSel * a_add_sel, xmlNode * a_node)
 
         if (xmlHasProp (a_node, "class")) {
                 klass = xmlGetProp (a_node, "class");
-                for (cur = klass; *cur; cur++) {
-                        while (cr_utils_is_white_space (*cur) == TRUE && *cur)
+                for (cur = klass; cur && *cur; cur++) {
+                        while (cur && *cur
+                               && cr_utils_is_white_space (*cur) 
+                               == TRUE)
                                 cur++;
                         if (!*cur)
                                 break;
                         if (!strncmp (cur, a_add_sel->content.class_name->str,
                                       a_add_sel->content.class_name->len)) {
                                 cur += a_add_sel->content.class_name->len;
-                                if (!*cur
+                                if ((cur && !*cur)
                                     || cr_utils_is_white_space (*cur) == TRUE)
                                         result = TRUE;
                         }
+                        if (cur && !*cur)
+                                break ;
                 }
         }
 
@@ -1757,14 +1762,16 @@ cr_sel_eng_destroy (CRSelEng * a_this)
 {
         g_return_if_fail (a_this);
 
-        if (PRIVATE (a_this)) {
-                g_free (PRIVATE (a_this));
-                PRIVATE (a_this) = NULL;
+        if (!PRIVATE (a_this))
+                goto end ;
+        if (PRIVATE (a_this)->pcs_handlers) {
+                cr_sel_eng_unregister_all_pseudo_class_sel_handlers
+                        (a_this) ;
+                PRIVATE (a_this)->pcs_handlers = NULL ;
         }
-        /*
-         *FIXME:
-         *unregister all the pseudo class sel handlers.
-         */
+        g_free (PRIVATE (a_this));
+        PRIVATE (a_this) = NULL;
+ end:
         if (a_this) {
                 g_free (a_this);
         }
