@@ -603,17 +603,55 @@ cr_declaration_to_string (CRDeclaration *a_this,
 }
 
 /**
+ *Serializes the declaration list into a string
+ *@param a_this the current instance of #CRDeclaration.
+ *@param a_indent the number of indentation white char
+ *to put before the actual serialisation.
+ */
+guchar *
+cr_declaration_list_to_string (CRDeclaration *a_this,
+			       gulong a_indent)
+{
+	CRDeclaration *cur = NULL ;
+	GString *stringue = NULL ;
+	guchar *str = NULL, *result = NULL ;
+
+	g_return_val_if_fail (a_this, NULL) ;
+
+	stringue = g_string_new (NULL) ;
+
+	for (cur = a_this ; cur ; cur = cur->next)
+	{
+		str = cr_declaration_to_string (cur, a_indent) ;
+		if (str)
+		{
+			g_string_append_printf (stringue, "%s;", str) ;
+			g_free (str) ;
+		}
+		else
+			break;
+	}
+	if (stringue && stringue->str)
+	{
+		result = stringue->str ;
+		g_string_free (stringue, FALSE) ;
+	}
+
+	return result ;
+}
+
+/**
  *Return the number of properties in the declaration;
  *@param a_this the current instance of #CRDeclaration.
  *@return number of properties in the declaration list.
  */
-int
+gint
 cr_declaration_nr_props (CRDeclaration *a_this)
 {
 	CRDeclaration *cur = NULL ;
 	int nr = 0;
 
-	g_return_if_fail (a_this) ;
+	g_return_val_if_fail (a_this, -1) ;
 
 	for (cur = a_this ; cur ; cur = cur->next)
 		nr ++;
@@ -633,7 +671,7 @@ cr_declaration_get_from_list (CRDeclaration *a_this, int itemnr)
 	CRDeclaration *cur = NULL ;
 	int nr = 0;
 
-	g_return_if_fail (a_this) ;
+	g_return_val_if_fail (a_this, NULL) ;
 
 	for (cur = a_this ; cur ; cur = cur->next)
 		if (nr++ == itemnr)
@@ -652,8 +690,8 @@ cr_declaration_get_by_prop_name (CRDeclaration *a_this, const guchar *a_prop)
 {
 	CRDeclaration *cur = NULL ;
 
-	g_return_if_fail (a_this) ;
-	g_return_if_fail (a_prop) ;
+	g_return_val_if_fail (a_this, NULL) ;
+	g_return_val_if_fail (a_prop, NULL) ;
 
 	for (cur = a_this ; cur ; cur = cur->next)
 		if (!strcmp (cur->property->str, a_prop))

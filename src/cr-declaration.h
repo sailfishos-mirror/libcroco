@@ -112,6 +112,9 @@ cr_declaration_get_by_prop_name (CRDeclaration *a_this, const guchar *a_str) ;
 guchar *
 cr_declaration_to_string (CRDeclaration *a_this,
 			  gulong a_indent) ;
+guchar *
+cr_declaration_list_to_string (CRDeclaration *a_this,
+			       gulong a_indent) ;
 void 
 cr_declaration_ref (CRDeclaration *a_this) ;
 

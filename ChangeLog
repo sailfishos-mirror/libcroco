@@ -1,5 +1,13 @@
 2004-02-14  Dodji Seketeli  <dodji@gnome.org>
 
+	* src/cr-declaration.[ch]: applied a patch from
+	Rob BUIS<rwlbuis@xs4all.nl> that does a bunch of cleanup and
+	fixes. It also adds the new cr_declaration_list_to_string() api
+	entry point.
+	* AUTHORS: updated this
+
+2004-02-14  Dodji Seketeli  <dodji@gnome.org>
+
 	* src/cr-declaration.[ch]:
 	(cr_declaration_nr_props),
 	(cr_declaration_get_from_list),
