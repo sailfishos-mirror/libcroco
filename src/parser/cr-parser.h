@@ -111,6 +111,9 @@ enum CRStatus
 cr_parser_parse_declaration (CRParser *a_this, GString **a_property,
                              CRTerm **a_expr) ;
 enum CRStatus
+cr_parser_parse_statement_core (CRParser *a_this) ;
+
+enum CRStatus
 cr_parser_parse_ruleset (CRParser *a_this) ;
 
 enum CRStatus

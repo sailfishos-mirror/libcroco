@@ -366,9 +366,6 @@ static enum CRStatus
 cr_parser_parse_ruleset_core (CRParser *a_this) ;
 
 static enum CRStatus
-cr_parser_parse_statement_core (CRParser *a_this) ;
-
-static enum CRStatus
 cr_parser_parse_selector_core (CRParser *a_this) ;
 
 static enum CRStatus
@@ -1165,65 +1162,6 @@ cr_parser_parse_stylesheet_core (CRParser *a_this)
 
         cr_parser_dump_err_stack (a_this, TRUE) ;
 
-        if (token) 
-        {
-                cr_token_destroy (token) ;
-                token = NULL ;
-        }
-
-        cr_tknzr_set_cur_pos (PRIVATE (a_this)->tknzr, &init_pos) ;
-
-        return status ;
-}
-
-/**
- *Parses a statement as defined by the css core grammar in
- *chapter 4.1 of the css2 spec.
- *statement   : ruleset | at-rule;
- *@param a_this the current instance of #CRParser.
- *@return CR_OK upon successfull completion, an error code otherwise.
- */
-static enum CRStatus
-cr_parser_parse_statement_core (CRParser *a_this)
-{
-        CRToken *token = NULL ;
-        CRInputPos init_pos ;
-        enum CRStatus status = CR_ERROR ;
-
-        g_return_val_if_fail (a_this && PRIVATE (a_this),
-                              CR_BAD_PARAM_ERROR) ;
-
-        RECORD_INITIAL_POS (a_this, &init_pos) ;
-
-        status = cr_tknzr_get_next_token (PRIVATE (a_this)->tknzr,
-                                          &token) ;
-        ENSURE_PARSING_COND (status == CR_OK && token) ;
-        
-        switch (token->type)
-        {
-        case ATKEYWORD_TK:
-        case IMPORT_SYM_TK:
-        case PAGE_SYM_TK:
-        case MEDIA_SYM_TK:
-        case FONT_FACE_SYM_TK:
-        case CHARSET_SYM_TK:
-                cr_tknzr_unget_token (PRIVATE (a_this)->tknzr, token) ;
-                token = NULL ;
-                status = cr_parser_parse_atrule_core (a_this) ;
-                CHECK_PARSING_STATUS (status, TRUE) ;
-                break ;
-
-        default:
-                cr_tknzr_unget_token (PRIVATE (a_this)->tknzr, token) ;
-                token = NULL ;
-                status = cr_parser_parse_ruleset_core (a_this) ;
-                cr_parser_clear_errors (a_this) ;
-                CHECK_PARSING_STATUS (status, TRUE) ;
-        }
-
-        return CR_OK ;
-
- error:
         if (token) 
         {
                 cr_token_destroy (token) ;
@@ -3905,6 +3843,66 @@ cr_parser_parse_declaration (CRParser *a_this, GString **a_property,
 
         cr_tknzr_set_cur_pos (PRIVATE (a_this)->tknzr, &init_pos) ;
         
+        return status ;
+}
+
+/**
+ *Parses a statement as defined by the css core grammar in
+ *chapter 4.1 of the css2 spec.
+ *statement   : ruleset | at-rule;
+ *@param a_this the current instance of #CRParser.
+ *@return CR_OK upon successfull completion, an error code otherwise.
+ */
+enum CRStatus
+cr_parser_parse_statement_core (CRParser *a_this)
+{
+        CRToken *token = NULL ;
+        CRInputPos init_pos ;
+        enum CRStatus status = CR_ERROR ;
+
+        g_return_val_if_fail (a_this && PRIVATE (a_this),
+                              CR_BAD_PARAM_ERROR) ;
+
+        RECORD_INITIAL_POS (a_this, &init_pos) ;
+
+        status = cr_tknzr_get_next_token (PRIVATE (a_this)->tknzr,
+                                          &token) ;
+
+        ENSURE_PARSING_COND (status == CR_OK && token) ;
+
+        switch (token->type)
+        {
+        case ATKEYWORD_TK:
+        case IMPORT_SYM_TK:
+        case PAGE_SYM_TK:
+        case MEDIA_SYM_TK:
+        case FONT_FACE_SYM_TK:
+        case CHARSET_SYM_TK:
+                cr_tknzr_unget_token (PRIVATE (a_this)->tknzr, token) ;
+                token = NULL ;
+                status = cr_parser_parse_atrule_core (a_this) ;
+                CHECK_PARSING_STATUS (status, TRUE) ;
+                break ;
+
+        default:
+                cr_tknzr_unget_token (PRIVATE (a_this)->tknzr, token) ;
+                token = NULL ;
+                status = cr_parser_parse_ruleset_core (a_this) ;
+                cr_parser_clear_errors (a_this) ;
+                CHECK_PARSING_STATUS (status, TRUE) ;
+        }
+
+        return CR_OK ;
+
+ error:
+        if (token) 
+        {
+                cr_token_destroy (token) ;
+                token = NULL ;
+        }
+
+        cr_tknzr_set_cur_pos (PRIVATE (a_this)->tknzr, &init_pos) ;
+
         return status ;
 }
 

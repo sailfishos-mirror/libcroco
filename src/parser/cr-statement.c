@@ -96,10 +96,10 @@ parse_font_face_property_cb (CRDocHandler *a_this,
 	}
 	name = NULL ;
 
-	stmt->kind.font_face_rule->decls_list = 
-		cr_declaration_append (stmt->kind.font_face_rule->decls_list,
+	stmt->kind.font_face_rule->decl_list = 
+		cr_declaration_append (stmt->kind.font_face_rule->decl_list,
 				       decl) ;
-	if (!stmt->kind.font_face_rule->decls_list)
+	if (!stmt->kind.font_face_rule->decl_list)
 		goto error ;
 	decl = NULL ;
 
@@ -167,10 +167,10 @@ parse_page_property_cb (CRDocHandler *a_this,
 	decl = cr_declaration_new (stmt, name, a_expression) ;
 	g_return_if_fail (decl) ;
 
-	stmt->kind.page_rule->decls_list = 
-		cr_declaration_append (stmt->kind.page_rule->decls_list,
+	stmt->kind.page_rule->decl_list = 
+		cr_declaration_append (stmt->kind.page_rule->decl_list,
 				       decl) ;
-	g_return_if_fail (stmt->kind.page_rule->decls_list) ;
+	g_return_if_fail (stmt->kind.page_rule->decl_list) ;
 }
 
 static void
@@ -439,11 +439,11 @@ cr_statement_clear (CRStatement *a_this)
 		if (!a_this->kind.page_rule)
 			return ;
 
-		if (a_this->kind.page_rule->decls_list)
+		if (a_this->kind.page_rule->decl_list)
 		{
 			cr_declaration_destroy
-				(a_this->kind.page_rule->decls_list) ;
-			a_this->kind.page_rule->decls_list = NULL ;
+				(a_this->kind.page_rule->decl_list) ;
+			a_this->kind.page_rule->decl_list = NULL ;
 		}
 		if (a_this->kind.page_rule->name)
 		{
@@ -481,11 +481,11 @@ cr_statement_clear (CRStatement *a_this)
 		if (!a_this->kind.font_face_rule)
 			return ;
 
-		if (a_this->kind.font_face_rule->decls_list)
+		if (a_this->kind.font_face_rule->decl_list)
 		{
 			cr_declaration_unref 
-				(a_this->kind.font_face_rule->decls_list);
-			a_this->kind.font_face_rule->decls_list = NULL ;
+				(a_this->kind.font_face_rule->decl_list);
+			a_this->kind.font_face_rule->decl_list = NULL ;
 		}
 		g_free (a_this->kind.font_face_rule) ;
 		a_this->kind.font_face_rule = NULL ;
@@ -553,7 +553,7 @@ cr_statement_dump_font_face_rule (CRStatement *a_this , FILE *a_fp,
 	g_return_if_fail (a_this 
 			  && a_this->type == AT_FONT_FACE_RULE_STMT) ;
 	
-	if (a_this->kind.font_face_rule->decls_list)
+	if (a_this->kind.font_face_rule->decl_list)
 	{
 		cr_utils_dump_n_chars (' ', a_fp, a_indent) ;
 
@@ -562,7 +562,7 @@ cr_statement_dump_font_face_rule (CRStatement *a_this , FILE *a_fp,
 		
 		fprintf (a_fp,"@font-face {\n") ;
 		cr_declaration_dump 
-			(a_this->kind.font_face_rule->decls_list,
+			(a_this->kind.font_face_rule->decl_list,
 			 a_fp, a_indent + DECLARATION_INDENT_NB, TRUE) ;
 		fprintf (a_fp,"\n}") ;
 	}
@@ -649,11 +649,11 @@ cr_statement_dump_page (CRStatement *a_this, FILE *a_fp, gulong a_indent)
 		}
 	}
 
-	if (a_this->kind.page_rule->decls_list)
+	if (a_this->kind.page_rule->decl_list)
 	{
 		fprintf (a_fp," {\n") ;
 		cr_declaration_dump 
-			(a_this->kind.page_rule->decls_list,
+			(a_this->kind.page_rule->decl_list,
 			 a_fp, a_indent + DECLARATION_INDENT_NB, TRUE) ;
 		fprintf (a_fp,"\n}\n") ;
 	}
@@ -766,6 +766,47 @@ cr_statement_dump_import_rule (CRStatement *a_this, FILE *a_fp,
 /*******************
  *public functions
  ******************/
+
+/**
+ *Tries to parse a buffer and says whether if the content of the buffer
+ *is a css statement as defined by the "Core CSS Grammar" (chapter 4 of the
+ *css spec) or not.
+ *@param a_buf the buffer to parse.
+ *@param a_encoding the character encoding of a_buf.
+ *@return TRUE if the buffer parses against the core grammar, false otherwise.
+ */
+gboolean
+cr_statement_does_buf_parses_against_core (const guchar *a_buf,
+                                           enum CREncoding a_encoding)
+{
+        CRParser *parser = NULL ;
+        enum CRStatus status = CR_OK ;
+        gboolean result = FALSE ;
+
+        parser = cr_parser_new_from_buf (a_buf, strlen (a_buf),
+                                         a_encoding, FALSE) ;
+        g_return_val_if_fail (parser, FALSE) ;
+
+        status = cr_parser_set_use_core_grammar (parser, TRUE) ;
+        if (status != CR_OK)
+        {
+                goto cleanup ;
+        }
+        
+        status = cr_parser_parse_statement_core (parser) ;
+        if (status == CR_OK)
+        {
+                result = TRUE ;
+        }
+
+ cleanup:
+        if (parser)
+        {
+                cr_parser_destroy (parser) ;
+        }
+
+        return result ;
+}
 
 /**
  *Parses a buffer that contains a css statement and returns 
@@ -1295,7 +1336,7 @@ cr_statement_new_at_page_rule (CRStyleSheet *a_sheet,
 	memset (result->kind.page_rule, 0, sizeof (CRAtPageRule)) ;
 	if (a_decl_list)
 	{
-		result->kind.page_rule->decls_list = a_decl_list;
+		result->kind.page_rule->decl_list = a_decl_list;
 		cr_declaration_ref (a_decl_list) ;
 	}
 	result->kind.page_rule->name = a_name ;
@@ -1510,7 +1551,7 @@ cr_statement_new_at_font_face_rule (CRStyleSheet *a_sheet,
 	memset (result->kind.font_face_rule, 0, 
 		sizeof (CRAtFontFaceRule));
 	
-	result->kind.font_face_rule->decls_list = a_font_decls ;
+	result->kind.font_face_rule->decl_list = a_font_decls ;
 	if (a_sheet)
 		cr_statement_set_parent_sheet (result, a_sheet) ;
 
@@ -1732,6 +1773,28 @@ cr_statement_ruleset_set_sel_list (CRStatement *a_this,
 }
 
 /**
+ *Gets a pointer to the list of declaration contained
+ *in the ruleset statement.
+ *@param a_this the current instance of #CRStatement.
+ *@a_decl_list out parameter. A pointer to the the returned
+ *list of declaration. Must not be NULL.
+ *@return CR_OK upon successfull completion, an error code if something
+ *bad happened.
+ */
+enum CRStatus
+cr_statement_ruleset_get_declarations (CRStatement *a_this,
+                                       CRDeclaration **a_decl_list)
+{
+        g_return_val_if_fail (a_this 
+                              && a_this->type == RULESET_STMT
+                              && a_this->kind.ruleset
+                              && a_decl_list,
+			      CR_BAD_PARAM_ERROR) ;
+
+        *a_decl_list = a_this->kind.ruleset->decl_list ;
+}
+
+/**
  *Gets a pointer to the selector list contained in
  *the current ruleset statement.
  *@param a_this the current ruleset statement.
@@ -1936,12 +1999,12 @@ cr_statement_at_page_rule_set_declarations (CRStatement *a_this,
 			      && a_this->kind.page_rule,
 			      CR_BAD_PARAM_ERROR) ;
 
-	if (a_this->kind.page_rule->decls_list)
+	if (a_this->kind.page_rule->decl_list)
 	{
-		cr_declaration_unref (a_this->kind.page_rule->decls_list);
+		cr_declaration_unref (a_this->kind.page_rule->decl_list);
 	}
 
-	a_this->kind.page_rule->decls_list = a_decl_list ;
+	a_this->kind.page_rule->decl_list = a_decl_list ;
 
 	if (a_decl_list)
 	{
@@ -1968,7 +2031,7 @@ cr_statement_at_page_rule_get_declarations (CRStatement *a_this,
 			      && a_this->kind.page_rule,
 			      CR_BAD_PARAM_ERROR) ;
 
-	*a_decl_list = a_this->kind.page_rule->decls_list ;
+	*a_decl_list = a_this->kind.page_rule->decl_list ;
 
 	return CR_OK ;
 }
@@ -2037,13 +2100,13 @@ cr_statement_at_font_face_rule_set_decls (CRStatement *a_this,
 			      && a_this->kind.font_face_rule,
 			      CR_BAD_PARAM_ERROR) ;
 
-	if (a_this->kind.font_face_rule->decls_list)
+	if (a_this->kind.font_face_rule->decl_list)
 	{
 		cr_declaration_unref 
-			(a_this->kind.font_face_rule->decls_list) ;
+			(a_this->kind.font_face_rule->decl_list) ;
 	}
 
-	a_this->kind.font_face_rule->decls_list = a_decls;
+	a_this->kind.font_face_rule->decl_list = a_decls;
 	cr_declaration_ref (a_decls) ;
 	
 	return CR_OK ;
@@ -2067,7 +2130,7 @@ cr_statement_at_font_face_rule_get_decls (CRStatement *a_this,
 			      && a_this->kind.font_face_rule,
 			      CR_BAD_PARAM_ERROR) ;
 
-	*a_decls = a_this->kind.font_face_rule->decls_list ;
+	*a_decls = a_this->kind.font_face_rule->decl_list ;
 	
 	return CR_OK ;
 }
@@ -2094,15 +2157,15 @@ cr_statement_at_font_face_rule_add_decl (CRStatement *a_this,
 			      CR_BAD_PARAM_ERROR) ;
 
 	decls = cr_declaration_append2 
-		(a_this->kind.font_face_rule->decls_list,
+		(a_this->kind.font_face_rule->decl_list,
 		 a_prop, a_value) ;
 
 	g_return_val_if_fail (decls, CR_ERROR) ;
 		
-	if (a_this->kind.font_face_rule->decls_list == NULL)
+	if (a_this->kind.font_face_rule->decl_list == NULL)
 		cr_declaration_ref (decls) ;
 
-	a_this->kind.font_face_rule->decls_list = decls ;
+	a_this->kind.font_face_rule->decl_list = decls ;
 
 	return CR_OK ;
 }

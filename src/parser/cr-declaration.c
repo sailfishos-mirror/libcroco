@@ -242,6 +242,89 @@ cr_declaration_append (CRDeclaration *a_this, CRDeclaration *a_new)
 }
 
 /**
+ *Unlinks the declaration from the declaration list.
+ *@param a_decl the declaration to unlink.
+ *@return a pointer to the unlinked declaration in
+ *case of a successfull completion, NULL otherwise.
+ */
+CRDeclaration *
+cr_declaration_unlink (CRDeclaration * a_decl)
+{
+	CRDeclaration *result = a_decl ;
+
+	g_return_val_if_fail (result, NULL) ;
+
+	/*
+	 *some sanity checks first
+	 */
+	if (a_decl->prev)
+	{
+		g_return_val_if_fail (a_decl->prev->next == a_decl, NULL) ;
+		
+	}
+	if (a_decl->next)
+	{
+		g_return_val_if_fail (a_decl->next->prev == a_decl, NULL) ;
+	}
+
+	/*
+	 *now, the real unlinking job.
+	 */
+	if (a_decl->prev)
+	{
+		a_decl->prev->next = a_decl->next ;
+	}
+	if (a_decl->next)
+	{
+		a_decl->next->prev = a_decl->prev ;
+	}
+	if (a_decl->parent_statement)
+	{
+		CRDeclaration **children_decl_ptr = NULL ;
+		switch (a_decl->parent_statement->type)
+		{
+		case RULESET_STMT:
+			if (a_decl->parent_statement->kind.ruleset)
+			{
+				children_decl_ptr =
+					&a_decl->parent_statement->
+					kind.ruleset->decl_list ;
+			}
+			
+			break ;
+
+		case AT_FONT_FACE_RULE_STMT:
+			if (a_decl->parent_statement->kind.font_face_rule)
+			{
+				children_decl_ptr =
+					&a_decl->parent_statement->
+					kind.font_face_rule->decl_list ;
+			}
+			break ;
+		case AT_PAGE_RULE_STMT:
+			if (a_decl->parent_statement->kind.page_rule)
+			{
+				children_decl_ptr =
+					&a_decl->parent_statement->
+					kind.page_rule->decl_list ;
+			}
+
+		default:
+			break ;
+		}
+		if (children_decl_ptr && *children_decl_ptr)
+			*children_decl_ptr = 
+				(*children_decl_ptr)->next ;
+	}
+
+	a_decl->next = NULL ;
+	a_decl->prev = NULL ;
+	a_decl->parent_statement = NULL ;
+
+	return result ;
+}
+
+/**
  *prepends a declaration to the current declaration list.
  *@param a_this the current declaration list.
  *@param a_new the declaration to prepend.

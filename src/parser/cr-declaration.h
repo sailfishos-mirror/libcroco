@@ -82,11 +82,14 @@ CRDeclaration *
 cr_declaration_append (CRDeclaration *a_this, CRDeclaration *a_new) ;
 
 CRDeclaration *
+cr_declaration_append2 (CRDeclaration *a_this, GString *a_prop,
+			CRTerm *a_value) ;
+
+CRDeclaration *
 cr_declaration_prepend (CRDeclaration *a_this, CRDeclaration *a_new) ;
 
 CRDeclaration *
-cr_declaration_append2 (CRDeclaration *a_this, GString *a_prop,
-			CRTerm *a_value) ;
+cr_declaration_unlink (CRDeclaration * a_decl) ;
 
 void
 cr_declaration_dump (CRDeclaration *a_this, FILE *a_fp, glong a_indent,
@@ -95,7 +98,6 @@ cr_declaration_dump (CRDeclaration *a_this, FILE *a_fp, glong a_indent,
 guchar *
 cr_declaration_to_string (CRDeclaration *a_this,
 			  gulong a_indent) ;
-
 void 
 cr_declaration_ref (CRDeclaration *a_this) ;
 

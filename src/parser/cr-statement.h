@@ -118,7 +118,7 @@ typedef struct _CRAtPageRule CRAtPageRule ;
 struct _CRAtPageRule
 {
 	/**a list of instances of #CRDeclaration*/
-	CRDeclaration *decls_list ;
+	CRDeclaration *decl_list ;
 
 	/**page selector. Is a pseudo selector*/
 	GString *name ;
@@ -137,7 +137,7 @@ typedef struct _CRAtFontFaceRule CRAtFontFaceRule ;
 struct _CRAtFontFaceRule
 {
 	/*a list of instanaces of #CRDeclaration*/
-	CRDeclaration *decls_list ;
+	CRDeclaration *decl_list ;
 } ;
 
 
@@ -232,10 +232,12 @@ struct _CRStatement
 } ;
 
 
+gboolean
+cr_statement_does_buf_parses_against_core (const guchar *a_buf,
+                                           enum CREncoding a_encoding) ;
 CRStatement *
 cr_statement_parse_from_buf (const guchar *a_buf,
 			     enum CREncoding a_encoding) ;
-
 CRStatement*
 cr_statement_new_ruleset (CRStyleSheet *a_sheet,
                           CRSelector *a_sel_list, 
@@ -319,6 +321,10 @@ cr_statement_ruleset_get_sel_list (CRStatement *a_this,
 enum CRStatus
 cr_statement_ruleset_set_decl_list (CRStatement *a_this,
 				    CRDeclaration *a_list) ;
+
+enum CRStatus
+cr_statement_ruleset_get_declarations (CRStatement *a_this,
+                                       CRDeclaration **a_decl_list) ;
 
 enum CRStatus
 cr_statement_ruleset_append_decl2 (CRStatement *a_this,

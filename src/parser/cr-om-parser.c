@@ -728,7 +728,7 @@ property (CRDocHandler *a_this,
 
         case AT_FONT_FACE_RULE_STMT:
                 decl2 = cr_declaration_append 
-                        (ctxt->cur_stmt->kind.font_face_rule->decls_list,
+                        (ctxt->cur_stmt->kind.font_face_rule->decl_list,
                          decl) ;
                 if (!decl2)
                 {
@@ -737,12 +737,12 @@ property (CRDocHandler *a_this,
                                 ("Could not append decl to ruleset");
                         goto error ;
                 }
-                ctxt->cur_stmt->kind.font_face_rule->decls_list = decl2 ;
+                ctxt->cur_stmt->kind.font_face_rule->decl_list = decl2 ;
                 decl = NULL ; decl2 = NULL ;
                 break ;
         case AT_PAGE_RULE_STMT:
                 decl2 = cr_declaration_append 
-                        (ctxt->cur_stmt->kind.page_rule->decls_list,
+                        (ctxt->cur_stmt->kind.page_rule->decl_list,
                          decl) ;
                 if (!decl2)
                 {
@@ -751,7 +751,7 @@ property (CRDocHandler *a_this,
                                 ("Could not append decl to ruleset");
                         goto error ;
                 }
-                ctxt->cur_stmt->kind.page_rule->decls_list = decl2 ;
+                ctxt->cur_stmt->kind.page_rule->decl_list = decl2 ;
                 decl = NULL ; decl2 = NULL ;
                 break ;
 
