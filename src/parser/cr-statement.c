@@ -1134,6 +1134,8 @@ cr_statement_at_page_rule_parse_from_buf (const guchar *a_buf,
  *Creates a new instance of #CRStatement of type
  *#CRAtCharsetRule.
  *@param a_charset the string representing the charset.
+ *Note that the newly built instance of #CRStatement becomes
+ *the owner of a_charset. The caller must not free a_charset !!!.
  *@return the newly built instance of #CRStatement or NULL
  *if an error arises.
  */
@@ -1143,7 +1145,7 @@ cr_statement_new_at_charset_rule (CRStyleSheet *a_sheet,
 {
 	CRStatement * result = NULL ;
 
-	g_return_val_if_fail (a_sheet, NULL) ;
+	g_return_val_if_fail (a_charset, NULL) ;
 
 	result = g_try_malloc (sizeof (CRStatement)) ;
 
@@ -1170,6 +1172,59 @@ cr_statement_new_at_charset_rule (CRStyleSheet *a_sheet,
 	cr_statement_set_parent_sheet (result, a_sheet) ;
 
 	return result ;
+}
+
+/**
+ *Parses a buffer that contains an '@charset' rule and
+ *creates an instance of #CRStatement of type AT_CHARSET_RULE_STMT.
+ *@param a_buf the buffer to parse.
+ *@param the character encoding of the buffer.
+ *@return the newly built instance of #CRStatement.
+ */
+CRStatement *
+cr_statement_at_charset_rule_parse_from_buf (const guchar *a_buf,
+					     enum CREncoding a_encoding) 
+{
+	enum CRStatus status = CR_OK ;
+	CRParser *parser = NULL ;
+	CRStatement *result = NULL ;
+	GString *charset = NULL ;
+
+	g_return_val_if_fail (a_buf, NULL) ;	
+	
+	parser = cr_parser_new_from_buf (a_buf, strlen (a_buf),
+					 a_encoding, FALSE) ;
+	if (!parser)
+	{
+		cr_utils_trace_info ("Instanciation of the parser failed.") ;
+		goto cleanup ;
+	}
+	
+	/*Now, invoke the parser to parse the "@charset production"*/
+	cr_parser_try_to_skip_spaces_and_comments (parser) ;
+	if (status != CR_OK)
+		goto cleanup ;
+	status = cr_parser_parse_charset (parser, &charset) ;
+	if (status != CR_OK || !charset)
+		goto cleanup ;
+
+	result = cr_statement_new_at_charset_rule (NULL, charset) ;
+	if (result)
+		charset = NULL ;
+
+ cleanup:
+
+	if (parser)
+	{
+		cr_parser_destroy (parser) ;
+		parser = NULL ;
+	}
+	if (charset)
+	{
+		g_string_free (charset, TRUE) ;
+	}
+
+	return result  ;
 }
 
 /**

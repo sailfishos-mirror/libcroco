@@ -256,6 +256,9 @@ CRStatement *
 cr_statement_new_at_charset_rule (CRStyleSheet *a_sheet,
                                   GString *a_charset) ;
 CRStatement *
+cr_statement_at_charset_rule_parse_from_buf (const guchar *a_buf,
+					     enum CREncoding a_encoding);
+CRStatement *
 cr_statement_at_media_rule_parse_from_buf (const guchar *a_buf,
 					   enum CREncoding a_enc) ;
 

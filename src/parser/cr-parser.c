@@ -4781,7 +4781,8 @@ cr_parser_parse_page (CRParser *a_this)
  *
  *@param a_this the "this pointer" of the current instance of #CRParser.
  *@param a_value out parameter. The actual parsed value of the charset 
- *declararation.
+ *declararation. Note that for safety check reasons, *a_value must be
+ *set to NULL.
  *@return CR_OK upon successfull completion, an error code otherwise.
  */
 enum CRStatus
@@ -4833,6 +4834,7 @@ cr_parser_parse_charset (CRParser *a_this, GString **a_value)
         if (charset_str)
         {
                 *a_value = charset_str ;
+                charset_str = NULL ;
         }
 
         PRIVATE (a_this)->state = CHARSET_PARSED_STATE ;
@@ -4850,6 +4852,12 @@ cr_parser_parse_charset (CRParser *a_this, GString **a_value)
         {
                 g_string_free (*a_value, TRUE) ;
                 *a_value = NULL ;
+        }
+
+        if (charset_str)
+        {
+                g_string_free (charset_str, TRUE) ;
+                charset_str = NULL ;
         }
 
         cr_tknzr_set_cur_pos (PRIVATE (a_this)->tknzr, 

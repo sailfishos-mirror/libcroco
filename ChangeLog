@@ -1,12 +1,22 @@
-2003-06-18  dodji  <dodji@seketeli.org>
+2003-06-18  Dodji Seketeli  <dodji@seketeli.org>
 
+	* tests/test4-main.c: updated the test routine to test
+	cr_statement_at_charset_rule_parse_from_buf().
+	
+	* src/parser/cr-statement.[ch]: added a new
+	cr_statement_at_charset_rule_parse_from_buf() method to
+	to create an "@charset" statement from a buffer text content.
+
+	* src/parser/cr-parser.c:Fixeds a small possibility of memleak
+	in cr_parser_parse_charse()	
+	
 	* tests/test4-main.c: fixed a small typo in the "@page" rule
 	embedded in gv_at_page_buf.
 	
 	* src/parser/cr-parser.c: fixed a small bug in the
 	cr_parser_parse_page () function.
 
-2003-06-17  dodji  <dodji@seketeli.org>
+2003-06-17  Dodji Seketeli <dodji@seketeli.org>
 
 	* tests/test4-main.c: added test_cr_statement_at_page_rule_parse ()
 	to test the new cr_statement_at_page_rule_parse_from_buf() function.
