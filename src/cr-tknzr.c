@@ -3471,8 +3471,8 @@ cr_tknzr_parse_token (CRTknzr *a_this, enum CRTokenType a_type,
                 case FUNCTION_TK:
                 case COMMENT_TK:
                 case URI_TK:
-                        *((GString**)a_res) = token->str ;
-                        token->str = NULL ;
+                        *((GString**)a_res) = token->u.str ;
+                        token->u.str = NULL ;
                         status = CR_OK ;
                         break ;
 		
@@ -3480,8 +3480,8 @@ cr_tknzr_parse_token (CRTknzr *a_this, enum CRTokenType a_type,
 		case EXS_TK:
                 case PERCENTAGE_TK:
                 case NUMBER_TK:                
-                        *((CRNum**)a_res) = token->num ;
-                        token->num = NULL ;
+                        *((CRNum**)a_res) = token->u.num ;
+                        token->u.num = NULL ;
                         status = CR_OK ;
                         break ;
 
@@ -3491,14 +3491,14 @@ cr_tknzr_parse_token (CRTknzr *a_this, enum CRTokenType a_type,
 		case FREQ_TK:
                         if (token->extra_type == a_et)
                         {
-                                *((CRNum**)a_res) = token->num ;
-                                token->num = NULL ;
+                                *((CRNum**)a_res) = token->u.num ;
+                                token->u.num = NULL ;
                                 status = CR_OK ;
                         }
                         break ;
 
 		case DIMEN_TK:
-                        *((CRNum**)a_res) = token->num ;
+                        *((CRNum**)a_res) = token->u.num ;
                         if (a_extra_res == NULL)
                         {
                                 status = CR_BAD_PARAM_ERROR ;
@@ -3506,13 +3506,13 @@ cr_tknzr_parse_token (CRTknzr *a_this, enum CRTokenType a_type,
                         }
 
                         *((GString**)a_extra_res) = token->dimen ;
-                        token->num = NULL ;
+                        token->u.num = NULL ;
                         token->dimen = NULL ;
                         status = CR_OK ;
                         break ;
 
 		case DELIM_TK:
-                        *((guint32*)a_res) = token->unichar ;
+                        *((guint32*)a_res) = token->u.unichar ;
                         status = CR_OK ;
                         break ;
 

@@ -1,3 +1,11 @@
+2003-04-05  Dodji  <dodji@seketeli.org>
+
+	* src/cr-token.h (struct _CRToken): 
+	applied a patch from Greg Lee <greg@ling.lll.hawaii.edu>,
+	which solves a compilation error under gcc 2.95.3. Basically,
+	it transforms an implicitly defined  union into an explicitly
+	defined one. Modified all the files impacted.
+	
 2003-04-03  Dodji  <dodji@seketeli.org>
 
 	* tests/testctl: can now run one single test. This can also

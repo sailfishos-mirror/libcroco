@@ -42,8 +42,8 @@
 static void
 dump (CRDeclaration *a_this, FILE *a_fp, glong a_indent)
 {
-	g_return_if_fail (a_this) ;
 	guchar *str = NULL, *tmp_str = NULL, *tmp_str2 = NULL;
+	g_return_if_fail (a_this) ;
 
 	if (a_this->property && a_this->property->str)
 	{		

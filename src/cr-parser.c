@@ -1577,7 +1577,7 @@ cr_parser_parse_declaration_core (CRParser *a_this)
         ENSURE_PARSING_COND (status == CR_OK 
                              && token
                              && token->type == DELIM_TK
-                             && token->unichar == ':' ) ;
+                             && token->u.unichar == ':' ) ;
         cr_token_destroy (token) ; token = NULL ;
         cr_parser_try_to_skip_spaces_and_comments (a_this) ;        
         status = cr_parser_parse_value_core (a_this) ;
@@ -1994,8 +1994,8 @@ cr_parser_parse_attribute_selector (CRParser *a_this, CRAttrSel **a_sel)
                              && token 
                              && token->type == IDENT_TK) ;
 
-        result->name = token->str ;
-        token->str = NULL ;
+        result->name = token->u.str ;
+        token->u.str = NULL ;
         cr_token_destroy (token) ;
         token = NULL ;
 
@@ -2016,7 +2016,7 @@ cr_parser_parse_attribute_selector (CRParser *a_this, CRAttrSel **a_sel)
                 result->match_way = DASHMATCH ;
                 goto parse_right_part ;
         }
-        else if (token->type == DELIM_TK && token->unichar == '=')
+        else if (token->type == DELIM_TK && token->u.unichar == '=')
         {
                 result->match_way = EQUALS ;
                 goto parse_right_part ;
@@ -2045,13 +2045,13 @@ cr_parser_parse_attribute_selector (CRParser *a_this, CRAttrSel **a_sel)
 
         if (token->type == IDENT_TK)
         {
-                result->value = token->str ;
-                token->str = NULL ;
+                result->value = token->u.str ;
+                token->u.str = NULL ;
         }
         else if (token->type == STRING_TK)
         {
-                result->value = token->str ;
-                token->str = NULL ;
+                result->value = token->u.str ;
+                token->u.str = NULL ;
         }
         else
         {
@@ -2189,12 +2189,12 @@ cr_parser_parse_term (CRParser *a_this, CRTerm **a_term)
                                           &token) ;
         if (status != CR_OK || !token) goto error ;
 
-        if (token->type == DELIM_TK && token->unichar == '+')
+        if (token->type == DELIM_TK && token->u.unichar == '+')
         {
                 result->unary_op = PLUS_UOP ;
         }
         else if (token->type 
-                 == DELIM_TK && token->unichar == '-')
+                 == DELIM_TK && token->u.unichar == '-')
         {
                 result->unary_op = MINUS_UOP ;
         }
@@ -2207,9 +2207,9 @@ cr_parser_parse_term (CRParser *a_this, CRTerm **a_term)
                 || token->type == PERCENTAGE_TK
                 || token->type == NUMBER_TK)
         {
-                status = cr_term_set_number (result, token->num) ;
+                status = cr_term_set_number (result, token->u.num) ;
                 CHECK_PARSING_STATUS (status, TRUE) ;
-                token->num = NULL ;
+                token->u.num = NULL ;
                 status = CR_OK ;
         }
         else if (token && token->type == FUNCTION_TK)
@@ -2229,27 +2229,27 @@ cr_parser_parse_term (CRParser *a_this, CRTerm **a_term)
         }
         else if (token && token->type == STRING_TK)
         {
-                status = cr_term_set_string (result, token->str) ;
+                status = cr_term_set_string (result, token->u.str) ;
                 CHECK_PARSING_STATUS (status, TRUE) ;
-                token->str = NULL ;
+                token->u.str = NULL ;
         }
         else if (token && token->type == IDENT_TK)
         {
-                status = cr_term_set_ident (result, token->str) ;
+                status = cr_term_set_ident (result, token->u.str) ;
                 CHECK_PARSING_STATUS (status, TRUE) ;
-                token->str = NULL ;
+                token->u.str = NULL ;
         }
         else if (token && token->type == URI_TK)
         {
-                status = cr_term_set_uri (result, token->str) ;
+                status = cr_term_set_uri (result, token->u.str) ;
                 CHECK_PARSING_STATUS (status, TRUE) ;
-                token->str = NULL ;
+                token->u.str = NULL ;
         }
         else if (token && token->type == RGB_TK)
         {
-                status = cr_term_set_rgb (result, token->rgb) ;
+                status = cr_term_set_rgb (result, token->u.rgb) ;
                 CHECK_PARSING_STATUS (status, TRUE) ;
-                token->rgb = NULL ;
+                token->u.rgb = NULL ;
         }
         else if (token && token->type == UNICODERANGE_TK)
         {
@@ -2258,9 +2258,9 @@ cr_parser_parse_term (CRParser *a_this, CRTerm **a_term)
         }
         else if (token && token->type == HASH_TK)
         {
-                status = cr_term_set_hash (result, token->str) ;
+                status = cr_term_set_hash (result, token->u.str) ;
                 CHECK_PARSING_STATUS (status, TRUE) ;
-                token->str = NULL ;
+                token->u.str = NULL ;
         }
         else
         {
@@ -2443,7 +2443,7 @@ cr_parser_parse_simple_selector (CRParser *a_this, CRSimpleSel **a_sel)
         sel = cr_simple_sel_new () ;
         ENSURE_PARSING_COND (sel) ;
 
-        if (token && token->type == DELIM_TK && token->unichar == '*')
+        if (token && token->type == DELIM_TK && token->u.unichar == '*')
         {
                 sel->type_mask |= UNIVERSAL_SELECTOR ;
                 sel->name = g_string_new ("*") ;
@@ -2451,9 +2451,9 @@ cr_parser_parse_simple_selector (CRParser *a_this, CRSimpleSel **a_sel)
         }
         else if (token && token->type == IDENT_TK)
         {
-                sel->name = token->str ;
+                sel->name = token->u.str ;
                 sel->type_mask |= TYPE_SELECTOR ;
-                token->str = NULL ;
+                token->u.str = NULL ;
                 found_sel = TRUE ;
                 
         }
@@ -2492,8 +2492,8 @@ cr_parser_parse_simple_selector (CRParser *a_this, CRSimpleSel **a_sel)
                         add_sel = cr_additional_sel_new_with_type 
                                 (ID_ADD_SELECTOR) ;
 
-                        add_sel->content.id_name = token->str ;
-                        token->str = NULL ;
+                        add_sel->content.id_name = token->u.str ;
+                        token->u.str = NULL ;
                         
                         add_sel_list = 
                                 cr_additional_sel_append 
@@ -2503,7 +2503,7 @@ cr_parser_parse_simple_selector (CRParser *a_this, CRSimpleSel **a_sel)
                 }
                 else if (token 
                          && (token->type == DELIM_TK) 
-                         && (token->unichar == '.'))
+                         && (token->u.unichar == '.'))
                 {
                         cr_token_destroy (token) ;
                         token = NULL ;
@@ -2519,8 +2519,8 @@ cr_parser_parse_simple_selector (CRParser *a_this, CRSimpleSel **a_sel)
                                 add_sel = cr_additional_sel_new_with_type
                                         (CLASS_ADD_SELECTOR) ;
 
-                                add_sel->content.class_name = token->str ;
-                                token->str = NULL ;
+                                add_sel->content.class_name = token->u.str ;
+                                token->u.str = NULL ;
 
                                 add_sel_list = 
                                         cr_additional_sel_append 
@@ -2562,7 +2562,7 @@ cr_parser_parse_simple_selector (CRParser *a_this, CRSimpleSel **a_sel)
                 }
                 else if (token 
                          && (token->type == DELIM_TK)
-                         && (token->unichar == ':'))
+                         && (token->u.unichar == ':'))
                 {
                         CRPseudo *pseudo = NULL ;
 
@@ -2585,14 +2585,14 @@ cr_parser_parse_simple_selector (CRParser *a_this, CRSimpleSel **a_sel)
                         if (token->type == IDENT_TK)
                         {
                                 pseudo->type = IDENT_PSEUDO ;
-                                pseudo->name = token->str ;
-                                token->str = NULL ;
+                                pseudo->name = token->u.str ;
+                                token->u.str = NULL ;
                                 found_sel = TRUE ;
                         }
                         else if (token->type == FUNCTION_TK)
                         {
-                                pseudo->name = token->str ;
-                                token->str = NULL ;
+                                pseudo->name = token->u.str ;
+                                token->u.str = NULL ;
                                 cr_parser_try_to_skip_spaces_and_comments 
                                         (a_this) ;
                                 status = cr_parser_parse_ident 
@@ -2816,8 +2816,8 @@ cr_parser_parse_charset (CRParser *a_this, GString **a_value)
                                           &token) ;
         ENSURE_PARSING_COND (status == CR_OK 
                              && token && token->type == STRING_TK) ;
-        charset_str = token->str ;
-        token->str = NULL ;
+        charset_str = token->u.str ;
+        token->u.str = NULL ;
         cr_token_destroy (token) ;
         token = NULL ;
 
@@ -3087,8 +3087,8 @@ cr_parser_parse_media (CRParser *a_this)
         ENSURE_PARSING_COND (status == CR_OK
                              && token && token->type == IDENT_TK) ;
 
-        medium = token->str ;
-        token->str = NULL ;
+        medium = token->u.str ;
+        token->u.str = NULL ;
         cr_token_destroy (token) ;
         token = NULL ;
         
@@ -3273,8 +3273,8 @@ cr_parser_parse_page (CRParser *a_this)
 
         if (token->type == IDENT_TK)
         {
-                page_selector = token->str ;
-                token->str = NULL ;
+                page_selector = token->u.str ;
+                token->u.str = NULL ;
                 cr_token_destroy (token) ;
                 token = NULL ;
         }
@@ -3294,7 +3294,7 @@ cr_parser_parse_page (CRParser *a_this)
         ENSURE_PARSING_COND (status == CR_OK 
                              && token) ;
 
-        if (token->type == DELIM_TK && token->unichar == ':')
+        if (token->type == DELIM_TK && token->u.unichar == ':')
         {
                 cr_token_destroy (token) ;
                 token = NULL ;
@@ -3997,8 +3997,8 @@ cr_parser_parse_function (CRParser *a_this, GString **a_func_name,
 
         if (token && token->type == FUNCTION_TK)
         {
-                *a_func_name = token->str ;
-                token->str = NULL ;
+                *a_func_name = token->u.str ;
+                token->u.str = NULL ;
         }
         else
         {
@@ -4474,11 +4474,11 @@ cr_parser_parse_stylesheet (CRParser *a_this)
                 else if (token 
                          && (token->type == HASH_TK
                              || (token->type == DELIM_TK 
-                                 && token->unichar == '.')
+                                 && token->u.unichar == '.')
                              || (token->type == DELIM_TK
-                                 && token->unichar == ':')
+                                 && token->u.unichar == ':')
                              || (token->type == DELIM_TK
-                                 && token->unichar == '*')
+                                 && token->u.unichar == '*')
                              || (token->type == BO_TK)
                              || token->type == IDENT_TK))
                 {

@@ -63,10 +63,10 @@ cr_token_clear (CRToken *a_this)
     case URI_TK:
     case FUNCTION_TK:
     case COMMENT_TK:
-        if (a_this->str)
+        if (a_this->u.str)
         {
-            g_string_free (a_this->str, TRUE) ;
-            a_this->str = NULL ;
+            g_string_free (a_this->u.str, TRUE) ;
+            a_this->u.str = NULL ;
         }
 		break ;
         
@@ -78,18 +78,18 @@ cr_token_clear (CRToken *a_this)
     case FREQ_TK:
     case PERCENTAGE_TK:
     case NUMBER_TK:
-        if (a_this->num)
+        if (a_this->u.num)
         {
-            cr_num_destroy (a_this->num) ;
-            a_this->num = NULL ;
+            cr_num_destroy (a_this->u.num) ;
+            a_this->u.num = NULL ;
         }
 		break ;
         
 	case DIMEN_TK:
-        if (a_this->num)
+        if (a_this->u.num)
         {
-            cr_num_destroy (a_this->num) ;
-            a_this->num = NULL ;
+            cr_num_destroy (a_this->u.num) ;
+            a_this->u.num = NULL ;
         }
         
         if (a_this->dimen)
@@ -249,7 +249,7 @@ cr_token_set_comment (CRToken *a_this, GString *a_str)
 
         a_this->type = COMMENT_TK ;
 
-        a_this->str = a_str ;
+        a_this->u.str = a_str ;
 
         return CR_OK ;
 }
@@ -263,7 +263,7 @@ cr_token_set_string (CRToken *a_this, GString *a_str)
 
         a_this->type = STRING_TK ;
 
-        a_this->str = a_str ;
+        a_this->u.str = a_str ;
 
         return CR_OK ;
 }
@@ -278,7 +278,7 @@ cr_token_set_ident (CRToken *a_this, GString * a_ident)
 
         a_this->type = IDENT_TK ;
 
-        a_this->str = a_ident ;
+        a_this->u.str = a_ident ;
 
         return CR_OK ;
 }
@@ -293,7 +293,7 @@ cr_token_set_function (CRToken *a_this, GString *a_fun_name)
 
         a_this->type = FUNCTION_TK ;
 
-        a_this->str = a_fun_name ;
+        a_this->u.str = a_fun_name ;
 
         return CR_OK ;
 }
@@ -307,7 +307,7 @@ cr_token_set_hash (CRToken *a_this, GString *a_hash)
 
         a_this->type = HASH_TK ;
 
-        a_this->str = a_hash ;
+        a_this->u.str = a_hash ;
 
         return CR_OK ;
 }
@@ -321,7 +321,7 @@ cr_token_set_rgb (CRToken *a_this, CRRgb *a_rgb)
 
         a_this->type = RGB_TK ;
 
-        a_this->rgb = a_rgb ;
+        a_this->u.rgb = a_rgb ;
 
         return CR_OK ;
 }
@@ -397,7 +397,7 @@ cr_token_set_atkeyword (CRToken *a_this, GString *a_atname)
 
         a_this->type = ATKEYWORD_TK ;
 
-        a_this->str = a_atname ;
+        a_this->u.str = a_atname ;
 
         return CR_OK ;
 }
@@ -423,7 +423,7 @@ cr_token_set_ems (CRToken *a_this, CRNum *a_num)
 
         a_this->type = EMS_TK ;
 
-        a_this->num = a_num ;
+        a_this->u.num = a_num ;
 
         return CR_OK ;
 }
@@ -438,7 +438,7 @@ cr_token_set_exs (CRToken *a_this, CRNum *a_num)
 
         a_this->type = EXS_TK ;
 
-        a_this->num = a_num ;
+        a_this->u.num = a_num ;
 
         return CR_OK ;
 }
@@ -454,7 +454,7 @@ cr_token_set_length (CRToken *a_this, CRNum *a_num,
         a_this->type = LENGTH_TK ;
         
         a_this->extra_type = a_et ;
-        a_this->num = a_num ;
+        a_this->u.num = a_num ;
 
         return CR_OK ;
 }
@@ -469,7 +469,7 @@ cr_token_set_angle (CRToken *a_this, CRNum *a_num,
 
         a_this->type = ANGLE_TK ;
         a_this->extra_type = a_et ;
-        a_this->num = a_num ;
+        a_this->u.num = a_num ;
 
         return CR_OK ;
 }
@@ -484,7 +484,7 @@ cr_token_set_time (CRToken *a_this, CRNum *a_num,
 
         a_this->type = TIME_TK ;
         a_this->extra_type = a_et;
-        a_this->num = a_num ;
+        a_this->u.num = a_num ;
 
         return CR_OK ;
 }
@@ -499,7 +499,7 @@ cr_token_set_freq (CRToken *a_this, CRNum *a_num,
 
         a_this->type = FREQ_TK ;
         a_this->extra_type = a_et ;
-        a_this->num = a_num ;
+        a_this->u.num = a_num ;
 
         return CR_OK ;
 }
@@ -513,7 +513,7 @@ cr_token_set_dimen (CRToken *a_this, CRNum *a_num,
         cr_token_clear (a_this) ;
 
         a_this->type = DIMEN_TK ;
-        a_this->num = a_num ;
+        a_this->u.num = a_num ;
         a_this->dimen = a_dim ;
 
         return CR_OK ;
@@ -529,7 +529,7 @@ cr_token_set_percentage (CRToken *a_this, CRNum *a_num)
         cr_token_clear (a_this) ;
 
         a_this->type = PERCENTAGE_TK ;
-        a_this->num = a_num ;
+        a_this->u.num = a_num ;
 
         return CR_OK ;
 }
@@ -542,7 +542,7 @@ cr_token_set_number (CRToken *a_this, CRNum *a_num)
         cr_token_clear (a_this) ;
 
         a_this->type = NUMBER_TK ;
-        a_this->num = a_num ;
+        a_this->u.num = a_num ;
 
         return CR_OK ;
 }
@@ -555,7 +555,7 @@ cr_token_set_uri (CRToken *a_this, GString *a_uri)
         cr_token_clear (a_this) ;
 
         a_this->type = URI_TK ;
-        a_this->str = a_uri ;
+        a_this->u.str = a_uri ;
 
         return CR_OK ;
 }
@@ -569,7 +569,7 @@ cr_token_set_delim (CRToken *a_this, guint32 a_char)
         cr_token_clear (a_this) ;
 
         a_this->type = DELIM_TK ;
-        a_this->unichar = a_char ;
+        a_this->u.unichar = a_char ;
 
         return CR_OK ;
 }
