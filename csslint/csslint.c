@@ -1,3 +1,5 @@
+/* -*- Mode: C; indent-tabs-mode:nil; c-basic-offset: 8-*- */
+
 /*
  * csslint.c : a small tester program for CSS2 input
  *
@@ -39,10 +41,11 @@ struct Options
 };
 
 void
-csslint_parse_cmd_line (int a_argc, char **a_argv, struct Options *a_options);
+csslint_parse_cmd_line (int a_argc, char **a_argv, 
+			struct Options *a_options);
 
 static void
-csslint_showVersion (const char *name);
+csslint_show_version (const char *name);
 
 static void
 csslint_usage (const char *name);
@@ -58,7 +61,7 @@ csslint_cssom_parser_parse (guchar * a_file_uri);
  */
 void
 csslint_parse_cmd_line (int a_argc, char **a_argv,
-						struct Options *a_options)
+			struct Options *a_options)
 {
 	int i= 0 ;
 
@@ -66,9 +69,9 @@ csslint_parse_cmd_line (int a_argc, char **a_argv,
 	memset (a_options, 0, sizeof (struct Options)) ;
 
     if (a_argc <= 1) 
-	{
+    {
         csslint_usage(a_argv[0]);
-	}
+    }
 		
 	for (i = 1 ; i < a_argc ; i++)
 	{
@@ -156,15 +159,16 @@ csslint_cssom_parser_parse (guchar * a_file_uri)
 	g_return_val_if_fail (a_file_uri, CR_BAD_PARAM_ERROR) ;
 		
 	parser = cr_om_parser_new (NULL) ;
-	status = cr_om_parser_parse_file (parser, a_file_uri, CR_ASCII,
-									  &stylesheet) ;
+	status = cr_om_parser_parse_file (parser, 
+                                          a_file_uri, CR_ASCII,
+					  &stylesheet) ;
 	if (status == CR_OK && stylesheet)
 	{
 		cr_stylesheet_dump (stylesheet, stdout) ;
 		cr_stylesheet_destroy (stylesheet) ;
 	}
 	cr_om_parser_destroy (parser) ;
-	
+
 	return status ;
 }
 
@@ -186,11 +190,13 @@ main (int argc, char **argv)
 	{
 		if (options.files_list != NULL)
 		{
-			status = csslint_cssom_parser_parse (options.files_list[0]);
+			status = 
+                                csslint_cssom_parser_parse 
+                                (options.files_list[0]);
 		} 
 		else
 		{
-			csslint_showVersion(argv[0]);
+			csslint_show_version(argv[0]);
 			return 0;
 		}
 
