@@ -28,7 +28,8 @@
  *@param a_argc the argc variable passed to the main function.
  *@param a_argv the argv variable passed to the main function.
  */
-static void showVersion (const char *name) {
+static void showVersion (const char *name) 
+{
     fprintf(stderr, "%s: using libcroco version %s\n", name, VERSION);
     fprintf(stderr, "   compiled with: ");
 #ifdef HAVE_LIBXML2
@@ -48,7 +49,8 @@ static void showVersion (const char *name) {
  *@param a_argc the argc variable passed to the main function.
  *@param a_argv the argv variable passed to the main function.
  */
-static void usage(const char *name) {
+static void usage(const char *name) 
+{
     printf("Usage : %s [options] CSS2files ...\n", name);
     printf("\tParse the CSS2 files and output the result of the parsing\n");
     printf("\t--version : display the version of the CSS2 library used\n");
@@ -57,16 +59,18 @@ static void usage(const char *name) {
 }
 
 int 
-main (int argc, char **argv) {
+main (int argc, char **argv) 
+{
     int i;
 	
-    if (argc <= 1) {
+    if (argc <= 1) 
+	{
         usage(argv[0]);
         return(1);
     }
     
-	for (i = 1; i < argc ; i++) {
-		
+	for (i = 1; i < argc ; i++) 
+	{
 		if (!strcmp(argv[i], "-"))
 			break;
 
@@ -74,9 +78,12 @@ main (int argc, char **argv) {
 			continue;
 		
 		if ((!strcmp(argv[i], "-version")) || 
-			(!strcmp(argv[i], "--version"))) {
+			(!strcmp(argv[i], "--version"))) 
+		{
 			showVersion (argv[0]);
-		} else {
+		} 
+		else 
+		{
 			fprintf(stderr, "Unknown option %s\n", argv[i]);
 			usage(argv[0]);
 			return(1);
