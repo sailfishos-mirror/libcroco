@@ -1,5 +1,7 @@
 2004-03-16  Dodji  <dodji@gnome.org>
 
+	* ============== 0.5 release============================
+
 	* croco-config.in: fixed this to include libxml2 and glib
 	into cflags and libs.
 	* docs/examples/cssom-example-1.c,docs/examples/sac-example-1.c,
