@@ -89,7 +89,7 @@ main (int argc, char **argv)
 	 *command line arguments of this 
 	 *program in this loop.
 	 */
-	for (i=0 ; i < argc ;i++)
+	for (i=1 ; i < argc ;i++)
 	{
 		if (*argv[i] != '-')
 			break ;
@@ -111,7 +111,7 @@ main (int argc, char **argv)
 		}
 	}
 
-	if (i >= argc)
+	if (i > argc)
 	{
 		/*
 		 *no file name has been given
@@ -124,7 +124,7 @@ main (int argc, char **argv)
 	 *Now, the real libcroco related stuffs...
 	 ****************************************/
 
-	file_path = argv[i + 1] ;
+	file_path = argv[i] ;
 	
 	/*
 	 *Instanciate the libcroco parser.
