@@ -71,7 +71,7 @@ fi
 
 dnl check libxml2 version
 have_libxml2=no
-PKG_CHECK_MODULES(LIBXML2, [libxml2 >= 2.5.1], 
+PKG_CHECK_MODULES(LIBXML2, [libxml-2.0 >= 2.5.1], 
 			   [have_libxml2=yes
 			   AC_DEFINE(HAVE_LIBXML2, 1, [use libxml2])], have_libxml2=no)
 			    

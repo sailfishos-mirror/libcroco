@@ -1,3 +1,8 @@
+2003-03-18  Gaël Chamoulaud  <strider@freespiders.org>
+
+	* configure.in: fixed a configure bug. Make sure to properly
+	check the libxml2 versions.
+
 2003-03-18  Dom Lachowicz <cinamod@hotmail.com>
 
 	* autogen.sh: Use gnome-autogen (cvs co gnome-common). Creates libtool
