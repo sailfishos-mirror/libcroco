@@ -127,9 +127,10 @@ print_properties_real (CRPropList *proplist)
 	CRPropList *cur_pair = NULL ;
 	
 	for (cur_pair = proplist ; cur_pair ;
-	     cur_pair= cr_prop_list_get_next (cur_pair)) {		
-		decl = NULL ;
+	     cur_pair= cr_prop_list_get_next (cur_pair)) {
 		gchar *str = NULL ;
+		decl = NULL ;
+
 		cr_prop_list_get_decl (cur_pair, &decl) ;
 		if (decl) {
 			str = cr_declaration_to_string (decl, 0) ;
