@@ -2656,8 +2656,9 @@ cr_style_to_string (CRStyle *a_this,
                     guint a_nb_indent)
 {
         const gint INTERNAL_INDENT = 2 ;
+        gint indent = a_nb_indent + INTERNAL_INDENT ;
         gchar *tmp_str = NULL ;
-        GString *indent = NULL, *str = NULL ;
+        GString *str = NULL ;
         gint i = 0 ;
 
         g_return_val_if_fail (a_this && a_str, CR_BAD_PARAM_ERROR) ;
@@ -2670,7 +2671,6 @@ cr_style_to_string (CRStyle *a_this,
         {
                 str = *a_str ;
         }
-
         cr_utils_dump_n_chars2 (' ', str, a_nb_indent) ;
         g_string_append_printf (str, "style {") ;
         
@@ -2681,6 +2681,7 @@ cr_style_to_string (CRStyle *a_this,
                  *(using num_prop_code_to_string)
                  *before outputing it value
                  */
+                cr_utils_dump_n_chars2 (' ', str, indent) ;
                 tmp_str = (gchar*)num_prop_code_to_string (i) ;
                 if (tmp_str)
                 {
@@ -2699,6 +2700,7 @@ cr_style_to_string (CRStyle *a_this,
         for (i=RGB_PROP_BORDER_TOP_COLOR ; i < NB_RGB_PROPS; i++)
         {
                 tmp_str = (gchar*)rgb_prop_code_to_string (i) ;
+                cr_utils_dump_n_chars2 (' ', str, indent) ;
                 if (tmp_str)
                 {
                         g_string_append_printf (str, "%s: ", tmp_str) ;
@@ -2716,6 +2718,7 @@ cr_style_to_string (CRStyle *a_this,
         for (i=BORDER_STYLE_PROP_TOP ; i < NB_BORDER_STYLE_PROPS ; i++)
         {
                 tmp_str = (gchar*)border_style_prop_code_to_string (i) ;
+                cr_utils_dump_n_chars2 (' ', str, indent) ;
                 if (tmp_str)
                 {
                         g_string_append_printf (str, "%s: ", tmp_str) ;
@@ -2725,11 +2728,46 @@ cr_style_to_string (CRStyle *a_this,
                         g_string_append_printf (str, "NULL: ") ;
                 }
                 tmp_str = NULL ;
-                cr_style_border_style_to_string (a_this->border_style_props[i], 
-                                                 str,
-                                                 a_nb_indent + INTERNAL_INDENT) ;
+                cr_style_border_style_to_string (a_this->border_style_props[i],
+                                                 str, 0) ;
                 g_string_append_printf (str, "\n") ;
         }
+        cr_utils_dump_n_chars2 (' ', str, indent) ;
+        g_string_append_printf (str, "display: ") ;
+        cr_style_display_type_to_string (a_this->display, str, 0) ;
+        g_string_append_printf (str, "\n") ;
+        
+        cr_utils_dump_n_chars2 (' ', str, indent) ;
+        g_string_append_printf (str, "position: ") ;
+        cr_style_position_type_to_string (a_this->position, str,
+                                          0) ;
+        g_string_append_printf (str, "\n") ;
+
+        cr_utils_dump_n_chars2 (' ', str, indent) ;
+        g_string_append_printf (str, "float-type: ") ;
+        cr_style_float_type_to_string (a_this->float_type, str, 0) ;
+        g_string_append_printf (str, "\n") ;
+        
+        cr_utils_dump_n_chars2 (' ', str, indent) ;
+        g_string_append_printf (str, "font-family: ") ;
+        tmp_str = cr_font_family_to_string (a_this->font_family,
+                                            TRUE) ;
+        if (tmp_str)
+        {
+                g_string_append_printf (str, "%s", tmp_str) ;
+                g_free (tmp_str) ;
+                tmp_str = NULL ;
+        }
+        else 
+        {
+                g_string_append_printf (str, "NULL") ;
+        }
+        g_string_append_printf (str, "\n") ;
+        
+        /*
+         *TODO: dump the other fields of CRStyle starting from
+         *font_size
+         */
         cr_utils_dump_n_chars2 (' ', str, a_nb_indent) ;
         g_string_append_printf (str, "}") ;
 

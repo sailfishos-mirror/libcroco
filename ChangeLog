@@ -1,3 +1,7 @@
+2004-02-08  Dodji Seketeli  <dodji@gnome.org>
+
+	* src/cr-style.c: more style structure debugging material.
+
 2004-02-07  Dodji Seketeli  <dodji@gnome.org>
 
 	* src/cr-fonts.[hc],src/cr-num.h,src/cr-style.[ch]:
