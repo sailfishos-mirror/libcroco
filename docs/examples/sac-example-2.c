@@ -20,7 +20,7 @@
  *
  *To compile this file, type:
  *
- *gcc -g  -o sac-example-2 `pkg-config --cflags --libs libcroco` sac-example-1.c
+ *gcc -g  -o sac-example-2 `croco-config --cflags`  `croco-config --libs` sac-example-2.c
  *
  *Make sure you have compiled and installed libcroco prior to trying to
  *compile this file :)
@@ -33,7 +33,7 @@
  *
  *Initial Author: Dodji Seketeli <Dodji 47 seketeli dot org>
  */
-
+#include <stdlib.h>
 #include <libcroco.h>
 
 /**
@@ -69,7 +69,8 @@ start_document_cb (CRDocHandler *a_handler)
          *Allocate the parsing context.
          *Our custom parsing context.
          */
-        parsing_context = malloc (sizeof (struct MyFooContext)) ;
+        parsing_context = (struct MyFooContext*) malloc 
+                (sizeof (struct MyFooContext)) ;
         if (!parsing_context)
         {
                 /*
@@ -109,7 +110,7 @@ start_selector_cb (CRDocHandler *a_handler,
 {
 	struct MyFooContext *context = NULL ;
         
-        context = a_handler->app_data ;
+        context = (struct MyFooContext*) a_handler->app_data ;
         if (!context)
                 return ;
         context->nb_props_per_ruleset = 0 ;
@@ -134,7 +135,7 @@ property_cb (CRDocHandler *a_handler,
 {
         struct MyFooContext *context = NULL ;
         
-        context = a_handler->app_data ;
+        context = (struct MyFooContext *)a_handler->app_data ;
 
         if (!context || !a_name || !a_name->str)
                 return ;
@@ -156,7 +157,7 @@ end_selector_cb (CRDocHandler *a_handler,
 {
         struct MyFooContext *context = NULL ;
 
-	context = a_handler->app_data ;
+	context = (struct MyFooContext*)a_handler->app_data ;
         if (!context)
                 return ;
         context->nb_rulesets ++ ;
@@ -175,7 +176,7 @@ end_document_cb (CRDocHandler *a_handler)
 {
         struct MyFooContext *context = NULL ;
 
-        context = a_handler->app_data ;
+        context = (struct MyFooContext*) a_handler->app_data ;
         if (!context)
                 return ;
 
@@ -197,7 +198,7 @@ display_usage (unsigned char *a_prog_name)
 
 	if (!prog_name)
 	{
-		prog_name = "sac-example-1" ;
+		prog_name = (unsigned char*) "sac-example-1" ;
 	}
 
 	printf ("usage: %s [--help] | <css file name>\n", prog_name) ;	
@@ -213,7 +214,7 @@ main (int argc, char **argv)
 
 	if (argc <= 1)
 	{
-		display_usage (argv[0]) ;
+		display_usage ((unsigned char*)argv[0]) ;
 		return -1 ;
 	}
 
@@ -230,8 +231,8 @@ main (int argc, char **argv)
 		if (!strcmp (argv[i], "--help")
 		    || !strcmp (argv[i], "-h"))
 		{
-			display_usage (argv[0]) ;
-			return ;
+			display_usage ((unsigned char*)argv[0]) ;
+			return -1;
 		}
 		else
 		{
@@ -240,7 +241,7 @@ main (int argc, char **argv)
 			 *available now, so this is
 			 *a bit redundant...
 			 */
-			display_usage (argv[0]) ;
+			display_usage ((unsigned char*)argv[0]) ;
 		}
 	}
 
@@ -250,14 +251,14 @@ main (int argc, char **argv)
 		 *no file name has been given
 		 *in parameter, go out.
 		 */
-		return ;
+		return -1;
 	}
 	
 	/****************************************
 	 *Now, the real libcroco related stuffs...
 	 ****************************************/
 
-	file_path = argv[i] ;
+	file_path = (unsigned char*)argv[i] ;
 	
 	/*
 	 *Instanciate the libcroco parser.
@@ -269,7 +270,7 @@ main (int argc, char **argv)
 		/*
 		 *Damned, something bad happened ...
 		 */
-		return ;
+		return -1 ;
 	}
 
 	/*
@@ -285,7 +286,7 @@ main (int argc, char **argv)
 		 */
 
 		cr_parser_destroy (parser) ;
-		return ;
+		return -1 ;
 	}
 
 	/****************************************

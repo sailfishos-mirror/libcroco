@@ -9,7 +9,7 @@
  *
  *To compile this file, type:
  *
- *gcc -g  -o sac-example-1 `pkg-config --cflags --libs libcroco` sac-example-1.c
+ *gcc -g  -o sac-example-1 `croco-config --cflags`  `croco-config --libs` sac-example-1.c
  *
  *Make sure you have compiled and installed libcroco prior to trying to
  *compile this file :)
