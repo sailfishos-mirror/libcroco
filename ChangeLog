@@ -1,3 +1,12 @@
+2004-01-29  Dodji Seketeli  <dodji@gnome.org>
+
+        * src/cr-sel-eng.c: 
+	(cr_sel_eng_get_matched_style): make sure to set the fields
+	of the style structure passed as an argument of the function, when
+	its not NULL.
+	* src/cr-style.c: 
+	(cr_style_set_props_to_defaults): make this function public
+
 2004-01-27  Gael CHAMOULAUD  <strider@gnome.org>
 
 	* configure.in: Removed the old references with libgnomeui and pango !

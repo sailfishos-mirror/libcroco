@@ -52,14 +52,12 @@ struct _CRCascade
 };
 
 
-CRCascade *
-cr_cascade_new (CRStyleSheet *a_author_sheet,
-		CRStyleSheet *a_user_sheet,
-		CRStyleSheet *a_ua_sheet) ;
+CRCascade * cr_cascade_new (CRStyleSheet *a_author_sheet,
+                            CRStyleSheet *a_user_sheet,
+                            CRStyleSheet *a_ua_sheet) ;
 
-CRStyleSheet *
-cr_cascade_get_sheet (CRCascade *a_this,
-                      enum CRStyleOrigin a_origin) ;
+CRStyleSheet * cr_cascade_get_sheet (CRCascade *a_this,
+                                     enum CRStyleOrigin a_origin) ;
 
 enum CRStatus cr_cascade_set_sheet (CRCascade *a_this,
                                     CRStyleSheet *a_sheet,

@@ -1515,14 +1515,17 @@ cr_sel_eng_get_matched_style (CRSelEng *a_this,
                         *a_style = cr_style_new () ;
                         g_return_val_if_fail (*a_style, CR_ERROR) ;
                 }
+                else
+                {
+                        cr_style_set_props_to_defaults (*a_style) ;
+                }
                 (*a_style)->parent_style = a_parent_style ;
-                
+
                 g_hash_table_foreach (props_hash,
                                       ((GHFunc)
                                        set_style_from_props_hash_hr_func),
-                                      *a_style) ;                
+                                      *a_style) ;
         }
-
         if (props_hash)
         {
                 g_hash_table_destroy (props_hash) ;

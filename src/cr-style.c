@@ -176,8 +176,6 @@ enum CRDirection
         NB_DIRS
 } ;
 
-static enum CRStatus
-cr_style_set_props_to_defaults (CRStyle *a_this) ;
 
 static enum CRStatus
 set_prop_padding_x_from_value (CRStyle *a_style,                          
@@ -283,90 +281,6 @@ cr_style_init_properties (void)
         return CR_OK ;
 }
 
-/**
- *Sets the style properties to their default values
- *according to the css2 spec.
- *@param a_this the current instance of #CRStyle.
- *@return CR_OK upon successfull completion, an error code otherwise.
- */
-static enum CRStatus
-cr_style_set_props_to_defaults (CRStyle *a_this)
-{
-        glong i = 0 ;
-
-        g_return_val_if_fail (a_this, CR_BAD_PARAM_ERROR) ;
-
-        for (i = 0 ; i < NB_NUM_PROPS ; i++)
-        {
-                switch (i)
-                {
-                case NUM_PROP_WIDTH:
-                case NUM_PROP_TOP:
-                case NUM_PROP_RIGHT:
-                case NUM_PROP_BOTTOM:
-                case NUM_PROP_LEFT:
-                        cr_num_set (&a_this->num_props[i].sv,
-                                    0, NUM_AUTO) ;
-                        break ;
-
-                case NUM_PROP_PADDING_TOP:
-                case NUM_PROP_PADDING_RIGHT:
-                case NUM_PROP_PADDING_BOTTOM:
-                case NUM_PROP_PADDING_LEFT:
-                case NUM_PROP_BORDER_TOP:
-                case NUM_PROP_BORDER_RIGHT:
-                case NUM_PROP_BORDER_BOTTOM:
-                case NUM_PROP_BORDER_LEFT:
-                case NUM_PROP_MARGIN_TOP:
-                case NUM_PROP_MARGIN_RIGHT:
-                case NUM_PROP_MARGIN_BOTTOM:
-                case NUM_PROP_MARGIN_LEFT:                
-                        cr_num_set (&a_this->num_props[i].sv,
-                                    0, NUM_LENGTH_PX) ;
-                        break ;
-
-                default:
-                        cr_utils_trace_info ("Unknown property") ;
-                        break ;
-                }
-        }
-
-        for (i = 0 ; i < NB_RGB_PROPS ; i++)
-        {
-                
-                switch (i)
-                {
-                        /*default foreground color is black*/
-                case RGB_PROP_COLOR:
-                        cr_rgb_set (&a_this->rgb_props[i].sv, 0, 0, 0,
-                                    FALSE) ;
-                        break ;
-                        
-                        /*default background color is white*/
-                case RGB_PROP_BACKGROUND_COLOR:
-                        cr_rgb_set (&a_this->rgb_props[i].sv, 
-                                    255, 255, 255, FALSE) ;
-                        break ;
-
-                default:
-                        cr_rgb_set (&a_this->rgb_props[i].sv, 0, 0, 0,
-                                    FALSE) ;
-                break ;
-                }
-        }
-
-        for (i = 0 ; i < NB_BORDER_STYLE_PROPS ; i++)
-        {
-                a_this->border_style_props[i] = BORDER_STYLE_NONE ;
-        }
-
-        a_this->display = DISPLAY_BLOCK ;
-        a_this->position = POSITION_STATIC ;
-        a_this->float_type = FLOAT_NONE ;
-        a_this->parent_style = NULL ;
-
-        return CR_OK ;
-}
 
 
 static enum CRPropertyID
@@ -1853,6 +1767,91 @@ cr_style_new (void)
 
 
 /**
+ *Sets the style properties to their default values
+ *according to the css2 spec.
+ *@param a_this the current instance of #CRStyle.
+ *@return CR_OK upon successfull completion, an error code otherwise.
+ */
+enum CRStatus
+cr_style_set_props_to_defaults (CRStyle *a_this)
+{
+        glong i = 0 ;
+
+        g_return_val_if_fail (a_this, CR_BAD_PARAM_ERROR) ;
+
+        for (i = 0 ; i < NB_NUM_PROPS ; i++)
+        {
+                switch (i)
+                {
+                case NUM_PROP_WIDTH:
+                case NUM_PROP_TOP:
+                case NUM_PROP_RIGHT:
+                case NUM_PROP_BOTTOM:
+                case NUM_PROP_LEFT:
+                        cr_num_set (&a_this->num_props[i].sv,
+                                    0, NUM_AUTO) ;
+                        break ;
+
+                case NUM_PROP_PADDING_TOP:
+                case NUM_PROP_PADDING_RIGHT:
+                case NUM_PROP_PADDING_BOTTOM:
+                case NUM_PROP_PADDING_LEFT:
+                case NUM_PROP_BORDER_TOP:
+                case NUM_PROP_BORDER_RIGHT:
+                case NUM_PROP_BORDER_BOTTOM:
+                case NUM_PROP_BORDER_LEFT:
+                case NUM_PROP_MARGIN_TOP:
+                case NUM_PROP_MARGIN_RIGHT:
+                case NUM_PROP_MARGIN_BOTTOM:
+                case NUM_PROP_MARGIN_LEFT:                
+                        cr_num_set (&a_this->num_props[i].sv,
+                                    0, NUM_LENGTH_PX) ;
+                        break ;
+
+                default:
+                        cr_utils_trace_info ("Unknown property") ;
+                        break ;
+                }
+        }
+
+        for (i = 0 ; i < NB_RGB_PROPS ; i++)
+        {
+                
+                switch (i)
+                {
+                        /*default foreground color is black*/
+                case RGB_PROP_COLOR:
+                        cr_rgb_set (&a_this->rgb_props[i].sv, 0, 0, 0,
+                                    FALSE) ;
+                        break ;
+                        
+                        /*default background color is white*/
+                case RGB_PROP_BACKGROUND_COLOR:
+                        cr_rgb_set (&a_this->rgb_props[i].sv, 
+                                    255, 255, 255, FALSE) ;
+                        break ;
+
+                default:
+                        cr_rgb_set (&a_this->rgb_props[i].sv, 0, 0, 0,
+                                    FALSE) ;
+                break ;
+                }
+        }
+
+        for (i = 0 ; i < NB_BORDER_STYLE_PROPS ; i++)
+        {
+                a_this->border_style_props[i] = BORDER_STYLE_NONE ;
+        }
+
+        a_this->display = DISPLAY_BLOCK ;
+        a_this->position = POSITION_STATIC ;
+        a_this->float_type = FLOAT_NONE ;
+        a_this->parent_style = NULL ;
+
+        return CR_OK ;
+}
+
+/**
  *Walks through a css2 property declaration, and populated the
  *according field(s) in the #CRStyle structure.
  *If the properties or their value(s) are/is not known, 
@@ -2171,11 +2170,27 @@ cr_style_dup (CRStyle *a_this)
                 cr_utils_trace_info ("Out of memory") ;
                 return NULL ;
         }
-        memcpy (result, a_this, sizeof (CRStyle)) ;
-
+        cr_style_copy (result, a_this) ;
         return result ;
 }
 
+/**
+ *Copies a style data structure into another.
+ *TODO: this is actually broken because it's based
+ *on memcpy although some data stuctures of CRStyle should
+ *be properly duplicated.
+ *@param a_dest the destination style datastructure
+ *@param a_src the source style datastructure.
+ *@return CR_OK upon succesfull completion, an error code otherwise
+ */
+enum CRStatus
+cr_style_copy (CRStyle *a_dest, CRStyle *a_src)
+{
+        g_return_val_if_fail (a_dest && a_src, CR_BAD_PARAM_ERROR) ;
+
+        memcpy (a_dest, a_src, sizeof (CRStyle)) ;
+        return CR_OK ;
+}
 
 /**
  *Destructor of the #CRStyle class.

@@ -259,25 +259,22 @@ struct _CRStyle
 } ;
 
 
-CRStyle *
-cr_style_new (void) ;
+CRStyle * cr_style_new (void) ;
+
+enum CRStatus cr_style_set_props_to_defaults (CRStyle *a_this) ;
+
+enum CRStatus cr_style_set_style_from_decl (CRStyle *a_this, CRDeclaration *a_decl) ;
 
 
-enum CRStatus
-cr_style_set_style_from_decl (CRStyle *a_this, CRDeclaration *a_decl) ;
+enum CRStatus cr_style_copy (CRStyle *a_dest, CRStyle *a_src) ;
 
+enum CRStatus cr_style_ref (CRStyle *a_this) ;
 
-enum CRStatus
-cr_style_ref (CRStyle *a_this) ;
+gboolean cr_style_unref (CRStyle *a_this) ;
 
-gboolean
-cr_style_unref (CRStyle *a_this) ;
+void cr_style_destroy (CRStyle *a_this) ;
 
-void
-cr_style_destroy (CRStyle *a_this) ;
-
-CRStyle *
-cr_style_dup (CRStyle *a_this) ;
+CRStyle * cr_style_dup (CRStyle *a_this) ;
 
 G_END_DECLS
 
