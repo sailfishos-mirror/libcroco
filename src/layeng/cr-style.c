@@ -49,6 +49,7 @@ enum CRPropertyID
 	PROP_ID_PADDING_RIGHT,
 	PROP_ID_PADDING_BOTTOM,
 	PROP_ID_PADDING_LEFT,
+        PROP_ID_PADDING,
 	PROP_ID_BORDER_TOP_WIDTH,
 	PROP_ID_BORDER_RIGHT_WIDTH,
 	PROP_ID_BORDER_BOTTOM_WIDTH,
@@ -70,6 +71,7 @@ enum CRPropertyID
 	PROP_ID_MARGIN_RIGHT,
 	PROP_ID_MARGIN_BOTTOM,
 	PROP_ID_MARGIN_LEFT,
+        PROP_ID_MARGIN,
 	PROP_ID_DISPLAY,
 	PROP_ID_POSITION,
 	PROP_ID_TOP,
@@ -101,6 +103,7 @@ static CRPropertyDesc gv_prop_table [] =
 	{"padding-right", PROP_ID_PADDING_RIGHT},
 	{"padding-bottom", PROP_ID_PADDING_BOTTOM},
 	{"padding-left", PROP_ID_PADDING_LEFT},
+        {"padding", PROP_ID_PADDING},
 	{"border-top-width", PROP_ID_BORDER_TOP_WIDTH},
 	{"border-right-width", PROP_ID_BORDER_RIGHT_WIDTH},
 	{"border-bottom-width", PROP_ID_BORDER_BOTTOM_WIDTH},
@@ -118,6 +121,7 @@ static CRPropertyDesc gv_prop_table [] =
 	{"margin-right", PROP_ID_MARGIN_RIGHT},
 	{"margin-bottom", PROP_ID_MARGIN_BOTTOM},
 	{"margin-left", PROP_ID_MARGIN_LEFT},
+        {"margin", PROP_ID_MARGIN},
 	{"display", PROP_ID_DISPLAY},
 	{"position", PROP_ID_POSITION},
 	{"top", PROP_ID_TOP},
@@ -218,6 +222,12 @@ set_prop_border_x_from_value (CRStyle *a_style, CRTerm *a_value,
 
 static enum CRStatus
 set_prop_border_from_value (CRStyle *a_style, CRTerm *a_value) ;
+
+static enum CRStatus
+set_prop_padding_from_value (CRStyle *a_style, CRTerm *a_value) ;
+
+static enum CRStatus
+set_prop_margin_from_value (CRStyle *a_style, CRTerm *a_value) ;
 
 static enum CRStatus
 cr_style_init_properties (void)
@@ -1231,6 +1241,117 @@ set_prop_border_from_value (CRStyle *a_style, CRTerm *a_value)
         return CR_OK ;
 }
 
+static enum CRStatus
+set_prop_padding_from_value (CRStyle *a_style, CRTerm *a_value)
+{
+        CRTerm *cur_term = NULL ;
+        enum CRDirection direction = 0 ;
+        enum CRStatus status = CR_OK ;
+
+        g_return_val_if_fail (a_style && a_value, CR_BAD_PARAM_ERROR) ;
+
+        cur_term = a_value ;
+        while (cur_term && cur_term->type != TERM_NUMBER)
+        {
+                cur_term = cur_term->next ;
+        }
+
+        if (!cur_term)
+                return CR_OK ;
+
+        for (direction = 0 ; direction < NB_DIRS ; direction ++)
+        {
+                set_prop_padding_x_from_value (a_style, cur_term,
+                                               direction) ;
+        }
+        cur_term = cur_term->next ;
+
+        while (cur_term && cur_term->type != TERM_NUMBER)
+        {
+                cur_term = cur_term->next ;
+        }
+        if (!cur_term)
+                return CR_OK ;
+
+        set_prop_padding_x_from_value (a_style, cur_term, DIR_RIGHT) ;
+        set_prop_padding_x_from_value (a_style, cur_term, DIR_LEFT) ;
+
+        while (cur_term && cur_term->type != TERM_NUMBER)
+        {
+                cur_term = cur_term->next ;
+        }
+        if (!cur_term)
+                return CR_OK ;
+        
+        set_prop_padding_x_from_value (a_style, cur_term, DIR_BOTTOM) ;
+
+        while (cur_term && cur_term->type != TERM_NUMBER)
+        {
+                cur_term = cur_term->next ;
+        }
+        if (!cur_term)
+                return CR_OK ;
+
+        status = set_prop_padding_x_from_value (a_style, cur_term, DIR_LEFT) ;
+
+        return status ;
+}
+
+static enum CRStatus
+set_prop_margin_from_value (CRStyle *a_style, CRTerm *a_value)
+{
+        CRTerm *cur_term = NULL ;
+        enum CRDirection direction = 0 ;
+        enum CRStatus status = CR_OK ;
+
+        g_return_val_if_fail (a_style && a_value, CR_BAD_PARAM_ERROR) ;
+
+        cur_term = a_value ;
+        while (cur_term && cur_term->type != TERM_NUMBER)
+        {
+                cur_term = cur_term->next ;
+        }
+
+        if (!cur_term)
+                return CR_OK ;
+
+        for (direction = 0 ; direction < NB_DIRS ; direction ++)
+        {
+                set_prop_margin_x_from_value (a_style, cur_term,
+                                              direction) ;
+        }
+        cur_term = cur_term->next ;
+
+        while (cur_term && cur_term->type != TERM_NUMBER)
+        {
+                cur_term = cur_term->next ;
+        }
+        if (!cur_term)
+                return CR_OK ;
+
+        set_prop_margin_x_from_value (a_style, cur_term, DIR_RIGHT) ;
+        set_prop_margin_x_from_value (a_style, cur_term, DIR_LEFT) ;
+
+        while (cur_term && cur_term->type != TERM_NUMBER)
+        {
+                cur_term = cur_term->next ;
+        }
+        if (!cur_term)
+                return CR_OK ;
+        
+        set_prop_margin_x_from_value (a_style, cur_term, DIR_BOTTOM) ;
+
+        while (cur_term && cur_term->type != TERM_NUMBER)
+        {
+                cur_term = cur_term->next ;
+        }
+        if (!cur_term)
+                return CR_OK ;
+
+        status = set_prop_margin_x_from_value (a_style, cur_term, DIR_LEFT) ;
+
+        return status ;
+}
 
 /******************
  *Public methods
@@ -1376,7 +1497,11 @@ cr_style_set_style_from_decl (CRStyle *a_this, CRDeclaration *a_decl,
                 status = set_prop_padding_x_from_value 
                         (a_this, value, DIR_LEFT) ;
                 break ;
-                
+
+        case PROP_ID_PADDING:
+                status = set_prop_padding_from_value (a_this, value) ;
+                break ;
+
         case PROP_ID_BORDER_TOP_WIDTH:
                 status = 
                         set_prop_border_x_width_from_value (a_this, value,
@@ -1500,6 +1625,11 @@ cr_style_set_style_from_decl (CRStyle *a_this, CRDeclaration *a_decl,
                 status = 
                         set_prop_margin_x_from_value (a_this, value,
                                                       DIR_LEFT) ;
+                break ;
+
+        case PROP_ID_MARGIN:
+                status =
+                        set_prop_margin_from_value (a_this, value) ;
                 break ;
 
         case PROP_ID_DISPLAY:

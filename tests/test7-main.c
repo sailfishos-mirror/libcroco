@@ -48,6 +48,7 @@ const guchar *gv_xmlbuf =
 const guchar *gv_xmlbuf =
 "<ARTICLE>"
 "  <HEADLINE>Fredrick the Great meets Bach</HEADLINE>"
+"   <PARA>Wow, and this css2 tests seems to work ;)</PARA>"
 "  <AUTHOR>Johann Nikolaus Forkel</AUTHOR>"
 "</ARTICLE>"
 ;
@@ -55,15 +56,17 @@ const guchar *gv_cssbuf =
 "INSTRUMENT { display: inline}"
 "ARTICLE, HEADLINE, AUTHOR, PARA " 
 "{ " 
+" margin: 5px 35px;"
+" display: block ; " 
+" position: static; " 
+" background-color: coral ;"
+" border: solid yellow thick;"
+
+/*
 " margin-top: 10px ;"
 " margin-left: 10px ;"
 " margin-bottom: 15px ;"
 " margin-right: 15px ;"
-" display: block ; " 
-" position: static; " 
-" background-color: coral ;"
-" border: solid yellow" 
-/*
 " border-top-width: thick ;"
 " border-top-style: solid ;"
 " border-right-width: thin ;"
