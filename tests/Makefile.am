@@ -16,13 +16,7 @@ test6_SOURCES=test6-main.c cr-test-utils.c cr-test-utils.h
 croco_lib=$(top_builddir)/src/@CROCO_LIB@
 LDADD=$(croco_lib)
 
-INCLUDES=-I$(top_srcdir)/intl \
-	-I$(top_srcdir)/src \
-	-I$(top_srcdir)/src/parser \
-	-I$(top_srcdir)/src/seleng \
-	-I$(top_srcdir)/src/layeng \
-	`pkg-config --cflags glib-2.0` \
-	$(croco_layeng_needed_includes)
+INCLUDES=-I$(top_srcdir)/intl -I$(top_srcdir)/src
 
 LDFLAGS=@GLIB2_LIBS@ @LIBXML2_LIBS@
 AM_CFLAGS=-I. @LIBXML2_CFLAGS@ @GLIB2_CFLAGS@

@@ -115,9 +115,9 @@ if test "x$GCC" = "xyes" ; then
 fi
 
 
-dnl************************
-dnl*Dodji's environment.
-dnl************************
+dnl ************************
+dnl *Dodji's environment.
+dnl ************************
 
 if test "x$LOGNAME" = "xdodji" -a "x$GCC" = "xyes" ; then
 	CFLAGS="-g -Wunused -Wimplicit -Wreturn-type -Wswitch \

@@ -1,3 +1,11 @@
+2004-02-19  Dodji Seketeli  <dodji@gnome.org>
+
+	* src/cr-sel-eng.c: 
+	(cr_sel_eng_get_matched_properties_from_cascade): Fixed a bug
+	that was "forgetting" all the properties gathered during the
+	cascading algorithm but the last ones.
+	* tests/Makefile.am: a bit of cleanup here.
+
 2004-02-14  Dodji Seketeli  <dodji@gnome.org>
 
 	* src/cr-declaration.[ch]: applied a patch from

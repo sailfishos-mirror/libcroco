@@ -1388,7 +1388,8 @@ cr_sel_eng_get_matched_properties_from_cascade  (CRSelEng *a_this,
 {
         CRStatement ** stmts_tab = NULL ;
         enum CRStatus status = CR_OK ;
-        gulong tab_size = 0, tab_len = 0, index = 0, i = 0  ;
+        gulong tab_size = 0, tab_len = 0, i = 0, total_tab_len = 0,
+                index = 0;
         enum CRStyleOrigin origin = 0 ;
         gushort stmts_chunck_size = 8 ;
         CRStyleSheet *sheet = NULL ;
@@ -1441,8 +1442,8 @@ cr_sel_eng_get_matched_properties_from_cascade  (CRSelEng *a_this,
                         cr_utils_trace_info ("Error while running "
                                              "selector engine") ;
                         goto error ;
-                }                
-                
+                }
+                total_tab_len += tab_len ;
         }
 
         /*
@@ -1451,7 +1452,7 @@ cr_sel_eng_get_matched_properties_from_cascade  (CRSelEng *a_this,
          *Make sure one can walk from the declaration to
          *the stylesheet.
          */
-        for (i = 0 ; i < tab_len ; i ++)
+        for (i = 0 ; i < total_tab_len ; i ++)
         {
                 CRStatement *stmt = stmts_tab[i] ;
 
