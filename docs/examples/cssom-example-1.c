@@ -2,7 +2,7 @@
 
 /**
  *This is an example that shows how to use
- *the libcroco css2 parsing library.
+ *the CSSOM api of the libcroco CSS2 parsing library.
  *
  *To compile it using gcc, type
  *
@@ -78,24 +78,17 @@ main (int argc, char **argv)
 		return 0;
 	}
 
-	/*
-	 *instanciate a new css object model parser.
-	 */	
-	parser = cr_om_parser_new (NULL) ;
+        /*****************************************************
+	 *Enough plumbering... now, the real libcroco stuffs.
+	 ***************************************************/
 
-	if (!parser)
-	{
-		fprintf (stderr, 
-			 "Arrgh!!! Couldn't instanciate the parser.\n");
-		return -1 ;
-	}
-
-	status = cr_om_parser_parse_file (parser, 
-					  argv[i] /*the style sheet 
-						    file path*/, 
-					  CR_ASCII /*the encoding*/,
-					  &stylesheet) ;
-
+        /*
+         *What we want here is to simply parse
+         *a CSS document using the cssom api.
+         */
+        status = cr_om_parser_simply_parse_file (argv[i] /*sheet*/,
+                                                 CR_ASCII /*the encoding*/,
+                                                 &stylesheet) ;
 	if (status == CR_OK && stylesheet)
 	{
 		/*
@@ -114,10 +107,6 @@ main (int argc, char **argv)
 		cr_stylesheet_destroy (stylesheet) ;
 		stylesheet = NULL ;
 	}
-
-	/*free the memory used by the parser*/
-	cr_om_parser_destroy (parser) ;
-	parser = NULL ;
 
 	return 0 ;
 }
