@@ -70,9 +70,16 @@ cr_stylesheet_new (CRStatement *a_stmts)
 void
 cr_stylesheet_dump (CRStyleSheet *a_this, FILE *a_fp)
 {
+	CRStatement * cur_stmt = NULL ;
+
 	g_return_if_fail (a_this && a_this->statements) ;
 
-	cr_statement_dump (a_this->statements, a_fp, 0) ;
+	for (cur_stmt = a_this->statements ; 
+	     cur_stmt ;
+	     cur_stmt = cur_stmt->next)
+	{
+		cr_statement_dump (cur_stmt, a_fp, 0) ;
+	}
 }
 
 /**

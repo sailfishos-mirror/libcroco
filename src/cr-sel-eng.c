@@ -345,16 +345,20 @@ sel_matches_node_real (CRSelEng *a_this, CRSimpleSel *a_sel,
         
 	g_return_val_if_fail (a_this && PRIVATE (a_this)
 			      && a_this && a_node 
-			      && a_node->type == XML_ELEMENT_NODE
 			      && a_result,
 			      CR_BAD_PARAM_ERROR) ;
+
+        *a_result = FALSE ;
+
+        if (a_node->type != XML_ELEMENT_NODE)
+                return CR_OK ;
 
 	/*go and get the last simple selector of the list*/
 	for (cur_sel = a_sel ; 
 	     cur_sel && cur_sel->next ; 
 	     cur_sel = cur_sel->next) ;
 
-        *a_result = FALSE ;
+        
 
 	for (cur_node = a_node ; cur_sel ; cur_sel = cur_sel->prev)
 	{
@@ -444,7 +448,7 @@ sel_matches_node_real (CRSelEng *a_this, CRSimpleSel *a_sel,
                 if (!cur_sel->prev)
                         break ;
 
-                switch (cur_sel->prev->combinator)
+                switch (cur_sel->combinator)
                 {
                 case NO_COMBINATOR:
                         break ;
@@ -745,9 +749,14 @@ cr_sel_eng_sel_matches_node (CRSelEng *a_this, CRSimpleSel *a_sel,
 {
 	g_return_val_if_fail (a_this && PRIVATE (a_this)
 			      && a_this && a_node 
-			      && a_node->type == XML_ELEMENT_NODE
 			      && a_result,
 			      CR_BAD_PARAM_ERROR) ;
+
+        if (a_node->type != XML_ELEMENT_NODE)
+        {
+                *a_result = FALSE ;
+                return CR_OK ;
+        }
 
         return sel_matches_node_real (a_this, a_sel, a_node,
                                       a_result, TRUE) ;

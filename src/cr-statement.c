@@ -1197,49 +1197,44 @@ cr_statement_at_font_face_rule_add_decl (CRStatement *a_this,
 void
 cr_statement_dump (CRStatement *a_this, FILE *a_fp, gulong a_indent)
 {
-	CRStatement *cur = NULL ;
-
 	g_return_if_fail (a_this) ;
 
-	for (cur = a_this ; cur ; cur = cur->next)
+	if (a_this->prev)
 	{
-		if (cur->prev)
-		{
-			fprintf (a_fp,"\n\n") ;
-		}
+		fprintf (a_fp,"\n\n") ;
+	}
 
-		switch (cur->type)
-		{
-		case RULESET_STMT:
-			cr_statement_dump_ruleset (cur, a_fp, a_indent) ;
-			break ;
+	switch (a_this->type)
+	{
+	case RULESET_STMT:
+		cr_statement_dump_ruleset (a_this, a_fp, a_indent) ;
+		break ;
 
-		case AT_FONT_FACE_RULE_STMT:
-			cr_statement_dump_font_face_rule 
-				(cur, a_fp, a_indent);
-			break ;
+	case AT_FONT_FACE_RULE_STMT:
+		cr_statement_dump_font_face_rule 
+			(a_this, a_fp, a_indent);
+		break ;
 
-		case AT_CHARSET_RULE_STMT:
-			cr_statement_dump_charset (cur, a_fp, a_indent) ;
-			break ;
+	case AT_CHARSET_RULE_STMT:
+		cr_statement_dump_charset (a_this, a_fp, a_indent) ;
+		break ;
 
-		case AT_PAGE_RULE_STMT:
-			cr_statement_dump_page (cur, a_fp, a_indent) ;
-			break ;
+	case AT_PAGE_RULE_STMT:
+		cr_statement_dump_page (a_this, a_fp, a_indent) ;
+		break ;
 
-		case AT_MEDIA_RULE_STMT:
-			cr_statement_dump_media_rule (cur, a_fp, a_indent) ;
-			break ;
+	case AT_MEDIA_RULE_STMT:
+		cr_statement_dump_media_rule (a_this, a_fp, a_indent) ;
+		break ;
 
-		case AT_IMPORT_RULE_STMT:
-			cr_statement_dump_import_rule (cur, a_fp, a_indent) ;
-			break ;
+	case AT_IMPORT_RULE_STMT:
+		cr_statement_dump_import_rule (a_this, a_fp, a_indent) ;
+		break ;
 
-		default :
-			fprintf (a_fp, "Statement unrecognized at %s:%d", 
-				 __FILE__, __LINE__) ;
-			break ;
-		}
+	default :
+		fprintf (a_fp, "Statement unrecognized at %s:%d", 
+			 __FILE__, __LINE__) ;
+		break ;
 	}
 }
 

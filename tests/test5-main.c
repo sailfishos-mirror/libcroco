@@ -56,6 +56,11 @@ display_about (char *prg_name) ;
 static enum CRStatus
 test_sel_eng (guchar * a_file_uri) ;
 
+static void
+walk_xml_tree_and_lookup_rules (CRSelEng *a_sel_eng,
+                                CRStyleSheet *a_sheet,
+                                xmlNode *a_node) ;
+
 /**
  *Displays the usage of the test
  *facility.
@@ -69,8 +74,7 @@ display_help (char *prg_name)
         g_print ("usage: %s <file-to-parse>\n", prg_name) ;
         g_print ("\t <file-to-parse>: the file to parse\n") ;
         g_print ("\n\n") ;
-        g_print ("Tests the cr_parser_parse () method.\n") ;
-        g_print ("Tests the parsing following the css core syntax\n") ;
+        g_print ("Test the selection engine") ;
         g_print ("Returns OK if the status is CR_OK, KO otherwise\n") ;
         g_print ("\n\n") ;
 }
@@ -95,6 +99,58 @@ display_about (char *prg_name)
 }
 
 
+static void
+walk_xml_tree_and_lookup_rules (CRSelEng *a_sel_eng,
+                                CRStyleSheet *a_sheet,
+                                xmlNode *a_node)
+{
+        CRStatement **stmts_tab = NULL;
+        gulong tab_len = 0, i= 0 ;
+        enum CRStatus status = CR_OK ;
+
+        xmlNode *cur_node = a_node ;
+
+        for (cur_node = a_node ;cur_node ; cur_node = cur_node->next)
+        {
+                status = cr_sel_eng_sel_get_matched_rulesets 
+                (a_sel_eng, a_sheet, 
+                 cur_node, &stmts_tab, &tab_len) ;
+
+                if (status == CR_OK && tab_len)
+                {
+                        g_print ("'''''''''''''''''''''''''\n") ;
+                        g_print ("xml start element: %s\n",
+                                 cur_node->name);
+
+                        for (i = 0 ; i < tab_len; i++)
+                        {
+                                if (stmts_tab[i])
+                                {
+                                        g_print ("\n") ;
+                                        cr_statement_dump (stmts_tab[i],
+                                                           stdout, 2) ;
+                                }
+                        }
+                        g_print ("xml end element: %s\n",
+                                 cur_node->name);
+                        g_print ("'''''''''''''''''''''''''\n") ;
+
+                        if (stmts_tab)
+                        {
+                                g_free (stmts_tab) ;
+                                stmts_tab= NULL ;
+                        }
+                }
+
+                if (cur_node->children)
+                {
+                        walk_xml_tree_and_lookup_rules 
+                                (a_sel_eng, a_sheet,
+                                 cur_node->children) ;
+                }
+        }
+}
+
 /**
  *The test of the cr_input_read_byte() method.
  *Reads the each byte of a_file_uri using the
@@ -113,8 +169,6 @@ test_sel_eng (guchar * a_file_uri)
         xmlDoc * xml_doc = NULL ;
         xmlNode *cur_node = NULL ;
         CRSelEng *selection_engine = NULL ;
-        CRStatement **stmts_tab = NULL ;
-        gulong tab_len = 0 ;
 
         g_return_val_if_fail (a_file_uri, CR_BAD_PARAM_ERROR) ;
 
@@ -137,11 +191,11 @@ test_sel_eng (guchar * a_file_uri)
 
         selection_engine = cr_sel_eng_new () ;
 
-        cur_node = xml_doc->children->children ;
+        cur_node = xml_doc->children ;
 
-        status = cr_sel_eng_sel_get_matched_rulesets 
-                (selection_engine, stylesheet, 
-                 cur_node, &stmts_tab, &tab_len) ;
+        walk_xml_tree_and_lookup_rules (selection_engine,
+                                        stylesheet,
+                                        cur_node) ;
 
         if (parser)
         {
