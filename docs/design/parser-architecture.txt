@@ -33,11 +33,11 @@ pointers values before dereferencing them for example...
 Conformance
 -----------
 We try to stick to the css spec. We now this is almost impossible to achieve
-given the ressource we have but we think it is sane target to chase.
+given the ressource we have but we think it is a sane target to chase.
 
 II) Overall architecture
 =========================
-The parser is organized around two main classes :
+The parser is organized around several main classes :
 
 1/ CRInput
 2/ CRTknzr (Tokenizer or lexer)
@@ -55,7 +55,7 @@ and remote data sources (sockets, url-identified ressources) but at the
 moment, it abstracts local data sources only.
 
 Adding a new type of data source should be transparent for the
-classes that already use CRInput. After all, it is what is abstraction about :)
+classes that already use CRInput. After all, this is what abstraction is about :)
 
 
 II.2 The CRTknzr class
@@ -74,7 +74,7 @@ The core of the parser.
 The main job of this class is to provide a cr_parser_parse_stylesheet() 
 method. During the parsing (the execution of the cr_parser_stylesheet())
 the parser sents events to notify the application when it encounters
-remarquable css constructions. This is the SAC (Simple api for CSS) api model
+remarquable css constructions. This is the SAC (Simple api for CSS) api model.
 
 To achieve that task, almost each production of the css grammar 
 has a matching parsing function (or method) in this class.
@@ -102,11 +102,11 @@ to:
              * try to recognize a substring of the incoming character string
 	     as something that matches a given css grammar production.
 
-             eg: the job of the cr_parser_parse_ruleset() is to try 
+             e.g: the job of the cr_parser_parse_ruleset() is to try 
 	     to recognize if "what" comes next in the input strean 
 	     is a css2 "ruleset".
 
-             * Builds a basic abstract data structure to 
+             * build a basic abstract data structure to 
 	     store the information encountered
 	     during the parsing of the current character string.
 
@@ -140,5 +140,8 @@ to:
 	     the parsing function hasn't been called at all.
 
 	     
+II.4 The selection Engine.
+--------------------------
+
 
  

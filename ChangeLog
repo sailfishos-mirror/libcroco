@@ -1,3 +1,7 @@
+2003-06-23  Dodji Seketeli  <dodji()47()seketeli()dot()org>
+
+	* docs/design/parser-architecture.txt: more bits on this.
+
 2003-06-22  Dodji Seketeli  <dodji at seketeli dot org>
 
 	* src/parser/cr-statement.c: added
