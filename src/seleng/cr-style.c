@@ -1424,7 +1424,8 @@ cr_style_new_from_ruleset (CRStatement *a_stmt,
  *@return CR_OK upon sucessfull statement, an error code otherwise.
  */
 enum CRStatus
-cr_style_set_style_from_ruleset (CRStyle *a_this, CRStatement *a_stmt,
+cr_style_set_style_from_ruleset (CRStyle *a_this, 
+                                 CRStatement *a_stmt,
                                  CRStyle *a_parent_style)
 {
         CRDeclaration *decl = NULL ;
