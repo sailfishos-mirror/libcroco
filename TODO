@@ -1,9 +1,16 @@
 
 *coding:)
 
-Code the cascading in cr-sel-eng.c
-     code the cascade precedence rules (in
-     put_css_properties_in_hashtable() )
+Go forward in the cascading implementation in cr-sel-eng.c
+     test/debug it.
+     write test cases to test/debug/validate this kind of stylesheets:
+       P {border: thick}
+       P {display: block}
+       /*
+        *stylesheets where the same selector is used several times
+        *to define different declarations.
+        */
+     write test cases to test/debug/validate the multi stylesheet support.
 
 
 *Doc:)
