@@ -1,3 +1,7 @@
+2003-03-19  Gaël Chamoulaud  <strider@freespiders.org>
+
+	* Relicense from GPL -> LGPL
+
 2003-03-18  Gaël Chamoulaud  <strider@freespiders.org>
 
 	* configure.in: fixed a configure bug. Make sure to properly

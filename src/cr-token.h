@@ -1,27 +1,23 @@
 /* -*- Mode: C; indent-tabs-mode:nil; c-basic-offset: 8-*- */
 
 /*
- *This file is part of The Croco Library
+ * This file is part of The Croco Library
  *
- *The Croco Library is free software; 
- *you can redistribute it and/or modify it under the terms of 
- *the GNU General Public License as 
- *published by the Free Software Foundation; either version 2, 
- *or (at your option) any later version.
+ * Copyright (C) 2002-2003 Dodji Seketeli <dodji@seketeli.org>
  *
- *GNU The Croco Library is distributed in the hope 
- *that it will be useful, but WITHOUT ANY WARRANTY; 
- *without even the implied warranty of 
- *MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- *See the GNU General Public License for more details.
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of version 2.1 of the GNU Lesser General Public
+ * License as published by the Free Software Foundation.
  *
- *You should have received a copy of the 
- *GNU General Public License along with The Croco Library; 
- *see the file COPYING. If not, write to 
- *the Free Software Foundation, Inc., 
- *59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
  *
- *Copyright 2002-2003 Dodji Seketeli <dodji@seketeli.org>
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
+ * USA
  */
 
 /*
@@ -49,7 +45,7 @@ extern "C"
 		CDC_TK,
 		INCLUDES_TK,
 		DASHMATCH_TK,
-                COMMENT_TK,
+        COMMENT_TK,
 		STRING_TK,
 		IDENT_TK,
 		HASH_TK,
@@ -69,17 +65,17 @@ extern "C"
 		DIMEN_TK,
 		PERCENTAGE_TK,
 		NUMBER_TK,
-                RGB_TK,
+        RGB_TK,
 		URI_TK,
 		FUNCTION_TK,
 		UNICODERANGE_TK,
-                SEMICOLON_TK,
-                CBO_TK, /*opening curly bracket*/
-                CBC_TK, /*closing curly bracket*/
-                PO_TK, /*opening parenthesis*/
-                PC_TK, /*closing parenthesis*/
-                BO_TK, /*opening bracket*/
-                BC_TK, /*closing bracket*/
+        SEMICOLON_TK,
+        CBO_TK, /*opening curly bracket*/
+        CBC_TK, /*closing curly bracket*/
+        PO_TK, /*opening parenthesis*/
+        PC_TK, /*closing parenthesis*/
+        BO_TK, /*opening bracket*/
+        BC_TK, /*closing bracket*/
 		DELIM_TK,
 	} ;
 
@@ -115,108 +111,108 @@ extern "C"
 		union
 		{
 			GString *str ;
-                        CRRgb *rgb ;
+            CRRgb *rgb ;
 			CRNum *num ;
 			guint32 unichar ;
 		} ;
 
-                GString * dimen ;
+        GString * dimen ;
 	} ;
 
-	CRToken*
-	cr_token_new (void) ;
-
-	enum CRStatus
-	cr_token_set_s (CRToken *a_this) ;
-
-	enum CRStatus
-	cr_token_set_cdo (CRToken *a_this) ;
-
-	enum CRStatus
-	cr_token_set_cdc (CRToken *a_this) ;
-
-	enum CRStatus
-	cr_token_set_includes (CRToken *a_this) ;
-
-	enum CRStatus
-	cr_token_set_dashmatch (CRToken *a_this) ;
-
+        CRToken*
+        cr_token_new (void) ;
+        
+        enum CRStatus
+        cr_token_set_s (CRToken *a_this) ;
+        
+        enum CRStatus
+        cr_token_set_cdo (CRToken *a_this) ;
+        
+        enum CRStatus
+        cr_token_set_cdc (CRToken *a_this) ;
+        
+        enum CRStatus
+        cr_token_set_includes (CRToken *a_this) ;
+        
+        enum CRStatus
+        cr_token_set_dashmatch (CRToken *a_this) ;
+        
         enum CRStatus
         cr_token_set_comment (CRToken *a_this, GString *a_str) ;
-
-	enum CRStatus
-	cr_token_set_string (CRToken *a_this, GString *a_str) ;
-
-	enum CRStatus
-	cr_token_set_ident (CRToken *a_this, GString * a_ident) ;
-
-	enum CRStatus
-	cr_token_set_hash (CRToken *a_this, GString *a_hash) ;
-
+        
+        enum CRStatus
+        cr_token_set_string (CRToken *a_this, GString *a_str) ;
+        
+        enum CRStatus
+        cr_token_set_ident (CRToken *a_this, GString * a_ident) ;
+        
+        enum CRStatus
+        cr_token_set_hash (CRToken *a_this, GString *a_hash) ;
+        
         enum CRStatus
         cr_token_set_rgb (CRToken *a_this, CRRgb *a_rgb) ;
-
-	enum CRStatus
-	cr_token_set_import_sym (CRToken *a_this) ;
-
-	enum CRStatus
-	cr_token_set_page_sym (CRToken *a_this) ;
-
-	enum CRStatus
-	cr_token_set_media_sym (CRToken *a_this) ;
-
-	enum CRStatus
-	cr_token_set_font_face_sym (CRToken *a_this) ;
-
-	enum CRStatus
-	cr_token_set_charset_sym (CRToken *a_this) ;
-
-	enum CRStatus
-	cr_token_set_atkeyword (CRToken *a_this, GString *a_atname) ;
-
-	enum CRStatus
-	cr_token_set_important_sym (CRToken *a_this) ;
-
-	enum CRStatus
-	cr_token_set_ems (CRToken *a_this, CRNum *a_num) ;
-
-	enum CRStatus
-	cr_token_set_exs (CRToken *a_this, CRNum *a_num) ;
-
-	enum CRStatus
-	cr_token_set_length (CRToken *a_this, CRNum *a_num,
-			     enum CRTokenExtraType a_et) ;
-
-	enum CRStatus
-	cr_token_set_angle (CRToken *a_this, CRNum *a_num,
-			    enum CRTokenExtraType a_et) ;
-
-	enum CRStatus
-	cr_token_set_time (CRToken *a_this, CRNum *a_num,
-			   enum CRTokenExtraType a_et) ;
-
-	enum CRStatus
-	cr_token_set_freq (CRToken *a_this, CRNum *a_num,
-			   enum CRTokenExtraType a_et) ;
-	enum CRStatus
-	cr_token_set_dimen (CRToken *a_this, CRNum *a_num,
-			    GString *a_dim) ;
-
-	enum CRStatus
-	cr_token_set_percentage (CRToken *a_this, CRNum *a_num) ;
-
-	enum CRStatus
-	cr_token_set_number (CRToken *a_this, CRNum *a_num) ;
-
-	enum CRStatus
-	cr_token_set_uri (CRToken *a_this, GString *a_uri) ;
-
+        
+        enum CRStatus
+        cr_token_set_import_sym (CRToken *a_this) ;
+        
+        enum CRStatus
+        cr_token_set_page_sym (CRToken *a_this) ;
+        
+        enum CRStatus
+        cr_token_set_media_sym (CRToken *a_this) ;
+        
+        enum CRStatus
+        cr_token_set_font_face_sym (CRToken *a_this) ;
+        
+        enum CRStatus
+        cr_token_set_charset_sym (CRToken *a_this) ;
+        
+        enum CRStatus
+        cr_token_set_atkeyword (CRToken *a_this, GString *a_atname) ;
+        
+        enum CRStatus
+        cr_token_set_important_sym (CRToken *a_this) ;
+        
+        enum CRStatus
+        cr_token_set_ems (CRToken *a_this, CRNum *a_num) ;
+        
+        enum CRStatus
+        cr_token_set_exs (CRToken *a_this, CRNum *a_num) ;
+        
+        enum CRStatus
+        cr_token_set_length (CRToken *a_this, CRNum *a_num,
+                             enum CRTokenExtraType a_et) ;
+        
+        enum CRStatus
+        cr_token_set_angle (CRToken *a_this, CRNum *a_num,
+                            enum CRTokenExtraType a_et) ;
+        
+        enum CRStatus
+        cr_token_set_time (CRToken *a_this, CRNum *a_num,
+                           enum CRTokenExtraType a_et) ;
+        
+        enum CRStatus
+        cr_token_set_freq (CRToken *a_this, CRNum *a_num,
+                           enum CRTokenExtraType a_et) ;
+        enum CRStatus
+        cr_token_set_dimen (CRToken *a_this, CRNum *a_num,
+                            GString *a_dim) ;
+        
+        enum CRStatus
+        cr_token_set_percentage (CRToken *a_this, CRNum *a_num) ;
+        
+        enum CRStatus
+        cr_token_set_number (CRToken *a_this, CRNum *a_num) ;
+        
+        enum CRStatus
+        cr_token_set_uri (CRToken *a_this, GString *a_uri) ;
+        
         enum CRStatus
         cr_token_set_function (CRToken *a_this, GString *a_fun_name) ;
-
+        
         enum CRStatus
         cr_token_set_bc (CRToken *a_this) ;
-
+        
         enum CRStatus
         cr_token_set_bo (CRToken *a_this) ;
         
@@ -245,11 +241,11 @@ extern "C"
 				   CRUnicodeRange *a_range) ;
 	*/
 
-	void
-	cr_token_destroy (CRToken *a_this) ;
-
+        void
+        cr_token_destroy (CRToken *a_this) ;
+        
 	
-
+        
 #ifdef __cplusplus
 } /*extern "C"*/
 #endif

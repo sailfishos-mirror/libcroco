@@ -1,26 +1,23 @@
 /* -*- Mode: C; indent-tabs-mode: nil; c-basic-offset: 8 -*- */
+
 /*
- *This file is part of The Croco Library
+ * This file is part of The Croco Library
  *
- *The Croco Library is free software; 
- *you can redistribute it and/or modify it under the terms of 
- *the GNU General Public License as 
- *published by the Free Software Foundation; either version 2, 
- *or (at your option) any later version.
+ * Copyright (C) 2002-2003 Dodji Seketeli <dodji@seketeli.org>
  *
- *GNU The Croco Library is distributed in the hope 
- *that it will be useful, but WITHOUT ANY WARRANTY; 
- *without even the implied warranty of 
- *MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- *See the GNU General Public License for more details.
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of version 2.1 of the GNU Lesser General Public
+ * License as published by the Free Software Foundation.
  *
- *You should have received a copy of the 
- *GNU General Public License along with The Croco Library; 
- *see the file COPYING. If not, write to 
- *the Free Software Foundation, Inc., 
- *59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
  *
- *Copyright 2002-2003 Dodji Seketeli <dodji@seketeli.org>
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
+ * USA
  */
 
 /*
@@ -493,152 +490,152 @@ cr_utils_read_char_from_utf8_buf (guchar * a_in, gulong a_in_len,
                                   guint32 *a_out, gulong *a_consumed)
 {
 	gulong in_len = 0, in_index = 0, nb_bytes_2_decode = 0 ;
-        enum CRStatus status = CR_OK ;
-
+    enum CRStatus status = CR_OK ;
+    
 	/*
-         *to store the final decoded 
+     *to store the final decoded 
 	 *unicode char
 	 */
 	guint32 c = 0 ;
-
-        g_return_val_if_fail (a_in && a_out && a_out
-                              && a_consumed, CR_BAD_PARAM_ERROR) ;
-
-        if (a_in_len < 1)
-        {
-                status = CR_OK ;
-                goto end ;
-        }
-
-        in_len = a_in_len ;
-
-        if (*a_in <= 0x7F) 
-        {
-                /*
-                 *7 bits long char
-                 *encoded over 1 byte:
-                 * 0xxx xxxx
-                 */
-                c = *a_in ;
-                nb_bytes_2_decode = 1 ;
-
-        } 
-        else if ((*a_in & 0xE0) == 0xC0) 
-        {
-                /*
-                 *up to 11 bits long char.
-                 *encoded over 2 bytes:
-                 *110x xxxx  10xx xxxx
-                 */
-                c = *a_in & 0x1F ;
-                nb_bytes_2_decode = 2 ;
-
-        } 
-        else if ((*a_in & 0xF0) == 0xE0) 
-        {
-                /*
-                 *up to 16 bit long char
-                 *encoded over 3 bytes:
-                 *1110 xxxx  10xx xxxx  10xx xxxx
-                 */
-                c = *a_in & 0x0F ;
-                nb_bytes_2_decode = 3 ;
-
-        } 
-        else if ((*a_in & 0xF8) == 0xF0) 
-        {
-                /*
-                 *up to 21 bits long char
-                 *encoded over 4 bytes:
-                 *1111 0xxx  10xx xxxx  10xx xxxx  10xx xxxx
-                 */
-                c = *a_in & 0x7 ;
-                nb_bytes_2_decode = 4 ;
-
-        } 
-        else if ((*a_in & 0xFC) == 0xF8) 
-        {
-                /*
-                 *up to 26 bits long char
-                 *encoded over 5 bytes.
-                 *1111 10xx  10xx xxxx  10xx xxxx  
-                 *10xx xxxx  10xx xxxx
-                 */
-                c = *a_in & 3 ;
-                nb_bytes_2_decode = 5 ;
-
-        } 
-        else if ((*a_in & 0xFE) == 0xFC) 
-        {
-                /*
-                 *up to 31 bits long char
-                 *encoded over 6 bytes:
-                 *1111 110x  10xx xxxx  10xx xxxx  
-                 *10xx xxxx  10xx xxxx  10xx xxxx
-                 */
-                c = *a_in & 1 ;
-                nb_bytes_2_decode = 6 ;
-
-        } 
-        else 
-        {
-                /*BAD ENCODING*/
-                goto end ;
-        }
-
-        if (nb_bytes_2_decode > a_in_len)
-        {
-                status = CR_END_OF_INPUT_ERROR ;
-                goto end ;
-        }
-
+    
+    g_return_val_if_fail (a_in && a_out && a_out
+                          && a_consumed, CR_BAD_PARAM_ERROR) ;
+    
+    if (a_in_len < 1)
+    {
+        status = CR_OK ;
+        goto end ;
+    }
+    
+    in_len = a_in_len ;
+    
+    if (*a_in <= 0x7F) 
+    {
         /*
-         *Go and decode the remaining byte(s)
-         *(if any) to get the current character.
+         *7 bits long char
+         *encoded over 1 byte:
+         * 0xxx xxxx
          */
-        for ( in_index = 1 ;
-              in_index < nb_bytes_2_decode ;
-              in_index ++) 
-        {
-                /*byte pattern must be: 10xx xxxx*/
-                if ((a_in[in_index] & 0xC0) != 0x80)
-                {
-                        goto end ;
-                }
-
-                c = (c << 6) | (a_in[in_index] & 0x3F) ;
-        }
-
-        /*
-         *The decoded ucs4 char is now
-         *in c.
-         */
+        c = *a_in ;
+        nb_bytes_2_decode = 1 ;
         
-        /************************
-         *Some security tests
-         ***********************/
-
-        /*be sure c is a char*/
-        if (c == 0xFFFF || c == 0xFFFE) goto end ;
-
-        /*be sure c is inferior to the max ucs4 char value*/
-        if (c > 0x10FFFF) goto end ;
-
+    } 
+    else if ((*a_in & 0xE0) == 0xC0) 
+    {
         /*
-         *c must be less than UTF16 "lower surrogate begin"
-         *or higher than UTF16 "High surrogate end"
+         *up to 11 bits long char.
+         *encoded over 2 bytes:
+         *110x xxxx  10xx xxxx
          */
-        if (c >= 0xD800 && c <= 0xDFFF) goto end ;
-
-        /*Avoid characters that equals zero*/
-        if (c == 0) goto end ;
-
-        *a_out = c ;
-
+        c = *a_in & 0x1F ;
+        nb_bytes_2_decode = 2 ;
+        
+    } 
+    else if ((*a_in & 0xF0) == 0xE0) 
+    {
+        /*
+         *up to 16 bit long char
+         *encoded over 3 bytes:
+         *1110 xxxx  10xx xxxx  10xx xxxx
+         */
+        c = *a_in & 0x0F ;
+        nb_bytes_2_decode = 3 ;
+        
+    } 
+    else if ((*a_in & 0xF8) == 0xF0) 
+    {
+        /*
+         *up to 21 bits long char
+         *encoded over 4 bytes:
+         *1111 0xxx  10xx xxxx  10xx xxxx  10xx xxxx
+         */
+        c = *a_in & 0x7 ;
+        nb_bytes_2_decode = 4 ;
+        
+    } 
+    else if ((*a_in & 0xFC) == 0xF8) 
+    {
+        /*
+         *up to 26 bits long char
+         *encoded over 5 bytes.
+         *1111 10xx  10xx xxxx  10xx xxxx  
+         *10xx xxxx  10xx xxxx
+         */
+        c = *a_in & 3 ;
+        nb_bytes_2_decode = 5 ;
+        
+    } 
+    else if ((*a_in & 0xFE) == 0xFC) 
+    {
+        /*
+         *up to 31 bits long char
+         *encoded over 6 bytes:
+         *1111 110x  10xx xxxx  10xx xxxx  
+         *10xx xxxx  10xx xxxx  10xx xxxx
+         */
+        c = *a_in & 1 ;
+        nb_bytes_2_decode = 6 ;
+        
+    } 
+    else 
+    {
+        /*BAD ENCODING*/
+        goto end ;
+    }
+    
+    if (nb_bytes_2_decode > a_in_len)
+    {
+        status = CR_END_OF_INPUT_ERROR ;
+        goto end ;
+    }
+    
+    /*
+     *Go and decode the remaining byte(s)
+     *(if any) to get the current character.
+     */
+    for ( in_index = 1 ;
+          in_index < nb_bytes_2_decode ;
+          in_index ++) 
+    {
+        /*byte pattern must be: 10xx xxxx*/
+        if ((a_in[in_index] & 0xC0) != 0x80)
+        {
+            goto end ;
+        }
+        
+        c = (c << 6) | (a_in[in_index] & 0x3F) ;
+    }
+    
+    /*
+     *The decoded ucs4 char is now
+     *in c.
+     */
+    
+    /************************
+     *Some security tests
+     ***********************/
+    
+    /*be sure c is a char*/
+    if (c == 0xFFFF || c == 0xFFFE) goto end ;
+    
+    /*be sure c is inferior to the max ucs4 char value*/
+    if (c > 0x10FFFF) goto end ;
+    
+    /*
+     *c must be less than UTF16 "lower surrogate begin"
+     *or higher than UTF16 "High surrogate end"
+     */
+    if (c >= 0xD800 && c <= 0xDFFF) goto end ;
+    
+    /*Avoid characters that equals zero*/
+    if (c == 0) goto end ;
+    
+    *a_out = c ;
+    
  end:
-        *a_consumed = nb_bytes_2_decode ;
-
-        return status ;
+    *a_consumed = nb_bytes_2_decode ;
+    
+    return status ;
 }
 
 

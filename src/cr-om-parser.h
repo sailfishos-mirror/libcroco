@@ -1,27 +1,23 @@
 /* -*- Mode: C; indent-tabs-mode:nil; c-basic-offset: 8-*- */
 
 /*
- *This file is part of The Croco Library
+ * This file is part of The Croco Library
  *
- *The Croco Library is free software; 
- *you can redistribute it and/or modify it under the terms of 
- *the GNU General Public License as 
- *published by the Free Software Foundation; either version 2, 
- *or (at your option) any later version.
+ * Copyright (C) 2002-2003 Dodji Seketeli <dodji@seketeli.org>
  *
- *GNU The Croco Library is distributed in the hope 
- *that it will be useful, but WITHOUT ANY WARRANTY; 
- *without even the implied warranty of 
- *MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- *See the GNU General Public License for more details.
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of version 2.1 of the GNU Lesser General Public
+ * License as published by the Free Software Foundation.
  *
- *You should have received a copy of the 
- *GNU General Public License along with The Croco Library; 
- *see the file COPYING. If not, write to 
- *the Free Software Foundation, Inc., 
- *59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
  *
- *Copyright 2002-2003 Dodji Seketeli <dodji@seketeli.org>
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
+ * USA
  */
 
 /*

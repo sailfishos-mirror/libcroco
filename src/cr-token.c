@@ -1,27 +1,23 @@
 /* -*- Mode: C; indent-tabs-mode:nil; c-basic-offset: 8-*- */
 
 /*
- *This file is part of The Croco Library
+ * This file is part of The Croco Library
  *
- *The Croco Library is free software; 
- *you can redistribute it and/or modify it under the terms of 
- *the GNU General Public License as 
- *published by the Free Software Foundation; either version 2, 
- *or (at your option) any later version.
+ * Copyright (C) 2002-2003 Dodji Seketeli <dodji@seketeli.org>
  *
- *GNU The Croco Library is distributed in the hope 
- *that it will be useful, but WITHOUT ANY WARRANTY; 
- *without even the implied warranty of 
- *MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- *See the GNU General Public License for more details.
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of version 2.1 of the GNU Lesser General Public
+ * License as published by the Free Software Foundation.
  *
- *You should have received a copy of the 
- *GNU General Public License along with The Croco Library; 
- *see the file COPYING. If not, write to 
- *the Free Software Foundation, Inc., 
- *59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
  *
- *Copyright 2002-2003 Dodji Seketeli <dodji@seketeli.org>
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
+ * USA
  */
 
 /*
@@ -57,61 +53,61 @@ cr_token_clear (CRToken *a_this)
 	case MEDIA_SYM_TK:
 	case FONT_FACE_SYM_TK:
 	case CHARSET_SYM_TK:
-        case IMPORT_SYM_TK:
+    case IMPORT_SYM_TK:
 	case IMPORTANT_SYM_TK:        
-                break ;
+        break ;
 
 	case STRING_TK:
-        case IDENT_TK:
-        case HASH_TK:
-        case URI_TK:
-        case FUNCTION_TK:
-        case COMMENT_TK:
-                if (a_this->str)
-                {
-                        g_string_free (a_this->str, TRUE) ;
-                        a_this->str = NULL ;
-                }
+    case IDENT_TK:
+    case HASH_TK:
+    case URI_TK:
+    case FUNCTION_TK:
+    case COMMENT_TK:
+        if (a_this->str)
+        {
+            g_string_free (a_this->str, TRUE) ;
+            a_this->str = NULL ;
+        }
 		break ;
-
+        
 	case EMS_TK:
-        case EXS_TK:
-        case LENGTH_TK:
-        case ANGLE_TK:
-        case TIME_TK:
-        case FREQ_TK:
-        case PERCENTAGE_TK:
-        case NUMBER_TK:
-                if (a_this->num)
-                {
-                        cr_num_destroy (a_this->num) ;
-                        a_this->num = NULL ;
-                }
+    case EXS_TK:
+    case LENGTH_TK:
+    case ANGLE_TK:
+    case TIME_TK:
+    case FREQ_TK:
+    case PERCENTAGE_TK:
+    case NUMBER_TK:
+        if (a_this->num)
+        {
+            cr_num_destroy (a_this->num) ;
+            a_this->num = NULL ;
+        }
 		break ;
-
+        
 	case DIMEN_TK:
-                if (a_this->num)
-                {
-                        cr_num_destroy (a_this->num) ;
-                        a_this->num = NULL ;
-                }
-
-                if (a_this->dimen)
-                {
-                        g_string_free (a_this->dimen, TRUE) ;
-                        a_this->dimen = NULL ;
-                }
-
+        if (a_this->num)
+        {
+            cr_num_destroy (a_this->num) ;
+            a_this->num = NULL ;
+        }
+        
+        if (a_this->dimen)
+        {
+            g_string_free (a_this->dimen, TRUE) ;
+            a_this->dimen = NULL ;
+        }
+        
 		break ;
 		
 	case UNICODERANGE_TK:
-                /*not supported yet.*/
+        /*not supported yet.*/
 		break ;	
-
+        
 	default:
 		break ;
 	}
-
+    
 	a_this->type = NO_TK ;
 }
 
