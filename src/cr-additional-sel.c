@@ -34,21 +34,19 @@
 CRAdditionalSel *
 cr_additional_sel_new (void)
 {
-	CRAdditionalSel *result = NULL ;
+        CRAdditionalSel *result = NULL;
 
-	result = g_try_malloc (sizeof (CRAdditionalSel)) ;
+        result = g_try_malloc (sizeof (CRAdditionalSel));
 
-	if (result == NULL)
-	{
-		cr_utils_trace_debug ("Out of memory") ;
-		return NULL ;
-	}
+        if (result == NULL) {
+                cr_utils_trace_debug ("Out of memory");
+                return NULL;
+        }
 
-	memset (result, 0, sizeof (CRAdditionalSel)) ;
+        memset (result, 0, sizeof (CRAdditionalSel));
 
-	return result ;
+        return result;
 }
-
 
 /**
  *Constructor of #CRAdditionalSel.
@@ -59,15 +57,15 @@ cr_additional_sel_new (void)
 CRAdditionalSel *
 cr_additional_sel_new_with_type (enum AddSelectorType a_sel_type)
 {
-        CRAdditionalSel * result = NULL ;
+        CRAdditionalSel *result = NULL;
 
-        result = cr_additional_sel_new () ;
+        result = cr_additional_sel_new ();
 
-        g_return_val_if_fail (result, NULL) ;
+        g_return_val_if_fail (result, NULL);
 
-        result->type = a_sel_type ;
+        result->type = a_sel_type;
 
-        return result ;
+        return result;
 }
 
 /**
@@ -79,18 +77,16 @@ cr_additional_sel_new_with_type (enum AddSelectorType a_sel_type)
  *
  */
 void
-cr_additional_sel_set_class_name (CRAdditionalSel *a_this,
-				  GString *a_class_name)
+cr_additional_sel_set_class_name (CRAdditionalSel * a_this,
+                                  GString * a_class_name)
 {
-	g_return_if_fail (a_this 
-			  && a_this->type == CLASS_ADD_SELECTOR) ;
-	
-	if (a_this->content.class_name)
-	{
-		g_string_free (a_this->content.class_name, TRUE) ;
-	}
+        g_return_if_fail (a_this && a_this->type == CLASS_ADD_SELECTOR);
 
-	a_this->content.class_name = a_class_name ;
+        if (a_this->content.class_name) {
+                g_string_free (a_this->content.class_name, TRUE);
+        }
+
+        a_this->content.class_name = a_class_name;
 }
 
 /**
@@ -101,18 +97,15 @@ cr_additional_sel_set_class_name (CRAdditionalSel *a_this,
  *@param a_id the new id to set.
  */
 void
-cr_additional_sel_set_id_name (CRAdditionalSel *a_this,
-			       GString *a_id)
+cr_additional_sel_set_id_name (CRAdditionalSel * a_this, GString * a_id)
 {
-	g_return_if_fail (a_this
-			  && a_this->type == ID_ADD_SELECTOR) ;
-	
-	if (a_this->content.id_name)
-	{
-		g_string_free (a_this->content.id_name, TRUE) ;
-	}
+        g_return_if_fail (a_this && a_this->type == ID_ADD_SELECTOR);
 
-	a_this->content.id_name = a_id ;
+        if (a_this->content.id_name) {
+                g_string_free (a_this->content.id_name, TRUE);
+        }
+
+        a_this->content.id_name = a_id;
 }
 
 /**
@@ -123,18 +116,16 @@ cr_additional_sel_set_id_name (CRAdditionalSel *a_this,
  *@param a_pseudo the new pseudo to set.
  */
 void
-cr_additional_sel_set_pseudo (CRAdditionalSel *a_this,
-			      CRPseudo *a_pseudo)
+cr_additional_sel_set_pseudo (CRAdditionalSel * a_this, CRPseudo * a_pseudo)
 {
-	g_return_if_fail (a_this 
-			  && a_this->type == PSEUDO_CLASS_ADD_SELECTOR) ;
+        g_return_if_fail (a_this
+                          && a_this->type == PSEUDO_CLASS_ADD_SELECTOR);
 
-	if (a_this->content.pseudo)
-	{
-		cr_pseudo_destroy (a_this->content.pseudo) ;
-	}
+        if (a_this->content.pseudo) {
+                cr_pseudo_destroy (a_this->content.pseudo);
+        }
 
-	a_this->content.pseudo = a_pseudo ;
+        a_this->content.pseudo = a_pseudo;
 }
 
 /**
@@ -145,18 +136,15 @@ cr_additional_sel_set_pseudo (CRAdditionalSel *a_this,
  *@param a_sel the new instance of #CRAttrSel to set.
  */
 void
-cr_additional_sel_set_attr_sel (CRAdditionalSel *a_this,
-				CRAttrSel *a_sel)
+cr_additional_sel_set_attr_sel (CRAdditionalSel * a_this, CRAttrSel * a_sel)
 {
-	g_return_if_fail (a_this 
-			  && a_this->type == ATTRIBUTE_ADD_SELECTOR) ;
+        g_return_if_fail (a_this && a_this->type == ATTRIBUTE_ADD_SELECTOR);
 
-	if (a_this->content.attr_sel)
-	{
-		cr_attr_sel_destroy (a_this->content.attr_sel) ;
-	}
-	
-	a_this->content.attr_sel = a_sel ;
+        if (a_this->content.attr_sel) {
+                cr_attr_sel_destroy (a_this->content.attr_sel);
+        }
+
+        a_this->content.attr_sel = a_sel;
 }
 
 /**
@@ -168,31 +156,28 @@ cr_additional_sel_set_attr_sel (CRAdditionalSel *a_this,
  *@return the new list of CRAdditionalSel or NULL if an error arises.
  */
 CRAdditionalSel *
-cr_additional_sel_append (CRAdditionalSel *a_this, 
-			  CRAdditionalSel *a_sel)
+cr_additional_sel_append (CRAdditionalSel * a_this, CRAdditionalSel * a_sel)
 {
-	CRAdditionalSel *cur_sel = NULL ;
+        CRAdditionalSel *cur_sel = NULL;
 
-	g_return_val_if_fail (a_sel, NULL) ;
+        g_return_val_if_fail (a_sel, NULL);
 
-	if (a_this == NULL)
-	{
-		return a_sel ;
-	}
+        if (a_this == NULL) {
+                return a_sel;
+        }
 
-	if (a_sel == NULL)
-		return NULL ;
-	
-	for (cur_sel = a_this ; 
-	     cur_sel && cur_sel->next ;
-	     cur_sel = cur_sel->next) ;
+        if (a_sel == NULL)
+                return NULL;
 
-	g_return_val_if_fail (cur_sel != NULL, NULL) ;
+        for (cur_sel = a_this;
+             cur_sel && cur_sel->next; cur_sel = cur_sel->next) ;
 
-	cur_sel->next = a_sel ;
-	a_sel->prev = cur_sel ;
-	
-	return a_this ;
+        g_return_val_if_fail (cur_sel != NULL, NULL);
+
+        cur_sel->next = a_sel;
+        a_sel->prev = cur_sel;
+
+        return a_this;
 }
 
 /**
@@ -204,131 +189,121 @@ cr_additional_sel_append (CRAdditionalSel *a_this,
  *@return the new list of CRAdditionalSel or NULL if an error arises.
  */
 CRAdditionalSel *
-cr_additional_sel_prepend (CRAdditionalSel *a_this, 
-			   CRAdditionalSel *a_sel)
+cr_additional_sel_prepend (CRAdditionalSel * a_this, CRAdditionalSel * a_sel)
 {
-	g_return_val_if_fail (a_sel, NULL) ;
+        g_return_val_if_fail (a_sel, NULL);
 
-	if (a_this == NULL)
-	{
-		return a_sel ;
-	}
+        if (a_this == NULL) {
+                return a_sel;
+        }
 
-	a_sel->next = a_this ;
-	a_this->prev = a_sel ;
+        a_sel->next = a_this;
+        a_this->prev = a_sel;
 
-	return a_sel ;	
+        return a_sel;
 }
 
-
 guchar *
-cr_additional_sel_to_string (CRAdditionalSel *a_this)
+cr_additional_sel_to_string (CRAdditionalSel * a_this)
 {
-        guchar * result = NULL ;
-        GString * str_buf = NULL ;
-        CRAdditionalSel *cur = NULL ;
+        guchar *result = NULL;
+        GString *str_buf = NULL;
+        CRAdditionalSel *cur = NULL;
 
-        g_return_val_if_fail (a_this, NULL) ;
+        g_return_val_if_fail (a_this, NULL);
 
-        str_buf = g_string_new (NULL) ;
+        str_buf = g_string_new (NULL);
 
-        for (cur = a_this ;cur ; cur = cur->next) 
-        {
-                switch (cur->type)
-                {
+        for (cur = a_this; cur; cur = cur->next) {
+                switch (cur->type) {
                 case CLASS_ADD_SELECTOR:
-                {
-                        guchar * name = NULL ;
-                        if (cur->content.class_name)
                         {
-                                name = g_strndup 
-                                        (cur->content.class_name->str,
-                                         cur->content.class_name->len);
+                                guchar *name = NULL;
 
-                                if (name)
-                                {
-                                        g_string_append_printf 
-                                                (str_buf, ".%s", name) ;
-                                        g_free (name) ;
-                                        name = NULL ;
+                                if (cur->content.class_name) {
+                                        name = g_strndup
+                                                (cur->content.class_name->str,
+                                                 cur->content.class_name->
+                                                 len);
+
+                                        if (name) {
+                                                g_string_append_printf
+                                                        (str_buf, ".%s",
+                                                         name);
+                                                g_free (name);
+                                                name = NULL;
+                                        }
                                 }
                         }
-                }
-                        break ;
+                        break;
 
                 case ID_ADD_SELECTOR:
-                {
-                        guchar * name = NULL ;
-                        if (cur->content.class_name)
                         {
-                                name = g_strndup 
-                                        (cur->content.id_name->str,
-                                         cur->content.id_name->len);
+                                guchar *name = NULL;
 
-                                if (name)
-                                {
-                                        g_string_append_printf 
-                                                (str_buf, "#%s", name) ;
-                                        g_free (name) ;
-                                        name = NULL ;
+                                if (cur->content.class_name) {
+                                        name = g_strndup
+                                                (cur->content.id_name->str,
+                                                 cur->content.id_name->len);
+
+                                        if (name) {
+                                                g_string_append_printf
+                                                        (str_buf, "#%s",
+                                                         name);
+                                                g_free (name);
+                                                name = NULL;
+                                        }
                                 }
                         }
-                }
-                        
-                        break ;
+
+                        break;
 
                 case PSEUDO_CLASS_ADD_SELECTOR:
-                {
-                        if (cur->content.pseudo)
                         {
-                                guchar *tmp_str = NULL ;
-                                
-                                tmp_str = cr_pseudo_to_string 
-                                        (cur->content.pseudo) ;
-                                if (tmp_str)
-                                {
-                                        g_string_append_printf 
-                                                (str_buf, ":%s", 
-                                                 tmp_str) ;
-                                        g_free (tmp_str) ;
-                                        tmp_str = NULL ;
-                                }
-                        }
-                }
-                break ;
-                
-                case ATTRIBUTE_ADD_SELECTOR:
-                        if (cur->content.attr_sel)
-                        {
-                                guchar *tmp_str = NULL ;
+                                if (cur->content.pseudo) {
+                                        guchar *tmp_str = NULL;
 
-                                g_string_append_printf (str_buf,"[") ;
-                                tmp_str = cr_attr_sel_to_string 
-                                        (cur->content.attr_sel) ;
-                                if (tmp_str)
-                                {
-                                        g_string_append_printf 
-                                                (str_buf, "%s]", 
-                                                 tmp_str) ;
-                                        g_free (tmp_str) ;
-                                        tmp_str = NULL ;
+                                        tmp_str = cr_pseudo_to_string
+                                                (cur->content.pseudo);
+                                        if (tmp_str) {
+                                                g_string_append_printf
+                                                        (str_buf, ":%s",
+                                                         tmp_str);
+                                                g_free (tmp_str);
+                                                tmp_str = NULL;
+                                        }
                                 }
                         }
-                        break ;
+                        break;
+
+                case ATTRIBUTE_ADD_SELECTOR:
+                        if (cur->content.attr_sel) {
+                                guchar *tmp_str = NULL;
+
+                                g_string_append_printf (str_buf, "[");
+                                tmp_str = cr_attr_sel_to_string
+                                        (cur->content.attr_sel);
+                                if (tmp_str) {
+                                        g_string_append_printf
+                                                (str_buf, "%s]", tmp_str);
+                                        g_free (tmp_str);
+                                        tmp_str = NULL;
+                                }
+                        }
+                        break;
 
                 default:
-                        break ;
+                        break;
                 }
         }
 
-        if (str_buf)
-        {
-                result = str_buf->str ;
-                g_string_free (str_buf, FALSE) ;
-                str_buf = NULL ;
+        if (str_buf) {
+                result = str_buf->str;
+                g_string_free (str_buf, FALSE);
+                str_buf = NULL;
         }
 
-        return result ;
+        return result;
 }
 
 /**
@@ -338,20 +313,18 @@ cr_additional_sel_to_string (CRAdditionalSel *a_this)
  *@param a_fp the destination file.
  */
 void
-cr_additional_sel_dump (CRAdditionalSel *a_this, FILE *a_fp)
+cr_additional_sel_dump (CRAdditionalSel * a_this, FILE * a_fp)
 {
-        guchar *tmp_str = NULL ;
+        guchar *tmp_str = NULL;
 
-        g_return_if_fail (a_fp) ;
+        g_return_if_fail (a_fp);
 
-        if (a_this)
-        {
-                tmp_str = cr_additional_sel_to_string (a_this) ;
-                if (tmp_str)
-                {
-                        fprintf (a_fp, "%s", tmp_str) ;
-                        g_free (tmp_str) ;
-                        tmp_str = NULL ;
+        if (a_this) {
+                tmp_str = cr_additional_sel_to_string (a_this);
+                if (tmp_str) {
+                        fprintf (a_fp, "%s", tmp_str);
+                        g_free (tmp_str);
+                        tmp_str = NULL;
                 }
         }
 }
@@ -362,40 +335,38 @@ cr_additional_sel_dump (CRAdditionalSel *a_this, FILE *a_fp)
  *of #CRAdditionalSel .
  */
 void
-cr_additional_sel_destroy (CRAdditionalSel *a_this)
+cr_additional_sel_destroy (CRAdditionalSel * a_this)
 {
-	g_return_if_fail (a_this) ;
+        g_return_if_fail (a_this);
 
-	switch (a_this->type)
-	{
-	case CLASS_ADD_SELECTOR:
-		g_string_free (a_this->content.class_name, TRUE) ;
-		a_this->content.class_name = NULL ;
-		break ;
+        switch (a_this->type) {
+        case CLASS_ADD_SELECTOR:
+                g_string_free (a_this->content.class_name, TRUE);
+                a_this->content.class_name = NULL;
+                break;
 
-	case PSEUDO_CLASS_ADD_SELECTOR:
-		cr_pseudo_destroy (a_this->content.pseudo) ;
-		a_this->content.pseudo = NULL ;
-		break ;
-		
-	case ID_ADD_SELECTOR:
-		g_string_free (a_this->content.id_name, TRUE) ;
-		a_this->content.id_name = NULL ;
-		break ;
+        case PSEUDO_CLASS_ADD_SELECTOR:
+                cr_pseudo_destroy (a_this->content.pseudo);
+                a_this->content.pseudo = NULL;
+                break;
 
-	case ATTRIBUTE_ADD_SELECTOR:
-		cr_attr_sel_destroy (a_this->content.attr_sel) ;
-		a_this->content.attr_sel = NULL ;
-		break ;
+        case ID_ADD_SELECTOR:
+                g_string_free (a_this->content.id_name, TRUE);
+                a_this->content.id_name = NULL;
+                break;
 
-	default :
-		break ;
-	}
+        case ATTRIBUTE_ADD_SELECTOR:
+                cr_attr_sel_destroy (a_this->content.attr_sel);
+                a_this->content.attr_sel = NULL;
+                break;
 
-	if (a_this->next)
-	{
-		cr_additional_sel_destroy (a_this->next) ;
-	}
+        default:
+                break;
+        }
 
-	g_free (a_this) ;
+        if (a_this->next) {
+                cr_additional_sel_destroy (a_this->next);
+        }
+
+        g_free (a_this);
 }

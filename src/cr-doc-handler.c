@@ -20,7 +20,6 @@
  * USA
  */
 
-
 #include "cr-doc-handler.h"
 #include <string.h>
 
@@ -32,9 +31,8 @@
  *to custom values.
  */
 
-struct _CRDocHandlerPriv
-{
-	/**
+struct _CRDocHandlerPriv {
+ /**
 	 *This pointer is to hold an application parsing context.
 	 *For example, it used by the Object Model parser to 
 	 *store it parsing context. #CRParser does not touch it, but
@@ -42,46 +40,43 @@ struct _CRDocHandlerPriv
 	 *the beginning of the css document, and frees it at the end
 	 *of the document.
 	 */
-	gpointer context ;
+        gpointer context;
 
-	/**
+ /**
 	 *The place where #CROMParser puts the result of its parsing, if
 	 *any.
 	 */
-	gpointer result ;
-} ;
-
+        gpointer result;
+};
 
 /**
  *Constructor of #CRDocHandler.
  *@return the newly built instance of
  *#CRDocHandler
  */
-CRDocHandler * 
+CRDocHandler *
 cr_doc_handler_new (void)
 {
-	CRDocHandler * result = NULL ;
+        CRDocHandler *result = NULL;
 
-	result = g_try_malloc (sizeof (CRDocHandler)) ;
+        result = g_try_malloc (sizeof (CRDocHandler));
 
-	g_return_val_if_fail (result, NULL) ;
+        g_return_val_if_fail (result, NULL);
 
-	memset (result, 0, sizeof (CRDocHandler)) ;
+        memset (result, 0, sizeof (CRDocHandler));
 
-	result->priv = g_try_malloc (sizeof (CRDocHandlerPriv)) ;
-	if (!result->priv)
-	{
-		cr_utils_trace_info ("Out of memory exception") ;
-		g_free (result) ;
-		return NULL ;
-	}
-	
-	cr_doc_handler_ref (result) ;
-	cr_doc_handler_set_default_sac_handler (result) ;
+        result->priv = g_try_malloc (sizeof (CRDocHandlerPriv));
+        if (!result->priv) {
+                cr_utils_trace_info ("Out of memory exception");
+                g_free (result);
+                return NULL;
+        }
 
-	return result ;
+        cr_doc_handler_ref (result);
+        cr_doc_handler_set_default_sac_handler (result);
+
+        return result;
 }
-
 
 /**
  *Returns the private parsing context.
@@ -92,14 +87,13 @@ cr_doc_handler_new (void)
  *@return the parsing context, or NULL if an error occured.
  */
 enum CRStatus
-cr_doc_handler_get_ctxt (CRDocHandler *a_this, gpointer * a_ctxt)
+cr_doc_handler_get_ctxt (CRDocHandler * a_this, gpointer * a_ctxt)
 {
-	g_return_val_if_fail (a_this && a_this->priv,
-			      CR_BAD_PARAM_ERROR) ;
+        g_return_val_if_fail (a_this && a_this->priv, CR_BAD_PARAM_ERROR);
 
-	*a_ctxt = a_this->priv->context ;
+        *a_ctxt = a_this->priv->context;
 
-	return CR_OK ;
+        return CR_OK;
 }
 
 /**
@@ -110,12 +104,11 @@ cr_doc_handler_get_ctxt (CRDocHandler *a_this, gpointer * a_ctxt)
  *@return CR_OK upon successfull completion, an error code otherwise.
  */
 enum CRStatus
-cr_doc_handler_set_ctxt (CRDocHandler *a_this, gpointer a_ctxt)
+cr_doc_handler_set_ctxt (CRDocHandler * a_this, gpointer a_ctxt)
 {
-	g_return_val_if_fail (a_this && a_this->priv,
-			      CR_BAD_PARAM_ERROR) ;
-	a_this->priv->context = a_ctxt ;
-	return CR_OK ;
+        g_return_val_if_fail (a_this && a_this->priv, CR_BAD_PARAM_ERROR);
+        a_this->priv->context = a_ctxt;
+        return CR_OK;
 }
 
 /**
@@ -126,14 +119,13 @@ cr_doc_handler_set_ctxt (CRDocHandler *a_this, gpointer a_ctxt)
  *@return CR_OK upon successfull completion, an error code otherwise.
  */
 enum CRStatus
-cr_doc_handler_get_result (CRDocHandler *a_this, gpointer * a_result)
+cr_doc_handler_get_result (CRDocHandler * a_this, gpointer * a_result)
 {
-	g_return_val_if_fail (a_this && a_this->priv,
-			      CR_BAD_PARAM_ERROR) ;
+        g_return_val_if_fail (a_this && a_this->priv, CR_BAD_PARAM_ERROR);
 
-	*a_result = a_this->priv->result ;
+        *a_result = a_this->priv->result;
 
-	return CR_OK ;
+        return CR_OK;
 }
 
 /**
@@ -144,12 +136,11 @@ cr_doc_handler_get_result (CRDocHandler *a_this, gpointer * a_result)
  *@return CR_OK upon successfull completion, an error code otherwise.
  */
 enum CRStatus
-cr_doc_handler_set_result (CRDocHandler *a_this, gpointer a_result)
+cr_doc_handler_set_result (CRDocHandler * a_this, gpointer a_result)
 {
-	g_return_val_if_fail (a_this && a_this->priv,
-			      CR_BAD_PARAM_ERROR) ;
-	a_this->priv->result = a_result ;
-	return CR_OK ;
+        g_return_val_if_fail (a_this && a_this->priv, CR_BAD_PARAM_ERROR);
+        a_this->priv->result = a_result;
+        return CR_OK;
 }
 
 /**
@@ -163,40 +154,40 @@ cr_doc_handler_set_result (CRDocHandler *a_this, gpointer a_result)
  *@return CR_OK upon successfull completion, an error code otherwise.
  */
 enum CRStatus
-cr_doc_handler_set_default_sac_handler (CRDocHandler *a_this)
+cr_doc_handler_set_default_sac_handler (CRDocHandler * a_this)
 {
-	g_return_val_if_fail (a_this, CR_BAD_PARAM_ERROR) ;
+        g_return_val_if_fail (a_this, CR_BAD_PARAM_ERROR);
 
-	a_this->start_document = NULL;
-	a_this->end_document = NULL ;
-	a_this->import_style = NULL ;
-	a_this->namespace_declaration = NULL ;
-	a_this->comment = NULL ;
-	a_this->start_selector = NULL ;
-	a_this->end_selector = NULL ;
-	a_this->property = NULL ;
-	a_this->start_font_face = NULL ;
-	a_this->end_font_face = NULL ;
-	a_this->start_media = NULL ;
-	a_this->end_media = NULL ;
-	a_this->start_page = NULL ;
-	a_this->end_page = NULL ;
-	a_this->ignorable_at_rule = NULL ;
-	a_this->error = NULL ;
-	a_this->unrecoverable_error = NULL ;
-	return CR_OK ;
+        a_this->start_document = NULL;
+        a_this->end_document = NULL;
+        a_this->import_style = NULL;
+        a_this->namespace_declaration = NULL;
+        a_this->comment = NULL;
+        a_this->start_selector = NULL;
+        a_this->end_selector = NULL;
+        a_this->property = NULL;
+        a_this->start_font_face = NULL;
+        a_this->end_font_face = NULL;
+        a_this->start_media = NULL;
+        a_this->end_media = NULL;
+        a_this->start_page = NULL;
+        a_this->end_page = NULL;
+        a_this->ignorable_at_rule = NULL;
+        a_this->error = NULL;
+        a_this->unrecoverable_error = NULL;
+        return CR_OK;
 }
 
 /**
  *Increases the reference count of the doc handler
  *@param a_this the current instance of #CRDocHandler.
  */
-void 
-cr_doc_handler_ref (CRDocHandler *a_this)
+void
+cr_doc_handler_ref (CRDocHandler * a_this)
 {
-	g_return_if_fail (a_this) ;
+        g_return_if_fail (a_this);
 
-	a_this->ref_count++ ;
+        a_this->ref_count++;
 }
 
 /**
@@ -206,24 +197,21 @@ cr_doc_handler_ref (CRDocHandler *a_this)
  *@return TRUE if the instance as been destroyed, FALSE otherwise.
  */
 gboolean
-cr_doc_handler_unref (CRDocHandler *a_this)
+cr_doc_handler_unref (CRDocHandler * a_this)
 {
-	g_return_val_if_fail (a_this, FALSE) ;
+        g_return_val_if_fail (a_this, FALSE);
 
-	if (a_this->ref_count > 0)
-	{
-		a_this->ref_count -- ;
-	}
+        if (a_this->ref_count > 0) {
+                a_this->ref_count--;
+        }
 
-	if (a_this->ref_count == 0)
-	{
-		cr_doc_handler_destroy (a_this) ;
-		return TRUE ;
-	}
+        if (a_this->ref_count == 0) {
+                cr_doc_handler_destroy (a_this);
+                return TRUE;
+        }
 
-	return FALSE ;
+        return FALSE;
 }
-
 
 /**
  *The destructor of the #CRDocHandler class.
@@ -231,14 +219,13 @@ cr_doc_handler_unref (CRDocHandler *a_this)
  *destroy.
  */
 void
-cr_doc_handler_destroy (CRDocHandler *a_this)
+cr_doc_handler_destroy (CRDocHandler * a_this)
 {
-	g_return_if_fail (a_this) ;
+        g_return_if_fail (a_this);
 
-	if (a_this->priv)
-	{
-		g_free (a_this->priv) ;
-		a_this->priv = NULL ;
-	}
-	g_free (a_this) ;
+        if (a_this->priv) {
+                g_free (a_this->priv);
+                a_this->priv = NULL;
+        }
+        g_free (a_this);
 }

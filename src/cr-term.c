@@ -34,56 +34,49 @@
  *Definition of the #CRTem class.
  */
 
-
 static void
-cr_term_clear (CRTerm *a_this)
+cr_term_clear (CRTerm * a_this)
 {
-        g_return_if_fail (a_this) ;
+        g_return_if_fail (a_this);
 
-        switch (a_this->type)
-        {
+        switch (a_this->type) {
         case TERM_NUMBER:
-                if (a_this->content.num)
-                {
-                        cr_num_destroy (a_this->content.num) ;
-                        a_this->content.num = NULL ;
+                if (a_this->content.num) {
+                        cr_num_destroy (a_this->content.num);
+                        a_this->content.num = NULL;
                 }
-                break ;
+                break;
 
         case TERM_FUNCTION:
-                if (a_this->ext_content.func_param)
-                {
-                        cr_term_destroy (a_this->ext_content.func_param) ;
-                        a_this->ext_content.func_param = NULL ;
+                if (a_this->ext_content.func_param) {
+                        cr_term_destroy (a_this->ext_content.func_param);
+                        a_this->ext_content.func_param = NULL;
                 }
         case TERM_STRING:
         case TERM_IDENT:
         case TERM_URI:
         case TERM_HASH:
-                if (a_this->content.str)
-                {
-                        g_string_free (a_this->content.str, TRUE) ;
-                        a_this->content.str = NULL ;
+                if (a_this->content.str) {
+                        g_string_free (a_this->content.str, TRUE);
+                        a_this->content.str = NULL;
                 }
-                break ;
+                break;
 
-        case TERM_RGB: 
-                if (a_this->content.rgb)
-                {
-                        cr_rgb_destroy (a_this->content.rgb) ;
-                        a_this->content.rgb = NULL ;
+        case TERM_RGB:
+                if (a_this->content.rgb) {
+                        cr_rgb_destroy (a_this->content.rgb);
+                        a_this->content.rgb = NULL;
                 }
-                break ;
+                break;
 
         case TERM_UNICODERANGE:
         case TERM_NO_TYPE:
-        default:        
-                break ;
+        default:
+                break;
         }
 
-        a_this->type = TERM_NO_TYPE ;
+        a_this->type = TERM_NO_TYPE;
 }
-
 
 /**
  *Instanciate a #CRTerm.
@@ -93,16 +86,15 @@ cr_term_clear (CRTerm *a_this)
 CRTerm *
 cr_term_new (void)
 {
-	CRTerm *result = NULL ;
+        CRTerm *result = NULL;
 
-	result = g_try_malloc (sizeof (CRTerm)) ;
-        if (!result)
-        {
-                cr_utils_trace_info ("Out of memory") ;
-                return NULL ;
+        result = g_try_malloc (sizeof (CRTerm));
+        if (!result) {
+                cr_utils_trace_info ("Out of memory");
+                return NULL;
         }
-        memset (result, 0, sizeof (CRTerm)) ;
-	return result ;
+        memset (result, 0, sizeof (CRTerm));
+        return result;
 }
 
 /**
@@ -113,135 +105,124 @@ cr_term_new (void)
  *NULL if parsing failed.
  */
 CRTerm *
-cr_term_parse_expression_from_buf (const guchar *a_buf, 
+cr_term_parse_expression_from_buf (const guchar * a_buf,
                                    enum CREncoding a_encoding)
 {
-        CRParser *parser = NULL ;
-        CRTerm *result = NULL ;
-        enum CRStatus status = CR_OK ;
+        CRParser *parser = NULL;
+        CRTerm *result = NULL;
+        enum CRStatus status = CR_OK;
 
-        g_return_val_if_fail (a_buf, NULL) ;
+        g_return_val_if_fail (a_buf, NULL);
 
         parser = cr_parser_new_from_buf (a_buf, strlen (a_buf),
-                                         a_encoding, FALSE) ;
-        g_return_val_if_fail (parser, NULL) ;
-        
-        status = cr_parser_try_to_skip_spaces_and_comments (parser) ;
-        if (status != CR_OK)
-        {
-                goto cleanup ;
+                                         a_encoding, FALSE);
+        g_return_val_if_fail (parser, NULL);
+
+        status = cr_parser_try_to_skip_spaces_and_comments (parser);
+        if (status != CR_OK) {
+                goto cleanup;
         }
-        status = cr_parser_parse_expr (parser, &result) ;
-        if (status != CR_OK)
-        {
-                if (result)
-                {
-                        cr_term_destroy (result) ;
-                        result = NULL ;
+        status = cr_parser_parse_expr (parser, &result);
+        if (status != CR_OK) {
+                if (result) {
+                        cr_term_destroy (result);
+                        result = NULL;
                 }
         }
 
- cleanup:
-        if (parser)
-        {
-                cr_parser_destroy (parser) ;
-                parser = NULL ;
+      cleanup:
+        if (parser) {
+                cr_parser_destroy (parser);
+                parser = NULL;
         }
 
-        return result ;
+        return result;
 }
 
 enum CRStatus
-cr_term_set_number (CRTerm *a_this, CRNum *a_num)
+cr_term_set_number (CRTerm * a_this, CRNum * a_num)
 {
-        g_return_val_if_fail (a_this,
-                              CR_BAD_PARAM_ERROR) ;
+        g_return_val_if_fail (a_this, CR_BAD_PARAM_ERROR);
 
-        cr_term_clear (a_this) ;
-        
-        a_this->type = TERM_NUMBER ;
-        a_this->content.num = a_num ;
-        return CR_OK ;
+        cr_term_clear (a_this);
+
+        a_this->type = TERM_NUMBER;
+        a_this->content.num = a_num;
+        return CR_OK;
 }
 
 enum CRStatus
-cr_term_set_function (CRTerm *a_this, GString *a_func_name,
-                      CRTerm *a_func_param)
+cr_term_set_function (CRTerm * a_this, GString * a_func_name,
+                      CRTerm * a_func_param)
 {
-        g_return_val_if_fail (a_this,
-                              CR_BAD_PARAM_ERROR) ;
+        g_return_val_if_fail (a_this, CR_BAD_PARAM_ERROR);
 
-        cr_term_clear (a_this) ;
-        
-        a_this->type = TERM_FUNCTION ;        
-        a_this->content.str = a_func_name ;
-        a_this->ext_content.func_param = a_func_param ;
-        return CR_OK ;
+        cr_term_clear (a_this);
+
+        a_this->type = TERM_FUNCTION;
+        a_this->content.str = a_func_name;
+        a_this->ext_content.func_param = a_func_param;
+        return CR_OK;
 }
 
 enum CRStatus
-cr_term_set_string (CRTerm *a_this, GString *a_str)
+cr_term_set_string (CRTerm * a_this, GString * a_str)
 {
-       g_return_val_if_fail (a_this,
-                              CR_BAD_PARAM_ERROR) ;
+        g_return_val_if_fail (a_this, CR_BAD_PARAM_ERROR);
 
-       cr_term_clear (a_this) ;
-        
-       a_this->type = TERM_STRING ;        
-       a_this->content.str = a_str ;
-       return CR_OK ;
+        cr_term_clear (a_this);
+
+        a_this->type = TERM_STRING;
+        a_this->content.str = a_str;
+        return CR_OK;
 }
 
 enum CRStatus
-cr_term_set_ident (CRTerm *a_this, GString *a_str)
+cr_term_set_ident (CRTerm * a_this, GString * a_str)
 {
-        g_return_val_if_fail (a_this,
-                              CR_BAD_PARAM_ERROR) ;
+        g_return_val_if_fail (a_this, CR_BAD_PARAM_ERROR);
 
-        cr_term_clear (a_this) ;
-        
-        a_this->type = TERM_IDENT ;        
-        a_this->content.str = a_str ;
-        return CR_OK ;
+        cr_term_clear (a_this);
+
+        a_this->type = TERM_IDENT;
+        a_this->content.str = a_str;
+        return CR_OK;
 }
 
 enum CRStatus
-cr_term_set_uri (CRTerm *a_this, GString *a_str)
+cr_term_set_uri (CRTerm * a_this, GString * a_str)
 {
-        g_return_val_if_fail (a_this,
-                              CR_BAD_PARAM_ERROR) ;
+        g_return_val_if_fail (a_this, CR_BAD_PARAM_ERROR);
 
-        cr_term_clear (a_this) ;
-        
-        a_this->type = TERM_URI ;
-        a_this->content.str = a_str ;
-        return CR_OK ;
+        cr_term_clear (a_this);
+
+        a_this->type = TERM_URI;
+        a_this->content.str = a_str;
+        return CR_OK;
 }
-        
-enum CRStatus
-cr_term_set_rgb (CRTerm *a_this, CRRgb *a_rgb)
-{
-        g_return_val_if_fail (a_this,
-                              CR_BAD_PARAM_ERROR) ;
 
-       cr_term_clear (a_this) ;
-        
-       a_this->type = TERM_RGB ;
-       a_this->content.rgb = a_rgb ;
-       return CR_OK ;
+enum CRStatus
+cr_term_set_rgb (CRTerm * a_this, CRRgb * a_rgb)
+{
+        g_return_val_if_fail (a_this, CR_BAD_PARAM_ERROR);
+
+        cr_term_clear (a_this);
+
+        a_this->type = TERM_RGB;
+        a_this->content.rgb = a_rgb;
+        return CR_OK;
 }
-        
-enum CRStatus
-cr_term_set_hash (CRTerm *a_this, GString *a_str)
-{
-        g_return_val_if_fail (a_this,
-                              CR_BAD_PARAM_ERROR) ;
 
-        cr_term_clear (a_this) ;
-        
-        a_this->type = TERM_HASH ;
-        a_this->content.str = a_str ;
-        return CR_OK ;
+enum CRStatus
+cr_term_set_hash (CRTerm * a_this, GString * a_str)
+{
+        g_return_val_if_fail (a_this, CR_BAD_PARAM_ERROR);
+
+        cr_term_clear (a_this);
+
+        a_this->type = TERM_HASH;
+        a_this->content.str = a_str;
+        return CR_OK;
 }
 
 /**
@@ -253,24 +234,22 @@ cr_term_set_hash (CRTerm *a_this, GString *a_str)
  *@return the list of terms with the a_new_term appended to it.
  */
 CRTerm *
-cr_term_append_term (CRTerm *a_this, CRTerm *a_new_term)
+cr_term_append_term (CRTerm * a_this, CRTerm * a_new_term)
 {
-	CRTerm *cur = NULL ;
+        CRTerm *cur = NULL;
 
-	g_return_val_if_fail (a_new_term, 
-			      NULL) ;
-	
+        g_return_val_if_fail (a_new_term, NULL);
+
         if (a_this == NULL)
-                return a_new_term ;
+                return a_new_term;
 
-	for (cur = a_this ;cur->next ; cur = cur->next) ;
-	
-	cur->next = a_new_term ;
-	a_new_term->prev = cur ;
+        for (cur = a_this; cur->next; cur = cur->next) ;
 
-	return a_this ;
+        cur->next = a_new_term;
+        a_new_term->prev = cur;
+
+        return a_this;
 }
-
 
 /**
  *Prepends a term to the list of terms represented by a_this.
@@ -281,17 +260,15 @@ cr_term_append_term (CRTerm *a_this, CRTerm *a_new_term)
  *@return the head of the new list.
  */
 CRTerm *
-cr_term_prepend_term (CRTerm *a_this, CRTerm *a_new_term)
+cr_term_prepend_term (CRTerm * a_this, CRTerm * a_new_term)
 {
-	g_return_val_if_fail (a_this && a_new_term, 
-			      NULL) ;
-	
-	a_new_term->next = a_this ;
-	a_this->prev = a_new_term ;
-	
-        return a_new_term ;
-}
+        g_return_val_if_fail (a_this && a_new_term, NULL);
 
+        a_new_term->next = a_this;
+        a_this->prev = a_new_term;
+
+        return a_new_term;
+}
 
 /**
  *Serializes the expression represented by
@@ -301,230 +278,202 @@ cr_term_prepend_term (CRTerm *a_this, CRTerm *a_new_term)
  *form of #CRTerm. MUST BE FREED BY THE CALLER using g_free().
  */
 guchar *
-cr_term_to_string (CRTerm *a_this)
+cr_term_to_string (CRTerm * a_this)
 {
-        GString *str_buf = NULL ;
-        CRTerm *cur =  NULL ;
-        guchar *result = NULL, *content = NULL ;
+        GString *str_buf = NULL;
+        CRTerm *cur = NULL;
+        guchar *result = NULL,
+                *content = NULL;
 
-        g_return_val_if_fail (a_this, NULL) ;
+        g_return_val_if_fail (a_this, NULL);
 
-        str_buf = g_string_new (NULL) ;
-        g_return_val_if_fail (str_buf, NULL) ;
+        str_buf = g_string_new (NULL);
+        g_return_val_if_fail (str_buf, NULL);
 
-        for (cur = a_this ; cur ; cur = cur->next)
-        {
+        for (cur = a_this; cur; cur = cur->next) {
                 if ((cur->content.str == NULL)
                     && (cur->content.num == NULL)
                     && (cur->content.str == NULL)
                     && (cur->content.rgb == NULL))
-                        continue ;
-                
-                switch (cur->the_operator)
-                {
+                        continue;
+
+                switch (cur->the_operator) {
                 case DIVIDE:
-                        g_string_append_printf (str_buf, " / ") ;
-                        break ;
+                        g_string_append_printf (str_buf, " / ");
+                        break;
 
                 case COMMA:
-                        g_string_append_printf (str_buf, ", ") ;
-                        break ;
+                        g_string_append_printf (str_buf, ", ");
+                        break;
 
                 case NO_OP:
-                        if (cur->prev)
-                        {
-                                g_string_append_printf (str_buf, " ") ;
+                        if (cur->prev) {
+                                g_string_append_printf (str_buf, " ");
                         }
-                        break ;
+                        break;
                 default:
-                        
-                        break ;
+
+                        break;
                 }
 
-                switch (cur->unary_op)
-                {
+                switch (cur->unary_op) {
                 case PLUS_UOP:
-                        g_string_append_printf (str_buf, "+") ;
-                        break ;
+                        g_string_append_printf (str_buf, "+");
+                        break;
 
                 case MINUS_UOP:
-                        g_string_append_printf (str_buf, "-") ;
-                        break ;
+                        g_string_append_printf (str_buf, "-");
+                        break;
 
-                default :
-                        break ;
+                default:
+                        break;
                 }
 
-                switch (cur->type)
-                {
+                switch (cur->type) {
                 case TERM_NUMBER:
-                        if (cur->content.num)
-                        {
-                                content = 
-                                        cr_num_to_string 
-                                        (cur->content.num) ;
+                        if (cur->content.num) {
+                                content = cr_num_to_string (cur->content.num);
                         }
 
-                        if (content)
-                        {
-                                g_string_append(str_buf, content) ;
-                                g_free (content) ;
-                                content = NULL ;
+                        if (content) {
+                                g_string_append (str_buf, content);
+                                g_free (content);
+                                content = NULL;
                         }
 
-                        break ;
+                        break;
 
                 case TERM_FUNCTION:
-                        if (cur->content.str)
-                        {
-                                content = g_strndup 
+                        if (cur->content.str) {
+                                content = g_strndup
                                         (cur->content.str->str,
-                                         cur->content.str->len) ;
-                        }                        
+                                         cur->content.str->len);
+                        }
 
-                        if (content)
-                        {
-                                g_string_append_printf (str_buf, "%s(", 
-                                                        content) ;
+                        if (content) {
+                                g_string_append_printf (str_buf, "%s(",
+                                                        content);
 
-                                if (a_this->ext_content.func_param)
-                                {
-                                        guchar *tmp_str = NULL ;
+                                if (a_this->ext_content.func_param) {
+                                        guchar *tmp_str = NULL;
 
-                                        tmp_str = cr_term_to_string 
+                                        tmp_str = cr_term_to_string
                                                 (a_this->
                                                  ext_content.func_param);
 
-                                        if (tmp_str)
-                                        { 
-                                                g_string_append_printf 
-                                                        (str_buf, 
-                                                         "%s",
-                                                         tmp_str) ;
-                                                g_free (tmp_str) ;
-                                                tmp_str = NULL ;
+                                        if (tmp_str) {
+                                                g_string_append_printf
+                                                        (str_buf,
+                                                         "%s", tmp_str);
+                                                g_free (tmp_str);
+                                                tmp_str = NULL;
                                         }
 
-                                        g_string_append_printf (str_buf, 
-                                                                ")") ;
-                                        g_free (content) ;
-                                        content = NULL ;
+                                        g_string_append_printf (str_buf, ")");
+                                        g_free (content);
+                                        content = NULL;
                                 }
                         }
 
-                        break ;
+                        break;
 
                 case TERM_STRING:
-                        if (cur->content.str)
-                        {
-                                content = g_strndup 
+                        if (cur->content.str) {
+                                content = g_strndup
                                         (cur->content.str->str,
-                                         cur->content.str->len) ;
+                                         cur->content.str->len);
                         }
 
-                        if (content)
-                        {
-                                g_string_append_printf (str_buf, 
-                                                        "\"%s\"", 
-                                                        content) ;
-                                g_free (content) ;
-                                content = NULL ;
-                        }                        
-                        break ;
+                        if (content) {
+                                g_string_append_printf (str_buf,
+                                                        "\"%s\"", content);
+                                g_free (content);
+                                content = NULL;
+                        }
+                        break;
 
                 case TERM_IDENT:
-                        if (cur->content.str)
-                        {
-                                content = g_strndup 
-                                (cur->content.str->str,
-                                 cur->content.str->len) ;
+                        if (cur->content.str) {
+                                content = g_strndup
+                                        (cur->content.str->str,
+                                         cur->content.str->len);
                         }
-                        
-                        if (content)
-                        {
-                                g_string_append (str_buf,content) ;
-                                g_free (content) ;
-                                content = NULL ;
-                        }                        
-                        break ;
+
+                        if (content) {
+                                g_string_append (str_buf, content);
+                                g_free (content);
+                                content = NULL;
+                        }
+                        break;
 
                 case TERM_URI:
-                        if (cur->content.str)
-                        {
-                                content = g_strndup 
-                                (cur->content.str->str,
-                                 cur->content.str->len) ;
+                        if (cur->content.str) {
+                                content = g_strndup
+                                        (cur->content.str->str,
+                                         cur->content.str->len);
                         }
 
-                        if (content)
-                        {
-                                g_string_append_printf 
-                                        (str_buf,  "url(%s)",content) ;
-                                g_free (content) ;
-                                content = NULL ;
-                        }                        
-                        break ;
+                        if (content) {
+                                g_string_append_printf
+                                        (str_buf, "url(%s)", content);
+                                g_free (content);
+                                content = NULL;
+                        }
+                        break;
 
                 case TERM_RGB:
-                        if (cur->content.rgb)
-                        {
-                                guchar *tmp_str = NULL ;
+                        if (cur->content.rgb) {
+                                guchar *tmp_str = NULL;
 
-                                g_string_append_printf (str_buf,  "rgb(");
-                                tmp_str = cr_rgb_to_string 
-                                        (cur->content.rgb) ;
+                                g_string_append_printf (str_buf, "rgb(");
+                                tmp_str = cr_rgb_to_string (cur->content.rgb);
 
-                                if (tmp_str)
-                                {
-                                        g_string_append (str_buf,
-                                                         tmp_str) ;
-                                        g_free (tmp_str) ;
-                                        tmp_str = NULL ;
+                                if (tmp_str) {
+                                        g_string_append (str_buf, tmp_str);
+                                        g_free (tmp_str);
+                                        tmp_str = NULL;
                                 }
-                                g_string_append_printf (str_buf,  ")") ;
+                                g_string_append_printf (str_buf, ")");
                         }
 
-                        break ;
+                        break;
 
                 case TERM_UNICODERANGE:
-                        g_string_append_printf 
-                                (str_buf, 
-                                 "?found unicoderange: dump not supported yet?") ;
-                        break ;
+                        g_string_append_printf
+                                (str_buf,
+                                 "?found unicoderange: dump not supported yet?");
+                        break;
 
                 case TERM_HASH:
-                        if (cur->content.str)
-                        {
-                                content = g_strndup 
+                        if (cur->content.str) {
+                                content = g_strndup
                                         (cur->content.str->str,
-                                         cur->content.str->len) ;
+                                         cur->content.str->len);
                         }
 
-                        if (content)
-                        {
-                                g_string_append_printf (str_buf, 
-                                                        "#%s", content) ;
-                                g_free (content) ;
-                                content = NULL ;
+                        if (content) {
+                                g_string_append_printf (str_buf,
+                                                        "#%s", content);
+                                g_free (content);
+                                content = NULL;
                         }
-                        break ;
+                        break;
 
                 default:
-                        g_string_append_printf (str_buf, 
-                                                "%s", 
+                        g_string_append_printf (str_buf,
+                                                "%s",
                                                 "Unrecognized Term type");
-                        break ;
+                        break;
                 }
         }
 
-        if (str_buf)
-        {
-                result = str_buf->str ;
-                g_string_free (str_buf, FALSE) ;
-                str_buf = NULL ;
+        if (str_buf) {
+                result = str_buf->str;
+                g_string_free (str_buf, FALSE);
+                str_buf = NULL;
         }
 
-        return result ;
+        return result;
 }
 
 /**
@@ -536,21 +485,19 @@ cr_term_to_string (CRTerm *a_this)
  *@param a_fp the destination file pointer.
  */
 void
-cr_term_dump (CRTerm *a_this, FILE *a_fp)
+cr_term_dump (CRTerm * a_this, FILE * a_fp)
 {
-        guchar *content=NULL ;
+        guchar *content = NULL;
 
-        g_return_if_fail (a_this) ;
+        g_return_if_fail (a_this);
 
-        content = cr_term_to_string (a_this) ;
+        content = cr_term_to_string (a_this);
 
-        if (content)
-        {
-                fprintf (a_fp, "%s", content) ;
-                g_free (content) ;
+        if (content) {
+                fprintf (a_fp, "%s", content);
+                g_free (content);
         }
 }
-
 
 /**
  *Increments the reference counter of the current instance
@@ -558,13 +505,12 @@ cr_term_dump (CRTerm *a_this, FILE *a_fp)
  *@param a_this the current instance of #CRTerm.
  */
 void
-cr_term_ref (CRTerm *a_this)
+cr_term_ref (CRTerm * a_this)
 {
-        g_return_if_fail (a_this) ;
+        g_return_if_fail (a_this);
 
-        a_this->ref_count ++ ;
+        a_this->ref_count++;
 }
-
 
 /**
  *Decrements the ref count of the current instance of
@@ -574,22 +520,20 @@ cr_term_ref (CRTerm *a_this)
  *@return TRUE if the current instance has been destroyed, FALSE otherwise.
  */
 gboolean
-cr_term_unref (CRTerm *a_this)
+cr_term_unref (CRTerm * a_this)
 {
-        g_return_val_if_fail (a_this, FALSE) ;
+        g_return_val_if_fail (a_this, FALSE);
 
-        if (a_this->ref_count)
-        {
-                a_this->ref_count -- ;
+        if (a_this->ref_count) {
+                a_this->ref_count--;
         }
 
-        if (a_this->ref_count == 0)
-        {
-                cr_term_destroy (a_this) ;
-                return TRUE ;
+        if (a_this->ref_count == 0) {
+                cr_term_destroy (a_this);
+                return TRUE;
         }
 
-        return FALSE ;
+        return FALSE;
 }
 
 /**
@@ -598,21 +542,19 @@ cr_term_unref (CRTerm *a_this)
  *of #CRTerm.
  */
 void
-cr_term_destroy (CRTerm *a_this)
+cr_term_destroy (CRTerm * a_this)
 {
-	g_return_if_fail (a_this) ;
+        g_return_if_fail (a_this);
 
-        cr_term_clear (a_this) ;
+        cr_term_clear (a_this);
 
-	if (a_this->next)
-	{
-		cr_term_destroy (a_this->next) ;
-		a_this->next = NULL ;
-	}
+        if (a_this->next) {
+                cr_term_destroy (a_this->next);
+                a_this->next = NULL;
+        }
 
-        if (a_this)
-        {
-                g_free (a_this) ;
+        if (a_this) {
+                g_free (a_this);
         }
 
 }

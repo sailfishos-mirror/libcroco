@@ -36,7 +36,6 @@
  *at http://www.w3.org/TR/REC-CSS2/ .
  */
 
-
 /****************************
  *Encoding transformations and
  *encoding helpers
@@ -56,8 +55,6 @@
  *0400 0000-7FFF FFFF   1111110x 10xxxxxx ... 10xxxxxx
  */
 
-
-
 /**
  *Given an utf8 string buffer, calculates
  *the length of this string if it was encoded
@@ -71,134 +68,112 @@
  *otherwise.
  */
 enum CRStatus
-cr_utils_utf8_str_len_as_ucs4 (const guchar *a_in_start,
-                               const guchar *a_in_end,
-                               gulong *a_len)
-{        
-        guchar *byte_ptr = NULL ;
-	gint len = 0 ;
+cr_utils_utf8_str_len_as_ucs4 (const guchar * a_in_start,
+                               const guchar * a_in_end, gulong * a_len)
+{
+        guchar *byte_ptr = NULL;
+        gint len = 0;
 
-	/*
+        /*
          *to store the final decoded 
-	 *unicode char
-	 */
-	guint c = 0 ;
+         *unicode char
+         */
+        guint c = 0;
 
-	g_return_val_if_fail (a_in_start && a_in_end && a_len,
-			      CR_BAD_PARAM_ERROR) ;
-	*a_len = 0 ;
-	
-	for (byte_ptr = (guchar*)a_in_start ;
-	     byte_ptr <= a_in_end ;
-             byte_ptr++) 
-        {
-		gint nb_bytes_2_decode = 0 ;
+        g_return_val_if_fail (a_in_start && a_in_end && a_len,
+                              CR_BAD_PARAM_ERROR);
+        *a_len = 0;
 
-		if (*byte_ptr <= 0x7F) 
-                {
-			/*
-			 *7 bits long char
-			 *encoded over 1 byte:
-			 * 0xxx xxxx
-			 */
-			c = *byte_ptr ;
-			nb_bytes_2_decode = 1 ;
+        for (byte_ptr = (guchar *) a_in_start;
+             byte_ptr <= a_in_end; byte_ptr++) {
+                gint nb_bytes_2_decode = 0;
 
-		} 
-                else if ((*byte_ptr & 0xE0) == 0xC0) 
-                {
-			/*
-			 *up to 11 bits long char.
-			 *encoded over 2 bytes:
-			 *110x xxxx  10xx xxxx
-			 */
-			c = *byte_ptr & 0x1F ;
-			nb_bytes_2_decode = 2 ;
+                if (*byte_ptr <= 0x7F) {
+                        /*
+                         *7 bits long char
+                         *encoded over 1 byte:
+                         * 0xxx xxxx
+                         */
+                        c = *byte_ptr;
+                        nb_bytes_2_decode = 1;
 
-		} 
-                else if ((*byte_ptr & 0xF0) == 0xE0) 
-                {
-			/*
-			 *up to 16 bit long char
-			 *encoded over 3 bytes:
-			 *1110 xxxx  10xx xxxx  10xx xxxx
-			 */
-			c = *byte_ptr & 0x0F ;
-			nb_bytes_2_decode = 3 ;
+                } else if ((*byte_ptr & 0xE0) == 0xC0) {
+                        /*
+                         *up to 11 bits long char.
+                         *encoded over 2 bytes:
+                         *110x xxxx  10xx xxxx
+                         */
+                        c = *byte_ptr & 0x1F;
+                        nb_bytes_2_decode = 2;
 
-		} 
-                else if ((*byte_ptr & 0xF8) == 0xF0) 
-                {
-			/*
-			 *up to 21 bits long char
-			 *encoded over 4 bytes:
-			 *1111 0xxx  10xx xxxx  10xx xxxx  10xx xxxx
-			 */
-			c = *byte_ptr & 0x7 ;
-			nb_bytes_2_decode = 4 ;
+                } else if ((*byte_ptr & 0xF0) == 0xE0) {
+                        /*
+                         *up to 16 bit long char
+                         *encoded over 3 bytes:
+                         *1110 xxxx  10xx xxxx  10xx xxxx
+                         */
+                        c = *byte_ptr & 0x0F;
+                        nb_bytes_2_decode = 3;
 
-		} 
-                else if ((*byte_ptr & 0xFC) == 0xF8) 
-                {
-			/*
-			 *up to 26 bits long char
-			 *encoded over 5 bytes.
+                } else if ((*byte_ptr & 0xF8) == 0xF0) {
+                        /*
+                         *up to 21 bits long char
+                         *encoded over 4 bytes:
+                         *1111 0xxx  10xx xxxx  10xx xxxx  10xx xxxx
+                         */
+                        c = *byte_ptr & 0x7;
+                        nb_bytes_2_decode = 4;
+
+                } else if ((*byte_ptr & 0xFC) == 0xF8) {
+                        /*
+                         *up to 26 bits long char
+                         *encoded over 5 bytes.
                          *1111 10xx  10xx xxxx  10xx xxxx  
-			 *10xx xxxx  10xx xxxx
-			 */
-			c = *byte_ptr & 3 ;
-			nb_bytes_2_decode = 5 ;
+                         *10xx xxxx  10xx xxxx
+                         */
+                        c = *byte_ptr & 3;
+                        nb_bytes_2_decode = 5;
 
-		} 
-                else if ((*byte_ptr & 0xFE) == 0xFC) 
-                {
-			/*
-			 *up to 31 bits long char
-			 *encoded over 6 bytes:
-			 *1111 110x  10xx xxxx  10xx xxxx  
-			 *10xx xxxx  10xx xxxx  10xx xxxx
-			 */
-			c = *byte_ptr & 1 ;
-			nb_bytes_2_decode = 6 ;
+                } else if ((*byte_ptr & 0xFE) == 0xFC) {
+                        /*
+                         *up to 31 bits long char
+                         *encoded over 6 bytes:
+                         *1111 110x  10xx xxxx  10xx xxxx  
+                         *10xx xxxx  10xx xxxx  10xx xxxx
+                         */
+                        c = *byte_ptr & 1;
+                        nb_bytes_2_decode = 6;
 
-		} 
-                else 
-                {
-			/*
+                } else {
+                        /*
                          *BAD ENCODING
                          */
-			return CR_ENCODING_ERROR ;
-		}
+                        return CR_ENCODING_ERROR;
+                }
 
-		/*
-		 *Go and decode the remaining byte(s)
-		 *(if any) to get the current character.
-		 */
-		for ( ;
-		      nb_bytes_2_decode > 1 ;
-		      nb_bytes_2_decode --) 
-                {
-			/*decode the next byte*/
-			byte_ptr ++ ;
+                /*
+                 *Go and decode the remaining byte(s)
+                 *(if any) to get the current character.
+                 */
+                for (; nb_bytes_2_decode > 1; nb_bytes_2_decode--) {
+                        /*decode the next byte */
+                        byte_ptr++;
 
-			/*byte pattern must be: 10xx xxxx*/
-			if ((*byte_ptr & 0xC0) != 0x80) 
-                        {
-				return CR_ENCODING_ERROR ;
-			}
+                        /*byte pattern must be: 10xx xxxx */
+                        if ((*byte_ptr & 0xC0) != 0x80) {
+                                return CR_ENCODING_ERROR;
+                        }
 
-			c = (c << 6) | (*byte_ptr & 0x3F) ;
-		}
+                        c = (c << 6) | (*byte_ptr & 0x3F);
+                }
 
-                len ++ ;
-	}
+                len++;
+        }
 
-	*a_len = len ;
+        *a_len = len;
 
-	return CR_OK ;
+        return CR_OK;
 }
-
-
 
 /**
  *Given an ucs4 string, this function
@@ -211,52 +186,37 @@ cr_utils_utf8_str_len_as_ucs4 (const guchar *a_in_start,
  *@return CR_OK upon successfull completion, an error code otherwise.
  */
 enum CRStatus
-cr_utils_ucs4_str_len_as_utf8 (const guint32 *a_in_start, 
-                               const guint32 *a_in_end,
-                               gulong *a_len)
+cr_utils_ucs4_str_len_as_utf8 (const guint32 * a_in_start,
+                               const guint32 * a_in_end, gulong * a_len)
 {
-	gint len = 0 ;
-	guint32 *char_ptr = NULL ;
+        gint len = 0;
+        guint32 *char_ptr = NULL;
 
-	g_return_val_if_fail (a_in_start && a_in_end && a_len,
-			      CR_BAD_PARAM_ERROR) ;
+        g_return_val_if_fail (a_in_start && a_in_end && a_len,
+                              CR_BAD_PARAM_ERROR);
 
-	for (char_ptr = (guint32*)a_in_start ;
-	     char_ptr <= a_in_end ;
-	     char_ptr ++) 
-        {
-		if (*char_ptr <= 0x7F) 
-                {
-			/*the utf-8 char would take 1 byte*/
-			len += 1 ;
-		} 
-                else if (*char_ptr <= 0x7FF) 
-                {
-			/*the utf-8 char would take 2 bytes*/
-			len += 2 ;
-		}
-                else if (*char_ptr <= 0xFFFF)
-                {
-                        len += 3 ;
+        for (char_ptr = (guint32 *) a_in_start;
+             char_ptr <= a_in_end; char_ptr++) {
+                if (*char_ptr <= 0x7F) {
+                        /*the utf-8 char would take 1 byte */
+                        len += 1;
+                } else if (*char_ptr <= 0x7FF) {
+                        /*the utf-8 char would take 2 bytes */
+                        len += 2;
+                } else if (*char_ptr <= 0xFFFF) {
+                        len += 3;
+                } else if (*char_ptr <= 0x1FFFFF) {
+                        len += 4;
+                } else if (*char_ptr <= 0x3FFFFFF) {
+                        len += 5;
+                } else if (*char_ptr <= 0x7FFFFFFF) {
+                        len += 6;
                 }
-                else if (*char_ptr <= 0x1FFFFF)
-                {
-                        len += 4 ;
-                }
-                else if (*char_ptr <= 0x3FFFFFF)
-                {
-                        len += 5 ;
-                }
-                else if (*char_ptr <= 0x7FFFFFFF)
-                {
-                        len+= 6 ;
-                }
-	}
+        }
 
-	*a_len = len ;
-	return CR_OK ;
+        *a_len = len;
+        return CR_OK;
 }
-
 
 /**
  *Given an ucsA string, this function
@@ -269,34 +229,28 @@ cr_utils_ucs4_str_len_as_utf8 (const guint32 *a_in_start,
  *@return CR_OK upon successfull completion, an error code otherwise.
  */
 enum CRStatus
-cr_utils_ucs1_str_len_as_utf8 (const guchar *a_in_start, 
-                               const guchar *a_in_end,
-                               gulong *a_len)
+cr_utils_ucs1_str_len_as_utf8 (const guchar * a_in_start,
+                               const guchar * a_in_end, gulong * a_len)
 {
-        gint len = 0 ;
-	guchar *char_ptr = NULL ;
+        gint len = 0;
+        guchar *char_ptr = NULL;
 
-	g_return_val_if_fail (a_in_start && a_in_end && a_len,
-			      CR_BAD_PARAM_ERROR) ;
+        g_return_val_if_fail (a_in_start && a_in_end && a_len,
+                              CR_BAD_PARAM_ERROR);
 
-	for (char_ptr = (guchar *)a_in_start ;
-	     char_ptr <= a_in_end ;
-	     char_ptr ++) 
-        {
-		if (*char_ptr <= 0x7F) 
-                {
-			/*the utf-8 char would take 1 byte*/
-			len += 1 ;
-		} 
-                else
-                {
-			/*the utf-8 char would take 2 bytes*/
-			len += 2 ;
-		}
+        for (char_ptr = (guchar *) a_in_start;
+             char_ptr <= a_in_end; char_ptr++) {
+                if (*char_ptr <= 0x7F) {
+                        /*the utf-8 char would take 1 byte */
+                        len += 1;
+                } else {
+                        /*the utf-8 char would take 2 bytes */
+                        len += 2;
+                }
         }
 
-	*a_len = len ;
-	return CR_OK ;
+        *a_len = len;
+        return CR_OK;
 }
 
 /**
@@ -315,132 +269,113 @@ cr_utils_ucs1_str_len_as_utf8 (const guchar *a_in_start,
  *@return CR_OK upon successfull completion, an error code otherwise.
  */
 enum CRStatus
-cr_utils_utf8_to_ucs4 (const guchar * a_in, 
-                       gulong *a_in_len,
-                       guint32 *a_out, 
-                       gulong *a_out_len)
+cr_utils_utf8_to_ucs4 (const guchar * a_in,
+                       gulong * a_in_len, guint32 * a_out, gulong * a_out_len)
 {
-	gulong in_len = 0, out_len = 0, in_index = 0, out_index = 0 ;
-        enum CRStatus status = CR_OK ;
+        gulong in_len = 0,
+                out_len = 0,
+                in_index = 0,
+                out_index = 0;
+        enum CRStatus status = CR_OK;
 
-	/*
+        /*
          *to store the final decoded 
-	 *unicode char
-	 */
-	guint c = 0 ;
+         *unicode char
+         */
+        guint c = 0;
 
-        g_return_val_if_fail (a_in && a_in_len 
-                              && a_out && a_out_len,
-                              CR_BAD_PARAM_ERROR) ;
+        g_return_val_if_fail (a_in && a_in_len
+                              && a_out && a_out_len, CR_BAD_PARAM_ERROR);
 
-        if (*a_in_len < 1)
-        {
-                status = CR_OK ;
-                goto end ;
+        if (*a_in_len < 1) {
+                status = CR_OK;
+                goto end;
         }
 
-        in_len = *a_in_len ;
-        out_len = *a_out_len ;
+        in_len = *a_in_len;
+        out_len = *a_out_len;
 
-	for (in_index = 0, out_index = 0 ;
-	     (in_index < in_len) && (out_index < out_len) ;
-             in_index++, out_index++)
-        {
-		gint nb_bytes_2_decode = 0 ;
+        for (in_index = 0, out_index = 0;
+             (in_index < in_len) && (out_index < out_len);
+             in_index++, out_index++) {
+                gint nb_bytes_2_decode = 0;
 
-		if (a_in[in_index] <= 0x7F) 
-                {
-			/*
-			 *7 bits long char
-			 *encoded over 1 byte:
-			 * 0xxx xxxx
-			 */
-			c = a_in[in_index] ;
-			nb_bytes_2_decode = 1 ;
+                if (a_in[in_index] <= 0x7F) {
+                        /*
+                         *7 bits long char
+                         *encoded over 1 byte:
+                         * 0xxx xxxx
+                         */
+                        c = a_in[in_index];
+                        nb_bytes_2_decode = 1;
 
-		} 
-                else if ((a_in[in_index] & 0xE0) == 0xC0) 
-                {
-			/*
-			 *up to 11 bits long char.
-			 *encoded over 2 bytes:
-			 *110x xxxx  10xx xxxx
-			 */
-			c = a_in[in_index] & 0x1F ;
-			nb_bytes_2_decode = 2 ;
+                } else if ((a_in[in_index] & 0xE0) == 0xC0) {
+                        /*
+                         *up to 11 bits long char.
+                         *encoded over 2 bytes:
+                         *110x xxxx  10xx xxxx
+                         */
+                        c = a_in[in_index] & 0x1F;
+                        nb_bytes_2_decode = 2;
 
-		} 
-                else if ((a_in[in_index] & 0xF0) == 0xE0) 
-                {
-			/*
-			 *up to 16 bit long char
-			 *encoded over 3 bytes:
-			 *1110 xxxx  10xx xxxx  10xx xxxx
-			 */
-			c = a_in[in_index] & 0x0F ;
-			nb_bytes_2_decode = 3 ;
+                } else if ((a_in[in_index] & 0xF0) == 0xE0) {
+                        /*
+                         *up to 16 bit long char
+                         *encoded over 3 bytes:
+                         *1110 xxxx  10xx xxxx  10xx xxxx
+                         */
+                        c = a_in[in_index] & 0x0F;
+                        nb_bytes_2_decode = 3;
 
-		} 
-                else if ((a_in[in_index] & 0xF8) == 0xF0) 
-                {
-			/*
-			 *up to 21 bits long char
-			 *encoded over 4 bytes:
-			 *1111 0xxx  10xx xxxx  10xx xxxx  10xx xxxx
-			 */
-			c = a_in[in_index] & 0x7 ;
-			nb_bytes_2_decode = 4 ;
+                } else if ((a_in[in_index] & 0xF8) == 0xF0) {
+                        /*
+                         *up to 21 bits long char
+                         *encoded over 4 bytes:
+                         *1111 0xxx  10xx xxxx  10xx xxxx  10xx xxxx
+                         */
+                        c = a_in[in_index] & 0x7;
+                        nb_bytes_2_decode = 4;
 
-		} 
-                else if ((a_in[in_index] & 0xFC) == 0xF8) 
-                {
-			/*
-			 *up to 26 bits long char
-			 *encoded over 5 bytes.
-			 *1111 10xx  10xx xxxx  10xx xxxx  
-			 *10xx xxxx  10xx xxxx
-			 */
-			c = a_in[in_index] & 3 ;
-			nb_bytes_2_decode = 5 ;
+                } else if ((a_in[in_index] & 0xFC) == 0xF8) {
+                        /*
+                         *up to 26 bits long char
+                         *encoded over 5 bytes.
+                         *1111 10xx  10xx xxxx  10xx xxxx  
+                         *10xx xxxx  10xx xxxx
+                         */
+                        c = a_in[in_index] & 3;
+                        nb_bytes_2_decode = 5;
 
-		} 
-                else if ((a_in[in_index] & 0xFE) == 0xFC) 
-                {
-			/*
-			 *up to 31 bits long char
-			 *encoded over 6 bytes:
-			 *1111 110x  10xx xxxx  10xx xxxx  
-			 *10xx xxxx  10xx xxxx  10xx xxxx
-			 */
-			c = a_in[in_index] & 1 ;
-			nb_bytes_2_decode = 6 ;
+                } else if ((a_in[in_index] & 0xFE) == 0xFC) {
+                        /*
+                         *up to 31 bits long char
+                         *encoded over 6 bytes:
+                         *1111 110x  10xx xxxx  10xx xxxx  
+                         *10xx xxxx  10xx xxxx  10xx xxxx
+                         */
+                        c = a_in[in_index] & 1;
+                        nb_bytes_2_decode = 6;
 
-		} 
-                else 
-                {
-			/*BAD ENCODING*/
-			goto end ;
-		}
+                } else {
+                        /*BAD ENCODING */
+                        goto end;
+                }
 
-		/*
-		 *Go and decode the remaining byte(s)
-		 *(if any) to get the current character.
-		 */
-		for ( ;
-		      nb_bytes_2_decode > 1 ;
-		      nb_bytes_2_decode --) 
-                {
-			/*decode the next byte*/
-			in_index ++ ;
+                /*
+                 *Go and decode the remaining byte(s)
+                 *(if any) to get the current character.
+                 */
+                for (; nb_bytes_2_decode > 1; nb_bytes_2_decode--) {
+                        /*decode the next byte */
+                        in_index++;
 
-			/*byte pattern must be: 10xx xxxx*/
-			if ((a_in[in_index] & 0xC0) != 0x80)
-                        {
-				goto end ;
-			}
+                        /*byte pattern must be: 10xx xxxx */
+                        if ((a_in[in_index] & 0xC0) != 0x80) {
+                                goto end;
+                        }
 
-			c = (c << 6) | (a_in[in_index] & 0x3F) ;
-		}
+                        c = (c << 6) | (a_in[in_index] & 0x3F);
+                }
 
                 /*
                  *The decoded ucs4 char is now
@@ -450,33 +385,35 @@ cr_utils_utf8_to_ucs4 (const guchar * a_in,
                 /************************
                  *Some security tests
                  ***********************/
-                
-                /*be sure c is a char*/
-                if (c == 0xFFFF || c == 0xFFFE) goto end ;
-                
-                /*be sure c is inferior to the max ucs4 char value*/
-                if (c > 0x10FFFF) goto end ;
+
+                /*be sure c is a char */
+                if (c == 0xFFFF || c == 0xFFFE)
+                        goto end;
+
+                /*be sure c is inferior to the max ucs4 char value */
+                if (c > 0x10FFFF)
+                        goto end;
 
                 /*
                  *c must be less than UTF16 "lower surrogate begin"
                  *or higher than UTF16 "High surrogate end"
                  */
-                if (c >= 0xD800 && c <= 0xDFFF) goto end ;
+                if (c >= 0xD800 && c <= 0xDFFF)
+                        goto end;
 
-                /*Avoid characters that equals zero*/
-                if (c == 0) goto end ;
+                /*Avoid characters that equals zero */
+                if (c == 0)
+                        goto end;
 
-
-                a_out[out_index] = c ;
+                a_out[out_index] = c;
         }
 
- end:
+      end:
         *a_out_len = out_index + 1;
         *a_in_len = in_index + 1;
 
-        return status ;
+        return status;
 }
-
 
 /**
  *Reads a character from an utf8 buffer.
@@ -490,309 +427,275 @@ cr_utils_utf8_to_ucs4 (const guchar * a_in,
  *@return CR_OK upon successfull completion, an error code otherwise.
  */
 enum CRStatus
-cr_utils_read_char_from_utf8_buf (const guchar * a_in, 
+cr_utils_read_char_from_utf8_buf (const guchar * a_in,
                                   gulong a_in_len,
-                                  guint32 *a_out, gulong *a_consumed)
+                                  guint32 * a_out, gulong * a_consumed)
 {
-	gulong in_len = 0, in_index = 0, nb_bytes_2_decode = 0 ;
-    enum CRStatus status = CR_OK ;
-    
-	/*
-     *to store the final decoded 
-	 *unicode char
-	 */
-	guint32 c = 0 ;
-    
-    g_return_val_if_fail (a_in && a_out && a_out
-                          && a_consumed, CR_BAD_PARAM_ERROR) ;
-    
-    if (a_in_len < 1)
-    {
-        status = CR_OK ;
-        goto end ;
-    }
-    
-    in_len = a_in_len ;
-    
-    if (*a_in <= 0x7F) 
-    {
+        gulong in_len = 0,
+                in_index = 0,
+                nb_bytes_2_decode = 0;
+        enum CRStatus status = CR_OK;
+
         /*
-         *7 bits long char
-         *encoded over 1 byte:
-         * 0xxx xxxx
+         *to store the final decoded 
+         *unicode char
          */
-        c = *a_in ;
-        nb_bytes_2_decode = 1 ;
-        
-    } 
-    else if ((*a_in & 0xE0) == 0xC0) 
-    {
-        /*
-         *up to 11 bits long char.
-         *encoded over 2 bytes:
-         *110x xxxx  10xx xxxx
-         */
-        c = *a_in & 0x1F ;
-        nb_bytes_2_decode = 2 ;
-        
-    } 
-    else if ((*a_in & 0xF0) == 0xE0) 
-    {
-        /*
-         *up to 16 bit long char
-         *encoded over 3 bytes:
-         *1110 xxxx  10xx xxxx  10xx xxxx
-         */
-        c = *a_in & 0x0F ;
-        nb_bytes_2_decode = 3 ;
-        
-    } 
-    else if ((*a_in & 0xF8) == 0xF0) 
-    {
-        /*
-         *up to 21 bits long char
-         *encoded over 4 bytes:
-         *1111 0xxx  10xx xxxx  10xx xxxx  10xx xxxx
-         */
-        c = *a_in & 0x7 ;
-        nb_bytes_2_decode = 4 ;
-        
-    } 
-    else if ((*a_in & 0xFC) == 0xF8) 
-    {
-        /*
-         *up to 26 bits long char
-         *encoded over 5 bytes.
-         *1111 10xx  10xx xxxx  10xx xxxx  
-         *10xx xxxx  10xx xxxx
-         */
-        c = *a_in & 3 ;
-        nb_bytes_2_decode = 5 ;
-        
-    } 
-    else if ((*a_in & 0xFE) == 0xFC) 
-    {
-        /*
-         *up to 31 bits long char
-         *encoded over 6 bytes:
-         *1111 110x  10xx xxxx  10xx xxxx  
-         *10xx xxxx  10xx xxxx  10xx xxxx
-         */
-        c = *a_in & 1 ;
-        nb_bytes_2_decode = 6 ;
-        
-    } 
-    else 
-    {
-        /*BAD ENCODING*/
-        goto end ;
-    }
-    
-    if (nb_bytes_2_decode > a_in_len)
-    {
-        status = CR_END_OF_INPUT_ERROR ;
-        goto end ;
-    }
-    
-    /*
-     *Go and decode the remaining byte(s)
-     *(if any) to get the current character.
-     */
-    for ( in_index = 1 ;
-          in_index < nb_bytes_2_decode ;
-          in_index ++) 
-    {
-        /*byte pattern must be: 10xx xxxx*/
-        if ((a_in[in_index] & 0xC0) != 0x80)
-        {
-            goto end ;
+        guint32 c = 0;
+
+        g_return_val_if_fail (a_in && a_out && a_out
+                              && a_consumed, CR_BAD_PARAM_ERROR);
+
+        if (a_in_len < 1) {
+                status = CR_OK;
+                goto end;
         }
-        
-        c = (c << 6) | (a_in[in_index] & 0x3F) ;
-    }
-    
-    /*
-     *The decoded ucs4 char is now
-     *in c.
-     */
-    
+
+        in_len = a_in_len;
+
+        if (*a_in <= 0x7F) {
+                /*
+                 *7 bits long char
+                 *encoded over 1 byte:
+                 * 0xxx xxxx
+                 */
+                c = *a_in;
+                nb_bytes_2_decode = 1;
+
+        } else if ((*a_in & 0xE0) == 0xC0) {
+                /*
+                 *up to 11 bits long char.
+                 *encoded over 2 bytes:
+                 *110x xxxx  10xx xxxx
+                 */
+                c = *a_in & 0x1F;
+                nb_bytes_2_decode = 2;
+
+        } else if ((*a_in & 0xF0) == 0xE0) {
+                /*
+                 *up to 16 bit long char
+                 *encoded over 3 bytes:
+                 *1110 xxxx  10xx xxxx  10xx xxxx
+                 */
+                c = *a_in & 0x0F;
+                nb_bytes_2_decode = 3;
+
+        } else if ((*a_in & 0xF8) == 0xF0) {
+                /*
+                 *up to 21 bits long char
+                 *encoded over 4 bytes:
+                 *1111 0xxx  10xx xxxx  10xx xxxx  10xx xxxx
+                 */
+                c = *a_in & 0x7;
+                nb_bytes_2_decode = 4;
+
+        } else if ((*a_in & 0xFC) == 0xF8) {
+                /*
+                 *up to 26 bits long char
+                 *encoded over 5 bytes.
+                 *1111 10xx  10xx xxxx  10xx xxxx  
+                 *10xx xxxx  10xx xxxx
+                 */
+                c = *a_in & 3;
+                nb_bytes_2_decode = 5;
+
+        } else if ((*a_in & 0xFE) == 0xFC) {
+                /*
+                 *up to 31 bits long char
+                 *encoded over 6 bytes:
+                 *1111 110x  10xx xxxx  10xx xxxx  
+                 *10xx xxxx  10xx xxxx  10xx xxxx
+                 */
+                c = *a_in & 1;
+                nb_bytes_2_decode = 6;
+
+        } else {
+                /*BAD ENCODING */
+                goto end;
+        }
+
+        if (nb_bytes_2_decode > a_in_len) {
+                status = CR_END_OF_INPUT_ERROR;
+                goto end;
+        }
+
+        /*
+         *Go and decode the remaining byte(s)
+         *(if any) to get the current character.
+         */
+        for (in_index = 1; in_index < nb_bytes_2_decode; in_index++) {
+                /*byte pattern must be: 10xx xxxx */
+                if ((a_in[in_index] & 0xC0) != 0x80) {
+                        goto end;
+                }
+
+                c = (c << 6) | (a_in[in_index] & 0x3F);
+        }
+
+        /*
+         *The decoded ucs4 char is now
+         *in c.
+         */
+
     /************************
      *Some security tests
      ***********************/
-    
-    /*be sure c is a char*/
-    if (c == 0xFFFF || c == 0xFFFE) goto end ;
-    
-    /*be sure c is inferior to the max ucs4 char value*/
-    if (c > 0x10FFFF) goto end ;
-    
-    /*
-     *c must be less than UTF16 "lower surrogate begin"
-     *or higher than UTF16 "High surrogate end"
-     */
-    if (c >= 0xD800 && c <= 0xDFFF) goto end ;
-    
-    /*Avoid characters that equals zero*/
-    if (c == 0) goto end ;
-    
-    *a_out = c ;
-    
- end:
-    *a_consumed = nb_bytes_2_decode ;
-    
-    return status ;
-}
 
+        /*be sure c is a char */
+        if (c == 0xFFFF || c == 0xFFFE)
+                goto end;
+
+        /*be sure c is inferior to the max ucs4 char value */
+        if (c > 0x10FFFF)
+                goto end;
+
+        /*
+         *c must be less than UTF16 "lower surrogate begin"
+         *or higher than UTF16 "High surrogate end"
+         */
+        if (c >= 0xD800 && c <= 0xDFFF)
+                goto end;
+
+        /*Avoid characters that equals zero */
+        if (c == 0)
+                goto end;
+
+        *a_out = c;
+
+      end:
+        *a_consumed = nb_bytes_2_decode;
+
+        return status;
+}
 
 /**
  *
  */
 enum CRStatus
-cr_utils_utf8_str_len_as_ucs1 (const guchar *a_in_start,
-                               const guchar *a_in_end,
-                               gulong *a_len)
+cr_utils_utf8_str_len_as_ucs1 (const guchar * a_in_start,
+                               const guchar * a_in_end, gulong * a_len)
 {
-	/*
-	 *Note: this function can be made shorter
-	 *but it considers all the cases of the utf8 encoding
-	 *to ease further extensions ...
-	 */
+        /*
+         *Note: this function can be made shorter
+         *but it considers all the cases of the utf8 encoding
+         *to ease further extensions ...
+         */
 
-        guchar *byte_ptr = NULL ;
-	gint len = 0 ;
+        guchar *byte_ptr = NULL;
+        gint len = 0;
 
-	/*
+        /*
          *to store the final decoded 
-	 *unicode char
-	 */
-	guint c = 0 ;
+         *unicode char
+         */
+        guint c = 0;
 
-	g_return_val_if_fail (a_in_start && a_in_end && a_len,
-			      CR_BAD_PARAM_ERROR) ;
-	*a_len = 0 ;
-	
-	for (byte_ptr = (guchar*)a_in_start ;
-	     byte_ptr <= a_in_end ;
-             byte_ptr++) 
-        {
-		gint nb_bytes_2_decode = 0 ;
+        g_return_val_if_fail (a_in_start && a_in_end && a_len,
+                              CR_BAD_PARAM_ERROR);
+        *a_len = 0;
 
-		if (*byte_ptr <= 0x7F) 
-                {
-			/*
-			 *7 bits long char
-			 *encoded over 1 byte:
-			 * 0xxx xxxx
-			 */
-			c = *byte_ptr ;
-			nb_bytes_2_decode = 1 ;
+        for (byte_ptr = (guchar *) a_in_start;
+             byte_ptr <= a_in_end; byte_ptr++) {
+                gint nb_bytes_2_decode = 0;
 
-		} 
-                else if ((*byte_ptr & 0xE0) == 0xC0) 
-                {
-			/*
-			 *up to 11 bits long char.
-			 *encoded over 2 bytes:
-			 *110x xxxx  10xx xxxx
-			 */
-			c = *byte_ptr & 0x1F ;
-			nb_bytes_2_decode = 2 ;
+                if (*byte_ptr <= 0x7F) {
+                        /*
+                         *7 bits long char
+                         *encoded over 1 byte:
+                         * 0xxx xxxx
+                         */
+                        c = *byte_ptr;
+                        nb_bytes_2_decode = 1;
 
-		} 
-                else if ((*byte_ptr & 0xF0) == 0xE0) 
-                {
-			/*
-			 *up to 16 bit long char
-			 *encoded over 3 bytes:
-			 *1110 xxxx  10xx xxxx  10xx xxxx
-			 */
-			c = *byte_ptr & 0x0F ;
-			nb_bytes_2_decode = 3 ;
+                } else if ((*byte_ptr & 0xE0) == 0xC0) {
+                        /*
+                         *up to 11 bits long char.
+                         *encoded over 2 bytes:
+                         *110x xxxx  10xx xxxx
+                         */
+                        c = *byte_ptr & 0x1F;
+                        nb_bytes_2_decode = 2;
 
-		} 
-                else if ((*byte_ptr & 0xF8) == 0xF0) 
-                {
-			/*
-			 *up to 21 bits long char
-			 *encoded over 4 bytes:
-			 *1111 0xxx  10xx xxxx  10xx xxxx  10xx xxxx
-			 */
-			c = *byte_ptr & 0x7 ;
-			nb_bytes_2_decode = 4 ;
+                } else if ((*byte_ptr & 0xF0) == 0xE0) {
+                        /*
+                         *up to 16 bit long char
+                         *encoded over 3 bytes:
+                         *1110 xxxx  10xx xxxx  10xx xxxx
+                         */
+                        c = *byte_ptr & 0x0F;
+                        nb_bytes_2_decode = 3;
 
-		} 
-                else if ((*byte_ptr & 0xFC) == 0xF8) 
-                {
-			/*
-			 *up to 26 bits long char
-			 *encoded over 5 bytes.
+                } else if ((*byte_ptr & 0xF8) == 0xF0) {
+                        /*
+                         *up to 21 bits long char
+                         *encoded over 4 bytes:
+                         *1111 0xxx  10xx xxxx  10xx xxxx  10xx xxxx
+                         */
+                        c = *byte_ptr & 0x7;
+                        nb_bytes_2_decode = 4;
+
+                } else if ((*byte_ptr & 0xFC) == 0xF8) {
+                        /*
+                         *up to 26 bits long char
+                         *encoded over 5 bytes.
                          *1111 10xx  10xx xxxx  10xx xxxx  
-			 *10xx xxxx  10xx xxxx
-			 */
-			c = *byte_ptr & 3 ;
-			nb_bytes_2_decode = 5 ;
+                         *10xx xxxx  10xx xxxx
+                         */
+                        c = *byte_ptr & 3;
+                        nb_bytes_2_decode = 5;
 
-		} 
-                else if ((*byte_ptr & 0xFE) == 0xFC) 
-                {
-			/*
-			 *up to 31 bits long char
-			 *encoded over 6 bytes:
-			 *1111 110x  10xx xxxx  10xx xxxx  
-			 *10xx xxxx  10xx xxxx  10xx xxxx
-			 */
-			c = *byte_ptr & 1 ;
-			nb_bytes_2_decode = 6 ;
+                } else if ((*byte_ptr & 0xFE) == 0xFC) {
+                        /*
+                         *up to 31 bits long char
+                         *encoded over 6 bytes:
+                         *1111 110x  10xx xxxx  10xx xxxx  
+                         *10xx xxxx  10xx xxxx  10xx xxxx
+                         */
+                        c = *byte_ptr & 1;
+                        nb_bytes_2_decode = 6;
 
-		} 
-                else 
-                {
-			/*
+                } else {
+                        /*
                          *BAD ENCODING
                          */
-			return CR_ENCODING_ERROR ;
-		}
+                        return CR_ENCODING_ERROR;
+                }
 
-		/*
-		 *Go and decode the remaining byte(s)
-		 *(if any) to get the current character.
-		 */
-		for ( ;
-		      nb_bytes_2_decode > 1 ;
-		      nb_bytes_2_decode --) 
-                {
-			/*decode the next byte*/
-			byte_ptr ++ ;
+                /*
+                 *Go and decode the remaining byte(s)
+                 *(if any) to get the current character.
+                 */
+                for (; nb_bytes_2_decode > 1; nb_bytes_2_decode--) {
+                        /*decode the next byte */
+                        byte_ptr++;
 
-			/*byte pattern must be: 10xx xxxx*/
-			if ((*byte_ptr & 0xC0) != 0x80) 
-                        {
-				return CR_ENCODING_ERROR ;
-			}
+                        /*byte pattern must be: 10xx xxxx */
+                        if ((*byte_ptr & 0xC0) != 0x80) {
+                                return CR_ENCODING_ERROR;
+                        }
 
-			c = (c << 6) | (*byte_ptr & 0x3F) ;
-		}
+                        c = (c << 6) | (*byte_ptr & 0x3F);
+                }
 
                 /*
                  *The decoded ucs4 char is now
                  *in c.
                  */
 
-		if (c <= 0xFF) {/*Add other conditions to support
-				 *other char sets (ucs2, ucs3, ucs4).
-				 */
-			len ++ ;
-		} else {
-			/*the char is too long to fit
-			 *into the supposed charset len.
-			 */
-			return CR_ENCODING_ERROR ;
-		}
-	}
+                if (c <= 0xFF) { /*Add other conditions to support
+                                  *other char sets (ucs2, ucs3, ucs4).
+                                  */
+                        len++;
+                } else {
+                        /*the char is too long to fit
+                         *into the supposed charset len.
+                         */
+                        return CR_ENCODING_ERROR;
+                }
+        }
 
-	*a_len = len ;
+        *a_len = len;
 
-	return CR_OK ;
+        return CR_OK;
 }
 
 /**
@@ -809,30 +712,26 @@ cr_utils_utf8_str_len_as_ucs1 (const guchar *a_in_start,
  *
  */
 enum CRStatus
-cr_utils_utf8_str_to_ucs4 (const guchar * a_in, 
-                           gulong *a_in_len,
-                           guint32 **a_out, gulong *a_out_len)
+cr_utils_utf8_str_to_ucs4 (const guchar * a_in,
+                           gulong * a_in_len,
+                           guint32 ** a_out, gulong * a_out_len)
 {
-        enum CRStatus status = CR_OK ;
+        enum CRStatus status = CR_OK;
 
-        g_return_val_if_fail (a_in && a_in_len 
-                              && a_out && a_out_len,
-                              CR_BAD_PARAM_ERROR) ;
+        g_return_val_if_fail (a_in && a_in_len
+                              && a_out && a_out_len, CR_BAD_PARAM_ERROR);
 
-        status =
-                cr_utils_utf8_str_len_as_ucs4 (a_in, 
-                                               &a_in[*a_in_len - 1],
-                                               a_out_len) ;
+        status = cr_utils_utf8_str_len_as_ucs4 (a_in,
+                                                &a_in[*a_in_len - 1],
+                                                a_out_len);
 
-        g_return_val_if_fail (status == CR_OK, status) ;
+        g_return_val_if_fail (status == CR_OK, status);
 
-        *a_out = g_malloc0 (*a_out_len * sizeof (guint32)) ;
-        
-        status =
-                cr_utils_utf8_to_ucs4 (a_in, a_in_len,
-                                       *a_out, a_out_len) ;
+        *a_out = g_malloc0 (*a_out_len * sizeof (guint32));
 
-        return status ;
+        status = cr_utils_utf8_to_ucs4 (a_in, a_in_len, *a_out, a_out_len);
+
+        return status;
 }
 
 /**
@@ -851,103 +750,89 @@ cr_utils_utf8_str_to_ucs4 (const guchar * a_in,
  *@return CR_OK upon successfull completion, an error code otherwise.
  */
 enum CRStatus
-cr_utils_ucs4_to_utf8 (const guint32 *a_in, 
-                       gulong *a_in_len,
-                       guchar *a_out, 
-                       gulong *a_out_len)
+cr_utils_ucs4_to_utf8 (const guint32 * a_in,
+                       gulong * a_in_len, guchar * a_out, gulong * a_out_len)
 {
-        gulong in_len = 0, in_index = 0, out_index = 0 ;
-        enum CRStatus status = CR_OK ;
+        gulong in_len = 0,
+                in_index = 0,
+                out_index = 0;
+        enum CRStatus status = CR_OK;
 
         g_return_val_if_fail (a_in && a_in_len && a_out && a_out_len,
-                              CR_BAD_PARAM_ERROR) ;
+                              CR_BAD_PARAM_ERROR);
 
-        if (*a_in_len < 1)
-        {
-                status =  CR_OK ;
-                goto end ;
+        if (*a_in_len < 1) {
+                status = CR_OK;
+                goto end;
         }
 
-        in_len = *a_in_len ;
+        in_len = *a_in_len;
 
-        for (in_index = 0 ;
-             in_index < in_len ;
-             in_index++)
-        {
+        for (in_index = 0; in_index < in_len; in_index++) {
                 /*
                  *FIXME: return whenever we encounter forbidden char values.
                  */
 
-                if (a_in[in_index] <= 0x7F)
-                {
-                        a_out[out_index] = a_in[in_index] ;
-                        out_index ++ ;
-                }
-                else if (a_in[in_index] <= 0x7FF)
-                {
-                        a_out[out_index] = (0xC0 | (a_in[in_index] >> 6)) ;
-                        a_out[out_index + 1] = (0x80 | (a_in[in_index] & 0x3F));
-                        out_index += 2 ;
-                }
-                else if (a_in[in_index] <= 0xFFFF)
-                {
-                        a_out[out_index] = (0xE0 | (a_in[in_index] >> 12)) ;
-                        a_out[out_index + 1] = 
-                                (0x80 | ((a_in[in_index] >> 6) & 0x3F)) ;
-                        a_out[out_index + 2] = (0x80 | (a_in[in_index] & 0x3F)) ;
-                        out_index += 3 ;
-                }
-                else if (a_in[in_index] <= 0x1FFFFF)
-                {
-                        a_out[out_index] = (0xF0 | (a_in[in_index] >> 18)) ;
-                        a_out[out_index + 1] 
-                                = (0x80 | ((a_in[in_index] >> 12) & 0x3F)) ;
-                        a_out[out_index + 2] 
-                                = (0x80 | ((a_in[in_index] >> 6) & 0x3F)) ;
-                        a_out[out_index + 3] 
-                                = (0x80 | (a_in[in_index] & 0x3F)) ;
-                        out_index += 4 ;
-                }
-                else if (a_in[in_index] <= 0x3FFFFFF)
-                {
-                        a_out[out_index] = (0xF8 | (a_in[in_index] >> 24)) ;
-                        a_out[out_index + 1] = (0x80 | (a_in[in_index] >> 18)) ;
-                        a_out[out_index + 2] 
-                                = (0x80 | ((a_in[in_index] >> 12) & 0x3F)) ;
-                        a_out[out_index + 3] 
-                                = (0x80 | ((a_in[in_index] >> 6) & 0x3F)) ;
-                        a_out[out_index + 4] 
-                                = (0x80 | (a_in[in_index] & 0x3F)) ;
-                        out_index += 5 ;
-                }
-                else if (a_in[in_index] <= 0x7FFFFFFF)
-                {
-                        a_out[out_index] = (0xFC | (a_in[in_index] >> 30)) ;
-                        a_out[out_index + 1] = (0x80 | (a_in[in_index] >> 24)) ;
-                        a_out[out_index + 2] 
-                                = (0x80 | ((a_in[in_index] >> 18) & 0x3F)) ;
-                        a_out[out_index + 3] 
-                                = (0x80 | ((a_in[in_index] >> 12) & 0x3F)) ;
-                        a_out[out_index + 4] 
-                                = (0x80 | ((a_in[in_index] >> 6) & 0x3F)) ;
+                if (a_in[in_index] <= 0x7F) {
+                        a_out[out_index] = a_in[in_index];
+                        out_index++;
+                } else if (a_in[in_index] <= 0x7FF) {
+                        a_out[out_index] = (0xC0 | (a_in[in_index] >> 6));
+                        a_out[out_index + 1] =
+                                (0x80 | (a_in[in_index] & 0x3F));
+                        out_index += 2;
+                } else if (a_in[in_index] <= 0xFFFF) {
+                        a_out[out_index] = (0xE0 | (a_in[in_index] >> 12));
+                        a_out[out_index + 1] =
+                                (0x80 | ((a_in[in_index] >> 6) & 0x3F));
+                        a_out[out_index + 2] =
+                                (0x80 | (a_in[in_index] & 0x3F));
+                        out_index += 3;
+                } else if (a_in[in_index] <= 0x1FFFFF) {
+                        a_out[out_index] = (0xF0 | (a_in[in_index] >> 18));
+                        a_out[out_index + 1]
+                                = (0x80 | ((a_in[in_index] >> 12) & 0x3F));
+                        a_out[out_index + 2]
+                                = (0x80 | ((a_in[in_index] >> 6) & 0x3F));
+                        a_out[out_index + 3]
+                                = (0x80 | (a_in[in_index] & 0x3F));
+                        out_index += 4;
+                } else if (a_in[in_index] <= 0x3FFFFFF) {
+                        a_out[out_index] = (0xF8 | (a_in[in_index] >> 24));
+                        a_out[out_index + 1] =
+                                (0x80 | (a_in[in_index] >> 18));
+                        a_out[out_index + 2]
+                                = (0x80 | ((a_in[in_index] >> 12) & 0x3F));
+                        a_out[out_index + 3]
+                                = (0x80 | ((a_in[in_index] >> 6) & 0x3F));
                         a_out[out_index + 4]
-                                = (0x80 | (a_in[in_index] & 0x3F)) ;
-                        out_index += 6 ;
+                                = (0x80 | (a_in[in_index] & 0x3F));
+                        out_index += 5;
+                } else if (a_in[in_index] <= 0x7FFFFFFF) {
+                        a_out[out_index] = (0xFC | (a_in[in_index] >> 30));
+                        a_out[out_index + 1] =
+                                (0x80 | (a_in[in_index] >> 24));
+                        a_out[out_index + 2]
+                                = (0x80 | ((a_in[in_index] >> 18) & 0x3F));
+                        a_out[out_index + 3]
+                                = (0x80 | ((a_in[in_index] >> 12) & 0x3F));
+                        a_out[out_index + 4]
+                                = (0x80 | ((a_in[in_index] >> 6) & 0x3F));
+                        a_out[out_index + 4]
+                                = (0x80 | (a_in[in_index] & 0x3F));
+                        out_index += 6;
+                } else {
+                        status = CR_ENCODING_ERROR;
+                        goto end;
                 }
-                else
-                {
-                        status = CR_ENCODING_ERROR ;
-                        goto end ;
-                }
-        }/*end for*/
-        
- end:
-        *a_in_len = in_index + 1 ;
-        *a_out_len = out_index + 1 ;
+        }                       /*end for */
 
-        return status ;
+      end:
+        *a_in_len = in_index + 1;
+        *a_out_len = out_index + 1;
+
+        return status;
 }
-
 
 /**
  *Converts an ucs4 string into an utf8 string.
@@ -962,28 +847,25 @@ cr_utils_ucs4_to_utf8 (const guint32 *a_in,
  *@return CR_OK upon successfull completion, an error code otherwise.
  */
 enum CRStatus
-cr_utils_ucs4_str_to_utf8 (const guint32 *a_in, 
-                           gulong *a_in_len,
-                           guchar **a_out, gulong *a_out_len)
-{        
-        enum CRStatus status = CR_OK ;
+cr_utils_ucs4_str_to_utf8 (const guint32 * a_in,
+                           gulong * a_in_len,
+                           guchar ** a_out, gulong * a_out_len)
+{
+        enum CRStatus status = CR_OK;
 
         g_return_val_if_fail (a_in && a_in_len && a_out
-                              && a_out_len, CR_BAD_PARAM_ERROR) ;
+                              && a_out_len, CR_BAD_PARAM_ERROR);
 
-        status =
-                cr_utils_ucs4_str_len_as_utf8 (a_in,
-                                               &a_in[*a_out_len -1], 
-                                               a_out_len) ;
+        status = cr_utils_ucs4_str_len_as_utf8 (a_in,
+                                                &a_in[*a_out_len - 1],
+                                                a_out_len);
 
-        g_return_val_if_fail (status == CR_OK, status) ;
+        g_return_val_if_fail (status == CR_OK, status);
 
-        status =
-                cr_utils_ucs4_to_utf8 (a_in, a_in_len, *a_out, a_out_len) ;
+        status = cr_utils_ucs4_to_utf8 (a_in, a_in_len, *a_out, a_out_len);
 
-        return status ;
+        return status;
 }
-
 
 /**
  *Converts an ucs1 buffer into an utf8 buffer.
@@ -1006,54 +888,49 @@ cr_utils_ucs4_str_to_utf8 (const guint32 *a_in,
  *
  */
 enum CRStatus
-cr_utils_ucs1_to_utf8 (const guchar *a_in, 
-                       gulong *a_in_len,
-                       guchar *a_out, 
-                       gulong *a_out_len)
+cr_utils_ucs1_to_utf8 (const guchar * a_in,
+                       gulong * a_in_len, guchar * a_out, gulong * a_out_len)
 {
-        gulong out_index = 0, in_index = 0, in_len = 0, out_len = 0 ;
-        enum CRStatus status = CR_OK ;
+        gulong out_index = 0,
+                in_index = 0,
+                in_len = 0,
+                out_len = 0;
+        enum CRStatus status = CR_OK;
 
         g_return_val_if_fail (a_in && a_in_len && a_out
-                              && a_out_len, CR_BAD_PARAM_ERROR) ;
+                              && a_out_len, CR_BAD_PARAM_ERROR);
 
-        if (*a_in_len < 1) 
-        {
-                status = CR_OK ;
-                goto end ;
+        if (*a_in_len < 1) {
+                status = CR_OK;
+                goto end;
         }
 
-        in_len = *a_in_len ;
-        out_len = *a_out_len ;
+        in_len = *a_in_len;
+        out_len = *a_out_len;
 
-        for (in_index = 0, out_index = 0 ;  
-             (in_index < in_len) && (out_index < out_len) ;
-             in_index ++)
-        {
+        for (in_index = 0, out_index = 0;
+             (in_index < in_len) && (out_index < out_len); in_index++) {
                 /*
                  *FIXME: return whenever we encounter forbidden char values.
                  */
 
-                if (a_in[in_index] <= 0x7F)
-                {
-                        a_out[out_index] = a_in[in_index] ;
-                        out_index ++ ;
+                if (a_in[in_index] <= 0x7F) {
+                        a_out[out_index] = a_in[in_index];
+                        out_index++;
+                } else {
+                        a_out[out_index] = (0xC0 | (a_in[in_index] >> 6));
+                        a_out[out_index + 1] =
+                                (0x80 | (a_in[in_index] & 0x3F));
+                        out_index += 2;
                 }
-                else
-                {
-                        a_out[out_index] = (0xC0 | (a_in[in_index] >> 6)) ;
-                        a_out[out_index + 1] = (0x80 | (a_in[in_index] & 0x3F));
-                        out_index += 2 ;
-                }
-        }/*end for*/
+        }                       /*end for */
 
- end:
-        *a_in_len = in_index  ;
-        *a_out_len = out_index ;
+      end:
+        *a_in_len = in_index;
+        *a_out_len = out_index;
 
-        return CR_OK ;
+        return CR_OK;
 }
-
 
 /**
  *Converts an ucs1 string into an utf8 string.
@@ -1065,42 +942,38 @@ cr_utils_ucs1_to_utf8 (const guchar *a_in,
  *
  */
 enum CRStatus
-cr_utils_ucs1_str_to_utf8 (const guchar *a_in, 
-                           gulong *a_in_len,
-                           guchar **a_out, 
-                           gulong *a_out_len)
+cr_utils_ucs1_str_to_utf8 (const guchar * a_in,
+                           gulong * a_in_len,
+                           guchar ** a_out, gulong * a_out_len)
 {
-        gulong in_len = 0, out_len = 0 ;
-        enum CRStatus status = CR_OK ;
+        gulong in_len = 0,
+                out_len = 0;
+        enum CRStatus status = CR_OK;
 
         g_return_val_if_fail (a_in && a_in_len && a_out
-                              && a_out_len, CR_BAD_PARAM_ERROR) ;
-        
-        if (*a_in_len < 1)
-        {
-                *a_out_len = 0 ;
-                *a_out = NULL ;
-                return CR_OK ;
+                              && a_out_len, CR_BAD_PARAM_ERROR);
+
+        if (*a_in_len < 1) {
+                *a_out_len = 0;
+                *a_out = NULL;
+                return CR_OK;
         }
 
-        status =
-                cr_utils_ucs1_str_len_as_utf8 (a_in, &a_in[*a_in_len -1], 
-                                               &out_len) ;
+        status = cr_utils_ucs1_str_len_as_utf8 (a_in, &a_in[*a_in_len - 1],
+                                                &out_len);
 
-        g_return_val_if_fail (status == CR_OK, status) ;
+        g_return_val_if_fail (status == CR_OK, status);
 
-        in_len = *a_in_len ;
+        in_len = *a_in_len;
 
-        *a_out = g_malloc0 (out_len) ;
+        *a_out = g_malloc0 (out_len);
 
-        status = cr_utils_ucs1_to_utf8 (a_in, a_in_len,
-                                        *a_out, &out_len) ;
+        status = cr_utils_ucs1_to_utf8 (a_in, a_in_len, *a_out, &out_len);
 
-        *a_out_len = out_len ;
+        *a_out_len = out_len;
 
-        return status ;
+        return status;
 }
-
 
 /**
  *Converts an utf8 buffer into an ucs1 buffer.
@@ -1126,162 +999,140 @@ cr_utils_ucs1_str_to_utf8 (const guchar *a_in,
  *@return CR_OK upon successfull completion, an error code otherwise.
  */
 enum CRStatus
-cr_utils_utf8_to_ucs1 (const guchar * a_in, 
-                       gulong * a_in_len,
-                       guchar *a_out, 
-                       gulong *a_out_len)
+cr_utils_utf8_to_ucs1 (const guchar * a_in,
+                       gulong * a_in_len, guchar * a_out, gulong * a_out_len)
 {
-	gulong in_index = 0, out_index = 0, in_len = 0, out_len = 0 ;
-        enum CRStatus status = CR_OK ;
+        gulong in_index = 0,
+                out_index = 0,
+                in_len = 0,
+                out_len = 0;
+        enum CRStatus status = CR_OK;
 
-	/*
+        /*
          *to store the final decoded 
-	 *unicode char
-	 */
-	guint32 c = 0 ;
+         *unicode char
+         */
+        guint32 c = 0;
 
         g_return_val_if_fail (a_in && a_in_len
-                              && a_out && a_out_len,
-                              CR_BAD_PARAM_ERROR) ;
+                              && a_out && a_out_len, CR_BAD_PARAM_ERROR);
 
-        if (*a_in_len < 1)
-        {
-                status = CR_OK ;
-                goto end ;
+        if (*a_in_len < 1) {
+                status = CR_OK;
+                goto end;
         }
 
-        in_len = *a_in_len ;
-        out_len = *a_out_len ;
+        in_len = *a_in_len;
+        out_len = *a_out_len;
 
-	for (in_index = 0 , out_index = 0 ;
-	     (in_index < in_len) && (out_index < out_len) ;
-             in_index ++, out_index++)
-        {
-		gint nb_bytes_2_decode = 0 ;
+        for (in_index = 0, out_index = 0;
+             (in_index < in_len) && (out_index < out_len);
+             in_index++, out_index++) {
+                gint nb_bytes_2_decode = 0;
 
-		if (a_in[in_index] <= 0x7F) 
-                {
-			/*
-			 *7 bits long char
-			 *encoded over 1 byte:
-			 * 0xxx xxxx
-			 */
-			c = a_in[in_index] ;
-			nb_bytes_2_decode = 1 ;
-                        
-		} 
-                else if ((a_in[in_index] & 0xE0) == 0xC0) 
-                {
-			/*
-			 *up to 11 bits long char.
-			 *encoded over 2 bytes:
-			 *110x xxxx  10xx xxxx
-			 */
-			c = a_in[in_index] & 0x1F ;
-			nb_bytes_2_decode = 2 ;
-                        
-		} 
-                else if ((a_in[in_index] & 0xF0) == 0xE0) 
-                {
-			/*
-			 *up to 16 bit long char
-			 *encoded over 3 bytes:
-			 *1110 xxxx  10xx xxxx  10xx xxxx
-			 */
-			c = a_in[in_index] & 0x0F ;
-			nb_bytes_2_decode = 3 ;
-                        
-		} 
-                else if ((a_in[in_index] & 0xF8) == 0xF0) 
-                {
-			/*
-			 *up to 21 bits long char
-			 *encoded over 4 bytes:
-			 *1111 0xxx  10xx xxxx  10xx xxxx  10xx xxxx
-			 */
-			c = a_in[in_index] & 0x7 ;
-			nb_bytes_2_decode = 4 ;
-                        
-		} 
-                else if ((a_in[in_index] & 0xFC) == 0xF8) 
-                {
-			/*
-			 *up to 26 bits long char
-			 *encoded over 5 bytes.
-			 *1111 10xx  10xx xxxx  10xx xxxx  
-			 *10xx xxxx  10xx xxxx
-			 */
-			c = a_in[in_index] & 3 ;
-			nb_bytes_2_decode = 5 ;
-                        
-		} 
-                else if ((a_in[in_index] & 0xFE) == 0xFC) 
-                {
-			/*
-			 *up to 31 bits long char
-			 *encoded over 6 bytes:
-			 *1111 110x  10xx xxxx  10xx xxxx  
-			 *10xx xxxx  10xx xxxx  10xx xxxx
-			 */
-			c = a_in[in_index] & 1 ;
-			nb_bytes_2_decode = 6 ;
-                        
-		} 
-                else 
-                {
-			/*BAD ENCODING*/
-                        status = CR_ENCODING_ERROR ;
-                        goto end ;
-		}
-                
-		/*
-		 *Go and decode the remaining byte(s)
-		 *(if any) to get the current character.
-		 */
-                if (in_index + nb_bytes_2_decode - 1 >= in_len)
-                {
-                        status = CR_OK ;
-                        goto end ;
+                if (a_in[in_index] <= 0x7F) {
+                        /*
+                         *7 bits long char
+                         *encoded over 1 byte:
+                         * 0xxx xxxx
+                         */
+                        c = a_in[in_index];
+                        nb_bytes_2_decode = 1;
+
+                } else if ((a_in[in_index] & 0xE0) == 0xC0) {
+                        /*
+                         *up to 11 bits long char.
+                         *encoded over 2 bytes:
+                         *110x xxxx  10xx xxxx
+                         */
+                        c = a_in[in_index] & 0x1F;
+                        nb_bytes_2_decode = 2;
+
+                } else if ((a_in[in_index] & 0xF0) == 0xE0) {
+                        /*
+                         *up to 16 bit long char
+                         *encoded over 3 bytes:
+                         *1110 xxxx  10xx xxxx  10xx xxxx
+                         */
+                        c = a_in[in_index] & 0x0F;
+                        nb_bytes_2_decode = 3;
+
+                } else if ((a_in[in_index] & 0xF8) == 0xF0) {
+                        /*
+                         *up to 21 bits long char
+                         *encoded over 4 bytes:
+                         *1111 0xxx  10xx xxxx  10xx xxxx  10xx xxxx
+                         */
+                        c = a_in[in_index] & 0x7;
+                        nb_bytes_2_decode = 4;
+
+                } else if ((a_in[in_index] & 0xFC) == 0xF8) {
+                        /*
+                         *up to 26 bits long char
+                         *encoded over 5 bytes.
+                         *1111 10xx  10xx xxxx  10xx xxxx  
+                         *10xx xxxx  10xx xxxx
+                         */
+                        c = a_in[in_index] & 3;
+                        nb_bytes_2_decode = 5;
+
+                } else if ((a_in[in_index] & 0xFE) == 0xFC) {
+                        /*
+                         *up to 31 bits long char
+                         *encoded over 6 bytes:
+                         *1111 110x  10xx xxxx  10xx xxxx  
+                         *10xx xxxx  10xx xxxx  10xx xxxx
+                         */
+                        c = a_in[in_index] & 1;
+                        nb_bytes_2_decode = 6;
+
+                } else {
+                        /*BAD ENCODING */
+                        status = CR_ENCODING_ERROR;
+                        goto end;
                 }
 
-		for ( ;
-		      nb_bytes_2_decode > 1 ;
-		      nb_bytes_2_decode --) 
-                {
-			/*decode the next byte*/
-			in_index ++ ;
-                        
-			/*byte pattern must be: 10xx xxxx*/
-			if ((a_in[in_index] & 0xC0) != 0x80)
-                        {
-				status = CR_ENCODING_ERROR ;
-                                goto end ;
-			}
+                /*
+                 *Go and decode the remaining byte(s)
+                 *(if any) to get the current character.
+                 */
+                if (in_index + nb_bytes_2_decode - 1 >= in_len) {
+                        status = CR_OK;
+                        goto end;
+                }
 
-			c = (c << 6) | (a_in[in_index] & 0x3F) ;
-		}
+                for (; nb_bytes_2_decode > 1; nb_bytes_2_decode--) {
+                        /*decode the next byte */
+                        in_index++;
+
+                        /*byte pattern must be: 10xx xxxx */
+                        if ((a_in[in_index] & 0xC0) != 0x80) {
+                                status = CR_ENCODING_ERROR;
+                                goto end;
+                        }
+
+                        c = (c << 6) | (a_in[in_index] & 0x3F);
+                }
 
                 /*
                  *The decoded ucs4 char is now
                  *in c.
                  */
 
-                if (c > 0xFF) 
-                {
-                        status = CR_ENCODING_ERROR ;
-                        goto end ;
+                if (c > 0xFF) {
+                        status = CR_ENCODING_ERROR;
+                        goto end;
                 }
-                
-                a_out[out_index] = c ;
+
+                a_out[out_index] = c;
         }
 
- end:
-        *a_out_len = out_index ;
-        *a_in_len = in_index ;
+      end:
+        *a_out_len = out_index;
+        *a_in_len = in_index;
 
-        return CR_OK ;        
+        return CR_OK;
 }
-
 
 /**
  *Converts an utf8 buffer into an
@@ -1296,43 +1147,35 @@ cr_utils_utf8_to_ucs1 (const guchar * a_in,
  *returns CR_OK.
  */
 enum CRStatus
-cr_utils_utf8_str_to_ucs1 (const guchar * a_in, 
+cr_utils_utf8_str_to_ucs1 (const guchar * a_in,
                            gulong * a_in_len,
-                           guchar **a_out, 
-                           gulong *a_out_len)
+                           guchar ** a_out, gulong * a_out_len)
 {
-        enum CRStatus status = CR_OK ;
+        enum CRStatus status = CR_OK;
 
-        g_return_val_if_fail (a_in && a_in_len 
-                              && a_out && a_out_len,
-                              CR_BAD_PARAM_ERROR) ;
+        g_return_val_if_fail (a_in && a_in_len
+                              && a_out && a_out_len, CR_BAD_PARAM_ERROR);
 
-        if (*a_in_len < 1)
-        {
-                *a_out_len = 0 ;
-                *a_out = NULL ;
-                return CR_OK ;
+        if (*a_in_len < 1) {
+                *a_out_len = 0;
+                *a_out = NULL;
+                return CR_OK;
         }
 
-        status =
-                cr_utils_utf8_str_len_as_ucs4 (a_in, &a_in[*a_in_len - 1],
-                                               a_out_len) ;
+        status = cr_utils_utf8_str_len_as_ucs4 (a_in, &a_in[*a_in_len - 1],
+                                                a_out_len);
 
-        g_return_val_if_fail (status == CR_OK, status) ;
+        g_return_val_if_fail (status == CR_OK, status);
 
-        *a_out = g_malloc0 (*a_out_len * sizeof (guint32)) ;
+        *a_out = g_malloc0 (*a_out_len * sizeof (guint32));
 
-        status =
-                cr_utils_utf8_to_ucs1 (a_in, a_in_len,
-                                       *a_out, a_out_len) ;
-        return status ;
+        status = cr_utils_utf8_to_ucs1 (a_in, a_in_len, *a_out, a_out_len);
+        return status;
 }
-
 
 /*****************************************
  *CSS basic types identification utilities
  *****************************************/
-
 
 /**
  *Returns TRUE if a_char is a white space as
@@ -1346,17 +1189,16 @@ cr_utils_utf8_str_to_ucs1 (const guchar * a_in,
 gboolean
 cr_utils_is_white_space (guint32 a_char)
 {
-        switch (a_char)
-        {
-        case ' ': 
-        case '\t': 
+        switch (a_char) {
+        case ' ':
+        case '\t':
         case '\r':
-        case '\n': 
+        case '\n':
         case '\f':
-                return TRUE ;
-                break ;
+                return TRUE;
+                break;
         default:
-                return FALSE ;
+                return FALSE;
         }
 }
 
@@ -1372,15 +1214,14 @@ cr_utils_is_white_space (guint32 a_char)
 gboolean
 cr_utils_is_newline (guint32 a_char)
 {
-        switch (a_char)
-        {
+        switch (a_char) {
         case '\n':
         case '\r':
         case '\f':
-                return TRUE ;
+                return TRUE;
                 break;
         default:
-                return FALSE ;
+                return FALSE;
         }
 }
 
@@ -1392,11 +1233,10 @@ gboolean
 cr_utils_is_hexa_char (guint32 a_char)
 {
         if ((a_char >= '0' && a_char <= '9')
-            || (a_char >= 'A' && a_char <= 'F'))
-        {
-                return TRUE ;
+            || (a_char >= 'A' && a_char <= 'F')) {
+                return TRUE;
         }
-        return FALSE ;
+        return FALSE;
 }
 
 /**
@@ -1412,12 +1252,11 @@ cr_utils_is_hexa_char (guint32 a_char)
 gboolean
 cr_utils_is_nonascii (guint32 a_char)
 {
-        if (a_char <= 177)
-        {
-                return FALSE ;
+        if (a_char <= 177) {
+                return FALSE;
         }
 
-        return TRUE ;
+        return TRUE;
 }
 
 /**
@@ -1427,42 +1266,37 @@ cr_utils_is_nonascii (guint32 a_char)
  *@param a_nb the number of times a_char is to be dumped.
  */
 void
-cr_utils_dump_n_chars (guchar a_char, FILE *a_fp, glong a_nb)
+cr_utils_dump_n_chars (guchar a_char, FILE * a_fp, glong a_nb)
 {
-        glong i = 0 ;
+        glong i = 0;
 
-        for (i = 0 ; i < a_nb ; i++)
-        {
-                fprintf (a_fp, "%c", a_char) ;
+        for (i = 0; i < a_nb; i++) {
+                fprintf (a_fp, "%c", a_char);
         }
 }
 
 void
-cr_utils_dump_n_chars2 (guchar a_char, 
-                        GString *a_string,
-                        glong a_nb)
+cr_utils_dump_n_chars2 (guchar a_char, GString * a_string, glong a_nb)
 {
-        glong i = 0 ;
+        glong i = 0;
 
-        g_return_if_fail (a_string) ;
+        g_return_if_fail (a_string);
 
-        for (i = 0 ; i < a_nb ; i++)
-        {
-                g_string_append_printf (a_string, "%c", a_char) ;
+        for (i = 0; i < a_nb; i++) {
+                g_string_append_printf (a_string, "%c", a_char);
         }
 }
 
 gdouble
 cr_utils_n_to_0_dot_n (glong a_n)
 {
-        gdouble result = a_n ;
+        gdouble result = a_n;
 
-        while (ABS (result) > 1)
-        {
-                result = result / 10 ;
+        while (ABS (result) > 1) {
+                result = result / 10;
         }
 
-        return result ;
+        return result;
 }
 
 /**
@@ -1472,21 +1306,21 @@ cr_utils_n_to_0_dot_n (glong a_n)
  *@param a_list_of_strings the list of strings to be duplicated.
  */
 GList *
-cr_dup_glist_of_string (GList *a_list_of_strings)
+cr_dup_glist_of_string (GList * a_list_of_strings)
 {
-        GList *cur = NULL, *result = NULL ;
+        GList *cur = NULL,
+                *result = NULL;
 
-        g_return_val_if_fail (a_list_of_strings, NULL) ;
+        g_return_val_if_fail (a_list_of_strings, NULL);
 
-        for (cur = a_list_of_strings ; cur ; cur = cur->next)
-        {
-                GString *str = NULL ;
-                
-                str = g_string_new_len (((GString *)cur->data)->str,
-                                        ((GString *)cur->data)->len) ;
+        for (cur = a_list_of_strings; cur; cur = cur->next) {
+                GString *str = NULL;
+
+                str = g_string_new_len (((GString *) cur->data)->str,
+                                        ((GString *) cur->data)->len);
                 if (str)
-                        result = g_list_append (result, str) ;
+                        result = g_list_append (result, str);
         }
 
-        return result ;
+        return result;
 }

@@ -23,45 +23,40 @@
 
 #define PRIVATE(a_obj) (a_obj)->priv
 
-struct _CRPropListPriv
-{
-	GString *prop ;
-	CRDeclaration *decl ;
-	CRPropList *next ;
-	CRPropList *prev ;
+struct _CRPropListPriv {
+        GString *prop;
+        CRDeclaration *decl;
+        CRPropList *next;
+        CRPropList *prev;
 };
 
-static CRPropList * 
-cr_prop_list_allocate (void) ;
+static CRPropList *cr_prop_list_allocate (void);
 
 /**
  *Default allocator of CRPropList
  *@return the newly allocated CRPropList or NULL
  *if an error arises.
  */
-static CRPropList * 
+static CRPropList *
 cr_prop_list_allocate (void)
 {
-	CRPropList *result = NULL;
+        CRPropList *result = NULL;
 
-	result = g_try_malloc (sizeof (CRPropList)) ;
-	if (!result)
-	{
-		cr_utils_trace_info ("could not allocate CRPropList") ;
-		return NULL ;
-	}
-	memset (result, 0, sizeof (CRPropList)) ;
-	PRIVATE (result) = g_try_malloc (sizeof (CRPropListPriv)) ;
-	if (!result)
-	{
-		cr_utils_trace_info ("could not allocate CRPropListPriv") ;
-		g_free (result) ;
-		return NULL ;
-	}
-	memset (PRIVATE (result), 0, sizeof (CRPropListPriv)) ;
-	return result ;
+        result = g_try_malloc (sizeof (CRPropList));
+        if (!result) {
+                cr_utils_trace_info ("could not allocate CRPropList");
+                return NULL;
+        }
+        memset (result, 0, sizeof (CRPropList));
+        PRIVATE (result) = g_try_malloc (sizeof (CRPropListPriv));
+        if (!result) {
+                cr_utils_trace_info ("could not allocate CRPropListPriv");
+                g_free (result);
+                return NULL;
+        }
+        memset (PRIVATE (result), 0, sizeof (CRPropListPriv));
+        return result;
 }
-
 
 /****************
  *public methods
@@ -74,28 +69,25 @@ cr_prop_list_allocate (void)
  *@return the resulting prop list, or NULL if an error
  *occured
  */
-CRPropList * 
-cr_prop_list_append (CRPropList *a_this,
-		     CRPropList *a_to_append)
+CRPropList *
+cr_prop_list_append (CRPropList * a_this, CRPropList * a_to_append)
 {
-	CRPropList *cur=NULL ;
+        CRPropList *cur = NULL;
 
-	g_return_val_if_fail (a_to_append, NULL) ;
+        g_return_val_if_fail (a_to_append, NULL);
 
-	if (!a_this)
-		return a_to_append ;
+        if (!a_this)
+                return a_to_append;
 
-	/*go fetch the last element of the list*/
-	for (cur = a_this ;
-	     cur && PRIVATE (cur) && PRIVATE (cur)->next ;
-	     cur = PRIVATE (cur)->next)
-		;
-	g_return_val_if_fail (cur, NULL) ;
-	PRIVATE (cur)->next = a_to_append ;
-	PRIVATE (a_to_append)->prev = cur ;
-	return a_this ;
+        /*go fetch the last element of the list */
+        for (cur = a_this;
+             cur && PRIVATE (cur) && PRIVATE (cur)->next;
+             cur = PRIVATE (cur)->next) ;
+        g_return_val_if_fail (cur, NULL);
+        PRIVATE (cur)->next = a_to_append;
+        PRIVATE (a_to_append)->prev = cur;
+        return a_this;
 }
-
 
 /**
  *Appends a pair of prop/declaration to
@@ -106,24 +98,23 @@ cr_prop_list_append (CRPropList *a_this,
  *@return the resulting property list, or NULL in case
  *of an error.
  */
-CRPropList * 
-cr_prop_list_append2 (CRPropList *a_this,
-		      GString *a_prop,
-		      CRDeclaration *a_decl)
+CRPropList *
+cr_prop_list_append2 (CRPropList * a_this,
+                      GString * a_prop, CRDeclaration * a_decl)
 {
-	CRPropList *list = NULL, *result = NULL ;
+        CRPropList *list = NULL,
+                *result = NULL;
 
-	g_return_val_if_fail (a_prop && a_decl,
-			      NULL) ;
+        g_return_val_if_fail (a_prop && a_decl, NULL);
 
-	list = cr_prop_list_allocate () ;
-	g_return_val_if_fail (list && PRIVATE (list), NULL) ;
+        list = cr_prop_list_allocate ();
+        g_return_val_if_fail (list && PRIVATE (list), NULL);
 
-	PRIVATE (list)->prop = a_prop ;
-	PRIVATE (list)->decl = a_decl ;
+        PRIVATE (list)->prop = a_prop;
+        PRIVATE (list)->decl = a_decl;
 
-	result = cr_prop_list_append (a_this, list) ;
-	return result ;
+        result = cr_prop_list_append (a_this, list);
+        return result;
 }
 
 /**
@@ -131,24 +122,22 @@ cr_prop_list_append2 (CRPropList *a_this,
  *@param a_this the current instance of #CRPropList
  *@param the new list to prepend.
  */
-CRPropList * 
-cr_prop_list_prepend (CRPropList *a_this,
-		      CRPropList *a_to_prepend)
+CRPropList *
+cr_prop_list_prepend (CRPropList * a_this, CRPropList * a_to_prepend)
 {
-	CRPropList *cur = NULL ;
+        CRPropList *cur = NULL;
 
-	g_return_val_if_fail (a_to_prepend, NULL) ;
+        g_return_val_if_fail (a_to_prepend, NULL);
 
-	if (!a_this)
-		return a_to_prepend ;
+        if (!a_this)
+                return a_to_prepend;
 
-	for (cur = a_to_prepend; cur && PRIVATE (cur)->next ;
-	     cur = PRIVATE (cur)->next)
-		;
-	g_return_val_if_fail (cur, NULL) ;
-	PRIVATE (cur)->next = a_this ;
-	PRIVATE (a_this)->prev = cur ;
-	return  a_to_prepend ;
+        for (cur = a_to_prepend; cur && PRIVATE (cur)->next;
+             cur = PRIVATE (cur)->next) ;
+        g_return_val_if_fail (cur, NULL);
+        PRIVATE (cur)->next = a_this;
+        PRIVATE (a_this)->prev = cur;
+        return a_to_prepend;
 }
 
 /**
@@ -156,23 +145,22 @@ cr_prop_list_prepend (CRPropList *a_this,
  *@param a_this the current instance of #CRPropList
  *@param the new list to prepend.
  */
-CRPropList * 
-cr_prop_list_prepend2 (CRPropList *a_this,
-		       GString *a_prop,
-		       CRDeclaration *a_decl)
+CRPropList *
+cr_prop_list_prepend2 (CRPropList * a_this,
+                       GString * a_prop, CRDeclaration * a_decl)
 {
-	CRPropList *list = NULL, *result = NULL ;
+        CRPropList *list = NULL,
+                *result = NULL;
 
-	g_return_val_if_fail (a_this 
-			      && PRIVATE (a_this)
-			      && a_prop && a_decl, NULL) ;
+        g_return_val_if_fail (a_this && PRIVATE (a_this)
+                              && a_prop && a_decl, NULL);
 
-	list = cr_prop_list_allocate () ;
-	g_return_val_if_fail (list, NULL) ;
-	PRIVATE (list)->prop = a_prop ;
-	PRIVATE (list)->decl = a_decl ;
-	result = cr_prop_list_prepend (a_this, list) ;
-	return result ;
+        list = cr_prop_list_allocate ();
+        g_return_val_if_fail (list, NULL);
+        PRIVATE (list)->prop = a_prop;
+        PRIVATE (list)->decl = a_decl;
+        result = cr_prop_list_prepend (a_this, list);
+        return result;
 }
 
 /**
@@ -181,17 +169,14 @@ cr_prop_list_prepend2 (CRPropList *a_this,
  *@param a_prop the property to set
  */
 enum CRStatus
-cr_prop_list_set_prop (CRPropList *a_this,
-		       GString *a_prop)
+cr_prop_list_set_prop (CRPropList * a_this, GString * a_prop)
 {
-	g_return_val_if_fail (a_this 
-			      && PRIVATE (a_this)
-			      && a_prop, CR_BAD_PARAM_ERROR) ;
+        g_return_val_if_fail (a_this && PRIVATE (a_this)
+                              && a_prop, CR_BAD_PARAM_ERROR);
 
-	PRIVATE (a_this)->prop = a_prop ;
-	return CR_OK ;
+        PRIVATE (a_this)->prop = a_prop;
+        return CR_OK;
 }
-
 
 /**
  *Getter of the property associated to the current instance
@@ -202,43 +187,33 @@ cr_prop_list_set_prop (CRPropList *a_this,
  *otherwise.
  */
 enum CRStatus
-cr_prop_list_get_prop (CRPropList *a_this,
-		       GString **a_prop)
+cr_prop_list_get_prop (CRPropList * a_this, GString ** a_prop)
 {
-	g_return_val_if_fail (a_this 
-			      && PRIVATE (a_this)
-			      && a_prop,
-			      CR_BAD_PARAM_ERROR) ;
+        g_return_val_if_fail (a_this && PRIVATE (a_this)
+                              && a_prop, CR_BAD_PARAM_ERROR);
 
-	*a_prop = PRIVATE (a_this)->prop ;
-	return CR_OK ;
+        *a_prop = PRIVATE (a_this)->prop;
+        return CR_OK;
 }
 
 enum CRStatus
-cr_prop_list_set_decl (CRPropList *a_this,
-		       CRDeclaration *a_decl)
+cr_prop_list_set_decl (CRPropList * a_this, CRDeclaration * a_decl)
 {
-	g_return_val_if_fail (a_this 
-			      && PRIVATE (a_this)
-			      && a_decl,
-			      CR_BAD_PARAM_ERROR) ;
+        g_return_val_if_fail (a_this && PRIVATE (a_this)
+                              && a_decl, CR_BAD_PARAM_ERROR);
 
-	PRIVATE (a_this)->decl =a_decl ;
-	return CR_OK ;
+        PRIVATE (a_this)->decl = a_decl;
+        return CR_OK;
 }
 
-
 enum CRStatus
-cr_prop_list_get_decl (CRPropList *a_this,
-		       CRDeclaration **a_decl)
+cr_prop_list_get_decl (CRPropList * a_this, CRDeclaration ** a_decl)
 {
-	g_return_val_if_fail (a_this
-			      && PRIVATE (a_this)
-			      && a_decl,
-			      CR_BAD_PARAM_ERROR) ;
+        g_return_val_if_fail (a_this && PRIVATE (a_this)
+                              && a_decl, CR_BAD_PARAM_ERROR);
 
-	*a_decl = PRIVATE (a_this)->decl  ;
-	return CR_OK ;
+        *a_decl = PRIVATE (a_this)->decl;
+        return CR_OK;
 }
 
 /**
@@ -252,40 +227,33 @@ cr_prop_list_get_decl (CRPropList *a_this,
  *bad happens.
  */
 enum CRStatus
-cr_prop_list_lookup_prop (CRPropList *a_this,
-			  GString *a_prop,
-			  CRPropList **a_pair)
+cr_prop_list_lookup_prop (CRPropList * a_this,
+                          GString * a_prop, CRPropList ** a_pair)
 {
-	CRPropList *cur = NULL ;
+        CRPropList *cur = NULL;
 
-	g_return_val_if_fail (a_prop && a_pair,
-			      CR_BAD_PARAM_ERROR) ;
+        g_return_val_if_fail (a_prop && a_pair, CR_BAD_PARAM_ERROR);
 
-	if (!a_this)
-		return CR_VALUE_NOT_FOUND_ERROR ;
+        if (!a_this)
+                return CR_VALUE_NOT_FOUND_ERROR;
 
-	g_return_val_if_fail (PRIVATE (a_this), CR_BAD_PARAM_ERROR) ;
+        g_return_val_if_fail (PRIVATE (a_this), CR_BAD_PARAM_ERROR);
 
-	for (cur = a_this ; cur ;
-	     cur = PRIVATE (cur)->next)
-	{
-		if (PRIVATE (cur)->prop 
-		    && PRIVATE (cur)->prop->str
-		    && a_prop->str
-		    && ! strcmp (PRIVATE (cur)->prop->str,
-				 a_prop->str))
-			break ;
-	}
+        for (cur = a_this; cur; cur = PRIVATE (cur)->next) {
+                if (PRIVATE (cur)->prop
+                    && PRIVATE (cur)->prop->str
+                    && a_prop->str
+                    && !strcmp (PRIVATE (cur)->prop->str, a_prop->str))
+                        break;
+        }
 
-	if (cur)
-	{
-		*a_pair = cur ;
-		return CR_OK ;
-	}
+        if (cur) {
+                *a_pair = cur;
+                return CR_OK;
+        }
 
-	return CR_VALUE_NOT_FOUND_ERROR ;
+        return CR_VALUE_NOT_FOUND_ERROR;
 }
-
 
 /**
  *Gets the next prop/decl pair in the list
@@ -296,12 +264,11 @@ cr_prop_list_lookup_prop (CRPropList *a_this,
  *or NULL if we reached end of list (or if an error occurs)
  */
 CRPropList *
-cr_prop_list_get_next (CRPropList *a_this)
+cr_prop_list_get_next (CRPropList * a_this)
 {
-	g_return_val_if_fail (a_this && PRIVATE (a_this),
-			      NULL) ;
+        g_return_val_if_fail (a_this && PRIVATE (a_this), NULL);
 
-	return PRIVATE (a_this)->next ;
+        return PRIVATE (a_this)->next;
 }
 
 /**
@@ -313,12 +280,11 @@ cr_prop_list_get_next (CRPropList *a_this)
  *or NULL if we reached end of list (or if an error occurs)
  */
 CRPropList *
-cr_prop_list_get_prev (CRPropList *a_this)
+cr_prop_list_get_prev (CRPropList * a_this)
 {
-	g_return_val_if_fail (a_this && PRIVATE (a_this),
-			      NULL) ;
+        g_return_val_if_fail (a_this && PRIVATE (a_this), NULL);
 
-	return PRIVATE (a_this)->prev ;
+        return PRIVATE (a_this)->prev;
 }
 
 /**
@@ -327,73 +293,63 @@ cr_prop_list_get_prev (CRPropList *a_this)
  *@param a_pair the prop/decl pair to unlink.
  *@return the new list or NULL in case of an error.
  */
-CRPropList * 
-cr_prop_list_unlink (CRPropList *a_this, 
-		     CRPropList *a_pair)
+CRPropList *
+cr_prop_list_unlink (CRPropList * a_this, CRPropList * a_pair)
 {
-	CRPropList *prev = NULL, *next = NULL ;
+        CRPropList *prev = NULL,
+                *next = NULL;
 
-	g_return_val_if_fail (a_this && PRIVATE (a_this) && a_pair,
-			      NULL) ;
+        g_return_val_if_fail (a_this && PRIVATE (a_this) && a_pair, NULL);
 
-	/*some sanity checks*/
-	if (PRIVATE (a_pair)->next)
-	{
-		next = PRIVATE (a_pair)->next ;
-		g_return_val_if_fail (PRIVATE (next), NULL) ;
-		g_return_val_if_fail 
-			(PRIVATE (next)->prev == a_pair,
-			 NULL) ;				
-	}
-	if (PRIVATE (a_pair)->prev)
-	{
-		prev = PRIVATE (a_pair)->prev ;
-		g_return_val_if_fail (PRIVATE (prev), NULL) ;
-		g_return_val_if_fail 
-			(PRIVATE (prev)->next == a_pair, NULL) ;
-	}
-	if (prev)
-	{
-		PRIVATE (prev)->next = next ;
-	}
-	if (next)
-	{
-		PRIVATE (next)->prev = prev ;
-	}
-	PRIVATE (a_pair)->prev = PRIVATE (a_pair)->next = NULL ;
-	if (a_this == a_pair)
-	{
-		if (next)
-			return next ;
-		return NULL ;
-	}
-	return a_this ;
+        /*some sanity checks */
+        if (PRIVATE (a_pair)->next) {
+                next = PRIVATE (a_pair)->next;
+                g_return_val_if_fail (PRIVATE (next), NULL);
+                g_return_val_if_fail (PRIVATE (next)->prev == a_pair, NULL);
+        }
+        if (PRIVATE (a_pair)->prev) {
+                prev = PRIVATE (a_pair)->prev;
+                g_return_val_if_fail (PRIVATE (prev), NULL);
+                g_return_val_if_fail (PRIVATE (prev)->next == a_pair, NULL);
+        }
+        if (prev) {
+                PRIVATE (prev)->next = next;
+        }
+        if (next) {
+                PRIVATE (next)->prev = prev;
+        }
+        PRIVATE (a_pair)->prev = PRIVATE (a_pair)->next = NULL;
+        if (a_this == a_pair) {
+                if (next)
+                        return next;
+                return NULL;
+        }
+        return a_this;
 }
 
 void
-cr_prop_list_destroy (CRPropList *a_this)
+cr_prop_list_destroy (CRPropList * a_this)
 {
-	CRPropList *tail = NULL, *cur = NULL ;
+        CRPropList *tail = NULL,
+                *cur = NULL;
 
-	g_return_if_fail (a_this && PRIVATE (a_this)) ;
+        g_return_if_fail (a_this && PRIVATE (a_this));
 
-	for (tail = a_this ; 
-	     tail && PRIVATE (tail) && PRIVATE (tail)->next;
-	     tail = cr_prop_list_get_next (tail))
-		;
-	g_return_if_fail (tail) ;
+        for (tail = a_this;
+             tail && PRIVATE (tail) && PRIVATE (tail)->next;
+             tail = cr_prop_list_get_next (tail)) ;
+        g_return_if_fail (tail);
 
-	cur = tail ;
+        cur = tail;
 
-	while (cur)
-	{
-		tail = PRIVATE (cur)->prev ;
-		if (tail && PRIVATE (tail))
-			PRIVATE (tail)->next = NULL ;
-		PRIVATE (cur)->prev = NULL ;
-		g_free (PRIVATE (cur)) ;
-		PRIVATE (cur) = NULL ;
-		g_free (cur) ;
-		cur = tail ;
-	}
+        while (cur) {
+                tail = PRIVATE (cur)->prev;
+                if (tail && PRIVATE (tail))
+                        PRIVATE (tail)->next = NULL;
+                PRIVATE (cur)->prev = NULL;
+                g_free (PRIVATE (cur));
+                PRIVATE (cur) = NULL;
+                g_free (cur);
+                cur = tail;
+        }
 }

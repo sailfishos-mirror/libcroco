@@ -35,7 +35,6 @@
  *css2 spec [5] .
  */
 
-
 /**
  *The constructor of #CRAttrSel.
  *@return the newly allocated instance
@@ -44,10 +43,11 @@
 CRAttrSel *
 cr_attr_sel_new (void)
 {
-	CRAttrSel *result = NULL ;
-        result = g_malloc0 (sizeof (CRAttrSel)) ;
+        CRAttrSel *result = NULL;
 
-        return result ;
+        result = g_malloc0 (sizeof (CRAttrSel));
+
+        return result;
 }
 
 /**
@@ -60,19 +60,18 @@ cr_attr_sel_new (void)
  *@return CR_OK upon successfull completion, an error code otherwise.
  */
 enum CRStatus
-cr_attr_sel_append_attr_sel (CRAttrSel *a_this, CRAttrSel *a_attr_sel)
+cr_attr_sel_append_attr_sel (CRAttrSel * a_this, CRAttrSel * a_attr_sel)
 {
-        CRAttrSel * cur_sel = NULL ;
+        CRAttrSel *cur_sel = NULL;
 
-        g_return_val_if_fail (a_this && a_attr_sel, 
-                              CR_BAD_PARAM_ERROR) ;
-        
-        for (cur_sel = a_this ; cur_sel->next ; cur_sel = cur_sel->next) ;
-        
-        cur_sel->next = a_attr_sel ;
-        a_attr_sel->prev = cur_sel ;
-        
-        return CR_OK ;
+        g_return_val_if_fail (a_this && a_attr_sel, CR_BAD_PARAM_ERROR);
+
+        for (cur_sel = a_this; cur_sel->next; cur_sel = cur_sel->next) ;
+
+        cur_sel->next = a_attr_sel;
+        a_attr_sel->prev = cur_sel;
+
+        return CR_OK;
 }
 
 /**
@@ -85,97 +84,85 @@ cr_attr_sel_append_attr_sel (CRAttrSel *a_this, CRAttrSel *a_attr_sel)
  *@return CR_OK upon successfull completion, an error code otherwise.
  */
 enum CRStatus
-cr_attr_sel_prepend_attr_sel (CRAttrSel *a_this, CRAttrSel *a_attr_sel)
+cr_attr_sel_prepend_attr_sel (CRAttrSel * a_this, CRAttrSel * a_attr_sel)
 {
         g_return_val_if_fail (a_this && a_attr_sel, CR_BAD_PARAM_ERROR);
 
-        a_attr_sel->next = a_this ;
-        a_this->prev = a_attr_sel ;
+        a_attr_sel->next = a_this;
+        a_this->prev = a_attr_sel;
 
-        return CR_OK ;
+        return CR_OK;
 }
 
 guchar *
-cr_attr_sel_to_string (CRAttrSel *a_this)
+cr_attr_sel_to_string (CRAttrSel * a_this)
 {
-        CRAttrSel *cur = NULL ;
-        guchar * result = NULL ;
-        GString *str_buf = NULL ;
+        CRAttrSel *cur = NULL;
+        guchar *result = NULL;
+        GString *str_buf = NULL;
 
-        g_return_val_if_fail (a_this, NULL) ;
+        g_return_val_if_fail (a_this, NULL);
 
-        str_buf = g_string_new (NULL) ;
+        str_buf = g_string_new (NULL);
 
-        for (cur = a_this ; cur ; cur = cur->next)
-        {
-                if (cur->prev)
-                {
-                        g_string_append_printf (str_buf," ") ;
+        for (cur = a_this; cur; cur = cur->next) {
+                if (cur->prev) {
+                        g_string_append_printf (str_buf, " ");
                 }
 
-                if (cur->name)
-                {
-                        guchar *name = NULL ;
+                if (cur->name) {
+                        guchar *name = NULL;
 
-                        name = g_strndup (cur->name->str,
-                                          cur->name->len) ;
-                        if (name)
-                        {
-                                g_string_append_printf (str_buf, 
-                                                        "%s", name) ;
-                                g_free (name) ;
-                                name = NULL ;
+                        name = g_strndup (cur->name->str, cur->name->len);
+                        if (name) {
+                                g_string_append_printf (str_buf, "%s", name);
+                                g_free (name);
+                                name = NULL;
                         }
                 }
-        
-                if (cur->value)
-                {
-                        guchar *value = NULL ;
 
-                        value = g_strndup (cur->value->str,
-                                           cur->value->len) ;
-                        if (value)
-                        {
-                                switch (cur->match_way)
-                                {
+                if (cur->value) {
+                        guchar *value = NULL;
+
+                        value = g_strndup (cur->value->str, cur->value->len);
+                        if (value) {
+                                switch (cur->match_way) {
                                 case SET:
-                                        break ;
+                                        break;
 
                                 case EQUALS:
-                                        g_string_append_printf 
-                                                (str_buf,"=") ;
-                                        break ;
+                                        g_string_append_printf (str_buf, "=");
+                                        break;
 
                                 case INCLUDES:
-                                        g_string_append_printf 
-                                                (str_buf,"~=") ;
-                                        break ;
+                                        g_string_append_printf
+                                                (str_buf, "~=");
+                                        break;
 
                                 case DASHMATCH:
-                                        g_string_append_printf 
-                                                (str_buf,"|=") ;
-                                                break ;
+                                        g_string_append_printf
+                                                (str_buf, "|=");
+                                        break;
 
                                 default:
-                                        break ;
+                                        break;
                                 }
-                        
-                                g_string_append_printf 
-                                        (str_buf,"\"%s\"",value) ;
 
-                                g_free (value) ;
-                                value = NULL ;
+                                g_string_append_printf
+                                        (str_buf, "\"%s\"", value);
+
+                                g_free (value);
+                                value = NULL;
                         }
                 }
         }
 
-        if (str_buf)
-        {
-                result = str_buf->str ;
-                g_string_free (str_buf, FALSE) ;                
+        if (str_buf) {
+                result = str_buf->str;
+                g_string_free (str_buf, FALSE);
         }
 
-        return result ;
+        return result;
 }
 
 /**
@@ -185,22 +172,20 @@ cr_attr_sel_to_string (CRAttrSel *a_this)
  *@param a_fp the destination file.
  */
 void
-cr_attr_sel_dump (CRAttrSel *a_this, FILE *a_fp)
+cr_attr_sel_dump (CRAttrSel * a_this, FILE * a_fp)
 {
-        guchar * tmp_str = NULL ;
+        guchar *tmp_str = NULL;
 
-        g_return_if_fail (a_this) ;
+        g_return_if_fail (a_this);
 
-        tmp_str = cr_attr_sel_to_string (a_this) ;
+        tmp_str = cr_attr_sel_to_string (a_this);
 
-        if (tmp_str)
-        {
-                fprintf (a_fp, "%s", tmp_str) ;
-                g_free (tmp_str) ;
-                tmp_str = NULL ;
+        if (tmp_str) {
+                fprintf (a_fp, "%s", tmp_str);
+                g_free (tmp_str);
+                tmp_str = NULL;
         }
 }
-
 
 /**
  *Destroys the current instance of #CRAttrSel.
@@ -209,31 +194,27 @@ cr_attr_sel_dump (CRAttrSel *a_this, FILE *a_fp)
  *instance of #CRAttrSel.
  */
 void
-cr_attr_sel_destroy (CRAttrSel *a_this)
+cr_attr_sel_destroy (CRAttrSel * a_this)
 {
-        g_return_if_fail (a_this) ;
+        g_return_if_fail (a_this);
 
-        if (a_this->name)
-        {
-                g_string_free (a_this->name, TRUE) ;
-                a_this->name = NULL ;
+        if (a_this->name) {
+                g_string_free (a_this->name, TRUE);
+                a_this->name = NULL;
         }
 
-        if (a_this->value)
-        {
-                g_string_free (a_this->value, TRUE) ;
-                a_this->value = NULL ;
+        if (a_this->value) {
+                g_string_free (a_this->value, TRUE);
+                a_this->value = NULL;
         }
 
-        if (a_this->next)
-        {
-                cr_attr_sel_destroy (a_this->next) ;
-                a_this->next = NULL ;
+        if (a_this->next) {
+                cr_attr_sel_destroy (a_this->next);
+                a_this->next = NULL;
         }
 
-        if (a_this)
-        {
-                g_free (a_this) ;
-                a_this = NULL ;
+        if (a_this) {
+                g_free (a_this);
+                a_this = NULL;
         }
 }

@@ -38,25 +38,23 @@
  *@return the newly built css2 stylesheet, or NULL in case of error.
  */
 CRStyleSheet *
-cr_stylesheet_new (CRStatement *a_stmts)
+cr_stylesheet_new (CRStatement * a_stmts)
 {
-	CRStyleSheet *result ;
+        CRStyleSheet *result;
 
-	result = g_try_malloc (sizeof (CRStyleSheet)) ;
-	if (!result)
-	{
-		cr_utils_trace_info ("Out of memory") ;
-		return NULL ;
-	}
+        result = g_try_malloc (sizeof (CRStyleSheet));
+        if (!result) {
+                cr_utils_trace_info ("Out of memory");
+                return NULL;
+        }
 
-	memset (result, 0, sizeof (CRStyleSheet)) ;
+        memset (result, 0, sizeof (CRStyleSheet));
 
-	if (a_stmts)
-		result->statements = a_stmts ;
+        if (a_stmts)
+                result->statements = a_stmts;
 
-	return result ;
+        return result;
 }
-
 
 /**
  *Dumps the current css2 stylesheet to a file.
@@ -64,18 +62,16 @@ cr_stylesheet_new (CRStatement *a_stmts)
  *@param a_fp the destination file
  */
 void
-cr_stylesheet_dump (CRStyleSheet *a_this, FILE *a_fp)
+cr_stylesheet_dump (CRStyleSheet * a_this, FILE * a_fp)
 {
-	CRStatement * cur_stmt = NULL ;
+        CRStatement *cur_stmt = NULL;
 
-	g_return_if_fail (a_this) ;
+        g_return_if_fail (a_this);
 
-	for (cur_stmt = a_this->statements ; 
-	     cur_stmt ;
-	     cur_stmt = cur_stmt->next)
-	{
-		cr_statement_dump (cur_stmt, a_fp, 0) ;
-	}
+        for (cur_stmt = a_this->statements;
+             cur_stmt; cur_stmt = cur_stmt->next) {
+                cr_statement_dump (cur_stmt, a_fp, 0);
+        }
 }
 
 /**
@@ -84,11 +80,11 @@ cr_stylesheet_dump (CRStyleSheet *a_this, FILE *a_fp)
  *@return number of rules in the stylesheet.
  */
 gint
-cr_stylesheet_nr_rules (CRStyleSheet *a_this)
+cr_stylesheet_nr_rules (CRStyleSheet * a_this)
 {
-	g_return_val_if_fail (a_this, -1) ;
+        g_return_val_if_fail (a_this, -1);
 
-	return cr_statement_nr_rules (a_this->statements);
+        return cr_statement_nr_rules (a_this->statements);
 }
 
 /**
@@ -99,52 +95,49 @@ cr_stylesheet_nr_rules (CRStyleSheet *a_this)
  *it will return NULL.
  */
 CRStatement *
-cr_stylesheet_statement_get_from_list (CRStyleSheet *a_this, int itemnr)
+cr_stylesheet_statement_get_from_list (CRStyleSheet * a_this, int itemnr)
 {
-	g_return_val_if_fail (a_this, NULL) ;
+        g_return_val_if_fail (a_this, NULL);
 
-	return cr_statement_get_from_list (a_this->statements, itemnr);
+        return cr_statement_get_from_list (a_this->statements, itemnr);
 }
 
 void
-cr_stylesheet_ref (CRStyleSheet *a_this)
+cr_stylesheet_ref (CRStyleSheet * a_this)
 {
-	g_return_if_fail (a_this) ;
+        g_return_if_fail (a_this);
 
-	a_this->ref_count ++ ;
+        a_this->ref_count++;
 }
 
 gboolean
-cr_stylesheet_unref (CRStyleSheet *a_this)
+cr_stylesheet_unref (CRStyleSheet * a_this)
 {
-	g_return_val_if_fail (a_this, FALSE) ;
-	
-	if (a_this->ref_count)
-		a_this->ref_count -- ;
+        g_return_val_if_fail (a_this, FALSE);
 
-	if (!a_this->ref_count)
-	{
-		cr_stylesheet_destroy (a_this) ;
-		return TRUE ;
-	}
+        if (a_this->ref_count)
+                a_this->ref_count--;
 
-	return FALSE ;
+        if (!a_this->ref_count) {
+                cr_stylesheet_destroy (a_this);
+                return TRUE;
+        }
+
+        return FALSE;
 }
-
 
 /**
  *Destructor of the #CRStyleSheet class.
  *@param a_this the current instance of the #CRStyleSheet class.
  */
 void
-cr_stylesheet_destroy (CRStyleSheet *a_this)
+cr_stylesheet_destroy (CRStyleSheet * a_this)
 {
-	g_return_if_fail (a_this) ;
+        g_return_if_fail (a_this);
 
-	if (a_this->statements)
-	{
-		cr_statement_destroy (a_this->statements) ;
-		a_this->statements = NULL ;
-	}
-	g_free (a_this) ;
+        if (a_this->statements) {
+                cr_statement_destroy (a_this->statements);
+                a_this->statements = NULL;
+        }
+        g_free (a_this);
 }

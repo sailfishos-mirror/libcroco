@@ -1,5 +1,11 @@
 2004-03-07  Dodji Seketeli  <dodji@gnome.org>
 
+	* src/*.c: re-indented the source files to make'em comply
+	with gnome indentation rules.
+	* libcroco-indent: added this indentation script.
+
+2004-03-07  Dodji Seketeli  <dodji@gnome.org>
+
 	* src/cr-style.c: applied a patch from
 	Benjamin Dauvergne to support the "color" property.
 

@@ -38,92 +38,78 @@
 CRPseudo *
 cr_pseudo_new (void)
 {
-	CRPseudo * result = NULL ;
-	
-	result = g_malloc0 (sizeof (CRPseudo)) ;
+        CRPseudo *result = NULL;
 
-	return result ;
+        result = g_malloc0 (sizeof (CRPseudo));
+
+        return result;
 }
-
 
 guchar *
-cr_pseudo_to_string (CRPseudo *a_this)
+cr_pseudo_to_string (CRPseudo * a_this)
 {
-        guchar *result = NULL ;
-        GString *str_buf = NULL ;
+        guchar *result = NULL;
+        GString *str_buf = NULL;
 
-        g_return_val_if_fail (a_this, NULL) ;
+        g_return_val_if_fail (a_this, NULL);
 
-        str_buf = g_string_new (NULL) ;
+        str_buf = g_string_new (NULL);
 
-        if (a_this->type == IDENT_PSEUDO)
-        {
-                guchar * name = NULL ;
+        if (a_this->type == IDENT_PSEUDO) {
+                guchar *name = NULL;
+
+                if (a_this->name == NULL) {
+                        goto error;
+                }
+
+                name = g_strndup (a_this->name->str, a_this->name->len);
+
+                if (name) {
+                        g_string_append_printf (str_buf, "%s", name);
+                        g_free (name);
+                        name = NULL;
+                }
+        } else if (a_this->type == FUNCTION_PSEUDO) {
+                guchar *name = NULL,
+                        *arg = NULL;
 
                 if (a_this->name == NULL)
-                {
-                        goto error ;
-                }
+                        goto error;
 
-                name = g_strndup (a_this->name->str,
-                                  a_this->name->len) ;
+                name = g_strndup (a_this->name->str, a_this->name->len);
 
-                if (name)
-                {
-                        g_string_append_printf (str_buf,"%s", name) ;
-                        g_free (name) ;
-                        name = NULL ;
-                }
-        }
-        else if (a_this->type == FUNCTION_PSEUDO)
-        {
-                guchar * name = NULL, *arg = NULL ;
-
-                if (a_this->name == NULL) 
-                        goto error ;
-                
-                name = g_strndup (a_this->name->str,
-                                  a_this->name->len) ;
-
-                if (a_this->extra)
-                {
+                if (a_this->extra) {
                         arg = g_strndup (a_this->extra->str,
-                                         a_this->extra->len) ;
+                                         a_this->extra->len);
                 }
 
-                if (name)
-                {
-                        g_string_append_printf (str_buf, 
-                                                "%s(",  name) ;
-                        g_free (name) ;
-                        name = NULL ;
+                if (name) {
+                        g_string_append_printf (str_buf, "%s(", name);
+                        g_free (name);
+                        name = NULL;
 
-                        if (arg)
-                        {
-                                g_string_append_printf (str_buf, 
-                                                        "%s", arg) ;
-                                g_free (arg) ;
-                                arg = NULL ;
+                        if (arg) {
+                                g_string_append_printf (str_buf, "%s", arg);
+                                g_free (arg);
+                                arg = NULL;
                         }
 
-                        g_string_append_printf (str_buf, ")") ;
-                } 
+                        g_string_append_printf (str_buf, ")");
+                }
         }
 
-        if (str_buf)
-        {
-                result = str_buf->str ;
-                g_string_free (str_buf, FALSE) ;
-                str_buf = NULL ;
+        if (str_buf) {
+                result = str_buf->str;
+                g_string_free (str_buf, FALSE);
+                str_buf = NULL;
         }
 
-        return result ;
+        return result;
 
- error:
-        g_string_free (str_buf, TRUE) ;
-        return NULL ;
+      error:
+        g_string_free (str_buf, TRUE);
+        return NULL;
 }
-
 
 /**
  *Dumps the pseudo to a file.
@@ -131,43 +117,38 @@ cr_pseudo_to_string (CRPseudo *a_this)
  *@param a_fp the destination file pointer.
  */
 void
-cr_pseudo_dump (CRPseudo *a_this, FILE *a_fp)
+cr_pseudo_dump (CRPseudo * a_this, FILE * a_fp)
 {
-        guchar *tmp_str = NULL ;
+        guchar *tmp_str = NULL;
 
-        if (a_this)
-        {
-                tmp_str = cr_pseudo_to_string (a_this) ;
-                if (tmp_str)
-                {
-                        fprintf (a_fp, "%s", tmp_str) ;
-                        g_free (tmp_str) ;
-                        tmp_str = NULL ;
+        if (a_this) {
+                tmp_str = cr_pseudo_to_string (a_this);
+                if (tmp_str) {
+                        fprintf (a_fp, "%s", tmp_str);
+                        g_free (tmp_str);
+                        tmp_str = NULL;
                 }
         }
 }
-
 
 /**
  *destructor of the #CRPseudo class.
  *@param a_this the current instance to destroy.
  */
 void
-cr_pseudo_destroy (CRPseudo *a_this)
+cr_pseudo_destroy (CRPseudo * a_this)
 {
-	g_return_if_fail (a_this) ;
+        g_return_if_fail (a_this);
 
-	if (a_this->name)
-	{
-		g_string_free (a_this->name, TRUE) ;
-		a_this->name = NULL ;
-	}
+        if (a_this->name) {
+                g_string_free (a_this->name, TRUE);
+                a_this->name = NULL;
+        }
 
-	if (a_this->extra)
-	{
-		g_string_free (a_this->extra, TRUE) ;
-		a_this->extra = NULL ;
-	}
+        if (a_this->extra) {
+                g_string_free (a_this->extra, TRUE);
+                a_this->extra = NULL;
+        }
 
-	g_free (a_this) ;
+        g_free (a_this);
 }

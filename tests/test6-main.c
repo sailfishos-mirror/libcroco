@@ -30,13 +30,11 @@
 #include "libcroco.h"
 #include "cr-test-utils.h"
 
-const guchar * gv_cssbuf =
-".str0 {stroke:#007844;stroke-width:44}"
-".fil0 {fill:url(#id0)}" ;
+const guchar *gv_cssbuf =
+        ".str0 {stroke:#007844;stroke-width:44}" ".fil0 {fill:url(#id0)}";
 
 static enum CRStatus
-test_cr_parser_parse (void) ;
-
+  test_cr_parser_parse (void);
 
 /**
  *The test of the cr_input_read_byte() method.
@@ -50,40 +48,37 @@ test_cr_parser_parse (void) ;
 static enum CRStatus
 test_cr_parser_parse (void)
 {
-        enum CRStatus status = CR_OK ;
-        CROMParser *parser = NULL ;
-	CRStyleSheet *stylesheet = NULL ;
+        enum CRStatus status = CR_OK;
+        CROMParser *parser = NULL;
+        CRStyleSheet *stylesheet = NULL;
 
-	parser = cr_om_parser_new (NULL) ;
-	status = cr_om_parser_parse_buf (parser, (guchar*)gv_cssbuf, 
-					 strlen (gv_cssbuf),
-					 CR_ASCII,
-					 &stylesheet) ;
+        parser = cr_om_parser_new (NULL);
+        status = cr_om_parser_parse_buf (parser, (guchar *) gv_cssbuf,
+                                         strlen (gv_cssbuf),
+                                         CR_ASCII, &stylesheet);
 
-	if (status == CR_OK && stylesheet)
-	{
-		cr_stylesheet_dump (stylesheet, stdout) ;
-		cr_stylesheet_destroy (stylesheet) ;
-	}
-	cr_om_parser_destroy (parser) ;
+        if (status == CR_OK && stylesheet) {
+                cr_stylesheet_dump (stylesheet, stdout);
+                cr_stylesheet_destroy (stylesheet);
+        }
+        cr_om_parser_destroy (parser);
 
-        return status ;
+        return status;
 }
 
 /**
  *The entry point of the testing routine.
  */
 int
-main (int argc, char ** argv)
+main (int argc, char **argv)
 {
-        enum CRStatus status = CR_OK ;
+        enum CRStatus status = CR_OK;
 
-        status = test_cr_parser_parse () ;
+        status = test_cr_parser_parse ();
 
-        if (status != CR_OK)
-        {
-                g_print ("\nKO\n") ;
+        if (status != CR_OK) {
+                g_print ("\nKO\n");
         }
 
-	return 0 ;
+        return 0;
 }

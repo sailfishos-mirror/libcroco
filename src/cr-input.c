@@ -24,12 +24,10 @@
  *$Id$
  */
 
-
 #include "stdio.h"
 #include <string.h>
 #include "cr-input.h"
 #include "cr-enc-handler.h"
-
 
 /**
  *@file
@@ -40,91 +38,81 @@
  *Private type defs
  *******************/
 
-
 /**
  *The private attributes of
  *the #CRInputPriv class.
  */
-struct _CRInputPriv 
-{
+struct _CRInputPriv {
         /*
          *The input buffer
          */
-        guchar *in_buf ;
-        gulong in_buf_size ;
+        guchar *in_buf;
+        gulong in_buf_size;
 
-        gulong nb_bytes ;
+        gulong nb_bytes;
 
         /*
          *The index of the next byte
          *to be read.
          */
-        gulong next_byte_index ;
+        gulong next_byte_index;
 
         /*
          *The current line number
          */
-        gulong line ;
+        gulong line;
 
         /*
          *The current col number.
          */
-        gulong col ;
+        gulong col;
 
-        gboolean end_of_line ;
-        gboolean end_of_input ;
+        gboolean end_of_line;
+        gboolean end_of_input;
 
         /*
          *the reference count of this
          *instance.
          */
-        guint ref_count ;
-        gboolean free_in_buf ;
-} ;
-
+        guint ref_count;
+        gboolean free_in_buf;
+};
 
 #define PRIVATE(object) (object)->priv
-
 
 /***************************
  *private constants
  **************************/
 #define CR_INPUT_MEM_CHUNK_SIZE 1024 * 4
 
-static CRInput *
-cr_input_new_real (void) ;
-
+static CRInput *cr_input_new_real (void);
 
 static CRInput *
 cr_input_new_real (void)
 {
-        CRInput *result = NULL ;
+        CRInput *result = NULL;
 
-        result = g_try_malloc (sizeof (CRInput)) ;
-        if (!result)
-        {
-                cr_utils_trace_info ("Out of memory") ;
-                return NULL ;
+        result = g_try_malloc (sizeof (CRInput));
+        if (!result) {
+                cr_utils_trace_info ("Out of memory");
+                return NULL;
         }
-        memset (result, 0, sizeof (CRInput)) ;
+        memset (result, 0, sizeof (CRInput));
 
-        PRIVATE (result) = g_try_malloc (sizeof (CRInputPriv)) ;
-        if (!PRIVATE (result))
-        {
-                cr_utils_trace_info ("Out of memory") ;
-                g_free (result) ;
-                return NULL ;
-        }        
-        memset (PRIVATE (result), 0, sizeof (CRInputPriv)) ;
-        PRIVATE (result)->free_in_buf = TRUE ;
-        return result ;
+        PRIVATE (result) = g_try_malloc (sizeof (CRInputPriv));
+        if (!PRIVATE (result)) {
+                cr_utils_trace_info ("Out of memory");
+                g_free (result);
+                return NULL;
+        }
+        memset (PRIVATE (result), 0, sizeof (CRInputPriv));
+        PRIVATE (result)->free_in_buf = TRUE;
+        return result;
 }
-
 
 /****************
  *Public methods
  ***************/
-
 
 /**
  *Creates a new input stream from a memory buffer.
@@ -137,59 +125,54 @@ cr_input_new_real (void)
  *@return the newly built instance of #CRInput.
  */
 CRInput *
-cr_input_new_from_buf (const guchar *a_buf, 
+cr_input_new_from_buf (const guchar * a_buf,
                        gulong a_len,
-                       enum CREncoding a_enc, 
-                       gboolean a_free_buf)
+                       enum CREncoding a_enc, gboolean a_free_buf)
 {
         CRInput *result = NULL;
-        enum CRStatus status = CR_OK ;
-        CREncHandler *enc_handler = NULL ;
-        gulong len = a_len ;
-        g_return_val_if_fail (a_buf, NULL) ;
+        enum CRStatus status = CR_OK;
+        CREncHandler *enc_handler = NULL;
+        gulong len = a_len;
 
-        result = cr_input_new_real () ;
-        g_return_val_if_fail (result, NULL) ;
+        g_return_val_if_fail (a_buf, NULL);
 
-        /*transform the encoding in utf8*/
-        if (a_enc != CR_UTF_8)
-        {
-                enc_handler = cr_enc_handler_get_instance (a_enc) ;
-                if (!enc_handler)
-                {
-                        goto error ;
+        result = cr_input_new_real ();
+        g_return_val_if_fail (result, NULL);
+
+        /*transform the encoding in utf8 */
+        if (a_enc != CR_UTF_8) {
+                enc_handler = cr_enc_handler_get_instance (a_enc);
+                if (!enc_handler) {
+                        goto error;
                 }
 
                 status = cr_enc_handler_convert_input
                         (enc_handler, a_buf, &len,
                          &PRIVATE (result)->in_buf,
-                         &PRIVATE (result)->in_buf_size) ;
+                         &PRIVATE (result)->in_buf_size);
 
                 if (status != CR_OK)
-                        goto error ;
+                        goto error;
 
-                PRIVATE (result)->line = 1 ;
-                PRIVATE (result)->nb_bytes =  PRIVATE (result)->in_buf_size ;
-        }
-        else
-        {
-                PRIVATE (result)->in_buf = (guchar *) a_buf ;
-                PRIVATE (result)->in_buf_size = a_len ;
-                PRIVATE (result)->nb_bytes = a_len ;
+                PRIVATE (result)->line = 1;
+                PRIVATE (result)->nb_bytes = PRIVATE (result)->in_buf_size;
+        } else {
+                PRIVATE (result)->in_buf = (guchar *) a_buf;
+                PRIVATE (result)->in_buf_size = a_len;
+                PRIVATE (result)->nb_bytes = a_len;
         }
 
-        PRIVATE (result)->free_in_buf = a_free_buf ;
+        PRIVATE (result)->free_in_buf = a_free_buf;
 
-        return result ;
+        return result;
 
- error:
-        if (result)
-        {
-                cr_input_destroy (result) ;
-                result = NULL ;
+      error:
+        if (result) {
+                cr_input_destroy (result);
+                result = NULL;
         }
 
-        return NULL ;
+        return NULL;
 }
 
 /**
@@ -205,94 +188,80 @@ cr_input_new_from_buf (const guchar *a_buf,
  */
 
 CRInput *
-cr_input_new_from_uri (const gchar *a_file_uri, enum CREncoding a_enc)
+cr_input_new_from_uri (const gchar * a_file_uri, enum CREncoding a_enc)
 {
-        CRInput * result = NULL ;
-        enum CRStatus status = CR_OK ;
-        FILE * file_ptr = NULL ;
-        guchar tmp_buf[CR_INPUT_MEM_CHUNK_SIZE] = {0} ;
-        gulong nb_read = 0, len = 0, buf_size = 0 ;
-        gboolean loop = TRUE ;
-        guchar *buf = NULL ;
+        CRInput *result = NULL;
+        enum CRStatus status = CR_OK;
+        FILE *file_ptr = NULL;
+        guchar tmp_buf[CR_INPUT_MEM_CHUNK_SIZE] = { 0 };
+        gulong nb_read = 0,
+                len = 0,
+                buf_size = 0;
+        gboolean loop = TRUE;
+        guchar *buf = NULL;
 
-        g_return_val_if_fail (a_file_uri, NULL) ;
+        g_return_val_if_fail (a_file_uri, NULL);
 
-        file_ptr = fopen (a_file_uri, "r") ;
+        file_ptr = fopen (a_file_uri, "r");
 
-        if (file_ptr == NULL) 
-        {
+        if (file_ptr == NULL) {
 
 #ifdef CR_DEBUG
-                cr_utils_trace_debug ("could not open file") ;
+                cr_utils_trace_debug ("could not open file");
 #endif
-                g_warning ("Could not open file %s\n", a_file_uri) ;
-                
-                return NULL ;
+                g_warning ("Could not open file %s\n", a_file_uri);
+
+                return NULL;
         }
 
-        /*load the file*/
-        while (loop) 
-        {
-                nb_read =
-                        fread (tmp_buf, 1/*read bytes*/,
-                               CR_INPUT_MEM_CHUNK_SIZE/*nb of bytes*/,
-                               file_ptr) ;
+        /*load the file */
+        while (loop) {
+                nb_read = fread (tmp_buf, 1 /*read bytes */ ,
+                                 CR_INPUT_MEM_CHUNK_SIZE /*nb of bytes */ ,
+                                 file_ptr);
 
-                if (nb_read != CR_INPUT_MEM_CHUNK_SIZE) 
-                {                        
-                        /*we read less chars than we wanted*/
-                        if (feof (file_ptr)) 
-                        {
-                                /*we reached eof*/
-                                loop = FALSE ;
-                        } 
-                        else 
-                        {  
-                                /*a pb occured !!*/
-                                cr_utils_trace_debug 
-                                        ("an io error occured") ;
-                                status = CR_ERROR ;
-                                goto cleanup ;
+                if (nb_read != CR_INPUT_MEM_CHUNK_SIZE) {
+                        /*we read less chars than we wanted */
+                        if (feof (file_ptr)) {
+                                /*we reached eof */
+                                loop = FALSE;
+                        } else {
+                                /*a pb occured !! */
+                                cr_utils_trace_debug ("an io error occured");
+                                status = CR_ERROR;
+                                goto cleanup;
                         }
                 }
 
-                if (status == CR_OK)
-                {
-                        /*read went well*/
-                       buf = g_realloc 
-                               (buf, len + CR_INPUT_MEM_CHUNK_SIZE) ;
-                       memcpy (buf + len, tmp_buf, nb_read) ;
-                       len +=  nb_read ;
-                       buf_size += CR_INPUT_MEM_CHUNK_SIZE ;
+                if (status == CR_OK) {
+                        /*read went well */
+                        buf = g_realloc (buf, len + CR_INPUT_MEM_CHUNK_SIZE);
+                        memcpy (buf + len, tmp_buf, nb_read);
+                        len += nb_read;
+                        buf_size += CR_INPUT_MEM_CHUNK_SIZE;
                 }
         }
 
-
-        if (status == CR_OK) 
-        {
-                result = cr_input_new_from_buf (buf, len, a_enc,
-                                                TRUE) ;
-                if (!result)
-                {
-                        goto cleanup ;
-                }                
+        if (status == CR_OK) {
+                result = cr_input_new_from_buf (buf, len, a_enc, TRUE);
+                if (!result) {
+                        goto cleanup;
+                }
         }
 
-cleanup:
+      cleanup:
 
-        if (file_ptr)
-        {
-                fclose (file_ptr) ;
-                file_ptr = NULL ;
+        if (file_ptr) {
+                fclose (file_ptr);
+                file_ptr = NULL;
         }
 
-        if (buf)
-        {
-                g_free (buf) ;
-                buf = NULL ;
+        if (buf) {
+                g_free (buf);
+                buf = NULL;
         }
 
-        return result ;
+        return result;
 }
 
 /**
@@ -300,41 +269,36 @@ cleanup:
  *@param a_this the current instance of #CRInput.
  */
 void
-cr_input_destroy (CRInput *a_this)
+cr_input_destroy (CRInput * a_this)
 {
         if (a_this == NULL)
-                return ;
+                return;
 
-        if (PRIVATE (a_this)) 
-        {
-                if (PRIVATE (a_this)->in_buf 
-                    && PRIVATE (a_this)->free_in_buf) 
-                {
-                        g_free (PRIVATE (a_this)->in_buf) ;
-                        PRIVATE (a_this)->in_buf = NULL ;
+        if (PRIVATE (a_this)) {
+                if (PRIVATE (a_this)->in_buf && PRIVATE (a_this)->free_in_buf) {
+                        g_free (PRIVATE (a_this)->in_buf);
+                        PRIVATE (a_this)->in_buf = NULL;
                 }
 
-                g_free (PRIVATE (a_this)) ;
-                PRIVATE (a_this) = NULL ;
+                g_free (PRIVATE (a_this));
+                PRIVATE (a_this) = NULL;
         }
 
-        g_free (a_this) ;
+        g_free (a_this);
 }
-
 
 /**
  *Increments the reference count of the current
  *instance of #CRInput.
  *@param a_this the current instance of #CRInput.
  */
-void 
-cr_input_ref (CRInput *a_this)
+void
+cr_input_ref (CRInput * a_this)
 {
-        g_return_if_fail (a_this && PRIVATE (a_this)) ;
-        
-        PRIVATE (a_this)->ref_count ++ ;
-}
+        g_return_if_fail (a_this && PRIVATE (a_this));
 
+        PRIVATE (a_this)->ref_count++;
+}
 
 /**
  *Decrements the reference count of this instance
@@ -342,25 +306,22 @@ cr_input_ref (CRInput *a_this)
  *zero, this instance is destroyed.
  *@param a_this the current instance of #CRInput.
  *
- */        
+ */
 gboolean
-cr_input_unref (CRInput *a_this)
+cr_input_unref (CRInput * a_this)
 {
-        g_return_val_if_fail (a_this && PRIVATE (a_this), FALSE) ;
-        
-        if (PRIVATE (a_this)->ref_count)  
-        {
-                PRIVATE (a_this)->ref_count -- ;
+        g_return_val_if_fail (a_this && PRIVATE (a_this), FALSE);
+
+        if (PRIVATE (a_this)->ref_count) {
+                PRIVATE (a_this)->ref_count--;
         }
 
-        if (PRIVATE (a_this)->ref_count == 0) 
-        {
-                cr_input_destroy (a_this) ;
-                return TRUE ;
+        if (PRIVATE (a_this)->ref_count == 0) {
+                cr_input_destroy (a_this);
+                return TRUE;
         }
-        return FALSE ;
+        return FALSE;
 }
-
 
 /**
  *Tests wether the current instance of
@@ -374,17 +335,16 @@ cr_input_unref (CRInput *a_this)
  *and only if this method returns CR_OK.
  */
 enum CRStatus
-cr_input_end_of_input (CRInput *a_this, gboolean *a_end_of_input)
+cr_input_end_of_input (CRInput * a_this, gboolean * a_end_of_input)
 {
         g_return_val_if_fail (a_this && PRIVATE (a_this)
-                              && a_end_of_input, CR_BAD_PARAM_ERROR) ;
+                              && a_end_of_input, CR_BAD_PARAM_ERROR);
 
-        *a_end_of_input = (PRIVATE (a_this)->next_byte_index 
-                           >= PRIVATE (a_this)->in_buf_size)? TRUE : FALSE ;
+        *a_end_of_input = (PRIVATE (a_this)->next_byte_index
+                           >= PRIVATE (a_this)->in_buf_size) ? TRUE : FALSE;
 
-        return CR_OK ;
+        return CR_OK;
 }
-
 
 /**
  *Returns the number of bytes left in the input stream
@@ -393,21 +353,19 @@ cr_input_end_of_input (CRInput *a_this, gboolean *a_end_of_input)
  *@return the number of characters left or -1 in case of error.
  */
 glong
-cr_input_get_nb_bytes_left (CRInput *a_this)
+cr_input_get_nb_bytes_left (CRInput * a_this)
 {
-        g_return_val_if_fail (a_this && PRIVATE (a_this), -1) ;
-        g_return_val_if_fail (PRIVATE (a_this)->nb_bytes 
-                              <= PRIVATE (a_this)->in_buf_size, -1) ;
-        g_return_val_if_fail (PRIVATE (a_this)->next_byte_index 
-                              <= PRIVATE (a_this)->nb_bytes, -1) ;
+        g_return_val_if_fail (a_this && PRIVATE (a_this), -1);
+        g_return_val_if_fail (PRIVATE (a_this)->nb_bytes
+                              <= PRIVATE (a_this)->in_buf_size, -1);
+        g_return_val_if_fail (PRIVATE (a_this)->next_byte_index
+                              <= PRIVATE (a_this)->nb_bytes, -1);
 
         if (PRIVATE (a_this)->end_of_input)
-                return 0 ;
-        
-        return PRIVATE (a_this)->nb_bytes 
-                - PRIVATE (a_this)->next_byte_index ;
-}
+                return 0;
 
+        return PRIVATE (a_this)->nb_bytes - PRIVATE (a_this)->next_byte_index;
+}
 
 /**
  *Returns the next byte of the input.
@@ -422,37 +380,28 @@ cr_input_get_nb_bytes_left (CRInput *a_this)
  *and only if this method returns CR_OK.
  */
 enum CRStatus
-cr_input_read_byte (CRInput *a_this, guchar *a_byte)
+cr_input_read_byte (CRInput * a_this, guchar * a_byte)
 {
-        g_return_val_if_fail (a_this 
-                              && PRIVATE (a_this) 
-                              && a_byte,
-                              CR_BAD_PARAM_ERROR) ;
+        g_return_val_if_fail (a_this && PRIVATE (a_this)
+                              && a_byte, CR_BAD_PARAM_ERROR);
 
-        g_return_val_if_fail (PRIVATE (a_this)->next_byte_index <= 
-                              PRIVATE (a_this)->nb_bytes,
-                              CR_BAD_PARAM_ERROR) ;
+        g_return_val_if_fail (PRIVATE (a_this)->next_byte_index <=
+                              PRIVATE (a_this)->nb_bytes, CR_BAD_PARAM_ERROR);
 
         if (PRIVATE (a_this)->end_of_input == TRUE)
-                return CR_END_OF_INPUT_ERROR ; 
+                return CR_END_OF_INPUT_ERROR;
 
-        *a_byte =
-                PRIVATE 
-                (a_this)->in_buf[PRIVATE (a_this)->next_byte_index] ;
+        *a_byte = PRIVATE (a_this)->in_buf[PRIVATE (a_this)->next_byte_index];
 
         if (PRIVATE (a_this)->nb_bytes -
-            PRIVATE (a_this)->next_byte_index < 2)
-        {
-                PRIVATE (a_this)->end_of_input = TRUE ;
-        }
-        else
-        {
-                PRIVATE (a_this)->next_byte_index ++ ;
+            PRIVATE (a_this)->next_byte_index < 2) {
+                PRIVATE (a_this)->end_of_input = TRUE;
+        } else {
+                PRIVATE (a_this)->next_byte_index++;
         }
 
-        return CR_OK ;
+        return CR_OK;
 }
-
 
 /**
  *Reads an unicode character from the current instance of
@@ -463,58 +412,51 @@ cr_input_read_byte (CRInput *a_this, guchar *a_byte)
  *otherwise.
  */
 enum CRStatus
-cr_input_read_char (CRInput *a_this, guint32 *a_char)
+cr_input_read_char (CRInput * a_this, guint32 * a_char)
 {
-        enum CRStatus status = CR_OK ;
-        gulong consumed = 0, nb_bytes_left = 0 ;
-        
+        enum CRStatus status = CR_OK;
+        gulong consumed = 0,
+                nb_bytes_left = 0;
+
         g_return_val_if_fail (a_this && PRIVATE (a_this) && a_char,
-                              CR_BAD_PARAM_ERROR) ;
+                              CR_BAD_PARAM_ERROR);
 
         if (PRIVATE (a_this)->end_of_input == TRUE)
-                return CR_END_OF_INPUT_ERROR ; 
+                return CR_END_OF_INPUT_ERROR;
 
-        nb_bytes_left = cr_input_get_nb_bytes_left (a_this) ;
+        nb_bytes_left = cr_input_get_nb_bytes_left (a_this);
 
-        if (nb_bytes_left < 1)
-        {
-                return  CR_END_OF_INPUT_ERROR ;
+        if (nb_bytes_left < 1) {
+                return CR_END_OF_INPUT_ERROR;
         }
 
-        status =
-                cr_utils_read_char_from_utf8_buf 
-                (PRIVATE (a_this)->in_buf 
-                 + 
+        status = cr_utils_read_char_from_utf8_buf
+                (PRIVATE (a_this)->in_buf
+                 +
                  PRIVATE (a_this)->next_byte_index,
-                 nb_bytes_left, a_char, &consumed) ;
+                 nb_bytes_left, a_char, &consumed);
 
-        if (status == CR_OK)
-        {
-                /*update next byte index*/
-                PRIVATE (a_this)->next_byte_index += consumed ;
+        if (status == CR_OK) {
+                /*update next byte index */
+                PRIVATE (a_this)->next_byte_index += consumed;
 
-                /*update line and column number*/
-                if (PRIVATE (a_this)->end_of_line == TRUE)
-                {
-                        PRIVATE (a_this)->col = 1 ;
-                        PRIVATE (a_this)->line ++ ;
-                        PRIVATE (a_this)->end_of_line = FALSE ;
+                /*update line and column number */
+                if (PRIVATE (a_this)->end_of_line == TRUE) {
+                        PRIVATE (a_this)->col = 1;
+                        PRIVATE (a_this)->line++;
+                        PRIVATE (a_this)->end_of_line = FALSE;
+                } else if (*a_char != '\n') {
+                        PRIVATE (a_this)->col++;
                 }
-                else if (*a_char != '\n')
-                {
-                        PRIVATE (a_this)->col ++ ;
-                }
-                
-                if (*a_char == '\n')
-                {
-                        PRIVATE (a_this)->end_of_line = TRUE ;
+
+                if (*a_char == '\n') {
+                        PRIVATE (a_this)->end_of_line = TRUE;
                 }
 
         }
 
-        return status ;
+        return status;
 }
-
 
 /**
  *Setter of the current line number.
@@ -524,16 +466,14 @@ cr_input_read_char (CRInput *a_this, guint32 *a_char)
  *@return CR_OK upon successful completion, an error code otherwise.
  */
 enum CRStatus
-cr_input_set_line_num (CRInput *a_this, glong a_line_num)
+cr_input_set_line_num (CRInput * a_this, glong a_line_num)
 {
-        g_return_val_if_fail (a_this && PRIVATE (a_this),
-                              CR_BAD_PARAM_ERROR) ;
+        g_return_val_if_fail (a_this && PRIVATE (a_this), CR_BAD_PARAM_ERROR);
 
-        PRIVATE (a_this)->line = a_line_num ;
+        PRIVATE (a_this)->line = a_line_num;
 
-        return CR_OK ;
+        return CR_OK;
 }
-
 
 /**
  *Getter of the current line number.
@@ -543,17 +483,15 @@ cr_input_set_line_num (CRInput *a_this, glong a_line_num)
  *@return CR_OK upon successful completion, an error code otherwise.
  */
 enum CRStatus
-cr_input_get_line_num (CRInput *a_this, glong *a_line_num)
+cr_input_get_line_num (CRInput * a_this, glong * a_line_num)
 {
         g_return_val_if_fail (a_this && PRIVATE (a_this)
-                              && a_line_num,
-                              CR_BAD_PARAM_ERROR) ;
-        
-        *a_line_num = PRIVATE (a_this)->line ;
+                              && a_line_num, CR_BAD_PARAM_ERROR);
 
-        return CR_OK ;
+        *a_line_num = PRIVATE (a_this)->line;
+
+        return CR_OK;
 }
-
 
 /**
  *Setter of the current column number.
@@ -563,16 +501,14 @@ cr_input_get_line_num (CRInput *a_this, glong *a_line_num)
  *@return CR_OK upon successful completion, an error code otherwise.
  */
 enum CRStatus
-cr_input_set_column_num (CRInput *a_this, glong a_col)
+cr_input_set_column_num (CRInput * a_this, glong a_col)
 {
-        g_return_val_if_fail (a_this && PRIVATE (a_this),
-                          CR_BAD_PARAM_ERROR) ;
+        g_return_val_if_fail (a_this && PRIVATE (a_this), CR_BAD_PARAM_ERROR);
 
-        PRIVATE (a_this)->col = a_col ;
+        PRIVATE (a_this)->col = a_col;
 
-        return CR_OK ;
+        return CR_OK;
 }
-
 
 /**
  *Getter of the current column number.
@@ -582,16 +518,15 @@ cr_input_set_column_num (CRInput *a_this, glong a_col)
  *@return CR_OK upon successful completion, an error code otherwise.
  */
 enum CRStatus
-cr_input_get_column_num (CRInput *a_this, glong *a_col)
+cr_input_get_column_num (CRInput * a_this, glong * a_col)
 {
         g_return_val_if_fail (a_this && PRIVATE (a_this) && a_col,
-                          CR_BAD_PARAM_ERROR) ;
-        
-        *a_col = PRIVATE (a_this)->col ;
+                              CR_BAD_PARAM_ERROR);
 
-        return CR_OK ;
+        *a_col = PRIVATE (a_this)->col;
+
+        return CR_OK;
 }
-
 
 /**
  *Increments the current line number.
@@ -600,16 +535,14 @@ cr_input_get_column_num (CRInput *a_this, glong *a_col)
  *@return CR_OK upon successful completion, an error code otherwise.
  */
 enum CRStatus
-cr_input_increment_line_num (CRInput *a_this, glong a_increment)
+cr_input_increment_line_num (CRInput * a_this, glong a_increment)
 {
-        g_return_val_if_fail (a_this && PRIVATE (a_this),
-                              CR_BAD_PARAM_ERROR) ;
-        
-        PRIVATE (a_this)->line += a_increment ;
+        g_return_val_if_fail (a_this && PRIVATE (a_this), CR_BAD_PARAM_ERROR);
 
-        return CR_OK ;
+        PRIVATE (a_this)->line += a_increment;
+
+        return CR_OK;
 }
-
 
 /**
  *Increments the current column number.
@@ -618,17 +551,14 @@ cr_input_increment_line_num (CRInput *a_this, glong a_increment)
  *@return CR_OK upon successful completion, an error code otherwise.
  */
 enum CRStatus
-cr_input_increment_col_num (CRInput *a_this, glong a_increment)
+cr_input_increment_col_num (CRInput * a_this, glong a_increment)
 {
-        g_return_val_if_fail (a_this && PRIVATE (a_this),
-                              CR_BAD_PARAM_ERROR) ;
+        g_return_val_if_fail (a_this && PRIVATE (a_this), CR_BAD_PARAM_ERROR);
 
-        PRIVATE (a_this)->col += a_increment ;
+        PRIVATE (a_this)->col += a_increment;
 
-        return CR_OK ;
+        return CR_OK;
 }
-
-
 
 /**
  *Consumes the next character of the input stream if
@@ -641,31 +571,25 @@ cr_input_increment_col_num (CRInput *a_this, glong a_increment)
  *next char is different from a_char, an other error code otherwise
  */
 enum CRStatus
-cr_input_consume_char (CRInput *a_this, guint32 a_char)
+cr_input_consume_char (CRInput * a_this, guint32 a_char)
 {
-        guint32 c ;
-        enum CRStatus status ;
+        guint32 c;
+        enum CRStatus status;
 
-        g_return_val_if_fail (a_this && PRIVATE (a_this),
-                              CR_BAD_PARAM_ERROR) ;
+        g_return_val_if_fail (a_this && PRIVATE (a_this), CR_BAD_PARAM_ERROR);
 
-        if ((status = cr_input_peek_char (a_this, &c)) != CR_OK)
-        {
-                return status ;
+        if ((status = cr_input_peek_char (a_this, &c)) != CR_OK) {
+                return status;
         }
 
-        if (c == a_char || a_char == 0)
-        {
-                status = cr_input_read_char (a_this, &c) ;
-        }
-        else
-        {
-                return CR_PARSING_ERROR ;
+        if (c == a_char || a_char == 0) {
+                status = cr_input_read_char (a_this, &c);
+        } else {
+                return CR_PARSING_ERROR;
         }
 
-        return status ;
+        return status;
 }
-
 
 /**
  *Consumes up to a_nb_char occurences of the next contiguous characters 
@@ -686,35 +610,33 @@ cr_input_consume_char (CRInput *a_this, guint32 a_char)
  *otherwise.
  */
 enum CRStatus
-cr_input_consume_chars (CRInput *a_this, guint32 a_char, gulong *a_nb_char)
+cr_input_consume_chars (CRInput * a_this, guint32 a_char, gulong * a_nb_char)
 {
-        enum CRStatus status = CR_OK ;
-        gulong nb_consumed = 0 ;
+        enum CRStatus status = CR_OK;
+        gulong nb_consumed = 0;
 
         g_return_val_if_fail (a_this && PRIVATE (a_this) && a_nb_char,
-                              CR_BAD_PARAM_ERROR) ;
+                              CR_BAD_PARAM_ERROR);
 
         g_return_val_if_fail (a_char != 0 || a_nb_char != NULL,
-                              CR_BAD_PARAM_ERROR) ;
+                              CR_BAD_PARAM_ERROR);
 
-        for (nb_consumed = 0 ;
-             ((status == CR_OK)
-              && (*a_nb_char > 0 && nb_consumed < *a_nb_char)) ;
-             nb_consumed ++)
-        {
-                status = cr_input_consume_char (a_this, a_char) ;
+        for (nb_consumed = 0; ((status == CR_OK)
+                               && (*a_nb_char > 0
+                                   && nb_consumed < *a_nb_char));
+             nb_consumed++) {
+                status = cr_input_consume_char (a_this, a_char);
         }
 
-        *a_nb_char = nb_consumed ;
+        *a_nb_char = nb_consumed;
 
-        if ((nb_consumed > 0) 
-            && ((status == CR_PARSING_ERROR) 
-                ||  (status == CR_END_OF_INPUT_ERROR)))
-        {                
-                status = CR_OK ;
+        if ((nb_consumed > 0)
+            && ((status == CR_PARSING_ERROR)
+                || (status == CR_END_OF_INPUT_ERROR))) {
+                status = CR_OK;
         }
 
-        return status ;
+        return status;
 }
 
 /**
@@ -727,41 +649,40 @@ cr_input_consume_chars (CRInput *a_this, guint32 a_char, gulong *a_nb_char)
  *@return CR_OK upon successful completion, an error code otherwise.
  */
 enum CRStatus
-cr_input_consume_white_spaces (CRInput *a_this, gulong *a_nb_chars)
+cr_input_consume_white_spaces (CRInput * a_this, gulong * a_nb_chars)
 {
-        enum CRStatus status = CR_OK ;
-        guint32 cur_char = 0, nb_consumed = 0 ;
+        enum CRStatus status = CR_OK;
+        guint32 cur_char = 0,
+                nb_consumed = 0;
 
         g_return_val_if_fail (a_this && PRIVATE (a_this) && a_nb_chars,
-                              CR_BAD_PARAM_ERROR) ;
+                              CR_BAD_PARAM_ERROR);
 
         for (nb_consumed = 0;
-             ((*a_nb_chars > 0) && (nb_consumed < *a_nb_chars)) ;
-             nb_consumed ++)
-        {
-                status = cr_input_peek_char (a_this, &cur_char) ;
-                if (status != CR_OK) break ;
+             ((*a_nb_chars > 0) && (nb_consumed < *a_nb_chars));
+             nb_consumed++) {
+                status = cr_input_peek_char (a_this, &cur_char);
+                if (status != CR_OK)
+                        break;
 
-                /*if the next char is a white space, consume it !*/
-                if (cr_utils_is_white_space (cur_char) == TRUE)
-                {
-                        status = cr_input_read_char (a_this, &cur_char) ;
-                        if (status != CR_OK) break ;
-                        continue ;
+                /*if the next char is a white space, consume it ! */
+                if (cr_utils_is_white_space (cur_char) == TRUE) {
+                        status = cr_input_read_char (a_this, &cur_char);
+                        if (status != CR_OK)
+                                break;
+                        continue;
                 }
-                
-                break ;
-        
+
+                break;
+
         }
 
-        if (nb_consumed && status == CR_END_OF_INPUT_ERROR) 
-        {
-                status = CR_OK ;
+        if (nb_consumed && status == CR_END_OF_INPUT_ERROR) {
+                status = CR_OK;
         }
-        
-        return status ;
+
+        return status;
 }
-
 
 /**
  *Same as cr_input_read_char() but does not update the
@@ -774,37 +695,33 @@ cr_input_consume_white_spaces (CRInput *a_this, gulong *a_nb_chars)
  *otherwise.
  */
 enum CRStatus
-cr_input_peek_char (CRInput *a_this, guint32 *a_char)
+cr_input_peek_char (CRInput * a_this, guint32 * a_char)
 {
-        enum CRStatus status = CR_OK ;
-        glong consumed = 0, nb_bytes_left = 0 ;
+        enum CRStatus status = CR_OK;
+        glong consumed = 0,
+                nb_bytes_left = 0;
 
-        g_return_val_if_fail (a_this && PRIVATE (a_this) 
-                              && a_char, CR_BAD_PARAM_ERROR) ;
+        g_return_val_if_fail (a_this && PRIVATE (a_this)
+                              && a_char, CR_BAD_PARAM_ERROR);
 
-        if (PRIVATE (a_this)->next_byte_index >= 
-            PRIVATE (a_this)->in_buf_size)
-        {
-                return CR_END_OF_INPUT_ERROR ;
+        if (PRIVATE (a_this)->next_byte_index >=
+            PRIVATE (a_this)->in_buf_size) {
+                return CR_END_OF_INPUT_ERROR;
         }
 
-        nb_bytes_left = cr_input_get_nb_bytes_left (a_this) ;
+        nb_bytes_left = cr_input_get_nb_bytes_left (a_this);
 
-        if (nb_bytes_left < 1)
-        {
-                return CR_END_OF_INPUT_ERROR ;
+        if (nb_bytes_left < 1) {
+                return CR_END_OF_INPUT_ERROR;
         }
 
-        status =
-                cr_utils_read_char_from_utf8_buf 
-                (PRIVATE (a_this)->in_buf + 
+        status = cr_utils_read_char_from_utf8_buf
+                (PRIVATE (a_this)->in_buf +
                  PRIVATE (a_this)->next_byte_index,
-                 nb_bytes_left, a_char, &consumed) ;
+                 nb_bytes_left, a_char, &consumed);
 
-        return status ;
+        return status;
 }
-
-
 
 /**
  *Gets a byte from the input stream,
@@ -828,45 +745,40 @@ cr_input_peek_char (CRInput *a_this, guint32 *a_char)
  *</ul>
  */
 enum CRStatus
-cr_input_peek_byte (CRInput *a_this, enum CRSeekPos a_origin,
-                    gulong a_offset, guchar *a_byte)
+cr_input_peek_byte (CRInput * a_this, enum CRSeekPos a_origin,
+                    gulong a_offset, guchar * a_byte)
 {
-        gulong abs_offset = 0 ;
+        gulong abs_offset = 0;
 
         g_return_val_if_fail (a_this && PRIVATE (a_this)
-                              && a_byte, 
-                              CR_BAD_PARAM_ERROR) ;
-        
+                              && a_byte, CR_BAD_PARAM_ERROR);
 
         switch (a_origin) {
 
         case CR_SEEK_CUR:
-                abs_offset = 
-                        PRIVATE (a_this)->next_byte_index - 1 + a_offset ;
-                break ;
+                abs_offset = PRIVATE (a_this)->next_byte_index - 1 + a_offset;
+                break;
 
         case CR_SEEK_BEGIN:
-                abs_offset = a_offset ;
-                break ;
+                abs_offset = a_offset;
+                break;
 
         case CR_SEEK_END:
-                abs_offset = 
-                        PRIVATE (a_this)->in_buf_size - 1 - a_offset ;
+                abs_offset = PRIVATE (a_this)->in_buf_size - 1 - a_offset;
                 break;
 
         default:
-                return CR_BAD_PARAM_ERROR ;
+                return CR_BAD_PARAM_ERROR;
         }
 
         if (abs_offset < PRIVATE (a_this)->in_buf_size) {
 
-                *a_byte =
-                        PRIVATE (a_this)->in_buf[abs_offset] ;
+                *a_byte = PRIVATE (a_this)->in_buf[abs_offset];
 
-                return CR_OK ;
+                return CR_OK;
 
         } else {
-                return CR_END_OF_INPUT_ERROR ;
+                return CR_END_OF_INPUT_ERROR;
         }
 }
 
@@ -881,29 +793,25 @@ cr_input_peek_byte (CRInput *a_this, enum CRSeekPos a_origin,
  *in account.
  *@return the read byte or 0 if something bad happened.
  */
-guchar 
-cr_input_peek_byte2 (CRInput *a_this, gulong a_offset, 
-                     gboolean *a_eof)
+guchar
+cr_input_peek_byte2 (CRInput * a_this, gulong a_offset, gboolean * a_eof)
 {
-        guchar result = 0 ;
-        enum CRStatus status = CR_ERROR ;
+        guchar result = 0;
+        enum CRStatus status = CR_ERROR;
 
-        g_return_val_if_fail (a_this && PRIVATE (a_this),
-                              0) ;
+        g_return_val_if_fail (a_this && PRIVATE (a_this), 0);
 
-        if (a_eof) 
-                *a_eof = FALSE ;
+        if (a_eof)
+                *a_eof = FALSE;
 
-        status = cr_input_peek_byte (a_this, CR_SEEK_CUR, a_offset,
-                                     &result) ;
+        status = cr_input_peek_byte (a_this, CR_SEEK_CUR, a_offset, &result);
 
         if ((status == CR_END_OF_INPUT_ERROR)
             && a_eof)
-                *a_eof = TRUE ;
+                *a_eof = TRUE;
 
-        return result ;
+        return result;
 }
-
 
 /**
  *Returns the memory address of the byte located at a given offset
@@ -914,17 +822,15 @@ cr_input_peek_byte2 (CRInput *a_this, gulong a_offset,
  *@return the address, otherwise NULL if an error occured.
  */
 guchar *
-cr_input_get_byte_addr (CRInput *a_this, 
-                        gulong a_offset)
+cr_input_get_byte_addr (CRInput * a_this, gulong a_offset)
 {
-        g_return_val_if_fail (a_this && PRIVATE (a_this), NULL) ;
-        
-        if (a_offset >= PRIVATE (a_this)->nb_bytes)
-        {
-                return NULL ;
+        g_return_val_if_fail (a_this && PRIVATE (a_this), NULL);
+
+        if (a_offset >= PRIVATE (a_this)->nb_bytes) {
+                return NULL;
         }
 
-        return &PRIVATE (a_this)->in_buf[a_offset] ;
+        return &PRIVATE (a_this)->in_buf[a_offset];
 }
 
 /**
@@ -934,20 +840,19 @@ cr_input_get_byte_addr (CRInput *a_this,
  *@return CR_OK upon successful completion, an error code otherwise.
  */
 enum CRStatus
-cr_input_get_cur_byte_addr (CRInput *a_this, guchar ** a_offset)
+cr_input_get_cur_byte_addr (CRInput * a_this, guchar ** a_offset)
 {
         g_return_val_if_fail (a_this && PRIVATE (a_this) && a_offset,
-                              CR_BAD_PARAM_ERROR) ;
+                              CR_BAD_PARAM_ERROR);
 
-        if (!PRIVATE (a_this)->next_byte_index)
-        {
-                return CR_START_OF_INPUT_ERROR ;   
+        if (!PRIVATE (a_this)->next_byte_index) {
+                return CR_START_OF_INPUT_ERROR;
         }
 
-        *a_offset = cr_input_get_byte_addr 
-                (a_this, PRIVATE (a_this)->next_byte_index -1) ;
+        *a_offset = cr_input_get_byte_addr
+                (a_this, PRIVATE (a_this)->next_byte_index - 1);
 
-        return CR_OK ;
+        return CR_OK;
 }
 
 /**
@@ -970,46 +875,42 @@ cr_input_get_cur_byte_addr (CRInput *a_this, guchar ** a_offset)
  *</ul>
  */
 enum CRStatus
-cr_input_seek_index (CRInput *a_this, enum CRSeekPos a_origin, gint a_pos)
+cr_input_seek_index (CRInput * a_this, enum CRSeekPos a_origin, gint a_pos)
 {
 
-        glong abs_offset = 0 ;
+        glong abs_offset = 0;
 
-        g_return_val_if_fail (a_this && PRIVATE (a_this), CR_BAD_PARAM_ERROR) ;
+        g_return_val_if_fail (a_this && PRIVATE (a_this), CR_BAD_PARAM_ERROR);
 
-  
         switch (a_origin) {
 
         case CR_SEEK_CUR:
-                abs_offset =
-                        PRIVATE (a_this)->next_byte_index - 1 + a_pos ;
-                break ;
+                abs_offset = PRIVATE (a_this)->next_byte_index - 1 + a_pos;
+                break;
 
         case CR_SEEK_BEGIN:
-                abs_offset = a_pos ;
-                break ;
+                abs_offset = a_pos;
+                break;
 
         case CR_SEEK_END:
-                abs_offset =
-                        PRIVATE (a_this)->in_buf_size - 1 - a_pos ;
-                break ;
+                abs_offset = PRIVATE (a_this)->in_buf_size - 1 - a_pos;
+                break;
 
         default:
-                return CR_BAD_PARAM_ERROR ;
+                return CR_BAD_PARAM_ERROR;
         }
 
         if ((abs_offset > 0)
             && (gulong) abs_offset < PRIVATE (a_this)->nb_bytes) {
 
-                /*update the input stream's internal state*/
-                PRIVATE (a_this)->next_byte_index = abs_offset + 1 ;
+                /*update the input stream's internal state */
+                PRIVATE (a_this)->next_byte_index = abs_offset + 1;
 
-                return CR_OK ;
+                return CR_OK;
         }
 
-        return CR_OUT_OF_BOUNDS_ERROR ;
+        return CR_OUT_OF_BOUNDS_ERROR;
 }
-
 
 /**
  *Gets the position of the "current byte index" which
@@ -1031,20 +932,19 @@ cr_input_seek_index (CRInput *a_this, enum CRSeekPos a_origin, gint a_pos)
  *function returns CR_OK.
  */
 enum CRStatus
-cr_input_get_cur_pos (CRInput *a_this, CRInputPos * a_pos)
+cr_input_get_cur_pos (CRInput * a_this, CRInputPos * a_pos)
 {
         g_return_val_if_fail (a_this && PRIVATE (a_this) && a_pos,
-                              CR_BAD_PARAM_ERROR) ;
+                              CR_BAD_PARAM_ERROR);
 
-        a_pos->next_byte_index = PRIVATE (a_this)->next_byte_index ;
-        a_pos->line = PRIVATE (a_this)->line ;
-        a_pos->col = PRIVATE (a_this)->col ;
-        a_pos->end_of_line = PRIVATE (a_this)->end_of_line ;
-        a_pos->end_of_file = PRIVATE (a_this)->end_of_input ;
-        
-        return CR_OK ;
+        a_pos->next_byte_index = PRIVATE (a_this)->next_byte_index;
+        a_pos->line = PRIVATE (a_this)->line;
+        a_pos->col = PRIVATE (a_this)->col;
+        a_pos->end_of_line = PRIVATE (a_this)->end_of_line;
+        a_pos->end_of_file = PRIVATE (a_this)->end_of_input;
+
+        return CR_OK;
 }
-
 
 /**
  *Getter of the next byte index. 
@@ -1057,17 +957,15 @@ cr_input_get_cur_pos (CRInput *a_this, CRInputPos * a_pos)
  *otherwise.
  */
 enum CRStatus
-cr_input_get_cur_index (CRInput *a_this, glong *a_index)
+cr_input_get_cur_index (CRInput * a_this, glong * a_index)
 {
-        g_return_val_if_fail (a_this && PRIVATE (a_this) 
-                              && a_index, 
-                              CR_BAD_PARAM_ERROR) ;
+        g_return_val_if_fail (a_this && PRIVATE (a_this)
+                              && a_index, CR_BAD_PARAM_ERROR);
 
-        *a_index = PRIVATE (a_this)->next_byte_index ;
+        *a_index = PRIVATE (a_this)->next_byte_index;
 
-        return CR_OK ;
+        return CR_OK;
 }
-
 
 /**
  *Setter of the next byte index.
@@ -1078,16 +976,14 @@ cr_input_get_cur_index (CRInput *a_this, glong *a_index)
  *@return CR_OK upon successful completion, an error code otherwise.
  */
 enum CRStatus
-cr_input_set_cur_index (CRInput *a_this, glong a_index)
+cr_input_set_cur_index (CRInput * a_this, glong a_index)
 {
-        g_return_val_if_fail (a_this && PRIVATE (a_this),
-                              CR_BAD_PARAM_ERROR) ;
-        
-        PRIVATE (a_this)->next_byte_index = a_index ;
+        g_return_val_if_fail (a_this && PRIVATE (a_this), CR_BAD_PARAM_ERROR);
 
-        return CR_OK ;
+        PRIVATE (a_this)->next_byte_index = a_index;
+
+        return CR_OK;
 }
-
 
 /**
  *Sets the end of file flag.
@@ -1096,14 +992,13 @@ cr_input_set_cur_index (CRInput *a_this, glong a_index)
  *@return CR_OK upon successful completion, an error code otherwise.
  */
 enum CRStatus
-cr_input_set_end_of_file (CRInput *a_this, gboolean a_eof)
+cr_input_set_end_of_file (CRInput * a_this, gboolean a_eof)
 {
-        g_return_val_if_fail (a_this && PRIVATE (a_this),
-                              CR_BAD_PARAM_ERROR) ;
+        g_return_val_if_fail (a_this && PRIVATE (a_this), CR_BAD_PARAM_ERROR);
 
-        PRIVATE (a_this)->end_of_input = a_eof ;
+        PRIVATE (a_this)->end_of_input = a_eof;
 
-        return CR_OK ;
+        return CR_OK;
 }
 
 /**
@@ -1114,17 +1009,15 @@ cr_input_set_end_of_file (CRInput *a_this, gboolean a_eof)
  *@return CR_OK upon successful completion, an error code otherwise.
  */
 enum CRStatus
-cr_input_get_end_of_file (CRInput *a_this, gboolean *a_eof)
+cr_input_get_end_of_file (CRInput * a_this, gboolean * a_eof)
 {
         g_return_val_if_fail (a_this && PRIVATE (a_this)
-                              && a_eof,
-                              CR_BAD_PARAM_ERROR) ;
+                              && a_eof, CR_BAD_PARAM_ERROR);
 
-        *a_eof = PRIVATE (a_this)->end_of_input ;
+        *a_eof = PRIVATE (a_this)->end_of_input;
 
-        return CR_OK ;
+        return CR_OK;
 }
-
 
 /**
  *Sets the end of line flag.
@@ -1134,14 +1027,13 @@ cr_input_get_end_of_file (CRInput *a_this, gboolean *a_eof)
  *otherwise.
  */
 enum CRStatus
-cr_input_set_end_of_line (CRInput *a_this, gboolean a_eol)
+cr_input_set_end_of_line (CRInput * a_this, gboolean a_eol)
 {
-        g_return_val_if_fail (a_this && PRIVATE (a_this),
-                              CR_BAD_PARAM_ERROR) ;
+        g_return_val_if_fail (a_this && PRIVATE (a_this), CR_BAD_PARAM_ERROR);
 
-        PRIVATE (a_this)->end_of_line = a_eol ;
+        PRIVATE (a_this)->end_of_line = a_eol;
 
-        return CR_OK ;
+        return CR_OK;
 }
 
 /**
@@ -1153,17 +1045,15 @@ cr_input_set_end_of_line (CRInput *a_this, gboolean a_eol)
  *otherwise.
  */
 enum CRStatus
-cr_input_get_end_of_line (CRInput *a_this, gboolean *a_eol)
+cr_input_get_end_of_line (CRInput * a_this, gboolean * a_eol)
 {
         g_return_val_if_fail (a_this && PRIVATE (a_this)
-                              && a_eol,
-                              CR_BAD_PARAM_ERROR) ;
+                              && a_eol, CR_BAD_PARAM_ERROR);
 
-        *a_eol = PRIVATE (a_this)->end_of_line ;
+        *a_eol = PRIVATE (a_this)->end_of_line;
 
-        return CR_OK ;
+        return CR_OK;
 }
-
 
 /**
  *Sets the current position in the input stream.
@@ -1173,16 +1063,16 @@ cr_input_get_end_of_line (CRInput *a_this, gboolean *a_eol)
  *@param a_pos the new position.
  */
 enum CRStatus
-cr_input_set_cur_pos (CRInput *a_this, CRInputPos *a_pos)
+cr_input_set_cur_pos (CRInput * a_this, CRInputPos * a_pos)
 {
         g_return_val_if_fail (a_this && PRIVATE (a_this) && a_pos,
-                              CR_BAD_PARAM_ERROR) ;
-        
-        cr_input_set_column_num (a_this, a_pos->col) ;
-        cr_input_set_line_num (a_this, a_pos->line) ;
-        cr_input_set_cur_index (a_this, a_pos->next_byte_index) ;
-        cr_input_set_end_of_line (a_this, a_pos->end_of_line) ;
-        cr_input_set_end_of_file (a_this, a_pos->end_of_file) ;
+                              CR_BAD_PARAM_ERROR);
 
-        return CR_OK ;
+        cr_input_set_column_num (a_this, a_pos->col);
+        cr_input_set_line_num (a_this, a_pos->line);
+        cr_input_set_cur_index (a_this, a_pos->next_byte_index);
+        cr_input_set_end_of_line (a_this, a_pos->end_of_line);
+        cr_input_set_end_of_file (a_this, a_pos->end_of_file);
+
+        return CR_OK;
 }
