@@ -174,6 +174,9 @@ status = cr_tknzr_peek_byte (a_tknzr, \
 CHECK_PARSING_STATUS (status, TRUE) ;
 
 
+#define BYTE(a_input, a_n, a_eof) \
+cr_input_peek_byte2 (a_input, a_n, a_eof)
+
 /**
  *Reads a byte from the topmost parser input
  *steam.
@@ -511,22 +514,6 @@ cr_tknzr_parse_comment (CRTknzr *a_this, GString **a_comment)
 
         if (status == CR_OK)
         {
-                /*
-                if (PRIVATE (a_this)->sac_handler
-                    && PRIVATE (a_this)->sac_handler->comment)
-                {
-                        PRIVATE (a_this)->sac_handler->comment 
-                                (PRIVATE (a_this)->sac_handler, 
-                                 comment) ;
-
-                        if (comment)
-                        {
-                                g_string_free (comment, TRUE) ;
-                                comment = NULL ;
-                        }
-                }
-                */
-
                 *a_comment = comment ;
 
                 return CR_OK ;
@@ -2093,6 +2080,605 @@ cr_tknzr_unget_token (CRTknzr *a_this, CRToken *a_token)
         return CR_OK ;
 }
 
+#define NEW_GET_NEXT_TOKEN 1
+#ifdef NEW_GET_NEXT_TOKEN
+
+enum CRStatus
+cr_tknzr_get_next_token (CRTknzr *a_this, CRToken **a_tk)
+{
+        enum CRStatus status = CR_OK ;
+        CRToken *token = NULL ;
+        CRParserInputPos init_pos ;
+        guint32 next_char = 0 ;
+        guchar next_bytes[4] = {0} ;
+        gboolean reached_eof = FALSE ;
+        CRInput *input = NULL ;
+        GString *str = NULL ;
+        CRRgb *rgb = NULL ;
+
+        g_return_val_if_fail (a_this && PRIVATE (a_this)
+                              && a_tk && *a_tk == NULL
+                              && PRIVATE (a_this)->input,
+                              CR_BAD_PARAM_ERROR) ;
+
+        if (PRIVATE (a_this)->token_cache)
+        {
+                *a_tk = PRIVATE (a_this)->token_cache ;
+                PRIVATE (a_this)->token_cache = NULL ;
+                return CR_OK ;
+        }
+
+        RECORD_INITIAL_POS (a_this, &init_pos) ;
+
+        status = cr_parser_input_get_end_of_file 
+                (PRIVATE (a_this)->input, &reached_eof) ;
+        ENSURE_PARSING_COND (status == CR_OK) ;
+
+        if (reached_eof == TRUE)
+        {
+                status = CR_END_OF_INPUT_ERROR ;
+                goto error ;
+        }
+
+        input = cr_parser_input_peek_input (PRIVATE (a_this)->input) ;
+        g_return_val_if_fail (input, CR_ERROR) ;
+        
+        PEEK_NEXT_CHAR (a_this, &next_char) ;
+        token = cr_token_new () ;
+        ENSURE_PARSING_COND (token) ;
+
+        switch (next_char)
+        {
+        case '@':
+        {
+                if (BYTE (input, 2, NULL)    ==  'f'
+                    && BYTE (input, 3, NULL) ==  'o'
+                    && BYTE (input, 4, NULL) ==  'n'
+                    && BYTE (input, 5, NULL) ==  't'
+                    && BYTE (input, 6, NULL) ==  '-'
+                    && BYTE (input, 7, NULL) ==  'f'
+                    && BYTE (input, 8, NULL) ==  'a'
+                    && BYTE (input, 9, NULL) ==  'c'
+                    && BYTE (input, 10, NULL) == 'e')
+                {
+                        SKIP_CHARS (a_this, 10) ;
+                        status = cr_token_set_font_face_sym (token) ;
+                        CHECK_PARSING_STATUS (status, TRUE) ;
+                        goto done ;
+                }
+                
+                if (BYTE (input, 2, NULL)    ==  'c'
+                    && BYTE (input, 3, NULL) ==  'h'
+                    && BYTE (input, 4, NULL) ==  'a'
+                    && BYTE (input, 5, NULL) ==  'r'
+                    && BYTE (input, 6, NULL) ==  's'
+                    && BYTE (input, 7, NULL) ==  'e'
+                    && BYTE (input, 8, NULL) ==  't')
+                {
+                        SKIP_CHARS (a_this, 8) ;
+                        status = cr_token_set_charset_sym (token) ;
+                        CHECK_PARSING_STATUS (status, TRUE) ;
+                        goto done ;
+                }
+
+                if (BYTE (input, 2, NULL)    ==  'i'
+                    && BYTE (input, 3, NULL) ==  'm'
+                    && BYTE (input, 4, NULL) ==  'p'
+                    && BYTE (input, 5, NULL) ==  'o'
+                    && BYTE (input, 6, NULL) ==  'r'
+                    && BYTE (input, 7, NULL) ==  't')
+                {
+                        SKIP_CHARS (a_this, 7) ;
+                        status = cr_token_set_import_sym (token) ;
+                        CHECK_PARSING_STATUS (status, TRUE) ;
+                        goto done ;
+                }
+
+                if (BYTE (input, 2, NULL)    ==  'm'
+                    && BYTE (input, 3, NULL) ==  'e'
+                    && BYTE (input, 4, NULL) ==  'd'
+                    && BYTE (input, 5, NULL) ==  'i'
+                    && BYTE (input, 6, NULL) ==  'a')
+                {
+                        SKIP_CHARS (a_this, 6)  ;
+                        status = cr_token_set_media_sym (token) ;
+                        CHECK_PARSING_STATUS (status, TRUE) ;
+                        goto done ;
+                }
+                
+                if (BYTE (input, 2, NULL)    ==  'p'
+                    && BYTE (input, 3, NULL) ==  'a'
+                    && BYTE (input, 4, NULL) ==  'g'
+                    && BYTE (input, 5, NULL) ==  'e')
+                {
+                        SKIP_CHARS (a_this, 5)  ;
+                        status = cr_token_set_page_sym (token) ;
+                        CHECK_PARSING_STATUS (status, TRUE) ;
+                        goto done ;
+                }
+
+                status = cr_tknzr_parse_atkeyword (a_this, &str) ;
+                if (status == CR_OK)
+                {
+                        status = cr_token_set_atkeyword (token, str) ;
+                        CHECK_PARSING_STATUS (status, TRUE) ;
+                        goto done ;
+                }
+        }
+        break ;
+
+        case 'u':
+
+                if (BYTE (input, 2, NULL)    ==  'u'
+                    && BYTE (input, 3, NULL) ==  'r'
+                    && BYTE (input, 4, NULL) ==  'l'
+                    && BYTE (input, 5, NULL) ==  '(')
+                {
+                        GString *str = NULL ;
+                        status = cr_tknzr_parse_uri (a_this, &str) ;
+                        if (status == CR_OK)
+                        {
+                                status = cr_token_set_uri (token, str) ;
+                                CHECK_PARSING_STATUS (status, TRUE) ;
+                                goto done ;
+                        }                        
+                }
+                else
+                {
+                        status = cr_tknzr_parse_ident (a_this, 
+                                                       &str) ;
+                        if (status == CR_OK && str)
+                        {
+                                status = cr_token_set_ident (token, 
+                                                             str) ;
+                                CHECK_PARSING_STATUS (status, TRUE) ;
+                                goto done ;
+                        }
+                }
+                break ;
+
+        case 'r':
+                if (BYTE (input, 2, NULL)    ==  'g'
+                    && BYTE (input, 3, NULL) ==  'b'
+                    && BYTE (input, 4, NULL) ==  '(')
+                {
+                        status = cr_tknzr_parse_rgb (a_this, &rgb) ;
+                        if (status == CR_OK && rgb)
+                        {
+                                status = cr_token_set_rgb (token, rgb) ;
+                                CHECK_PARSING_STATUS (status, TRUE)  ;
+                                rgb = NULL ;
+                                goto done ;
+                        }
+                        
+                }
+                else
+                {
+                        status = cr_tknzr_parse_ident (a_this,
+                                                       &str) ;
+                        if (status == CR_OK)
+                        {
+                                status = cr_token_set_ident (token,
+                                                             str) ;
+                                CHECK_PARSING_STATUS(status, TRUE) ;
+                                str = NULL ;
+                                goto done ;
+                        }
+                }
+                break ;
+
+        case '<':
+                if (BYTE (input, 2, NULL)    ==  '-'
+                    && BYTE (input, 3, NULL) ==  '-')
+                {
+                        SKIP_CHARS (a_this, 3) ;
+                        status = cr_token_set_cdo (token) ;
+                        CHECK_PARSING_STATUS (status, TRUE) ;
+                        goto done ;
+                }
+                break ;
+
+        case '-':
+                if (BYTE (input, 2, NULL)    ==  '-'
+                    && BYTE (input, 3, NULL) ==  '>')
+                {
+                        SKIP_CHARS (a_this, 3) ;
+                        status = cr_token_set_cdc (token) ;
+                        CHECK_PARSING_STATUS (status, TRUE) ;
+                        goto done ;
+                }
+
+        case '~':
+                if (BYTE (input, 2, NULL) ==  '=')
+                {
+                        SKIP_CHARS (a_this, 2) ;
+                        status = cr_token_set_includes (token) ;
+                        CHECK_PARSING_STATUS (status, TRUE) ;
+                        goto done ;
+                }
+                break ;
+
+        case '|':
+                if (BYTE (input, 2, NULL) == '=')
+                {
+                        SKIP_CHARS (a_this, 2) ;
+                        status = cr_token_set_dashmatch (token) ;
+                        CHECK_PARSING_STATUS (status, TRUE) ;
+                        goto done ;
+                }
+                break ;
+
+        case '/':
+                if (BYTE (input, 2, NULL) == '*')
+                {
+                        status = cr_tknzr_parse_comment (a_this, &str) ;
+
+                        if (status == CR_OK)
+                        {
+                                status = cr_token_set_comment (token, str) ;
+                                str = NULL ;
+                                CHECK_PARSING_STATUS (status, TRUE) ;
+                                goto done ;
+                        }
+                }
+
+        case ';':
+                SKIP_CHARS (a_this, 1) ;
+                status = cr_token_set_semicolon (token) ;
+                CHECK_PARSING_STATUS (status, TRUE) ;
+                goto done ;
+
+        case '{':
+                SKIP_CHARS (a_this, 1) ;
+                status = cr_token_set_cbo (token) ;
+                CHECK_PARSING_STATUS (status, TRUE) ;
+                goto done ;
+
+        case '}':
+                SKIP_CHARS (a_this, 1) ;
+                status = cr_token_set_cbc (token) ;
+                CHECK_PARSING_STATUS (status, TRUE) ;
+                goto done ;
+
+        case '(':
+                SKIP_CHARS (a_this, 1) ;
+                status = cr_token_set_po (token) ;
+                CHECK_PARSING_STATUS (status, TRUE) ;
+                goto done ;
+
+        case ')':
+                SKIP_CHARS (a_this, 1) ;
+                status = cr_token_set_pc (token) ;
+                CHECK_PARSING_STATUS (status, TRUE) ;
+                goto done ;
+
+        case '[':
+                SKIP_CHARS (a_this, 1) ;
+                status = cr_token_set_bo (token) ;
+                CHECK_PARSING_STATUS (status, TRUE) ;
+                goto done ;
+
+        case ']':
+                SKIP_CHARS (a_this, 1) ;
+                status = cr_token_set_bc (token) ;
+                CHECK_PARSING_STATUS (status, TRUE) ;
+                goto done ;
+
+        case ' ':
+        case '\t':
+        case '\n':
+        case '\f':
+        {
+                guchar *start = NULL, *end = NULL ;
+                status = cr_tknzr_parse_w (a_this, &start, &end) ;
+                if (status == CR_OK)
+                {
+                        status = cr_token_set_s (token) ;
+                        CHECK_PARSING_STATUS (status, TRUE) ;
+                        goto done ;
+                }
+        }
+                break ;
+
+        case  '#':
+        {
+                status = cr_tknzr_parse_hash (a_this, &str) ;
+                if (status == CR_OK && str)
+                {
+                        status = cr_token_set_hash (token, str) ;
+                        CHECK_PARSING_STATUS (status, TRUE) ;
+                        str = NULL ;
+                        goto done ;
+                }
+        }
+        break ;
+
+        case '\'':        
+        case '"':
+                status = cr_tknzr_parse_string (a_this, &str) ;
+                if (status == CR_OK && str)
+                {
+                        status = cr_token_set_string (token, str) ;
+                        CHECK_PARSING_STATUS (status, TRUE) ;
+                        str = NULL ;
+                        goto done ;
+                }
+                break ;
+
+        case '!':
+                status = cr_tknzr_parse_important (a_this) ;
+                if (status == CR_OK)
+                {
+                        status = cr_token_set_important_sym (token) ;
+                        CHECK_PARSING_STATUS (status, TRUE) ;
+                        goto done ;
+                }
+                break ;
+        case '0':
+        case '1':
+        case '2':
+        case '3':
+        case '4':
+        case '5':
+        case '6':
+        case '7':
+        case '8':
+        case '9':
+        case '.':
+        {
+                CRNum *num = NULL ;
+
+                status = cr_tknzr_parse_num (a_this, &num) ;
+                if (status == CR_OK && num)
+                {
+                        next_bytes[0] = BYTE (input, 1, NULL) ;
+                        next_bytes[1] = BYTE (input, 2, NULL) ;
+                        next_bytes[2] = BYTE (input, 3, NULL) ;
+                        next_bytes[3] = BYTE (input, 3, NULL) ;
+
+                        if (next_bytes[0]    == 'e' 
+                            && next_bytes[1] == 'm')
+                        {
+                                status = cr_token_set_ems (token, num) ;
+                                num = NULL ;
+                                SKIP_CHARS (a_this, 2) ;
+                        }
+                        else if (next_bytes[0]    == 'e' 
+                                 && next_bytes[1] == 'x')
+                        {
+                                status = cr_token_set_exs (token, num) ;
+                                num = NULL ; 
+                                SKIP_CHARS (a_this, 2) ;
+                        }
+                        else if (next_bytes[0]    == 'p' 
+                                 && next_bytes[1] == 'x')
+                        {
+                                status = cr_token_set_length 
+                                        (token, num,
+                                         LENGTH_PX_ET) ;
+                                num = NULL ;
+                                SKIP_CHARS (a_this, 2) ;
+                        }
+                        else if (next_bytes[0]    == 'c' 
+                                 && next_bytes[1] == 'm')
+                        {
+                                status = cr_token_set_length 
+                                        (token, num, LENGTH_CM_ET) ;
+                                num = NULL ;
+                                SKIP_CHARS (a_this, 2) ;
+                        }
+                        else if (next_bytes[0]    == 'm' 
+                                 && next_bytes[1] == 'm')
+                        {
+                                status = cr_token_set_length 
+                                        (token, num, LENGTH_MM_ET) ;
+                                num = NULL ;
+                                SKIP_CHARS (a_this, 2) ;
+                        }
+                        else if (next_bytes[0]    == 'i' 
+                                 && next_bytes[1] == 'n')
+                        {
+                                status = cr_token_set_length 
+                                        (token, num, LENGTH_IN_ET) ;
+                                num = NULL ;
+                                SKIP_CHARS (a_this, 2) ;
+                        }
+                        else if (next_bytes[0]    == 'p' 
+                                 && next_bytes[1] == 't')
+                        {
+                                status = cr_token_set_length 
+                                        (token, num, LENGTH_PT_ET) ;
+                                num = NULL ;
+                                SKIP_CHARS (a_this, 2) ;
+                        }
+                        else if (next_bytes[0]    == 'p' 
+                                 && next_bytes[1] == 'c')
+                        {
+                                status = cr_token_set_length 
+                                        (token, num, LENGTH_PC_ET) ;
+                                num = NULL ;
+                                SKIP_CHARS (a_this, 2) ;
+                        }
+                        else if (next_bytes[0]    == 'd' 
+                                 && next_bytes[1] == 'e'
+                                 && next_bytes[2] == 'g')
+                        {
+                                status = cr_token_set_angle 
+                                        (token, num, ANGLE_DEG_ET) ;
+                                num = NULL ;
+                                SKIP_CHARS (a_this, 3) ;
+                        }
+                        else if (next_bytes[0]    == 'r' 
+                                 && next_bytes[1] == 'a'
+                                 && next_bytes[2] == 'd')
+                        {
+                                status = cr_token_set_angle 
+                                        (token, num, ANGLE_RAD_ET) ;
+                                num = NULL ;
+                                SKIP_CHARS (a_this, 3) ;
+                        }
+                        else if (next_bytes[0]    == 'g' 
+                                 && next_bytes[1] == 'r'
+                                 && next_bytes[2] == 'a'
+                                 && next_bytes[3] == 'd')
+                        {
+                                status = cr_token_set_angle 
+                                        (token, num, ANGLE_GRAD_ET) ;
+                                num = NULL ;
+                                SKIP_CHARS (a_this, 4) ;
+                        }
+                        else if (next_bytes[0]    == 'm' 
+                                 && next_bytes[1] == 's')
+                        {
+                                status = cr_token_set_time 
+                                        (token, num,TIME_MS_ET) ;
+                                num = NULL ;
+                                SKIP_CHARS (a_this, 2) ;
+                        }
+                        else if (next_bytes[0] =='s')
+                        {
+                                status = cr_token_set_time 
+                                        (token, num, TIME_S_ET) ;
+                                num = NULL ;
+                                SKIP_CHARS (a_this, 1) ;
+                        }
+                        else if (next_bytes[0]    == 'H' 
+                                 && next_bytes[1] == 'z')
+                        {
+                                status = cr_token_set_freq 
+                                        (token, num, FREQ_HZ_ET) ;
+                                num = NULL ;
+                                SKIP_CHARS (a_this, 2) ;
+                        }
+                        else if (next_bytes[0]    == 'k' 
+                                 && next_bytes[1] == 'H'
+                                 && next_bytes[1] == 'z')
+                        {
+                                status = cr_token_set_freq 
+                                        (token, num, FREQ_KHZ_ET) ;
+                                num = NULL ;
+                                SKIP_CHARS (a_this, 3) ;
+                        }
+                        else if (next_bytes[0]  == '%')
+                        {
+                                status = cr_token_set_percentage (token, 
+                                                                  num) ;
+                                num = NULL ;
+                                SKIP_CHARS (a_this, 1) ;
+                        }
+                        else
+                        {
+                                status = cr_tknzr_parse_ident (a_this,
+                                                               &str) ;
+                                if (status == CR_OK && str)
+                                {
+                                        status = cr_token_set_dimen
+                                                (token, num, str) ;
+                                        num = NULL ;
+                                        CHECK_PARSING_STATUS (status, TRUE) ;
+                                        str = NULL ;
+                                }
+                                else
+                                {
+                                        status = cr_token_set_number 
+                                                (token, num) ;
+                                        num = NULL ;
+                                        CHECK_PARSING_STATUS (status, TRUE) ;
+                                        str = NULL ;
+                                }
+                        }
+
+                        goto done ;
+                }
+        }
+        break ;
+
+        default:
+                /*process the fallback cases here*/
+
+                if (next_char == '\\'
+                    || (cr_utils_is_nonascii (next_bytes[0]) == TRUE)
+                    || ((next_char >= 'a') && (next_char <= 'z'))
+                    || ((next_char >= 'A') && (next_char <= 'Z')))
+                {
+                        status = cr_tknzr_parse_ident (a_this, &str) ;
+                        if (status == CR_OK && str)
+                        {
+                                guint32 next_c = 0 ;
+
+                                status = cr_parser_input_peek_char 
+                                        (PRIVATE (a_this)->input, 
+                                         &next_c);
+
+                                if (status == CR_OK && next_c == '(')
+                                {
+
+                                        SKIP_CHARS (a_this, 1) ; 
+                                        status = cr_token_set_function
+                                                (token, str) ;
+                                        CHECK_PARSING_STATUS (status, TRUE) ;
+                                        /*ownership is transfered
+                                         *to token by cr_token_set_function.
+                                         */
+                                        str = NULL ;
+                                }
+                                else
+                                {
+                                        status = cr_token_set_ident (token,
+                                                                     str) ;
+                                        CHECK_PARSING_STATUS (status, TRUE) ;
+                                        str = NULL ;
+                                }
+                                goto done ;
+                        }
+                        else
+                        {
+                                if (str)
+                                {
+                                        g_string_free (str, TRUE) ;
+                                        str = NULL ;
+                                }
+                        }
+                }
+                break ;
+        }
+        
+        READ_NEXT_CHAR (a_this, &next_char) ;
+        status = cr_token_set_delim (token, next_char) ;        
+        CHECK_PARSING_STATUS (status, TRUE) ;
+
+ done:
+
+        if (status == CR_OK && token)
+        {
+                *a_tk = token ;
+                /*
+                 *store the previous position input stream pos.
+                 */
+                memmove (&PRIVATE (a_this)->prev_pos, 
+                         &init_pos, sizeof (CRParserInputPos)) ;
+                return CR_OK ;
+        }
+
+ error:
+        if (token)
+        {
+                cr_token_destroy (token) ;
+                token = NULL ;
+        }
+
+        if (str)
+        {
+                g_string_free (str, TRUE) ;
+                str = NULL ;
+        }
+        cr_parser_input_set_cur_pos (PRIVATE (a_this)->input, 
+                                     &init_pos) ;
+        return status ;
+
+}
+
+#else
 enum CRStatus
 cr_tknzr_get_next_token (CRTknzr *a_this, CRToken ** a_tk)
 {
@@ -2216,13 +2802,7 @@ cr_tknzr_get_next_token (CRTknzr *a_this, CRToken ** a_tk)
                     && next_bytes[5] == 'r'
                     && next_bytes[6] == 't')
                 {
-                        SKIP_CHARS (a_this, 7) ;
-                        token = cr_token_new () ;
-                        ENSURE_PARSING_COND (token != NULL) ;
-
-                        status = cr_token_set_import_sym (token) ;
-                        CHECK_PARSING_STATUS (status, TRUE) ;
-                        goto done ;
+                        
                 }
                 
         }
@@ -2837,6 +3417,7 @@ cr_tknzr_get_next_token (CRTknzr *a_this, CRToken ** a_tk)
         
 }
 
+#endif /*NEW_GET_NEXT_TOKEN*/
 
 enum CRStatus
 cr_tknzr_parse_token (CRTknzr *a_this, enum CRTokenType a_type,
