@@ -8,7 +8,7 @@ PKG_NAME="libcroco"
 
 (test -f $srcdir/configure.in \
   && test -f $srcdir/README \
-  && test -f $srcdir/src/cr-parser.h) || {
+  && test -f $srcdir/src/parser/cr-parser.h) || {
     echo -n "**Error**: Directory "\`$srcdir\'" does not look like the"
     echo " top-level $PKG_NAME directory"
     exit 1

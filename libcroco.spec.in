@@ -15,7 +15,7 @@ BuildRequires:    glib2-devel >= @GLIB2_VERSION@
 BuildRequires:    libxml2-devel >= @LIBXML2_VERSION@
 
 %description
-CSS2 parsing library for GNOME
+CSS2 parsing and manipulation library for GNOME
 
 %package devel
 Summary:          Libraries and include files for developing with libcroco.

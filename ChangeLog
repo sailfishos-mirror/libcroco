@@ -1,3 +1,15 @@
+2003-04-12  dodji  <dodji@seketeli.org>
+
+	* src/* made a big change of the source tree.
+	Now, the whole thing is divided in 3 parts:
+	the paser, the selection engine and the layout engine.
+	The parser source files produce a libcroco.so shared lib.
+	The selection engine source files produce a libcrseleng.so shared
+	library.
+	The layout engine source fils produce a libcrlayeng.so shared
+	library.
+	The same configure options as before apply.
+
 2003-04-05  Dodji  <dodji@seketeli.org>
 
 	* src/cr-token.h (struct _CRToken): 

@@ -20,11 +20,23 @@ test5_SOURCES=test5-main.c cr-test-utils.c cr-test-utils.h
 test6_SOURCES=test6-main.c cr-test-utils.c cr-test-utils.h
 test7_SOURCES=test7-main.c cr-test-utils.c cr-test-utils.h
 
+croco_parser_lib=$(top_builddir)/src/parser/@CROCO_PARSER_LIB@
 
-LDADD=$(top_srcdir)/src/libcroco.la
+if HAVE_SELENG
+croco_seleng_lib=$(top_builddir)/src/seleng/@CROCO_SELENG_LIB@
+endif
+
+if HAVE_LAYENG
+croco_layeng_lib=$(top_builddir)/src/layeng/@CROCO_LAYENG_LIB@ 
+endif
+
+LDADD=$(croco_parser_lib) $(croco_seleng_lib) $(croco_layeng_lib)
 
 INCLUDES=-I$(top_srcdir)/intl \
 	-I$(top_srcdir)/src \
+	-I$(top_srcdir)/src/parser \
+	-I$(top_srcdir)/src/seleng \
+	-I$(top_srcdir)/src/layeng \
 	`pkg-config --cflags glib-2.0`
 
 LDFLAGS=`pkg-config --libs glib-2.0` @LIBXML2_LIBS@

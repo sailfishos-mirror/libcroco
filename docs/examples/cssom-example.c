@@ -27,7 +27,8 @@
 void
 display_usage (char *prg_name)
 {
-	printf ("\nusage: %s [options] <css file to parse>\n\n", prg_name) ;
+	printf ("\nusage: %s [options] <css file to parse>\n\n", 
+                prg_name) ;
 	printf ("\twhere options are:\n") ;
 	printf ("\t--help|h\tdisplays this help\n") ;
 	printf ("\n") ;
