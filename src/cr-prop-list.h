@@ -68,6 +68,9 @@ enum CRStatus cr_prop_list_set_decl (CRPropList *a_this,
 enum CRStatus cr_prop_list_get_decl (CRPropList *a_this,
 				     CRDeclaration **a_decl) ;
 
+CRPropList * cr_prop_list_unlink (CRPropList *a_this, 
+				  CRPropList *a_pair) ;
+
 void cr_prop_list_destroy (CRPropList *a_this) ;
 
 G_END_DECLS

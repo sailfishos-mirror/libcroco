@@ -1,3 +1,13 @@
+2004-03-01  dodji  <dodji@gnome.org>
+
+	* src/cr-prop-list.[ch]: added the (cr_prop_list_unlink) function.
+	* src/cr-sel-eng.c: 
+	(put_css_properties_in_props_list): put the properties at the
+	end of the properties list built by this function. This is
+	necessary to keep the properties declaration order. This order
+	is significant for example when you consider short hand 
+	properties expansion.
+
 2004-02-29  Dodji Seketeli  <dodji@gnome.org>
 
 	* src/cr-input.c,src/cr-num.c,src/cr-prop-list.[ch],

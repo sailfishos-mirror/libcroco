@@ -1195,10 +1195,18 @@ put_css_properties_in_props_list (CRPropList **a_props,
                         <
                         a_stmt->parent_sheet->origin))
                 {
-                        cr_prop_list_set_prop (pair,
-                                               cur_decl->property) ;
-                        cr_prop_list_set_decl (pair,
-                                               cur_decl) ;
+                        tmp_props = cr_prop_list_unlink 
+                                (props, pair) ;
+                        if (!tmp_props)
+                        {
+                                cr_utils_trace_info ("tmp_props != NULL failed") ;
+                                continue ;
+                        }
+                        props = tmp_props ;
+                        tmp_props = NULL ;
+                        cr_prop_list_append2 (props,
+                                              cur_decl->property,
+                                              cur_decl) ;
                         continue ;
                 }
                 else if (decl->parent_statement 
@@ -1227,11 +1235,18 @@ put_css_properties_in_props_list (CRPropList **a_props,
                 if (a_stmt->specificity
                     >= decl->parent_statement->specificity)
                 {
-                        
-                        cr_prop_list_set_prop (pair,
-                                               cur_decl->property) ;
-                        cr_prop_list_set_decl (pair,
-                                               cur_decl) ;
+                        tmp_props = cr_prop_list_unlink (props,
+                                                         pair) ;
+                        if (!tmp_props)
+                        {
+                                cr_utils_trace_info ("tmp_props != NULL failed") ;
+                                continue ;
+                        }
+                        props = tmp_props ;
+                        tmp_props = NULL ;
+                        cr_prop_list_append2 (props,
+                                              cur_decl->property,
+                                              cur_decl) ;
                 }
         }
         /*TODO: this may leak. Check this out*/

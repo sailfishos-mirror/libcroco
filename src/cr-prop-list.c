@@ -321,6 +321,55 @@ cr_prop_list_get_prev (CRPropList *a_this)
 	return PRIVATE (a_this)->prev ;
 }
 
+/**
+ *Unlinks a prop/decl pair from the list
+ *@param a_this the current list of prop/decl pairs
+ *@param a_pair the prop/decl pair to unlink.
+ *@return the new list or NULL in case of an error.
+ */
+CRPropList * 
+cr_prop_list_unlink (CRPropList *a_this, 
+		     CRPropList *a_pair)
+{
+	CRPropList *prev = NULL, *next = NULL ;
+
+	g_return_val_if_fail (a_this && PRIVATE (a_this) && a_pair,
+			      NULL) ;
+
+	/*some sanity checks*/
+	if (PRIVATE (a_this)->next)
+	{
+		next = PRIVATE (a_this)->next ;
+		g_return_val_if_fail (PRIVATE (next), NULL) ;
+		g_return_val_if_fail 
+			(PRIVATE (next)->prev == a_this,
+			 NULL) ;				
+	}
+	if (PRIVATE (a_this)->prev)
+	{
+		prev = PRIVATE (a_this)->prev ;
+		g_return_val_if_fail (PRIVATE (prev), NULL) ;
+		g_return_val_if_fail 
+			(PRIVATE (prev)->next == a_this, NULL) ;
+	}
+	if (prev)
+	{
+		PRIVATE (prev)->next = next ;
+	}
+	if (next)
+	{
+		PRIVATE (next)->prev = prev ;
+	}
+	PRIVATE (a_pair)->prev = PRIVATE (a_pair)->next = NULL ;
+	if (a_this == a_pair)
+	{
+		if (next)
+			return next ;
+		return a_this ;
+	}
+	return a_this ;
+}
+
 void
 cr_prop_list_destroy (CRPropList *a_this)
 {
