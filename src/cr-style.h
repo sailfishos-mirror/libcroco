@@ -205,7 +205,7 @@ enum CRBoxOffsetProp
 /**
  *The css2 style class.
  *Contains computed and actual values
- *of inferred from the declarations found
+ *inferred from the declarations found
  *in the stylesheets.
  *See css2 spec chapter 6.
  */
@@ -258,7 +258,29 @@ struct _CRStyle
         gulong ref_count ;
 } ;
 
+enum CRStatus cr_style_num_prop_val_to_string (CRNumPropVal *a_prop_val,
+                                               GString *a_str,
+                                               guint a_nb_indent) ;
 
+enum CRStatus cr_style_rgb_prop_val_to_string (CRRgbPropVal *a_prop_val,
+                                               GString *a_str,
+                                               guint a_nb_indent) ;
+
+enum CRStatus cr_style_border_style_to_string (enum CRBorderStyle a_prop,
+                                               GString *a_str,
+                                               guint a_nb_indent) ;
+
+enum CRStatus cr_style_display_type_to_string (enum CRDisplayType a_code,
+                                               GString *a_str,
+                                               guint a_nb_indent) ;
+
+enum CRStatus cr_style_position_type_to_string (enum CRPositionType a_code,
+                                                GString *a_str,
+                                                guint a_nb_indent) ;
+
+enum CRStatus cr_style_float_type_to_string (enum CRFloatType a_code,
+                                             GString *a_str,
+                                             guint a_nb_indent) ;
 CRStyle * cr_style_new (void) ;
 
 enum CRStatus cr_style_set_props_to_defaults (CRStyle *a_this) ;
@@ -275,6 +297,10 @@ gboolean cr_style_unref (CRStyle *a_this) ;
 void cr_style_destroy (CRStyle *a_this) ;
 
 CRStyle * cr_style_dup (CRStyle *a_this) ;
+
+enum CRStatus cr_style_to_string (CRStyle *a_this, 
+                                  GString **a_str, 
+                                  guint a_nb_indent) ;
 
 G_END_DECLS
 

@@ -3,8 +3,6 @@
 /*
  * This file is part of The Croco Library
  *
- * Copyright (C) 2002-2003 Dodji Seketeli <dodji@seketeli.org>
- *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of version 2.1 of 
  * the GNU Lesser General Public
@@ -20,6 +18,8 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
  * USA
+ *
+ *see COPYRIGTHS file for information
  */
 
 /*
@@ -162,6 +162,64 @@ static GHashTable *gv_prop_hash = NULL ;
  */
 static gulong gv_prop_hash_ref_count = 0 ;
 
+struct CRNumPropEnumDumpInfo {
+        enum CRNumProp code ;
+        const gchar * str ;
+} ;
+
+static struct CRNumPropEnumDumpInfo gv_num_props_dump_infos[] = {
+        {NUM_PROP_TOP,              "top"},
+        {NUM_PROP_RIGHT,            "right"},
+        {NUM_PROP_BOTTOM,           "bottom"},
+        {NUM_PROP_LEFT,             "left"},
+        {NUM_PROP_PADDING_TOP,      "padding-top"},
+        {NUM_PROP_PADDING_RIGHT,    "padding-right"},
+        {NUM_PROP_PADDING_BOTTOM,   "padding-bottom"},
+        {NUM_PROP_PADDING_LEFT,     "padding-left"},
+        {NUM_PROP_BORDER_TOP,       "border-top"},
+        {NUM_PROP_BORDER_RIGHT,     "border-right"},
+        {NUM_PROP_BORDER_BOTTOM,    "border-bottom"},
+        {NUM_PROP_BORDER_LEFT,      "border-left"},
+        {NUM_PROP_MARGIN_TOP,       "margin-top"},
+        {NUM_PROP_MARGIN_RIGHT,     "margin-right"},
+        {NUM_PROP_MARGIN_BOTTOM,    "margin-bottom"},
+        {NUM_PROP_MARGIN_LEFT,      "margin-left"},
+        {NUM_PROP_WIDTH,            "width"},
+        {0, NULL}
+} ;
+
+struct CRRgbPropEnumDumpInfo {
+        enum CRRgbProp code ;
+        const gchar *str ;
+} ;
+
+static struct CRRgbPropEnumDumpInfo gv_rgb_props_dump_infos [] =
+{
+        {RGB_PROP_BORDER_TOP_COLOR, "border-top-color"},
+        {RGB_PROP_BORDER_RIGHT_COLOR, "border-right-color"},
+        {RGB_PROP_BORDER_BOTTOM_COLOR, "bottom-color"},
+        {RGB_PROP_BORDER_LEFT_COLOR, "left-color"},
+        {RGB_PROP_COLOR, "color"},
+        {RGB_PROP_BACKGROUND_COLOR, "background-color"},
+        {0, NULL}
+} ;
+
+struct CRBorderStylePropEnumDumpInfo 
+{
+        enum CRBorderStyleProp code ;
+        const gchar *str ;
+                
+} ;
+
+static struct CRBorderStylePropEnumDumpInfo gv_border_style_props_dump_infos [] =
+{
+        {BORDER_STYLE_PROP_TOP,    "border-style-top"},
+        {BORDER_STYLE_PROP_RIGHT,  "border-style-right"},
+        {BORDER_STYLE_PROP_BOTTOM, "boder-style-bottom"},
+        {BORDER_STYLE_PROP_LEFT,   "border-style-left"},
+        {0,NULL}
+} ;
+
 static enum CRStatus
 cr_style_init_properties (void) ;
 
@@ -176,6 +234,14 @@ enum CRDirection
         NB_DIRS
 } ;
 
+static const gchar *
+num_prop_code_to_string (enum CRNumProp a_code) ;
+
+static const gchar *
+rgb_prop_code_to_string (enum CRRgbProp a_code) ;
+
+static const gchar *
+border_style_prop_code_to_string (enum CRBorderStyleProp a_code) ;
 
 static enum CRStatus
 set_prop_padding_x_from_value (CRStyle *a_style,                          
@@ -251,6 +317,84 @@ set_prop_font_style_from_value (CRStyle *a_style, CRTerm *a_value) ;
 static enum CRStatus
 set_prop_font_weight_from_value (CRStyle *a_style, CRTerm *a_value) ;
 
+
+static const gchar *
+num_prop_code_to_string (enum CRNumProp a_code)
+{
+        gint len = sizeof (gv_num_props_dump_infos) / 
+                sizeof (struct CRNumPropEnumDumpInfo) ;
+        if (a_code >= len)
+        {
+                cr_utils_trace_info ("A field has been added "
+                                     "to 'enum CRNumProp' and no matching"
+                                     " entry has been "
+                                     "added to gv_num_prop_dump_infos table.\n"
+                                     "Please add the missing matching entry") ;
+                return NULL ;
+        }
+        if (gv_num_props_dump_infos[a_code].code != a_code)
+        {
+                cr_utils_trace_info ("mismatch between the order of fields in"
+                                     " 'enum CRNumProp' and "
+                                     "the order of entries in "
+                                     "the gv_num_prop_dump_infos table") ;
+                return NULL ;
+        }
+        return gv_num_props_dump_infos[a_code].str ;
+}
+
+static const gchar *
+rgb_prop_code_to_string (enum CRRgbProp a_code)
+{
+        gint len = sizeof (gv_rgb_props_dump_infos) /
+                 sizeof (struct CRRgbPropEnumDumpInfo) ;
+
+        if (a_code >= len) 
+        {
+                cr_utils_trace_info ("A field has been added "
+                                     "to 'enum CRRgbProp' and no matching"
+                                     " entry has been "
+                                     "added to gv_rgb_prop_dump_infos table.\n"
+                                     "Please add the missing matching entry") ;
+                return NULL ;
+        }
+        if (gv_rgb_props_dump_infos[a_code].code != a_code)
+        {
+                cr_utils_trace_info ("mismatch between the order of fields in"
+                                     " 'enum CRRgbProp' and "
+                                     "the order of entries in "
+                                     "the gv_rgb_props_dump_infos table") ;
+                return NULL ;
+        }
+        return gv_rgb_props_dump_infos[a_code].str ;
+}
+
+static const gchar *
+border_style_prop_code_to_string (enum CRBorderStyleProp a_code)
+{
+        gint len = sizeof (gv_border_style_props_dump_infos) /
+                sizeof (struct CRBorderStylePropEnumDumpInfo) ;
+
+        if (a_code >= len) 
+        {
+                cr_utils_trace_info ("A field has been added "
+                                     "to 'enum CRBorderStyleProp' and no matching"
+                                     " entry has been "
+                                     "added to gv_border_style_prop_dump_infos table.\n"
+                                     "Please add the missing matching entry") ;
+                return NULL ;
+        }
+        if (gv_border_style_props_dump_infos[a_code].code != a_code)
+        {
+                cr_utils_trace_info ("mismatch between the order of fields in"
+                                     " 'enum CRBorderStyleProp' and "
+                                     "the order of entries in "
+                                     "the gv_border_style_props_dump_infos table") ;
+                return NULL ;
+        }
+        return gv_border_style_props_dump_infos[a_code].str ;
+}
+
 static enum CRStatus
 cr_style_init_properties (void)
 {
@@ -280,7 +424,6 @@ cr_style_init_properties (void)
 
         return CR_OK ;
 }
-
 
 
 static enum CRPropertyID
@@ -2189,6 +2332,407 @@ cr_style_copy (CRStyle *a_dest, CRStyle *a_src)
         g_return_val_if_fail (a_dest && a_src, CR_BAD_PARAM_ERROR) ;
 
         memcpy (a_dest, a_src, sizeof (CRStyle)) ;
+        return CR_OK ;
+}
+
+/**
+ *dump a CRNumpPropVal in a string.
+ *@param a_prop_val the numerical property value to dump
+ *@param a_str the string to dump the numerical propertie into.
+ *Note that the string value is appended to a_str.
+ *@param a_nb_indent the number white chars of indentation.
+ */
+enum CRStatus
+cr_style_num_prop_val_to_string (CRNumPropVal *a_prop_val,
+                                 GString *a_str,
+                                 guint a_nb_indent)
+{
+        enum CRStatus status = CR_OK ;
+        guchar * tmp_str = NULL ;
+        GString *str = NULL ;
+
+        g_return_val_if_fail (a_prop_val && a_str,
+                              CR_BAD_PARAM_ERROR) ;
+
+        str = g_string_new (NULL) ;
+        cr_utils_dump_n_chars2 (' ', str, a_nb_indent) ;
+        g_string_append_printf (str, "NumPropVal {") ;
+        tmp_str = cr_num_to_string (&a_prop_val->sv) ;
+        if (!tmp_str)
+        {
+                status = CR_ERROR ;
+                goto cleanup ;
+        }
+        g_string_append_printf (str, "sv: %s ", tmp_str) ;
+        g_free (tmp_str) ;
+        tmp_str = NULL ;
+        tmp_str = cr_num_to_string (&a_prop_val->cv) ;
+        if (!tmp_str)
+        {
+                status = CR_ERROR ;
+                goto cleanup ;
+        }
+        g_string_append_printf (str, "av: %s ", tmp_str) ;
+        g_free (tmp_str) ;
+        tmp_str = NULL ;                
+        g_string_append_printf (str, "}") ;
+        g_string_append (str, str->str) ;
+
+        g_string_append (a_str, str->str) ;
+        status = CR_OK ;
+ cleanup:
+
+        if (tmp_str)
+        {
+                g_free (tmp_str) ;
+                tmp_str = NULL ;
+        }
+        if (str) 
+        {
+                g_string_free (str, TRUE) ;
+        }
+        return status ;
+}
+
+
+enum CRStatus
+cr_style_rgb_prop_val_to_string (CRRgbPropVal *a_prop_val,
+                                 GString *a_str,
+                                 guint a_nb_indent)
+{
+        enum CRStatus status = CR_OK ;
+        guchar * tmp_str = NULL ;
+        GString *str = NULL ;
+
+        g_return_val_if_fail (a_prop_val && a_str, CR_BAD_PARAM_ERROR) ;
+
+        str = g_string_new (NULL) ;
+
+        cr_utils_dump_n_chars2 (' ', str, a_nb_indent) ;
+        g_string_append_printf (str, "RGBPropVal {") ;
+        tmp_str = cr_rgb_to_string (&a_prop_val->sv) ;
+        if (!tmp_str)
+        {
+                status = CR_ERROR ;
+                goto cleanup ;
+        }
+        g_string_append_printf (str, "sv: %s ", tmp_str) ;
+        g_free (tmp_str) ;
+        tmp_str = NULL ;
+        tmp_str = cr_rgb_to_string (&a_prop_val->cv) ;
+        if (!tmp_str)
+        {
+                status = CR_ERROR ;
+                goto cleanup ;
+        }
+        g_string_append_printf (str, "cv: %s ", tmp_str) ;        
+        g_free (tmp_str) ;
+        tmp_str = NULL ;
+        tmp_str = cr_rgb_to_string (&a_prop_val->av) ;
+        if (!tmp_str)
+        {
+                status = CR_ERROR ;
+                goto cleanup ;
+        }
+        g_string_append_printf (str, "av: %s ", tmp_str) ;
+        g_free (tmp_str) ;
+        tmp_str = NULL ;
+
+        g_string_append_printf (str, "}") ;
+        g_string_append (str, str->str) ;
+        g_string_append (a_str, str->str) ;
+        status = CR_OK ;
+ cleanup:
+
+        if (tmp_str)
+        {
+                g_free (tmp_str) ;
+                tmp_str = NULL ;
+        }
+        if (str) 
+        {
+                g_string_free (str, TRUE) ;
+        }
+        return status ;
+}
+
+enum CRStatus
+cr_style_border_style_to_string (enum CRBorderStyle a_prop,
+                                 GString *a_str,
+                                 guint a_nb_indent)
+{
+        gchar *str = NULL ;
+
+        g_return_val_if_fail (a_str, CR_BAD_PARAM_ERROR) ;
+
+        switch (a_prop)
+        {
+        case BORDER_STYLE_NONE:
+                str = (gchar*) "border-style-none" ;
+                break ;
+        case BORDER_STYLE_HIDDEN:
+                str = (gchar*) "border-style-hidden" ;
+                break ;
+        case BORDER_STYLE_DOTTED:
+                str = (gchar*) "border-style-dotted" ;
+                break ;
+        case BORDER_STYLE_DASHED:
+                str = (gchar*) "border-style-dashed" ;
+                break ;
+        case BORDER_STYLE_SOLID:
+                str = (gchar*) "border-style-solid" ;
+                break ;
+        case BORDER_STYLE_DOUBLE:
+                str = (gchar*) "border-style-double" ;
+                break ;
+        case BORDER_STYLE_GROOVE:
+                str = (gchar*) "border-style-groove" ;
+                break ;
+        case BORDER_STYLE_RIDGE:
+                str = (gchar*) "border-style-ridge" ;
+                break ;
+        case BORDER_STYLE_INSET:
+                str = (gchar*) "border-style-inset" ;
+                break ;
+        case BORDER_STYLE_OUTSET:
+                str = (gchar*) "border-style-outset" ;
+                break ;
+        default:
+                str = (gchar*) "unknown border style" ;
+                break ;
+        }        
+        cr_utils_dump_n_chars2 (' ', a_str, a_nb_indent) ;
+        g_string_append_printf (a_str, "%s", str) ;
+        return CR_OK ;
+}
+
+
+enum CRStatus
+cr_style_display_type_to_string (enum CRDisplayType a_code,
+                                 GString *a_str,
+                                 guint a_nb_indent)
+{
+        gchar *str = NULL ;
+
+        g_return_val_if_fail (a_str, CR_BAD_PARAM_ERROR) ;
+
+        switch (a_code)
+        {
+        case DISPLAY_NONE:
+                str = (gchar*) "display-none" ;
+                break ;
+        case DISPLAY_INLINE:
+                str = (gchar*) "display-inline" ;
+                break ;
+        case DISPLAY_BLOCK:
+                str = (gchar*) "display-block" ;
+                break ;
+        case DISPLAY_LIST_ITEM:
+                str = (gchar*) "display-list-item" ;
+                break ;
+        case DISPLAY_RUN_IN:
+                str = (gchar*) "display-run-in" ;
+                break ;
+        case DISPLAY_COMPACT:
+                str = (gchar*) "display-compact" ;
+                break ;
+        case DISPLAY_MARKER:
+                str = (gchar*) "display-marker" ;
+                break ;
+        case DISPLAY_TABLE:
+                str = (gchar*) "display-table" ;
+                break ;
+        case DISPLAY_INLINE_TABLE:
+                str = (gchar*) "display-inline-table" ;
+                break ;
+        case DISPLAY_TABLE_ROW_GROUP:
+                str = (gchar*) "display-table-row-group" ;
+                break ;
+        case DISPLAY_TABLE_HEADER_GROUP:
+                str = (gchar*) "display-table-header-group" ;
+                break ;
+        case DISPLAY_TABLE_FOOTER_GROUP:
+                str = (gchar*) "display-table-footer-group" ;
+                break ;
+        case DISPLAY_TABLE_ROW:
+                str = (gchar*) "display-table-row" ;
+                break ;
+        case DISPLAY_TABLE_COLUMN_GROUP:
+                str = (gchar*) "display-table-column-group" ;
+                break ;
+        case DISPLAY_TABLE_COLUMN:
+                str = (gchar*) "display-table-column" ;
+                break ;
+        case DISPLAY_TABLE_CELL:
+                str = (gchar*) "display-table-cell" ;
+                break ;
+        case DISPLAY_TABLE_CAPTION:
+                str = (gchar*) "display-table-caption" ;
+                break ;
+        case DISPLAY_INHERIT:
+                str = (gchar*) "display-inherit" ;
+                break ;
+        default:
+                str = (gchar*) "unknown display property" ;
+                break ;
+        }
+        cr_utils_dump_n_chars2 (' ', a_str, a_nb_indent) ;
+        g_string_append_printf (a_str, str) ;
+        return CR_OK ;
+        
+}
+
+enum CRStatus
+cr_style_position_type_to_string (enum CRPositionType a_code,
+                                  GString *a_str,
+                                  guint a_nb_indent)
+{
+        gchar *str = NULL ;
+
+        g_return_val_if_fail (a_str, CR_BAD_PARAM_ERROR) ;
+
+        switch (a_code)
+        {
+        case POSITION_STATIC:
+                str = (gchar*) "position-static" ;
+                break ;
+        case POSITION_RELATIVE:
+                str = (gchar*) "position-relative" ;
+                break ;
+        case POSITION_ABSOLUTE:
+                str = (gchar*) "position-absolute" ;
+                break ;
+        case POSITION_FIXED:
+                str = (gchar*) "position-fixed" ;
+                break ;
+        case POSITION_INHERIT:
+                str = (gchar*) "position-inherit" ;
+                break ;
+        default:
+                str = (gchar*)"unknown static property" ;
+        }
+        cr_utils_dump_n_chars2 (' ', a_str, a_nb_indent) ;
+        g_string_append_printf (a_str, "%s", str) ;
+        return CR_OK ;
+}
+
+enum CRStatus
+cr_style_float_type_to_string (enum CRFloatType a_code,
+                               GString *a_str,
+                               guint a_nb_indent)
+{
+        gchar *str = NULL ;
+
+        g_return_val_if_fail (a_str, CR_BAD_PARAM_ERROR) ;
+
+        switch (a_code)
+        {
+        case FLOAT_NONE:
+                str = (gchar*)"float-none" ;
+                break ;
+        case FLOAT_LEFT:
+                str = (gchar*)"float-left" ;
+                break ;
+        case FLOAT_RIGHT:
+                str = (gchar*)"float-right" ;
+                break ;
+        case FLOAT_INHERIT:
+                str = (gchar*)"float-inherit" ;
+                break ;
+        default:
+                str = (gchar*)"unknown float property value" ;
+                break ;
+        }
+        return CR_OK ;
+}
+
+/**
+ *TODO: code this style dumping function (much needed for debugging reasons),
+ *this is a blocking feature.
+ */
+enum CRStatus
+cr_style_to_string (CRStyle *a_this,
+                    GString **a_str,
+                    guint a_nb_indent)
+{
+        const gint INTERNAL_INDENT = 2 ;
+        gchar *tmp_str = NULL ;
+        GString *indent = NULL, *str = NULL ;
+        gint i = 0 ;
+
+        g_return_val_if_fail (a_this && a_str, CR_BAD_PARAM_ERROR) ;
+
+        if (!*a_str)
+        {
+                str = g_string_new (NULL) ;
+        }
+        else
+        {
+                str = *a_str ;
+        }
+
+        cr_utils_dump_n_chars2 (' ', str, a_nb_indent) ;
+        g_string_append_printf (str, "style {") ;
+        
+        /*loop over the num_props and to_string() them*/
+        for (i = NUM_PROP_TOP ; i < NB_NUM_PROPS ; i++) {
+                /*
+                 *to_string() the name of the num_prop
+                 *(using num_prop_code_to_string)
+                 *before outputing it value
+                 */
+                tmp_str = (gchar*)num_prop_code_to_string (i) ;
+                if (tmp_str)
+                {
+                        g_string_append_printf (str, "%s: ", tmp_str) ;
+                }
+                else 
+                {
+                        g_string_append_printf (str, "NULL:") ;
+                }
+                tmp_str = NULL ;
+                cr_style_num_prop_val_to_string (&a_this->num_props[i], str,
+                                                 a_nb_indent + INTERNAL_INDENT) ;
+                g_string_append_printf (str, "\n") ;
+        }
+        /*loop over the rgb_props and to_string() them all*/
+        for (i=RGB_PROP_BORDER_TOP_COLOR ; i < NB_RGB_PROPS; i++)
+        {
+                tmp_str = (gchar*)rgb_prop_code_to_string (i) ;
+                if (tmp_str)
+                {
+                        g_string_append_printf (str, "%s: ", tmp_str) ;
+                }
+                else
+                {
+                        g_string_append_printf (str, "NULL: ") ;
+                }
+                tmp_str = NULL ;
+                cr_style_rgb_prop_val_to_string (&a_this->rgb_props[i], str,
+                                                 a_nb_indent + INTERNAL_INDENT) ;
+                g_string_append_printf (str, "\n") ;
+        }
+        /*loop over the border_style_props and to_string() them*/
+        for (i=BORDER_STYLE_PROP_TOP ; i < NB_BORDER_STYLE_PROPS ; i++)
+        {
+                tmp_str = (gchar*)border_style_prop_code_to_string (i) ;
+                if (tmp_str)
+                {
+                        g_string_append_printf (str, "%s: ", tmp_str) ;
+                }
+                else
+                {
+                        g_string_append_printf (str, "NULL: ") ;
+                }
+                tmp_str = NULL ;
+                cr_style_border_style_to_string (a_this->border_style_props[i], 
+                                                 str,
+                                                 a_nb_indent + INTERNAL_INDENT) ;
+                g_string_append_printf (str, "\n") ;
+        }
+        cr_utils_dump_n_chars2 (' ', str, a_nb_indent) ;
+        g_string_append_printf (str, "}") ;
+
         return CR_OK ;
 }
 

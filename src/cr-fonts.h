@@ -250,27 +250,35 @@ cr_font_family_set_name (CRFontFamily *a_this, guchar *a_name) ;
  *'font-size' manipulation functions
  ***********************************/
 
-CRFontSize *
-cr_font_size_new (void) ;
+CRFontSize * cr_font_size_new (void) ;
 
-enum CRStatus
-cr_font_size_clear (CRFontSize *a_this) ;
+enum CRStatus cr_font_size_clear (CRFontSize *a_this) ;
 
-enum CRStatus
-cr_font_size_copy (CRFontSize *a_dst, CRFontSize *a_src) ;
+enum CRStatus cr_font_size_copy (CRFontSize *a_dst, CRFontSize *a_src) ;
 
+gchar* cr_font_size_to_string (CRFontSize *a_this) ;
 
-void
-cr_font_size_destroy (CRFontSize *a_font_size) ;
+void cr_font_size_destroy (CRFontSize *a_font_size) ;
 
 /*******************************************************
  *'font-size-adjust' manipulation function declarations
  *******************************************************/
 
-CRFontSizeAdjust *
-cr_font_size_adjust_new (void) ;
+CRFontSizeAdjust * cr_font_size_adjust_new (void) ;
 
-void
-cr_font_size_adjust_destroy (CRFontSizeAdjust *a_this) ;
+gchar * cr_font_size_adjust_to_string (CRFontSizeAdjust *a_this) ;
+
+void cr_font_size_adjust_destroy (CRFontSizeAdjust *a_this) ;
+
+/***********************************
+ *various other font related functions
+ ***********************************/
+const gchar * cr_font_style_to_string (enum CRFontStyle a_code) ;
+
+const gchar * cr_font_weight_to_string (enum CRFontWeight a_code)  ;
+
+const gchar * cr_font_variant_to_string (enum CRFontVariant a_code) ;
+
+const gchar * cr_font_stretch_to_string (enum CRFontStretch a_code) ;
 
 G_END_DECLS

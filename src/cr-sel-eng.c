@@ -1499,8 +1499,7 @@ cr_sel_eng_get_matched_style (CRSelEng *a_this,
         GHashTable *props_hash = NULL ;
 
         g_return_val_if_fail (a_this && a_cascade
-                              && a_node && a_style
-                              && (*a_style == NULL),
+                              && a_node && a_style,
                               CR_BAD_PARAM_ERROR) ;
         
         status = cr_sel_eng_get_matched_properties_from_cascade 

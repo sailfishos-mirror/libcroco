@@ -3,7 +3,6 @@
 /*
  * This file is part of The Croco Library
  *
- * Copyright (C) 2002-2003 Dodji Seketeli <dodji@seketeli.org>
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of version 2.1 of 
@@ -20,6 +19,8 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
  * USA
+ *
+ *See COPYRIGHTS file for copyright information
  */
 
 #include "cr-fonts.h"
@@ -78,23 +79,72 @@ cr_font_family_to_string_real (CRFontFamily *a_this,
         {
                 if (a_this->prev)
                 {
-                        g_string_append_printf (*a_string,
-                                                ", %s", name) ;                        
+                        g_string_append_printf (*a_string, ", %s", name) ;
                 }
                 else
                 {
-                        g_string_append (*a_string,
-                                         name) ;
+                        g_string_append (*a_string, name) ;
                 }
         }
-
         if (a_walk_list == TRUE && a_this->next)
         {
                 result = cr_font_family_to_string_real (a_this->next,
                                                         TRUE, a_string) ;
         }
-
         return result ;
+}
+
+static const gchar *
+cr_predefined_absolute_font_size_to_string (enum CRPredefinedAbsoluteFontSize a_code)
+{
+        gchar *str = NULL ;
+        switch (a_code)
+        {
+        case FONT_SIZE_XX_SMALL:
+                str = (gchar*)"font-size-xx-small" ;
+                break ;
+        case FONT_SIZE_X_SMALL:
+                str = (gchar*)"font-size-x-small" ;
+                break ;
+        case FONT_SIZE_SMALL:
+                str = (gchar*)"font-size-small" ;
+                break ;
+        case FONT_SIZE_MEDIUM:
+                str = (gchar*)"font-size-medium" ;
+                break ;
+        case FONT_SIZE_LARGE:
+                str = (gchar*)"font-size-large" ;
+                break ;
+        case FONT_SIZE_X_LARGE:
+                str = (gchar*)"font-size-x-large" ;
+                break ;
+        case FONT_SIZE_XX_LARGE:
+                str = (gchar*)"font-size-xx-large" ;
+                break ;
+        default:
+                str = (gchar*) "unknown predefined absolute font size value";
+        }
+        return str ;
+}
+
+static const gchar *
+cr_relative_font_size_to_string (enum CRRelativeFontSize a_code)
+{
+        gchar *str = NULL ;
+
+        switch (a_code)
+        {
+        case FONT_SIZE_LARGER:
+                str = (gchar*)"font-size-larger" ;
+                break ;
+        case FONT_SIZE_SMALLER:
+                str = (gchar*)"font-size-smaller" ;
+                break ;
+        default:
+                str = (gchar*)"unknown relative font size value" ;
+                break ;
+        }
+        return str ;
 }
 
 CRFontFamily *
@@ -333,6 +383,208 @@ cr_font_size_copy (CRFontSize *a_dst, CRFontSize *a_src)
                 return CR_UNKNOWN_TYPE_ERROR ;
         }
         return CR_OK ;
+}
+
+gchar*
+cr_font_size_to_string (CRFontSize *a_this)
+{
+        gchar *str = NULL ;
+        g_return_val_if_fail (a_this, NULL) ;
+
+        switch (a_this->type)
+        {
+        case PREDEFINED_ABSOLUTE_FONT_SIZE:
+                str = g_strdup (cr_predefined_absolute_font_size_to_string
+                                (a_this->value.predefined)) ;
+                break ;
+        case ABSOLUTE_FONT_SIZE:
+                str = cr_num_to_string (a_this->value.absolute) ;
+                break ;
+        case RELATIVE_FONT_SIZE:
+                str = g_strdup (cr_relative_font_size_to_string
+                                (a_this->value.relative)) ;
+                break ;
+        case INHERITED_FONT_SIZE:
+                str = g_strdup ("inherited") ;
+                break ;
+        default:
+                break ;
+        }
+        return str ;
+}
+
+
+gchar *
+cr_font_size_adjust_to_string (CRFontSizeAdjust *a_this)
+{
+        gchar *str = NULL ;
+
+        g_return_val_if_fail (a_this, NULL) ;
+
+        switch (a_this->type)
+        {
+        case FONT_SIZE_ADJUST_NONE:
+                str = g_strdup ("font-size-adjust-none") ;
+                break ;
+        case FONT_SIZE_ADJUST_NUMBER:
+                if (a_this->num)
+                        str = cr_num_to_string (a_this->num) ;
+                else
+                        str = g_strdup ("font-size-adjust-NULL") ;
+                break ;
+        case FONT_SIZE_ADJUST_INHERIT:
+                str = g_strdup ("font-size-adjust-inherit") ;
+        }
+        return str ;
+}
+
+const gchar *
+cr_font_style_to_string (enum CRFontStyle a_code)
+{
+        gchar *str = NULL ;
+
+        switch (a_code)
+        {
+        case FONT_STYLE_NORMAL:
+                str = (gchar*)"font-style-normal" ;
+                break ;
+        case FONT_STYLE_ITALIC:
+                str = (gchar*)"font-style-italic" ;
+                break ;
+        case FONT_STYLE_OBLIQUE:
+                str = (gchar*)"font-style-oblique" ;
+                break ;
+        case FONT_STYLE_INHERIT:
+                str = (gchar*)"font-style-inherit" ;
+                break ;
+        default:
+                str = (gchar*)"font-style" ;
+                break ;
+        }
+        return str ;
+}
+
+const gchar *
+cr_font_variant_to_string (enum CRFontVariant a_code)
+{
+        gchar *str = NULL ;
+        
+        switch (a_code)
+        {
+        case FONT_VARIANT_NORMAL:
+                str = (gchar*) "font-variant-normal";
+                break ;
+        case FONT_VARIANT_SMALL_CAPS:
+                str = (gchar*) "font-variant-small-caps" ;
+                break ;
+        case FONT_VARIANT_INHERIT:
+                str = (gchar*) "font-variant-inherent" ;
+                break ;
+        }
+        return str ;
+}
+
+const gchar *
+cr_font_weight_to_string (enum CRFontWeight a_code) 
+{
+        gchar *str = NULL ;
+        
+        switch (a_code)
+        {
+        case FONT_WEIGHT_NORMAL:
+                str = (gchar*) "font-weight-normal";
+                break ;
+        case FONT_WEIGHT_BOLD:
+                str = (gchar*) "font-weight-bold";
+                break ;
+        case FONT_WEIGHT_BOLDER:
+                str = (gchar*) "font-weight-bolder";
+                break ;
+        case FONT_WEIGHT_LIGHTER:
+                str = (gchar*) "font-weight-lighter";
+                break ;
+        case FONT_WEIGHT_100:
+                str = (gchar*) "font-weight-100";
+                break ;
+        case FONT_WEIGHT_200:
+                str = (gchar*) "font-weight-200";
+                break ;
+        case FONT_WEIGHT_300:
+                str = (gchar*) "font-weight-300";
+                break ;
+        case FONT_WEIGHT_400:
+                str = (gchar*) "font-weight-400";
+                break ;
+        case FONT_WEIGHT_500:
+                str = (gchar*) "font-weight-500";
+                break ;
+        case FONT_WEIGHT_600:
+                str = (gchar*) "font-weight-600";
+                break ;
+        case FONT_WEIGHT_700:
+                str = (gchar*) "font-weight-700";
+                break ;
+        case FONT_WEIGHT_800:
+                str = (gchar*) "font-weight-800";
+                break ;
+        case FONT_WEIGHT_900:
+                str = (gchar*) "font-weight-900";
+                break ;
+        case FONT_WEIGHT_INHERIT:
+                str = (gchar*) "font-weight-inherit";
+                break ;
+        default:
+                str = (gchar*) "unknown font-weight property value";
+                break ;
+        }
+        return str ;
+}
+
+const gchar *
+cr_font_stretch_to_string (enum CRFontStretch a_code)
+{
+        gchar *str = NULL ;
+
+        switch (a_code)
+        {
+        case FONT_STRETCH_NORMAL:
+                str = (gchar*)"font-stretch-normal" ;
+                break ;
+        case FONT_STRETCH_WIDER:
+                str = (gchar*)"font-stretch-wider" ;
+                break ;
+        case FONT_STRETCH_NARROWER:
+                str = (gchar*)"font-stretch-narrower" ;
+                break ;
+        case FONT_STRETCH_ULTRA_CONDENSED:
+                str = (gchar*)"font-stretch-ultra-condensed" ;
+                break ;
+        case FONT_STRETCH_EXTRA_CONDENSED:
+                str = (gchar*)"font-stretch-extra-condensed" ;
+                break ;
+        case FONT_STRETCH_CONDENSED:
+                str = (gchar*)"font-stretch-condensed" ;
+                break ;
+        case FONT_STRETCH_SEMI_CONDENSED:
+                str = (gchar*)"font-stretch-semi-condensed" ;
+                break ;
+        case FONT_STRETCH_SEMI_EXPANDED:
+                str = (gchar*)"font-stretch-semi-expanded" ;
+                break ;
+        case FONT_STRETCH_EXPANDED:
+                str = (gchar*)"font-stretch-expanded" ;
+                break ;
+        case FONT_STRETCH_EXTRA_EXPANDED:
+                str = (gchar*)"font-stretch-extra-expaned" ;
+                break ;
+        case FONT_STRETCH_ULTRA_EXPANDED:
+                str = (gchar*)"font-stretch-ultra-expanded" ;
+                break ;
+        case FONT_STRETCH_INHERIT:
+                str = (gchar*)"font-stretch-inherit" ;
+                break ;
+        }
+        return str ;
 }
 
 void
