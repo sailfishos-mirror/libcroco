@@ -30,7 +30,7 @@
 
 /**
  *@file
- *Some test facilities for the #CRParser class.
+ *Some test facilities for the #CROMParser class.
  */
 
 CRDocHandler * gv_test_handler = {0} ;

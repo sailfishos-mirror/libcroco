@@ -1,144 +1,22 @@
-==31389== valgrind-1.0.4, a memory error detector for x86 GNU/Linux.
-==31389== Copyright (C) 2000-2002, and GNU GPL'd, by Julian Seward.
-==31389== Startup, with flags:
-==31389==    --suppressions=/usr/local/lib/valgrind/default.supp
-==31389==    -v
-==31389==    --num-callers=100
-==31389==    --leak-check=yes
-==31389==    --show-reachable=yes
-==31389== Reading suppressions file: /usr/local/lib/valgrind/default.supp
-==31389== Reading syms from /home/dodji/dev/libcroco/tests/.libs/test4
-==31389== Reading syms from /lib/ld-2.2.5.so
-==31389== Reading syms from /usr/local/lib/valgrind/valgrind.so
-==31389== Reading syms from /usr/lib/libglib-2.0.so.0.0.6
-==31389==    object doesn't have any debug info
-==31389== Reading syms from /usr/local/lib/libcroco.so.0.0.1
-==31389== Reading syms from /lib/i686/libc-2.2.5.so
-==31389==    object doesn't have any debug info
-==31389== Estimated CPU clock rate is 364 MHz
-==31389== 
-==31389== 
-==31389== ERROR SUMMARY: 0 errors from 0 contexts (suppressed: 0 from 0)
-==31389== malloc/free: in use at exit: 38298 bytes in 19 blocks.
-==31389== malloc/free: 2510 allocs, 2491 frees, 125800 bytes allocated.
-==31389== 
-==31389== searching for pointers to 19 not-freed blocks.
-==31389== checked 4075548 bytes.
-==31389== 
-==31389== definitely lost: 0 bytes in 0 blocks.
-==31389== possibly lost:   0 bytes in 0 blocks.
-==31389== still reachable: 38298 bytes in 19 blocks.
-==31389== 
-==31389== 20 bytes in 1 blocks are still reachable in loss record 1 of 6
-==31389==    at 0x4003BF5B: calloc (vg_clientfuncs.c:239)
-==31389==    by 0x4025FF5D: g_allocator_new (in /usr/lib/libglib-2.0.so.0.0.6)
-==31389==    by 0x40254B16: (within /usr/lib/libglib-2.0.so.0.0.6)
-==31389==    by 0x40253F7F: g_list_append (in /usr/lib/libglib-2.0.so.0.0.6)
-==31389==    by 0x402BB93D: cr_parser_parse_import (cr-parser.c:3170)
-==31389==    by 0x402BD9A2: cr_parser_parse_stylesheet (cr-parser.c:4494)
-==31389==    by 0x402BE6BF: cr_parser_parse (cr-parser.c:5086)
-==31389==    by 0x402BE8B4: cr_parser_parse_from_file (cr-parser.c:5144)
-==31389==    by 0x402C2E74: cr_om_parser_parse_file (cr-om-parser.c:847)
-==31389==    by 0x804880E: test_cr_parser_parse (test4-main.c:100)
-==31389==    by 0x80488DA: main (test4-main.c:142)
-==31389==    by 0x402E1082: __libc_start_main (in /lib/i686/libc-2.2.5.so)
-==31389==    by 0x80485F1: cr_om_parser_parse_file (in /home/dodji/dev/libcroco/tests/.libs/test4)
-==31389== 
-==31389== 80 bytes in 1 blocks are still reachable in loss record 2 of 6
-==31389==    at 0x4003BAB5: malloc (vg_clientfuncs.c:100)
-==31389==    by 0x402E1BFA: (within /lib/i686/libc-2.2.5.so)
-==31389==    by 0x402E1865: iconv_open (in /lib/i686/libc-2.2.5.so)
-==31389==    by 0x402439E3: (within /usr/lib/libglib-2.0.so.0.0.6)
-==31389==    by 0x40241D2D: g_convert (in /usr/lib/libglib-2.0.so.0.0.6)
-==31389==    by 0x4024221C: g_convert_with_fallback (in /usr/lib/libglib-2.0.so.0.0.6)
-==31389==    by 0x40261F26: g_print (in /usr/lib/libglib-2.0.so.0.0.6)
-==31389==    by 0x402BF7EA: cr_statement_dump_charset (cr-statement.c:259)
-==31389==    by 0x402C1226: cr_statement_dump (cr-statement.c:1196)
-==31389==    by 0x402C14CF: cr_stylesheet_dump (cr-stylesheet.c:74)
-==31389==    by 0x804882B: test_cr_parser_parse (test4-main.c:104)
-==31389==    by 0x80488DA: main (test4-main.c:142)
-==31389==    by 0x402E1082: __libc_start_main (in /lib/i686/libc-2.2.5.so)
-==31389==    by 0x80485F1: cr_om_parser_parse_file (in /home/dodji/dev/libcroco/tests/.libs/test4)
-==31389== 
-==31389== 208 bytes in 4 blocks are still reachable in loss record 3 of 6
-==31389==    at 0x4003BAB5: malloc (vg_clientfuncs.c:100)
-==31389==    by 0x4025EAF2: g_mem_chunk_new (in /usr/lib/libglib-2.0.so.0.0.6)
-==31389==    by 0x40271523: g_string_sized_new (in /usr/lib/libglib-2.0.so.0.0.6)
-==31389==    by 0x40271588: g_string_new (in /usr/lib/libglib-2.0.so.0.0.6)
-==31389==    by 0x402B021D: cr_tknzr_parse_string (cr-tknzr.c:768)
-==31389==    by 0x402B44E5: cr_tknzr_get_next_token (cr-tknzr.c:2713)
-==31389==    by 0x402B8247: cr_parser_try_to_skip_spaces_and_comments (cr-parser.c:832)
-==31389==    by 0x402BB4A7: cr_parser_parse_charset (cr-parser.c:3026)
-==31389==    by 0x402BD767: cr_parser_parse_stylesheet (cr-parser.c:4408)
-==31389==    by 0x402BE6BF: cr_parser_parse (cr-parser.c:5086)
-==31389==    by 0x402BE8B4: cr_parser_parse_from_file (cr-parser.c:5144)
-==31389==    by 0x402C2E74: cr_om_parser_parse_file (cr-om-parser.c:847)
-==31389==    by 0x804880E: test_cr_parser_parse (test4-main.c:100)
-==31389==    by 0x80488DA: main (test4-main.c:142)
-==31389==    by 0x402E1082: __libc_start_main (in /lib/i686/libc-2.2.5.so)
-==31389==    by 0x80485F1: cr_om_parser_parse_file (in /home/dodji/dev/libcroco/tests/.libs/test4)
-==31389== 
-==31389== 230 bytes in 8 blocks are still reachable in loss record 4 of 6
-==31389==    at 0x4003BAB5: malloc (vg_clientfuncs.c:100)
-==31389==    by 0x4025F739: g_malloc (in /usr/lib/libglib-2.0.so.0.0.6)
-==31389==    by 0x4027842A: g_tree_new (in /usr/lib/libglib-2.0.so.0.0.6)
-==31389==    by 0x4025EC1E: g_mem_chunk_new (in /usr/lib/libglib-2.0.so.0.0.6)
-==31389==    by 0x40271523: g_string_sized_new (in /usr/lib/libglib-2.0.so.0.0.6)
-==31389==    by 0x40271588: g_string_new (in /usr/lib/libglib-2.0.so.0.0.6)
-==31389==    by 0x402B021D: cr_tknzr_parse_string (cr-tknzr.c:768)
-==31389==    by 0x402B44E5: cr_tknzr_get_next_token (cr-tknzr.c:2713)
-==31389==    by 0x402B8247: cr_parser_try_to_skip_spaces_and_comments (cr-parser.c:832)
-==31389==    by 0x402BB4A7: cr_parser_parse_charset (cr-parser.c:3026)
-==31389==    by 0x402BD767: cr_parser_parse_stylesheet (cr-parser.c:4408)
-==31389==    by 0x402BE6BF: cr_parser_parse (cr-parser.c:5086)
-==31389==    by 0x402BE8B4: cr_parser_parse_from_file (cr-parser.c:5144)
-==31389==    by 0x402C2E74: cr_om_parser_parse_file (cr-om-parser.c:847)
-==31389==    by 0x804880E: test_cr_parser_parse (test4-main.c:100)
-==31389==    by 0x80488DA: main (test4-main.c:142)
-==31389==    by 0x402E1082: __libc_start_main (in /lib/i686/libc-2.2.5.so)
-==31389==    by 0x80485F1: cr_om_parser_parse_file (in /home/dodji/dev/libcroco/tests/.libs/test4)
-==31389== 
-==31389== 5120 bytes in 4 blocks are still reachable in loss record 5 of 6
-==31389==    at 0x4003BAB5: malloc (vg_clientfuncs.c:100)
-==31389==    by 0x4025F05F: g_mem_chunk_alloc (in /usr/lib/libglib-2.0.so.0.0.6)
-==31389==    by 0x40271457: g_string_sized_new (in /usr/lib/libglib-2.0.so.0.0.6)
-==31389==    by 0x40271588: g_string_new (in /usr/lib/libglib-2.0.so.0.0.6)
-==31389==    by 0x402B021D: cr_tknzr_parse_string (cr-tknzr.c:768)
-==31389==    by 0x402B44E5: cr_tknzr_get_next_token (cr-tknzr.c:2713)
-==31389==    by 0x402B8247: cr_parser_try_to_skip_spaces_and_comments (cr-parser.c:832)
-==31389==    by 0x402BB4A7: cr_parser_parse_charset (cr-parser.c:3026)
-==31389==    by 0x402BD767: cr_parser_parse_stylesheet (cr-parser.c:4408)
-==31389==    by 0x402BE6BF: cr_parser_parse (cr-parser.c:5086)
-==31389==    by 0x402BE8B4: cr_parser_parse_from_file (cr-parser.c:5144)
-==31389==    by 0x402C2E74: cr_om_parser_parse_file (cr-om-parser.c:847)
-==31389==    by 0x804880E: test_cr_parser_parse (test4-main.c:100)
-==31389==    by 0x80488DA: main (test4-main.c:142)
-==31389==    by 0x402E1082: __libc_start_main (in /lib/i686/libc-2.2.5.so)
-==31389==    by 0x80485F1: cr_om_parser_parse_file (in /home/dodji/dev/libcroco/tests/.libs/test4)
-==31389== 
-==31389== 32640 bytes in 1 blocks are still reachable in loss record 6 of 6
-==31389==    at 0x4003BAB5: malloc (vg_clientfuncs.c:100)
-==31389==    by 0x402E1CFF: (within /lib/i686/libc-2.2.5.so)
-==31389==    by 0x402E1865: iconv_open (in /lib/i686/libc-2.2.5.so)
-==31389==    by 0x402439E3: (within /usr/lib/libglib-2.0.so.0.0.6)
-==31389==    by 0x40241D2D: g_convert (in /usr/lib/libglib-2.0.so.0.0.6)
-==31389==    by 0x4024221C: g_convert_with_fallback (in /usr/lib/libglib-2.0.so.0.0.6)
-==31389==    by 0x40261F26: g_print (in /usr/lib/libglib-2.0.so.0.0.6)
-==31389==    by 0x402BF7EA: cr_statement_dump_charset (cr-statement.c:259)
-==31389==    by 0x402C1226: cr_statement_dump (cr-statement.c:1196)
-==31389==    by 0x402C14CF: cr_stylesheet_dump (cr-stylesheet.c:74)
-==31389==    by 0x804882B: test_cr_parser_parse (test4-main.c:104)
-==31389==    by 0x80488DA: main (test4-main.c:142)
-==31389==    by 0x402E1082: __libc_start_main (in /lib/i686/libc-2.2.5.so)
-==31389==    by 0x80485F1: cr_om_parser_parse_file (in /home/dodji/dev/libcroco/tests/.libs/test4)
-==31389== 
-==31389== LEAK SUMMARY:
-==31389==    definitely lost: 0 bytes in 0 blocks.
-==31389==    possibly lost:   0 bytes in 0 blocks.
-==31389==    still reachable: 38298 bytes in 19 blocks.
-==31389== 
---31389--       lru: 50 epochs, 0 clearings.
---31389-- translate: new 5784 (81473 -> 1079851), discard 0 (0 -> 0).
---31389--  dispatch: 2500000 basic blocks, 52/15905 sched events, 10797 tt_fast misses.
---31389-- reg-alloc: 1906 t-req-spill, 196526+11325 orig+spill uis, 29392 total-reg-r.
---31389--    sanity: 53 cheap, 3 expensive checks.
+--8511-- FATAL: unhandled syscall: 252
+--8511-- Do not panic.  You may be able to fix this easily.
+--8511-- Read the file README_MISSING_SYSCALL_OR_IOCTL.
+==8511== 
+==8511== Valgrind detected that your program requires
+==8511== the following unimplemented functionality:
+==8511==    no wrapper for the above system call
+==8511== This may be because the functionality is hard to implement,
+==8511== or because no reasonable program would behave this way,
+==8511== or because nobody has yet needed it.  In any case, let me know
+==8511== (jseward@acm.org) and/or try to work around the problem, if you can.
+==8511== 
+==8511== Valgrind has to exit now.  Sorry.  Bye!
+==8511== 
+
+sched status:
+
+Thread 1: status = Runnable, associated_mx = 0x0, associated_cv = 0x0
+==8511==    at 0x4046BCD3: _exit (in /lib/i686/libc-2.3.1.so)
+==8511==    by 0x403D37FF: __libc_start_main (in /lib/i686/libc-2.3.1.so)
+==8511==    by 0x8048721: cr_parser_new (in /home/dodji/dev/gnome/libcroco/tests/.libs/test2)
+

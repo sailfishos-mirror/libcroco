@@ -27,7 +27,8 @@ TEST_OUTPUT_DIR=test-outputs
 ERROR_REPORT_FILE=tests-error.log
 COMMAND_LIST=
 COMMAND=
-
+RUN_VALGRIND=no
+TEST_PROG=
 EGREP=`which egrep`
 if test "empty$EGREP" = "empty" ; then
     echo "You don't have the egrep program installed"
@@ -43,9 +44,9 @@ fi
 display_usage ()
 {
     echo ""
-    echo "usage: $0 [options] <command>"
+    echo "usage: $0 [general options] <command> [command option]"
     echo ""
-    echo "where options are:"
+    echo "where general options are:"
     echo "===================="
     echo "-h|--help     displays this help"
     echo ""
@@ -54,8 +55,11 @@ display_usage ()
     echo "run           run the tests and display their result"
     echo "mkref         run the tests but saves their output as a reference"
     echo "mkcleanup     removes the tmp directories that may have been created"    
+    echo ""
+    echo "run command options:"
+    echo "--valgrind runs the test using valgrind"
+    echo "--testprog <test program>"
 }
-
 
 parse_command_line ()
 {
@@ -83,9 +87,10 @@ parse_command_line ()
 		exit 0
 		;;
 
-	    run|mkref|mkcleanup)
+	    run|mkref|mkcleanup)		
 		COMMAND_LIST=$arg
-		shift
+		REMAINING_ARGS=$@
+		echo "REMAINING_ARGS=$REMAINING_ARGS"
 		break ;
 		;;
 
@@ -105,11 +110,10 @@ build_tests_list ()
 	echo "$un test: $TEST_PROG"
 	TEST_PROG_LIST="$TEST_PROG_LIST $TEST_PROG"
     done
-	
 }
 
 #runs a test programs.
-#usage run_test_prog <test-name> <reference>
+#usage run_test_prog <test-name> <reference> <display-on-stdout>
 #where "test-name" is the name of the test program to run
 #"reference" is a boolean value: yes/no. (the string "yes" or the string no)
 #if yes, means that the output of the test is to be saved as a reference.
@@ -118,7 +122,8 @@ run_test_prog ()
 {
     TEST_PROG=$1
     REFERENCE=$2
-    
+    DISPLAY_ON_STDOUT=$3
+
     OUTPUT_DIR=
     OUTPUT_SUFFIX=
     TEST_INPUT_LIST=
@@ -140,23 +145,42 @@ run_test_prog ()
 	    mkdir $HERE/$TEST_OUTPUT_DIR ;
 	    echo "done"
 	fi
-
 	OUTPUT_DIR=$HERE/$TEST_OUTPUT_DIR
 	OUTPUT_SUFFIX=.out
-    fi    
+    fi
 
     if test "empty$TEST_INPUT_LIST" != "empty" ; then
 	for TEST_INPUT in $TEST_INPUT_LIST ; do
-	    #launch the test with the test input file, and save the output.
-	    echo "executing $HERE/$TEST_PROG $HERE/$TEST_INPUT_DIR/$TEST_INPUT > $OUTPUT_DIR/${TEST_INPUT}${OUTPUT_SUFFIX} ..."
-	    $HERE/$TEST_PROG $HERE/$TEST_INPUT_DIR/$TEST_INPUT > $OUTPUT_DIR/${TEST_INPUT}${OUTPUT_SUFFIX}
-	    echo "done"
-	    echo ""
+	    if test "$DISPLAY_ON_STDOUT" = "yes" ; then
+		echo "###############################################"
+		echo "launching $HERE/$TEST_PROG $HERE/$TEST_INPUT_DIR/$TEST_INPUT"....
+		echo "###############################################"
+		$HERE/$TEST_PROG $HERE/$TEST_INPUT_DIR/$TEST_INPUT
+		echo "###############################################"
+		echo  "done"
+		echo "###############################################"
+		echo ""
+	    else
+		echo "executing $HERE/$TEST_PROG $HERE/$TEST_INPUT_DIR/$TEST_INPUT > $OUTPUT_DIR/${TEST_INPUT}${OUTPUT_SUFFIX} ..."
+		$HERE/$TEST_PROG $HERE/$TEST_INPUT_DIR/$TEST_INPUT > $OUTPUT_DIR/${TEST_INPUT}${OUTPUT_SUFFIX}
+		echo "done"
+	    fi
 	done
     else
-	echo "executing $HERE/$TEST_PROG  > $OUTPUT_DIR/${TEST_INPUT}${OUTPUT_SUFFIX} ..."
-	$HERE/$TEST_PROG > $OUTPUT_DIR/${TEST_PROG}${OUTPUT_SUFFIX}
-	echo "done"
+	if test "$DISPLAY_ON_STDOUT" = "yes" ; then
+	    echo "####################################################"
+	    echo "launching $HERE/$TEST_PROG ..."
+	    echo "####################################################"
+	    $HERE/$TEST_PROG
+	    echo "####################################################"
+	    echo "done"
+	    echo "####################################################"
+	    echo ""
+	else
+	    echo "executing $HERE/$TEST_PROG  > $OUTPUT_DIR/${TEST_INPUT}${OUTPUT_SUFFIX} ..."
+	    $HERE/$TEST_PROG > $OUTPUT_DIR/${TEST_PROG}${OUTPUT_SUFFIX}
+	    echo "done"
+	fi
     fi
 }
 
@@ -183,7 +207,75 @@ run_test_report ()
     fi
 }
 
+############################
+#Executes the "run" command along with
+#it's command options.
+#For the sake of safety checking
+############################
+execute_run_cmd ()
+{
+    args=$@
 
+    if test "$1" != "run" ; then
+	echo "internal error: first argument should be \'run\'"
+	return
+    fi
+    shift
+
+    while true ; do
+	cur_arg=$1
+	echo "cur_arg=$cur_arg"
+
+	case $cur_arg in
+	    --valgrind)
+		RUN_VALGRIND=yes
+		shift
+		;;
+
+	    "--testprog")
+		shift
+		if test "empty$1" = "empty" ; then
+		    echo "--testprog should be followed by a prog name"
+		    display_usage
+		    exit
+		fi
+		TEST_PROG=$1
+		echo "TEST_PROG=$TEST_PROG"
+		shift
+		;;
+
+	    *)
+		break 
+		;;
+	esac
+    done
+
+    if test "empty$TEST_PROG" = "empty"; then
+	build_tests_list ;
+	if test "empty$TEST_PROG_LIST" = "empty" ; then
+	    echo "could not find any test to run"
+	    exit
+	fi
+
+	for TEST in $TEST_PROG_LIST ; do
+	    run_test_prog $TEST no no;
+	done
+	run_test_report ;
+    else
+	#run the test and display result on stdout
+	run_test_prog $TEST_PROG no yes ;
+    fi
+}
+
+##############################
+#Analyzes a command string "<command> [command option]"
+#and runs the necessary commands.
+#
+#Must be called with the command line
+#starting with a command name.
+#all the previous general argument must
+#have been stripped away.
+#############################
 execute_command ()
 {
     arg=$1 ;
@@ -191,17 +283,7 @@ execute_command ()
     case "$arg" in
 
 	run)
-	    build_tests_list ;
-	    if test "empty$TEST_PROG_LIST" = "empty" ; then
-		echo "could not find any test to run"
-		exit
-	    fi
-
-	    for TEST in $TEST_PROG_LIST ; do
-		run_test_prog $TEST no;
-	    done
-
-	    run_test_report ;
+	    execute_run_cmd $@
 	    ;;
 
 	mkref)
@@ -212,7 +294,7 @@ execute_command ()
 	    fi
 
 	    for TEST in $TEST_PROG_LIST ; do
-		run_test_prog $TEST yes;
+		run_test_prog $TEST yes no;
 	    done
 	    ;;
 
@@ -240,7 +322,7 @@ main ()
 	exit
     fi
 
-    execute_command $COMMAND_LIST
+    execute_command $REMAINING_ARGS
 }
 
 main $@

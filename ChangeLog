@@ -1,3 +1,17 @@
+2003-04-03  Dodji  <dodji@seketeli.org>
+
+	* tests/testctl: can now run one single test. This can also
+	run all the tests a run a simple report that summarizes the
+	results of the tests.
+
+	* configure.in: make sure this generates the libcroco.spec file.
+	make sure to test the presence of glib2 during configure.
+
+	* libcroco.spec.in: added autoconf magic in this.
+	Can now generate an rpm by typing make rpm. Before that,
+	the user that types make rpm must have write acess to
+	/usr/src .
+
 2003-04-02  Gaël Chamoulaud (strider) <strider@freespiders.org>
 	
 	* croco-config.1: updated the man page

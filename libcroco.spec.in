@@ -1,7 +1,7 @@
 %define __libtoolize :
 %define __spec_install_post /usr/lib/rpm/brp-compress
 Name:             libcroco
-Summary:          An CCS2 parsing library 
+Summary:          A CSS2 parsing library 
 Version:          @VERSION@
 Release:          1
 License:          LGPL
@@ -9,23 +9,23 @@ Group:            System Environment/Libraries
 Source:           %{name}-%{version}.tar.gz
 BuildRoot:        %{_tmppath}/%{name}-%{version}-root
 BuildRequires:    pkgconfig >= 0.8
-Requires:         glib2 >= 2.0.0
-Requires:         libxml2 >= 2.4.7
-BuildRequires:    glib2-devel >= 2.0.0
-BuildRequires:    libxml2-devel >= 2.4.7
+Requires:         glib2 >= @GLIB2_VERSION@
+Requires:         libxml2 >= @LIBXML2_VERSION@
+BuildRequires:    glib2-devel >= @GLIB2_VERSION@
+BuildRequires:    libxml2-devel >= @LIBXML2_VERSION@
 
 %description
-CCS2 parsing library for GNOME
+CSS2 parsing library for GNOME
 
 %package devel
 Summary:          Libraries and include files for developing with libcroco.
 Group:            Development/Libraries
 Requires:         %{name} = %{version}
 Requires:         pkgconfig >= 0.8
-Requires:         glib2 >= 2.0.0
-Requires:         glib2-devel >= 2.0.0
-Requires:         libxml2 >= 2.4.7
-Requires:         libxml2-devel >= 2.4.7
+Requires:         glib2 >= @GLIB2_VERSION@
+Requires:         glib2-devel >= @GLIB2_VERSION@
+Requires:         libxml2 >= @LIBXML2_VERSION@
+Requires:         libxml2-devel >= @LIBXML2_VERSION@
 
 %description devel
 This package provides the necessary development libraries and include
@@ -35,7 +35,7 @@ files to allow you to develop with libcroco.
 %setup -q -n libcroco-%{version}
 
 %build
-%configure --enable-seleng=no --enable-layeng=yes
+%configure --enable-seleng=@WITH_SELENG@ --enable-layeng=@WITH_SELENG@
 make
 
 %install
@@ -67,5 +67,8 @@ rm -rf $RPM_BUILD_ROOT
 %{_libdir}/pkgconfig/libcroco.pc
 
 %changelog
+* Wed Apr 2 2003 Dodji Seketeli <dodji@seketeli.org>
+- initial release: SAC api, CSSOM api, basic selectors implementation.
+
 * Sun Mar 30 2003 Christian Schaller <uraeus@gnome.org>
 - created this thing
