@@ -252,6 +252,10 @@ cr_statement_new_at_import_rule (CRStyleSheet *a_container_sheet,
 				 CRStyleSheet *a_imported_sheet) ;
 
 CRStatement *
+cr_statement_at_import_rule_parse_from_buf (const guchar * a_buf,
+                                            enum CREncoding a_encoding) ;
+
+CRStatement *
 cr_statement_new_at_media_rule (CRStyleSheet *a_sheet,
                                 CRStatement *a_ruleset,
 				GList *a_media) ;

@@ -1,3 +1,13 @@
+2003-06-19  Dodji Seketeli  <dodji@seketeli.org>
+
+	* tests/test4-main.[ch]: updated this to test
+	cr_statement_parse_from_buf(). It seems to work now.
+	Still some memleaks to fix.
+
+	* src/parser/cr-statement.[ch]:
+	some bug fixes in cr_statement_parse_from_buf() + 
+	added a new cr_statement_at_import_rule_parse_from_buf() method.
+
 2003-06-18  Dodji Seketeli  <dodji@seketeli.org>
 
 	* src/parser/cr-statement.[ch]:

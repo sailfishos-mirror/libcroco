@@ -63,6 +63,10 @@ const guchar *gv_at_font_face_buf=
 "}"
 ;
 
+const guchar *gv_at_import_buf=
+"@import \"subs.css\";"
+;
+
 static void 
 display_help (char *prg_name) ;
 
@@ -257,6 +261,92 @@ test_cr_statement_font_face_rule_parse_from_buf (void)
         return CR_OK ;
 }
 
+static enum CRStatus
+test_cr_statement_at_import_rule_parse_from_buf (void)
+{
+        CRStatement *stmt = NULL ;
+
+        stmt = cr_statement_at_import_rule_parse_from_buf (gv_at_import_buf,
+                                                           CR_UTF_8) ;
+        g_return_val_if_fail (stmt, CR_ERROR) ;
+        if (stmt)
+        {
+                cr_statement_destroy (stmt) ;
+                stmt = NULL ;
+        }
+
+        return CR_OK ;
+}
+
+static enum CRStatus
+test_cr_statement_parse_from_buf (void)
+{
+        CRStatement *stmt = NULL ;
+        
+        stmt = cr_statement_parse_from_buf (gv_ruleset_buf, CR_UTF_8) ;
+        if (stmt)
+        {
+                cr_statement_destroy (stmt) ;
+                stmt = NULL ;
+        }
+        else
+        {
+                return CR_ERROR ;
+        }
+        stmt = cr_statement_parse_from_buf (gv_at_media_buf, CR_UTF_8) ;
+        if (stmt)
+        {
+                cr_statement_destroy (stmt) ;
+                stmt = NULL ;
+        }
+        else
+        {
+                return CR_ERROR ;
+        }
+        stmt = cr_statement_parse_from_buf (gv_at_page_buf, CR_UTF_8) ;
+        if (stmt)
+        {
+                cr_statement_destroy (stmt) ;
+                stmt = NULL ;
+        }
+        else
+        {
+                return CR_ERROR ;
+        }
+        stmt = cr_statement_parse_from_buf (gv_at_charset_buf, CR_UTF_8) ;
+        if (stmt)
+        {
+                cr_statement_destroy (stmt) ;
+                stmt = NULL ;
+        }
+        else
+        {
+                return CR_ERROR ;
+        }
+        stmt = cr_statement_parse_from_buf (gv_at_font_face_buf, CR_UTF_8) ;
+        if (stmt)
+        {
+                cr_statement_destroy (stmt) ;
+                stmt = NULL ;
+        }
+        else
+        {
+                return CR_ERROR ;
+        }
+        stmt = cr_statement_parse_from_buf (gv_at_import_buf, CR_UTF_8) ;
+        if (stmt)
+        {
+                cr_statement_destroy (stmt) ;
+                stmt = NULL ;
+        }
+        else
+        {
+                return CR_ERROR ;
+        }
+
+        return CR_OK ;
+}
+
 /**
  *The entry point of the testing routine.
  */
@@ -302,6 +392,20 @@ main (int argc, char ** argv)
         }
 
         status = test_cr_statement_font_face_rule_parse_from_buf () ;
+        if (status != CR_OK)
+        {
+                g_print ("\nKO\n") ;
+                return 0 ;
+        }
+
+        test_cr_statement_at_import_rule_parse_from_buf () ;
+        if (status != CR_OK)
+        {
+                g_print ("\nKO\n") ;
+                return 0 ;
+        }
+
+        status = test_cr_statement_parse_from_buf () ;
         if (status != CR_OK)
         {
                 g_print ("\nKO\n") ;

@@ -1,10 +1,12 @@
 
 *coding:)
 
-Code a cr_statement_at_import_rule_parse () function and
-include it support in cr_statement_parse_from_buf ().
+Well, in the cr_statement_xxx_parse_functions, memleaks 
+occur (the parsing result set in the sac callback is not freed)
+when a parsing fails. This is because I haven't implemented
+the "error" SAC callbacks yet. I must do it !!!
 
-Code a test case for cr_statement_parse_from_buf ().
+More debug of the test case for cr_statement_parse_from_buf ().
 
 Provide support for font selection. (hard, started, is well underway.)
  First make sure to be able to gather all the font related property

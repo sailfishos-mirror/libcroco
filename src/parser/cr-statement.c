@@ -794,39 +794,64 @@ cr_statement_parse_from_buf (const guchar *a_buf,
 	if (!result)
 	{
 		result = cr_statement_at_charset_rule_parse_from_buf 
-			(a_buf, a_encoding) ;
-		if (result)
-			goto out ;
+			(a_buf, a_encoding) ;			
 	}
+        else
+        {
+                goto out ;
+        }
+
 	if (!result)
 	{
 		result = cr_statement_at_media_rule_parse_from_buf
 			(a_buf, a_encoding) ;
-		if (result)
-			goto out ;
 	}
+        else
+        {
+                goto out ;
+        }
+
 	if (!result)
 	{
 		result = cr_statement_at_charset_rule_parse_from_buf 
 			(a_buf, a_encoding) ;
-		if (result)
-			goto out ;
 	}
+        else
+        {
+                goto out ;
+        }
+
 	if (!result)
 	{
 		result = cr_statement_font_face_rule_parse_from_buf
 			(a_buf, a_encoding) ;
-		if (result)
-			goto out ;
+
 	}
+        else
+        {
+                goto out ;
+        }
+
 	if (!result)
 	{
 		result = cr_statement_at_page_rule_parse_from_buf
 			(a_buf, a_encoding) ;
-		if (result)
-			goto out ;
 	}
+        else
+        {
+                goto out ;
+        }
 
+        if (!result)
+        {
+                result = cr_statement_at_import_rule_parse_from_buf 
+                        (a_buf, a_encoding) ;
+        }
+        else
+        {
+                goto out ;
+        }
+        
  out:
 	return result ;
 }
@@ -865,8 +890,12 @@ cr_statement_ruleset_parse_from_buf (const guchar * a_buf,
 	
 	cr_parser_set_sac_handler (parser, sac_handler) ;
 	cr_parser_try_to_skip_spaces_and_comments (parser) ;
-	cr_parser_parse_ruleset (parser) ;
-	
+	status = cr_parser_parse_ruleset (parser) ;
+	if (status != CR_OK)
+        {
+                goto cleanup ;
+        }
+
 	status = cr_doc_handler_get_result (sac_handler, 
 					    (gpointer*)&result) ;
 	if (! ((status == CR_OK) && result) )
@@ -878,7 +907,7 @@ cr_statement_ruleset_parse_from_buf (const guchar * a_buf,
 		}
 	}
 
-/* cleanup:*/
+ cleanup:
 	if (parser)
 	{
 		cr_parser_destroy (parser) ;
@@ -1120,8 +1149,6 @@ cr_statement_new_at_import_rule (CRStyleSheet *a_container_sheet,
 {
 	CRStatement *result = NULL ;
 
-	g_return_val_if_fail (a_container_sheet, NULL) ;
-
 	result = g_try_malloc (sizeof (CRStatement)) ;
 
 	if (!result)
@@ -1147,9 +1174,83 @@ cr_statement_new_at_import_rule (CRStyleSheet *a_container_sheet,
 	result->kind.import_rule->url = a_url;
 	result->kind.import_rule->media_list = a_media_list ;
 	result->kind.import_rule->sheet = a_imported_sheet;
-	cr_statement_set_parent_sheet (result, a_container_sheet) ;
+        if (a_container_sheet)
+                cr_statement_set_parent_sheet (result, a_container_sheet) ;
 
 	return result ;
+}
+
+/**
+ *Parses a buffer that contains an "@import" rule and
+ *instanciate a #CRStatement of type AT_IMPORT_RULE_STMT
+ *@param a_buf the buffer to parse.
+ *@param a_encoding the encoding of a_buf.
+ *@return the newly built instance of #CRStatement in case of 
+ *a successfull parsing, NULL otherwise.
+ */
+CRStatement *
+cr_statement_at_import_rule_parse_from_buf (const guchar * a_buf,
+                                            enum CREncoding a_encoding)
+{
+        enum CRStatus status = CR_OK ;
+	CRParser *parser = NULL ;
+        CRStatement *result = NULL ;
+        GList *media_list = NULL ;
+        GString *import_string = NULL ;
+
+        parser = cr_parser_new_from_buf (a_buf, strlen (a_buf),
+                                         a_encoding, FALSE) ;
+        if (!parser)
+        {
+                cr_utils_trace_info ("Instanciation of parser failed.") ;
+                goto cleanup ;
+        }
+
+        status = cr_parser_try_to_skip_spaces_and_comments (parser) ;
+        if (status != CR_OK)
+                goto cleanup ;
+
+        status = cr_parser_parse_import (parser, &media_list,
+                                         &import_string) ;
+        if (status != CR_OK || !import_string)
+                goto cleanup ;
+
+        result = cr_statement_new_at_import_rule (NULL, import_string,
+                                                  media_list, NULL) ;
+        if (result)
+        {
+                import_string = NULL ;
+                media_list = NULL ;
+        }
+
+ cleanup:
+        if (parser)
+        {
+                cr_parser_destroy (parser) ;
+                parser = NULL ;
+        }
+        if (media_list)
+        {
+                GList *cur = NULL ;
+                for (cur = media_list; media_list; 
+                     media_list = g_list_next (media_list))
+                {
+                        if (media_list->data)
+                        {
+                                g_string_free (media_list->data, TRUE);
+                                media_list->data = NULL ;
+                        }
+                }
+                g_list_free (media_list) ;
+                media_list = NULL;
+        }
+        if (import_string)
+        {
+                g_string_free (import_string, TRUE) ;
+                import_string = NULL;
+        }
+
+        return result ;
 }
 
 /**
