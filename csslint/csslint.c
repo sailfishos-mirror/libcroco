@@ -21,7 +21,80 @@
 
 #include "libcroco.h"
 
+#include <glib.h>
 #include <string.h>
+
+/**
+ *The options data structure.
+ *The variable of this data structure are set
+ *during the  parsing the command line by the
+ *parse_command_line() function.
+ */
+struct Options
+{
+	gboolean param_version ;
+	gboolean param_cssom ;
+
+	gchar ** files_list ;
+};
+
+void
+csslint_parse_cmd_line (int a_argc, char **a_argv, struct Options *a_options);
+
+static void
+csslint_showVersion (const char *name);
+
+static void
+csslint_usage (const char *name);
+
+static enum CRStatus
+csslint_cssom_parser_parse (guchar * a_file_uri);
+
+/**
+ *Parses the command line.
+ *@param a_argc the argc parameter of the main routine.
+ *@param the argv parameter of the main routine.
+ *@param a_options out parameter the parsed options.
+ */
+void
+csslint_parse_cmd_line (int a_argc, char **a_argv,
+						struct Options *a_options)
+{
+	int i= 0 ;
+
+	g_return_if_fail (a_options) ;
+	memset (a_options, 0, sizeof (struct Options)) ;
+
+    if (a_argc <= 1) 
+	{
+        csslint_usage(a_argv[0]);
+	}
+		
+	for (i = 1 ; i < a_argc ; i++)
+	{
+		if (a_argv[i][0] != '-') break ;
+		
+		if ((!strcmp (a_argv[i], "-version")) || 
+			(!strcmp (a_argv[i], "--version")))
+		{
+			a_options->param_version = TRUE ;
+		}
+		if ((!strcmp (a_argv[i], "-cssom")) || 
+			(!strcmp (a_argv[i], "--cssom")))
+		{
+			a_options->param_cssom = TRUE ;
+		}
+	}
+	
+	if (i >= a_argc)
+	{
+		a_options->files_list = NULL ;
+	}
+	else
+	{
+		a_options->files_list = &a_argv[i] ;
+	}
+}
 
 /**
  *Displays the version text.
@@ -29,7 +102,7 @@
  *@param a_argv the argv variable passed to the main function.
  */
 static void 
-showVersion (const char *name) 
+csslint_showVersion (const char *name) 
 {
     fprintf(stderr, "%s: using libcroco version %s\n", name, VERSION);
     fprintf(stderr, "   compiled with: ");
@@ -51,48 +124,87 @@ showVersion (const char *name)
  *@param a_argv the argv variable passed to the main function.
  */
 static void 
-usage(const char *name) 
+csslint_usage(const char *name) 
 {
     printf("Usage : %s [options] CSS2files ...\n", name);
     printf("\tParse the CSS2 files and output the result of the parsing\n");
+
+	/* Listing of different options */
     printf("\t--version : display the version of the CSS2 library used\n");
+	printf("\t--cssom : parse a CSS file and builds a CSS object model\n");
+
     printf("\nLibcroco project home page: http://www.freespiders.org/projects/libcroco\n");
     printf("To report bugs or get some help check: http://bugzilla.gnome.org/\n");
+}
+
+/**
+ *The test of the cr_input_read_byte() method.
+ *Reads the each byte of a_file_uri using the
+ *cr_input_read_byte() method. Each byte is send to
+ *stdout.
+ *@param a_file_uri the file to read.
+ *@return CR_OK upon successfull completion of the
+ *function, an error code otherwise.
+ */
+static enum CRStatus
+csslint_cssom_parser_parse (guchar * a_file_uri)
+{
+	enum CRStatus status = CR_OK ;
+	CROMParser *parser = NULL ;
+	CRStyleSheet *stylesheet = NULL ;
+	
+	g_return_val_if_fail (a_file_uri, CR_BAD_PARAM_ERROR) ;
+		
+	parser = cr_om_parser_new (NULL) ;
+	status = cr_om_parser_parse_file (parser, a_file_uri, CR_ASCII,
+									  &stylesheet) ;
+	if (status == CR_OK && stylesheet)
+	{
+		cr_stylesheet_dump (stylesheet, stdout) ;
+		cr_stylesheet_destroy (stylesheet) ;
+	}
+	cr_om_parser_destroy (parser) ;
+	
+	return status ;
 }
 
 int 
 main (int argc, char **argv) 
 {
-    int i;
+	struct Options options;
+	enum CRStatus status = CR_OK;
 	
-    if (argc <= 1) 
-	{
-        usage(argv[0]);
-        return(1);
-    }
-    
-	for (i = 1; i < argc ; i++) 
-	{
-		if (!strcmp(argv[i], "-"))
-			break;
+	csslint_parse_cmd_line (argc, argv, &options);
 
-		if (argv[i][0] != '-')
-			continue;
-		
-		if ((!strcmp(argv[i], "-version")) || 
-			(!strcmp(argv[i], "--version"))) 
+	if (options.param_version == TRUE)
+	{
+		csslint_showVersion(argv[0]);
+		return 0;
+	}
+
+	if (options.param_cssom == TRUE)
+	{
+		if (options.files_list != NULL)
 		{
-			showVersion (argv[0]);
+			status = csslint_cssom_parser_parse (options.files_list[0]);
 		} 
-		else 
+		else
 		{
-			fprintf(stderr, "Unknown option %s\n", argv[i]);
-			usage(argv[0]);
-			return(1);
+			csslint_showVersion(argv[0]);
+			return 0;
 		}
 
+		if (status == CR_OK)
+		{
+			g_print ("\nOK\n");
+		}
+		else
+		{
+			g_print ("\nKO\n");
+		}
 	}
-	return 1;
+    
+	return 0;
 }
 
 

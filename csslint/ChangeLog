@@ -1,3 +1,10 @@
+2003-03-24  Gaël Chamoulaud  <strider@freespiders.org>
+
+	* csslint.c (csslint_usage): Added the ability to parse
+	a CSS file and builds a CSS object model.
+	* csslint.1: updated csslint man page
+	
+
 2003-03-23  Gaël Chamoulaud  <strider@freespiders.org>
 
 	* Makefile.am (AM_CFLAGS): added a man page for csslint program.
