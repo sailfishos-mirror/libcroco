@@ -3,8 +3,6 @@
 /*
  * This file is part of The Croco Library
  *
- * Copyright (C) 2002-2003 Dodji Seketeli <dodji@seketeli.org>
- *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of version 2.1 of the GNU Lesser General Public
  * License as published by the Free Software Foundation.
@@ -18,6 +16,8 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
  * USA
+ *
+ * See the COPYRIGHTS file for copyrights information.
  */
 
 /*
@@ -1039,6 +1039,74 @@ cr_tknzr_parse_ident (CRTknzr *a_this, GString **a_str)
         }
 
         return CR_OK ;
+}
+
+/**
+ *Parses a "vendor-specific-ident". This is only a dash followed
+ *by a an identifier. This is not specified by the CSS2 spec but
+ *is heavily used by a lot of user agents.
+ *@param a_this the currens instance of #CRTknzr.
+ *
+ *@param a_str a pointer to parsed ident. If *a_str is NULL,
+ *this function allocates a new instance of GString. If not, 
+ *the function just appends the parsed string to the one passed.
+ *In both cases it is up to the caller to free *a_str.
+ *
+ *@return CR_OK upon successfull completion, an error code 
+ *otherwise.
+ */
+static enum CRStatus
+cr_tknzr_parse_vendor_specific_ident (CRTknzr *a_this, 
+                                      GString **a_str)
+{
+        guint32 tmp_char = 0 ;
+        CRInputPos init_pos ;
+        enum CRStatus status = CR_OK ;
+
+        g_return_val_if_fail (a_this && PRIVATE (a_this) 
+                              && PRIVATE (a_this)->input 
+                              && a_str, 
+                              CR_BAD_PARAM_ERROR) ;
+
+        RECORD_INITIAL_POS (a_this, &init_pos) ;
+
+        if (BYTE (PRIVATE (a_this)->input, 1, NULL) == '-')
+        {
+                SKIP_BYTES (a_this, 1) ;
+        }
+        else
+        {
+                return CR_PARSING_ERROR ;
+        }
+
+        status = cr_tknzr_parse_nmstart (a_this, &tmp_char) ;
+        if (status != CR_OK)
+        {
+                status = CR_PARSING_ERROR ;
+                goto error ;
+        }
+        if (*a_str == NULL)
+        {
+                *a_str = g_string_new (NULL) ;
+        }
+        g_string_append_c (*a_str, '-') ;
+        g_string_append_unichar (*a_str, tmp_char) ;
+
+        for (;;)
+        {
+                status = 
+                        cr_tknzr_parse_nmchar (a_this, &tmp_char);
+
+                if (status != CR_OK) break ;
+
+                g_string_append_unichar (*a_str, tmp_char) ;
+        }
+
+        return CR_OK ;
+
+ error:
+        cr_tknzr_set_cur_pos (a_this, &init_pos) ;
+        return status ;
 }
 
 /**
@@ -2298,7 +2366,18 @@ cr_tknzr_get_next_token (CRTknzr *a_this, CRToken **a_tk)
                         CHECK_PARSING_STATUS (status, TRUE) ;
                         goto done ;
                 }
-
+                else 
+                {
+                        status = cr_tknzr_parse_vendor_specific_ident 
+                                (a_this, &str) ;
+                        if (status == CR_OK)
+                        {
+                                cr_token_set_vendor_specific_ident 
+                                        (token, str) ;
+                                goto done ;
+                        }
+                }
+                break ;
         case '~':
                 if (BYTE (input, 2, NULL) ==  '=')
                 {
@@ -2697,7 +2776,7 @@ cr_tknzr_get_next_token (CRTknzr *a_this, CRToken **a_tk)
                 str = NULL ;
         }
         cr_tknzr_set_cur_pos (a_this, 
-                                     &init_pos) ;
+                              &init_pos) ;
         return status ;
 
 }
@@ -2741,6 +2820,7 @@ cr_tknzr_parse_token (CRTknzr *a_this, enum CRTokenType a_type,
 
 		case STRING_TK:
                 case IDENT_TK:
+                case VENDOR_SPECIFIC_IDENT_TK: 
 		case HASH_TK:
                 case ATKEYWORD_TK:
                 case FUNCTION_TK:

@@ -63,6 +63,7 @@ cr_token_clear (CRToken *a_this)
         case URI_TK:
         case FUNCTION_TK:
         case COMMENT_TK:
+        case VENDOR_SPECIFIC_IDENT_TK:
                 if (a_this->u.str)
                 {
                         g_string_free (a_this->u.str, TRUE) ;
@@ -283,6 +284,18 @@ cr_token_set_ident (CRToken *a_this, GString * a_ident)
         return CR_OK ;
 }
 
+enum CRStatus
+cr_token_set_vendor_specific_ident (CRToken *a_this, GString * a_ident)
+{
+        g_return_val_if_fail (a_this, CR_BAD_PARAM_ERROR) ;
+
+        cr_token_clear (a_this) ;
+
+        a_this->type = VENDOR_SPECIFIC_IDENT_TK ;
+
+        a_this->u.str = a_ident ;
+        return CR_OK ;
+}
 
 enum CRStatus
 cr_token_set_function (CRToken *a_this, GString *a_fun_name)

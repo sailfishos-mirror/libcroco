@@ -74,6 +74,7 @@ enum CRTokenType
         BO_TK, /*opening bracket*/
         BC_TK, /*closing bracket*/
         DELIM_TK,
+        VENDOR_SPECIFIC_IDENT_TK,
 } ;
 
 enum CRTokenExtraType
@@ -142,7 +143,10 @@ cr_token_set_string (CRToken *a_this, GString *a_str) ;
         
 enum CRStatus
 cr_token_set_ident (CRToken *a_this, GString * a_ident) ;
-        
+
+enum CRStatus
+cr_token_set_vendor_specific_ident (CRToken *a_this, GString * a_ident) ;
+
 enum CRStatus
 cr_token_set_hash (CRToken *a_this, GString *a_hash) ;
         
