@@ -725,8 +725,8 @@ cr_box_view_layout (CRBoxView *a_this)
 
         cr_lay_eng_layout_box_tree (PRIVATE (a_this)->layeng,
                                     PRIVATE (a_this)->box_model->box.children) ;
-        cr_box_dump_to_file (PRIVATE (a_this)->box_model->box.children,
-                             0, stdout) ;
+        /*cr_box_dump_to_file (PRIVATE (a_this)->box_model->box.children,
+          0, stdout) ;*/
 
         return CR_OK ;
 }
