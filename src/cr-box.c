@@ -36,10 +36,14 @@
 static enum CRBoxType
 cr_box_guess_type (CRStyle *a_style) ;
 
+static glong
+cr_box_get_rightmost_x (CRBox *a_this) ;
+
+static glong
+cr_box_get_bottommost_y (CRBox *a_this) ;
 
 static enum CRStatus
 cr_box_layout_normal (CRBox *a_this) ;
-
 
 static enum CRStatus
 cr_box_layout_float (CRBox *a_this) ;
@@ -55,6 +59,11 @@ cr_box_layout (CRBox *a_this) ;
  *Private methods
  ******************************/
 
+/**
+ *Guess the type of a box from the 'position' rule
+ *contained in its style data structure.
+ *@param a_style the style data structure associated to the box.
+ */
 static enum CRBoxType
 cr_box_guess_type (CRStyle *a_style)
 {
@@ -73,7 +82,7 @@ cr_box_guess_type (CRStyle *a_style)
                 box_type = BOX_TYPE_INLINE ;
                 break ;
         
-        case DISPLAY_BLOCK:                
+        case DISPLAY_BLOCK:
         case DISPLAY_LIST_ITEM:
         case DISPLAY_TABLE:
         case DISPLAY_INLINE_TABLE:
@@ -110,7 +119,46 @@ cr_box_guess_type (CRStyle *a_style)
         return box_type ;
 }
 
+static glong
+cr_box_get_bottommost_y (CRBox *a_this)
+{
+        return (a_this->outer_edge.y
+                +
+                a_this->outer_edge.y_offset
+                +
+                a_this->outer_edge.height) ;
+}
 
+/**
+ *Computes the abscissa of the rightmost side
+ *of the current box.
+ *@param a_box the current box.
+ *@return a positve or 0 number if the computation went well,
+ *-1 otherwise.
+ */
+static glong
+cr_box_get_rightmost_x (CRBox *a_this)
+{       
+        if (!a_this)
+                return 0 ;
+
+        return (a_this->outer_edge.x 
+                +
+                a_this->outer_edge.x_offset
+                +
+                a_this->outer_edge.width) ;
+}
+
+/**
+ *Lay the box out according to "Normal flow"
+ *as decribed in css2 spec chap 9.4.
+ *In normal flow, a box belongs to a formating context
+ *that may be block or inline. In block formating context,
+ *boxes are laid out verticaly, one under an other.
+ *In inline formatting context, boxes are laid out horizontally,
+ *usually from the left to the right, unless we support bidi.
+ *@param a_this the current box.
+ */
 static enum CRStatus
 cr_box_layout_normal (CRBox *a_this)
 {
@@ -119,49 +167,67 @@ cr_box_layout_normal (CRBox *a_this)
         g_return_val_if_fail (a_this && a_this->style,
                               CR_BAD_PARAM_ERROR) ;
 
+        /*
+         *Only boxes that have
+         *the position rule set to 'static' or 'relative'
+         *can be part of a normal formatting context.
+         */
         if (a_this->style->position != POSITION_STATIC
             && a_this->style->position != POSITION_RELATIVE)
         {
                 return CR_UNEXPECTED_POSITION_SCHEME ;
         }
 
-        if (a_this->parent == NULL 
-            && a_this->prev == NULL)
+        switch (a_this->type)
         {
-                a_this->outer_edge.x = 0;
-                a_this->outer_edge.y = 0;
-        }
-        else
+        case BOX_TYPE_BLOCK:
+        case BOX_TYPE_ANONYMOUS_BLOCK:
         {
-                /*this is not the topmost root box.
-                 *So,
-                 *1/depending on the width/height 
-                 *on the preceding
-                 *box and on the type 
-                 *(inline/block etc...) of the current box,
-                 *set the top left corner 
-                 *position of the current box.
-                 *2/compute the content edge.
-                 *3/compute the border edge.
-                 *4/compute the outer edge (margin edge).
+                CRBox *cont_box = a_this->parent ;
+                /*
+                 *We are in a block formating context 
                  */
-                switch (a_this->type)
-                {
-                case BOX_TYPE_BLOCK:
-                case BOX_TYPE_ANONYMOUS_BLOCK:
-                {
-                        /*a_this->outer_edge.x = */
-                                break ;
-                }
-                case BOX_TYPE_COMPACT:
-                case BOX_TYPE_RUN_IN:
-                case BOX_TYPE_INLINE:
-                case BOX_TYPE_ANONYMOUS_INLINE:
-                        break ;
 
-                default:
-                        break ;
-                }
+                /*
+                 *position the 'x' of the top
+                 *left corner of this box
+                 *at the leftmost abscissa of it's containing box.
+                 *Position the 'y' of the top left corner of this
+                 *just under the previous box.
+                 */
+                if (!cont_box)
+                        a_this->outer_edge.x = 0 ;
+                else
+                        a_this->outer_edge.x = cont_box->inner_edge.x ;
+
+                a_this->outer_edge.y =
+                        cr_box_get_bottommost_y (a_this->prev) ;
+
+                a_this->outer_edge.x =
+                        cr_box_get_rightmost_x (a_this->prev) ;
+
+                /*
+                 *Now, compute the inner edge of this box;
+                 *which means 
+                 *1/set the left margin, left border and 
+                 *left padding edges.
+                 *2/compute the left most x and topmost y of
+                 *the inner box and.
+                 *3/Compute the outer edge of the containing
+                 *box; this is recursive.
+                 */
+                
+                break ;
+        }
+
+        case BOX_TYPE_COMPACT:
+        case BOX_TYPE_RUN_IN:
+        case BOX_TYPE_INLINE:
+        case BOX_TYPE_ANONYMOUS_INLINE:
+                break ;
+
+        default:
+                break ;
         }
 
         return status ;
