@@ -120,16 +120,25 @@ test_cr_parser_parse (guchar * a_file_uri)
 static enum CRStatus
 test_cr_declaration_parse (void)
 {
+        guchar * tmp_str = NULL ;
         CRDeclaration * decl = NULL ;
 
         decl = cr_declaration_parse (NULL, gv_decl,
                                      CR_UTF_8) ;
+        tmp_str = cr_declaration_to_string (decl, 2) ;
 
         if (decl)
         {
                 cr_declaration_destroy (decl) ;
                 return CR_OK ;
         }
+
+        if (tmp_str)
+        {
+                g_free (tmp_str) ;
+                tmp_str = NULL ;
+        }
+
         return CR_ERROR ;
 }
 
@@ -141,7 +150,7 @@ main (int argc, char ** argv)
 {
         struct Options options ;
         enum CRStatus status = CR_OK ;
-        
+
         status = test_cr_declaration_parse () ;
 
         if (status != CR_OK)
@@ -149,7 +158,7 @@ main (int argc, char ** argv)
                 g_print ("\nKO\n") ;
                 return 0 ;
         }
-
+                
         cr_test_utils_parse_cmd_line (argc, argv, &options) ;
 
         if (options.display_help == TRUE)

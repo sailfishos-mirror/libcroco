@@ -92,6 +92,10 @@ void
 cr_declaration_dump (CRDeclaration *a_this, FILE *a_fp, glong a_indent,
 		     gboolean a_one_per_line) ;
 
+guchar *
+cr_declaration_to_string (CRDeclaration *a_this,
+			  gulong a_indent) ;
+
 void 
 cr_declaration_ref (CRDeclaration *a_this) ;
 

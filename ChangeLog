@@ -1,4 +1,10 @@
 2003-06-09  Dodji  <dodji@seketeli.org>
+	* tests/test4-main.c: updated this test to test the
+	new cr_declaration_to_string () api.
+	
+	* src/parser/cr-declaration.[ch] (cr_declaration_to_string ()):
+	Added this new api to allow the serialisation of css declarations.
+	This is not well tested yet, but it works.
 
 	* src/parser/cr-parser.c (cr_parser_parse_declaration): 
 	fixed a bug that prevented this parsing function to be called outside

@@ -34,7 +34,6 @@
  *The definition of the #CRDeclaration class.
  */
 
-
 /**
  *Dumps (serializes) one css declaration to a file.
  *@param a_this the current instance of #CRDeclaration.
@@ -324,6 +323,77 @@ cr_declaration_dump (CRDeclaration *a_this, FILE *a_fp, glong a_indent,
 	}
 }
 
+/**
+ *Serializes the declaration into a string
+ *@param a_this the current instance of #CRDeclaration.
+ *@param a_indent the number of indentation white char
+ *to put before the actual serialisation.
+ */
+guchar *
+cr_declaration_to_string (CRDeclaration *a_this,
+			  gulong a_indent)
+{
+	GString *stringue = NULL ;
+
+	guchar *str = NULL, *result = NULL ;
+	g_return_val_if_fail (a_this, NULL) ;
+
+	stringue = g_string_new (NULL) ;
+
+	if (a_this->property && a_this->property->str)
+	{
+		str = g_strndup (a_this->property->str,
+				 a_this->property->len) ;
+		if (str)
+		{
+			cr_utils_dump_n_chars2 (' ', stringue, 
+						a_indent) ;
+			g_string_append_printf (stringue, "%s",
+						str) ;
+			g_free (str) ;
+			str = NULL ;
+		}
+		else
+			goto error ;
+
+		if (a_this->value)
+		{
+			guchar *value_str = NULL ;
+
+			value_str = cr_term_to_string (a_this->value) ;
+			if (value_str)
+			{
+				g_string_append_printf (stringue, " : %s",
+							value_str) ;
+				g_free (value_str) ;
+			}
+			else
+				goto error ;
+		}		
+	}
+
+	if (stringue && stringue->str)
+	{
+		result = stringue->str ;
+		g_string_free (stringue, FALSE) ;
+	}
+
+	return result ;
+
+ error:
+	if (stringue)
+	{
+		g_string_free (stringue, TRUE) ;
+		stringue = NULL ;
+	}
+	if (str)
+	{
+		g_free (str) ;
+		str = NULL ;
+	}
+
+	return result ;
+}
 
 /**
  *Increases the ref count of the current instance of #CRDeclaration.
