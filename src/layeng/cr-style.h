@@ -136,10 +136,10 @@ struct _CRStyle
 	CRNum padding_left ;
 
 	/**border properties*/
-	CRNum border_top_width ;
-	CRNum border_right_width ;
-	CRNum border_bottom_width ;
-	CRNum border_left_width ;
+	CRNum border_top ;
+	CRNum border_right ;
+	CRNum border_bottom ;
+	CRNum border_left ;
 
         CRRgb color ;
 	CRRgb border_top_color ;

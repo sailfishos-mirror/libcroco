@@ -230,13 +230,13 @@ cr_style_set_props_to_defaults (CRStyle *a_this)
         cr_num_set (&a_this->padding_left,
                     0, NUM_LENGTH_PX) ;
 
-        cr_num_set (&a_this->border_top_width,
+        cr_num_set (&a_this->border_top,
                     0, BORDER_MEDIUM) ;
-        cr_num_set (&a_this->border_right_width,
+        cr_num_set (&a_this->border_right,
                     0, BORDER_MEDIUM) ;
-        cr_num_set (&a_this->border_bottom_width,
+        cr_num_set (&a_this->border_bottom,
                     0, BORDER_MEDIUM) ;
-        cr_num_set (&a_this->border_left_width,
+        cr_num_set (&a_this->border_left,
                     0, BORDER_MEDIUM) ;
 
         /*default foreground color is black*/
@@ -400,30 +400,30 @@ set_prop_border_x_width_from_value (CRStyle *a_style,
         switch (a_dir)
         {
         case DIR_TOP:
-                num_val = &a_style->border_top_width ;
+                num_val = &a_style->border_top ;
                 parent_num_val = 
-                        &a_style->parent_style->border_top_width ;
+                        &a_style->parent_style->border_top ;
                 break ;
 
         case DIR_RIGHT:
                 num_val = 
-                        &a_style->border_right_width ;
+                        &a_style->border_right ;
 
                 parent_num_val = 
-                        &a_style->parent_style->border_right_width;
+                        &a_style->parent_style->border_right;
 
                 break ;
 
         case DIR_BOTTOM:
-                num_val = &a_style->border_bottom_width ;
+                num_val = &a_style->border_bottom ;
                 parent_num_val = 
-                        &a_style->parent_style->border_bottom_width;
+                        &a_style->parent_style->border_bottom;
                 break ;
 
         case DIR_LEFT:
-                num_val = &a_style->border_left_width ;
+                num_val = &a_style->border_left ;
                 parent_num_val = 
-                        &a_style->parent_style->border_left_width;
+                        &a_style->parent_style->border_left;
                 break ;
 
         default:

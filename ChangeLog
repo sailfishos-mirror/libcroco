@@ -1,6 +1,14 @@
-2003-04-21  Dodji  <dodji@seketeli.org>
-	* src/layeng/cr-lay-eng.c (cr_lay_eng_layout_box_normal): 
-	when forward in normal flow layout code.
+2003-04-20  dodji  <dodji@seketeli.org>
+
+	* tests/test7-main.c: updated the test7 code to see the layout in
+	action.
+
+	* src/layeng/cr-style.[ch]: just modified some rule 
+	names for convenience.
+
+	* src/layeng/cr-lay-eng.[ch]:
+	when forward in normal flow layout code. Have now very basic layout code.
+	Still have to write a canvas code to render the layed out box.
 
         * src/layeng/cr-lay-eng.c (compute_text_box_inner_edge_size): started to work on the
 	the inner edge size computation based on pango.

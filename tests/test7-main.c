@@ -49,10 +49,10 @@ const guchar *gv_cssbuf =
 ;
 
 static enum CRStatus
-test_cr_lay_eng_build_annotated_tree (void) ;
+test_layout_box (void)  ;
 
 static enum CRStatus
-test_cr_lay_eng_build_annotated_tree (void)
+test_layout_box (void)
 {
 	enum CRStatus status = CR_OK ;
 	CRStyleSheet * sheet = NULL ;
@@ -102,9 +102,9 @@ test_cr_lay_eng_build_annotated_tree (void)
 	}
         sheet = NULL ;
 
-	status = cr_lay_eng_build_box_tree (layout_engine,
-                                            xml_doc, cascade,
-                                            &box_tree) ;
+	status = cr_lay_eng_create_box_tree (layout_engine,
+                                             xml_doc, cascade,
+                                             &box_tree) ;
 	if (status != CR_OK)
 	{
 		cr_utils_trace_info ("could not build the annotated doc") ;
@@ -113,6 +113,8 @@ test_cr_lay_eng_build_annotated_tree (void)
 
         if (box_tree)
         {
+                cr_lay_eng_layout_box_tree (layout_engine,
+                                            box_tree) ;
                 cr_box_dump_to_file (box_tree, 0, stdout) ;
                 cr_box_destroy (box_tree) ;
                 box_tree = NULL ;
@@ -154,7 +156,9 @@ main (int argc, char **argv)
 {
 	enum CRStatus status = CR_OK ;
 
-	status = test_cr_lay_eng_build_annotated_tree () ;
+        cr_lay_eng_init (argc, argv) ;
+
+	status = test_layout_box () ;
 
 	if (status != CR_OK)
 	{

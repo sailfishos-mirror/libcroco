@@ -48,6 +48,10 @@ typedef struct
 } CRLayEng ;
 
 
+
+void
+cr_lay_eng_init (glong a_argc, gchar ** a_argv) ;
+
 CRLayEng *
 cr_lay_eng_new (void) ;
 
@@ -58,10 +62,14 @@ cr_lay_eng_get_matched_style (CRLayEng *a_this,
                               CRStyle *a_parent_style,
                               CRStyle **a_style) ;
 enum CRStatus
-cr_lay_eng_build_box_tree (CRLayEng *a_this,
-                           xmlDoc *a_xml_doc,
-                           CRCascade *a_cascade,
-                           CRBox **a_box_tree) ;
+cr_lay_eng_create_box_tree (CRLayEng *a_this,
+                            xmlDoc *a_xml_doc,
+                            CRCascade *a_cascade,
+                            CRBox **a_box_tree) ;
+enum CRStatus
+cr_lay_eng_layout_box_tree (CRLayEng *a_this,
+                            CRBox *a_box_tree) ;
+
 void
 cr_lay_eng_destroy (CRLayEng *a_this) ;
 
