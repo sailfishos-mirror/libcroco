@@ -74,10 +74,10 @@ cr_sel_eng_get_matched_rulesets (CRSelEng *a_this,
                                  gulong *a_len) ;
 
 enum CRStatus
-cr_sel_eng_get_matched_rulesets_from_cascade  (CRSelEng *a_this,
-                                               CRCascade *a_cascade,
-                                               xmlNode *a_node,
-                                               GHashTable **props_decls_dict) ;
+cr_sel_eng_get_matched_properties_from_cascade  (CRSelEng *a_this,
+                                                 CRCascade *a_cascade,
+                                                 xmlNode *a_node,
+                                                 GHashTable **props_decls_dict) ;
 
 enum CRStatus
 cr_sel_eng_get_matched_style (CRSelEng *a_this,

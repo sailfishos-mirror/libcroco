@@ -62,6 +62,9 @@ cr_sel_eng_get_matched_rulesets_real (CRSelEng *a_this,
 static enum CRStatus
 put_css_properties_in_hashtable (GHashTable **a_props_hashtable,
                                  CRStatement *a_ruleset) ;
+static void
+set_style_from_props_hash_hr_func (guchar *a_prop, CRStatement *a_stmt,
+                                   CRStyle *a_style) ;
 
 struct _CRSelEngPriv
 {
@@ -328,6 +331,10 @@ attr_add_sel_matches_node (CRAdditionalSel *a_add_sel,
 /**
  *Evaluate a selector (a simple selectors list) and says
  *if it matches the xml node given in parameter.
+ *The algorithm used here is the following:
+ *Walk the combinator separated list of simple selectors backward, starting
+ *from the end of the list. For each simple selector, looks if
+ *if matches the current node.
  *
  *@param a_this the selection engine.
  *@param a_sel the simple selection list.
@@ -383,6 +390,13 @@ sel_matches_node_real (CRSelEng *a_this, CRSimpleSel *a_sel,
 				if (!strcmp (cur_sel->name->str,
                                              cur_node->name))
 				{
+                                        /*
+                                         *this simple selector
+                                         *matches the current xml node
+                                         *Let's see if the preceding
+                                         *simple selectors also match
+                                         *their xml node counterpart.
+                                         */
 					goto walk_a_step_in_expr ;
 				}
                                 goto done ;
@@ -451,7 +465,7 @@ sel_matches_node_real (CRSelEng *a_this, CRSimpleSel *a_sel,
 
                 /*
 		 *here, depending on the combinator of cur_sel
-		 *choose the axis of the xml tree traversing
+		 *choose the axis of the xml tree traversal
 		 *and walk one step in the xml tree.
 		 */
                 if (!cur_sel->prev)
@@ -529,9 +543,13 @@ sel_matches_node_real (CRSelEng *a_this, CRSimpleSel *a_sel,
                 continue ;
 		
 	}
-
+        
+        /*
+         *if we reached this point, it means the selector matches
+         *the xml node.
+         */
         *a_result = TRUE ;
-
+        
  done:
         return CR_OK ;
 }
@@ -545,6 +563,10 @@ sel_matches_node_real (CRSelEng *a_this, CRSimpleSel *a_sel,
  *to this function will eventually return a rulesets list starting
  *from the last ruleset statement visited during the previous call.
  *The enable users to get matching rulesets in an incremental way.
+ *Note that for each statement returned, 
+ *the engine calculates the specificity of the selector
+ *that matched the xml node and stores it in the "specifity" field
+ *of the statement structure.
  *
  *@param a_sel_eng the current selection engine
  *@param a_node the xml node for which the request
@@ -658,8 +680,8 @@ cr_sel_eng_get_matched_rulesets_real (CRSelEng *a_this,
                         continue ;
 
                 /*
-                 *now, we have a selector list to look in.
-                 *let's walk through  it and try to match the xml_node
+                 *now, we have a comma separated selector list to look in.
+                 *let's walk it and try to match the xml_node
                  *on each item of the list.
                  */
                 for (cur_sel = sel_list ; cur_sel ; cur_sel = cur_sel->next)
@@ -674,7 +696,7 @@ cr_sel_eng_get_matched_rulesets_real (CRSelEng *a_this,
                         if (status == CR_OK && matches == TRUE)
                         {
                                 /*
-                                 *bingo, we found one ruleset that
+                                 *bingo!!! we found one ruleset that
                                  *matches that fucking node.
                                  *lets put it in the out array.
                                  */
@@ -683,6 +705,22 @@ cr_sel_eng_get_matched_rulesets_real (CRSelEng *a_this,
                                 {
                                         a_rulesets[i] = cur_stmt ;
                                         i++ ;
+
+                                        /*
+                                         *For the cascade computing algorithm
+                                         *(which is gonna take place later)
+                                         *we must compute the specificity
+                                         *(css2 spec chap 6.4.1) of the selector
+                                         *that matched the current xml node
+                                         *and store it in the css2 statement
+                                         *(statement == ruleset here).
+                                         */
+                                        status = 
+                                                cr_simple_sel_compute_specificity
+                                                (cur_sel->simple_sel) ;
+
+                                        g_return_val_if_fail (status == CR_OK,
+                                                              CR_ERROR) ;
                                 }
                                 else
                                         
@@ -711,6 +749,7 @@ cr_sel_eng_get_matched_rulesets_real (CRSelEng *a_this,
  *statement and put the properties found into a hashtable.
  *Each key of the hashtable is a css property. The
  *associated value is a pointer to the current #CRStatement.
+ *This function is where the cascading property sorting is done.
  *
  *@param a_props_hashtable in/out parameter. The hashtable into
  *which the the property/statement pairs will be added.
@@ -812,23 +851,50 @@ put_css_properties_in_hashtable (GHashTable **a_props_hashtable,
                         /*
                          *A property with the same
                          *name and the same origin already exist.
-                         *shit. This lasting longer than expect ...
+                         *shit. This is lasting longer than expected ...
                          *Luckily, the spec says in 6.4.1:
                          *"more specific selectors will override 
                          *more general ones"
+                         *and
+                         *"if two rules have the same weight, 
+                         *origin and specificity, 
+                         *the latter specified wins"
                          */
-
-                        /*
-                         *to take the specificity in account,
-                         *make sure that the matcher updated stmt->specificity.
-                         */
-
-                        /* status = cr_simple_sel_compute_specificity () ;*/
+                        if (cur_stmt->specificity >= stmt->specificity)
+                        {
+                                g_hash_table_replace 
+                                        (props_hash,
+                                         cur_decl->property,
+                                         a_ruleset) ;      
+                        }
                 }
         }
 
         return CR_OK ;
 }
+
+static void
+set_style_from_props_hash_hr_func (guchar *a_prop, CRStatement *a_stmt,
+                                   CRStyle *a_style)
+{
+        CRDeclaration *cur_decl = NULL ;
+
+        g_return_if_fail (a_prop && a_stmt 
+                          && a_stmt->type == RULESET_STMT
+                          && a_stmt->kind.ruleset
+                          && a_style) ;
+
+        for (cur_decl = a_stmt->kind.ruleset->decl_list ;
+             cur_decl ; cur_decl = cur_decl->next)
+        {
+                cr_style_set_style_from_decl (a_style, cur_decl) ;
+        }
+}
+
+
+/****************************************
+ *PUBLIC METHODS
+ ****************************************/
 
 /**
  *Creates a new instance of #CRSelEng.
@@ -981,10 +1047,10 @@ cr_sel_eng_get_matched_rulesets (CRSelEng *a_this,
 }
 
 enum CRStatus
-cr_sel_eng_get_matched_rulesets_from_cascade  (CRSelEng *a_this,
-                                               CRCascade *a_cascade,
-                                               xmlNode *a_node,
-                                               GHashTable **a_props_hashtable)
+cr_sel_eng_get_matched_properties_from_cascade  (CRSelEng *a_this,
+                                                 CRCascade *a_cascade,
+                                                 xmlNode *a_node,
+                                                 GHashTable **a_props_hashtable)
 {
         CRStatement ** stmts_tab = NULL ;
         enum CRStatus status = CR_OK ;
@@ -1063,7 +1129,7 @@ cr_sel_eng_get_matched_rulesets_from_cascade  (CRSelEng *a_this,
                 case RULESET_STMT:
                         if (!stmt->parent_sheet)
                                 continue ;
-                        put_css_properties_in_hashtable 
+                        status = put_css_properties_in_hashtable
                                 (a_props_hashtable,
                                  stmt) ;
                         break ;
@@ -1104,6 +1170,7 @@ cr_sel_eng_get_matched_rulesets_from_cascade  (CRSelEng *a_this,
  *the returned *a_style using cr_style_destroy().
  *@return CR_OK upon successfull completion, an error code otherwise.
  */
+#if 1
 enum CRStatus
 cr_sel_eng_get_matched_style (CRSelEng *a_this,
                               CRCascade *a_cascade,
@@ -1157,6 +1224,48 @@ cr_sel_eng_get_matched_style (CRSelEng *a_this,
 
         return status ;
 }
+#else
+
+
+enum CRStatus
+cr_sel_eng_get_matched_style (CRSelEng *a_this,
+                              CRCascade *a_cascade,
+                              xmlNode *a_node,
+                              CRStyle *a_parent_style,
+                              CRStyle **a_style)
+{
+        enum CRStatus status = CR_OK ;
+        GHashTable *props_hash = NULL ;
+
+        g_return_val_if_fail (a_this && a_cascade
+                              && a_node && a_style
+                              && (*a_style == NULL),
+                              CR_BAD_PARAM_ERROR) ;
+        
+        status = cr_sel_eng_get_matched_properties_from_cascade 
+                (a_this, a_cascade, a_node, &props_hash) ;
+        g_return_val_if_fail (status == CR_OK, status) ;
+
+        if (props_hash && g_hash_table_size (props_hash))
+        {
+                
+                if (!*a_style)
+                {
+                        *a_style = cr_style_new () ;
+                        g_return_val_if_fail (*a_style, CR_ERROR) ;
+                }
+                (*a_style)->parent_style = a_parent_style ;
+                
+                g_hash_table_foreach (props_hash,
+                                      ((GHFunc)
+                                       set_style_from_props_hash_hr_func),
+                                      a_style) ;
+        }
+
+        return CR_OK ;
+}
+
+#endif
 
 /**
  *The destructor of #CRSelEng

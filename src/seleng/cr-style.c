@@ -1412,9 +1412,10 @@ cr_style_new_from_ruleset (CRStatement *a_stmt,
                 }
         }
 
-        return cr_style_set_style_from_ruleset (*a_style, a_stmt,
-                                                a_parent_style) ;
+        (*a_style)->parent_style = a_parent_style ;
+        return cr_style_set_style_from_ruleset (*a_style, a_stmt) ;
 }
+
 
 /**
  *Sets an instance of #CRStyle from a ruleset type of css2 statement.
@@ -1425,8 +1426,7 @@ cr_style_new_from_ruleset (CRStatement *a_stmt,
  */
 enum CRStatus
 cr_style_set_style_from_ruleset (CRStyle *a_this, 
-                                 CRStatement *a_stmt,
-                                 CRStyle *a_parent_style)
+                                 CRStatement *a_stmt)
 {
         CRDeclaration *decl = NULL ;
 
@@ -1439,7 +1439,7 @@ cr_style_set_style_from_ruleset (CRStyle *a_this,
              decl ; decl = decl->next)
         {
                 cr_style_set_style_from_decl
-                        (a_this, decl, a_parent_style) ;
+                        (a_this, decl) ;
         }
 
         return CR_OK ;
@@ -1453,14 +1453,10 @@ cr_style_set_style_from_ruleset (CRStyle *a_this,
  *value(s)
  *@param a_this the instance of #CRStyle to set.
  *@param a_decl the declaration from which the #CRStyle fields are set.
- *@param a_parent_style the style of the parent xml node. The parent
- *xml node is the parent node of the node that generated this style 
- *structure.
  *@return CR_OK upon successfull completion, an error code otherwise.
  */
 enum CRStatus
-cr_style_set_style_from_decl (CRStyle *a_this, CRDeclaration *a_decl,
-                              CRStyle *a_parent_style)
+cr_style_set_style_from_decl (CRStyle *a_this, CRDeclaration *a_decl)
 {
         CRTerm *value = NULL ;
         enum CRStatus status = CR_OK ;
@@ -1472,8 +1468,6 @@ cr_style_set_style_from_decl (CRStyle *a_this, CRDeclaration *a_decl,
                               && a_decl->property
                               && a_decl->property->str,
                               CR_BAD_PARAM_ERROR) ;
-
-        a_this->parent_style = a_parent_style ;
 
         prop_id = cr_style_get_prop_id (a_decl->property->str) ;
 
