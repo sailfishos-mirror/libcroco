@@ -31,7 +31,6 @@
 #include "cr-style.h"
 
 
-
 /**
  *@file
  *The definition of the #CRStyle class.
@@ -48,6 +47,7 @@
  */
 enum CRPropertyID
 {
+        PROP_NOT_KNOWN,
 	PROP_PADDING_TOP,
 	PROP_PADDING_RIGHT,
 	PROP_PADDING_BOTTOM,
@@ -114,17 +114,257 @@ static CRPropertyDesc gv_prop_table [] =
 		
 } ;
 
-static GHashTable *gv_prop_hash = 0 ;
+/**
+ *A the key/value pair of this hash table
+ *are:
+ *key => name of the the css propertie found in gv_prop_table
+ *value => matching property id found in gv_prop_table.
+ *So this hash table is here just to retrieval of a property id
+ *from a property name.
+ */
+static GHashTable *gv_prop_hash = NULL ;
 
+/**
+ *incremented by each new instance of #CRStyle
+ *and decremented at the it destroy time.
+ *When this reaches zero, gv_prop_hash is destroyed.
+ */
+static gulong gv_prop_hash_ref_count = 0 ;
 
-static void
+static enum CRStatus
 cr_style_init_properties (void) ;
 
+enum CRDirection
+{
+        DIR_TOP,
+        DIR_RIGHT,
+        DIR_BOTTOM,
+        DIR_LEFT
+} ;
 
-static void
+static enum CRStatus
+set_padding_x_from_value (CRStyle *a_style,                          
+                          CRTerm *a_value,
+                          enum CRDirection a_dir) ;
+
+static enum CRStatus
+set_border_x_width_from_value (CRStyle *a_style,
+                               CRTerm *a_value,
+                               enum CRDirection a_dir) ;
+
+static enum CRStatus
 cr_style_init_properties (void)
 {
-	return ;
+
+	if (!gv_prop_hash)
+        {
+                gulong i = 0 ;
+
+                gv_prop_hash = g_hash_table_new (g_str_hash,
+                                                 g_str_equal) ;
+                if (!gv_prop_hash)
+                {
+                        cr_utils_trace_info ("Out of memory") ;
+                        return CR_ERROR ;
+                }
+
+                                /*load gv_prop_hash from gv_prop_table*/
+                for (i = 0 ; gv_prop_table[i].name ; i++)
+                {
+                        g_hash_table_insert 
+                                (gv_prop_hash,
+                                 (gpointer)gv_prop_table[i].name,
+                                 GINT_TO_POINTER 
+                                 (gv_prop_table[i].prop_id)) ;
+                }
+        }
+
+        return CR_OK ;
+}
+
+static enum CRPropertyID
+cr_style_get_prop_id (const guchar * a_prop)
+{
+        gpointer * raw_id = NULL ;
+
+        if (!gv_prop_hash)
+        {
+                cr_style_init_properties () ;
+        }
+
+        raw_id = g_hash_table_lookup (gv_prop_hash,
+                                      a_prop) ;
+        if (!raw_id)
+        {
+                return PROP_NOT_KNOWN ;
+        }
+        return GPOINTER_TO_INT (raw_id) ;
+}
+
+
+static enum CRStatus
+set_padding_x_from_value (CRStyle *a_style,
+                          CRTerm *a_value,
+                          enum CRDirection a_dir)
+{
+        enum CRStatus status = CR_OK ;
+        CRNum *num_val = NULL, *parent_num_val = NULL ;
+        
+        g_return_val_if_fail (a_style && a_value, CR_BAD_PARAM_ERROR) ;
+        
+        if (a_value->type != TERM_NUMBER
+            && a_value->type != TERM_IDENT)
+                return CR_BAD_PARAM_ERROR ;
+
+        switch (a_dir)
+        {
+        case DIR_TOP:
+                num_val = &a_style->padding_top ;
+                parent_num_val = &a_style->parent_style->padding_top ;
+                break ;
+                
+        case DIR_RIGHT:
+                num_val = &a_style->padding_right ;
+                parent_num_val = &a_style->parent_style->padding_right ;
+                break ;
+
+        case DIR_BOTTOM:
+                num_val = &a_style->padding_bottom ;
+                parent_num_val = &a_style->parent_style->padding_bottom ;
+                break ;
+
+        case DIR_LEFT:
+                num_val = & a_style->padding_left ;
+                parent_num_val = &a_style->parent_style->padding_left ;
+                break ;
+
+        default:
+                return CR_BAD_PARAM_ERROR ;
+        }
+
+        if (a_value->type == TERM_IDENT)
+        {
+                if (a_value->content.str
+                    && a_value->content.str->str
+                    && !strncmp ((guchar*)"inherited", 
+                                 a_value->content.str->str,
+                                 strlen ("inherited")))
+                {
+                        cr_num_copy (num_val, parent_num_val) ;
+                        return CR_OK ;
+                }
+                else
+                        return CR_UNKNOWN_TYPE_ERROR ;
+        }
+
+        g_return_val_if_fail (a_value->type == TERM_NUMBER
+                              && a_value->content.num,
+                              CR_UNKNOWN_TYPE_ERROR) ;
+
+        switch (a_value->content.num->type)
+        {
+        case NUM_LENGTH_EM:
+        case NUM_LENGTH_EX:
+        case NUM_LENGTH_PX:
+        case NUM_LENGTH_IN:
+        case NUM_LENGTH_CM:
+        case NUM_LENGTH_MM:
+        case NUM_LENGTH_PT:
+        case NUM_LENGTH_PC:
+        case NUM_PERCENTAGE:
+                status = cr_num_copy (num_val, a_value->content.num) ;
+                break ;
+        default:
+                status = CR_UNKNOWN_TYPE_ERROR ;
+                break ;
+        }
+
+        return status ;
+}
+
+
+static enum CRStatus
+set_border_x_width_from_value (CRStyle *a_style,
+                               CRTerm *a_value,
+                               enum CRDirection a_dir)
+{
+        enum CRStatus status = CR_OK ;
+        CRNum *num_val = NULL, *parent_num_val = NULL ;
+
+        g_return_val_if_fail (a_value
+                              && a_style->parent_style, 
+                              CR_BAD_PARAM_ERROR) ;
+
+        switch (a_dir)
+        {
+        case DIR_TOP:
+                num_val = &a_style->border_top_width ;
+                parent_num_val = 
+                        &a_style->parent_style->border_top_width ;
+                break ;
+
+        case DIR_RIGHT:
+                num_val = 
+                        &a_style->border_right_width ;
+
+                parent_num_val = 
+                        &a_style->parent_style->border_right_width;
+
+                break ;
+
+        case DIR_BOTTOM:
+                num_val = &a_style->border_bottom_width ;
+                parent_num_val = 
+                        &a_style->parent_style->border_bottom_width;
+                break ;
+
+        case DIR_LEFT:
+                num_val = &a_style->border_left_width ;
+                parent_num_val = 
+                        &a_style->parent_style->border_left_width;
+                break ;
+
+        default:
+                break ;
+        }
+
+
+        if (a_value->type == TERM_IDENT)
+        {
+                if (a_value->content.str && a_value->content.str->str)
+                {
+                        if (!strncmp ("thin", 
+                                      a_value->content.str->str,
+                                      strlen ("thin")))
+                        {
+                                
+                        }
+                        else if (!strncmp ("medium",
+                                           a_value->content.str->str,
+                                           strlen ("medium")))
+                        {
+                                
+                        }
+                        else if (!strncmp ("thick",
+                                           a_value->content.str->str,
+                                           strlen ("thick")))
+                        {
+                                
+                        }
+                        else
+                        {
+                                return CR_UNKNOWN_TYPE_ERROR ;
+                        }
+                }
+        }
+
+        switch (a_value->type)
+        {
+        default :
+                status = CR_ERROR ;
+                break ;
+        }
+        return status ;
 }
 
 CRStyle *
@@ -139,16 +379,153 @@ cr_style_new (void)
 		return NULL ;
 	}
 	memset (result, 0, sizeof (CRStyle)) ;
+        gv_prop_hash_ref_count ++ ;
 
 	return result ;
 }
 
 
 enum CRStatus
-cr_style_new_from_ruleset (CRStatement *a_this, 
+cr_style_new_from_ruleset (CRStatement *a_stmt, 
+                           CRStyle *a_parent_style,
 			   CRStyle **a_style)
 {
+        CRDeclaration *decl = NULL ;        
+
+        g_return_val_if_fail (a_stmt                    
+                              && a_stmt->type == RULESET_STMT
+                              && a_stmt->kind.ruleset,
+                              CR_BAD_PARAM_ERROR) ;
+
+        if (! *a_style)
+        {
+                *a_style = cr_style_new () ;
+                if (! *a_style)
+                {
+                        cr_utils_trace_info ("Out of memory") ;
+                        return CR_ERROR ;
+                }
+        }
+
+        for (decl = a_stmt->kind.ruleset->decl_list ;
+             decl ; decl = decl->next)
+        {
+                cr_style_set_style_from_decl 
+                        (*a_style, decl, a_parent_style) ;
+        }
+
 	return CR_OK ;
+}
+
+
+enum CRStatus
+cr_style_set_style_from_decl (CRStyle *a_this, CRDeclaration *a_decl,
+                              CRStyle *a_parent_style)
+{
+        CRTerm *value = NULL ;
+        enum CRStatus status = CR_OK ;
+
+        enum CRPropertyID prop_id = PROP_NOT_KNOWN ;
+
+        g_return_val_if_fail (a_this && a_decl
+                              && a_decl
+                              && a_decl->property
+                              && a_decl->property->str, 
+                              CR_BAD_PARAM_ERROR) ;
+
+        a_this->parent_style = a_parent_style ;
+
+        prop_id = cr_style_get_prop_id (a_decl->property->str) ;
+
+        value = a_decl->value ;
+        switch (prop_id)
+        {
+        case PROP_PADDING_TOP:
+                status = set_padding_x_from_value 
+                        (a_this, value, DIR_TOP) ;
+                break ;
+
+        case PROP_PADDING_RIGHT:
+                status = set_padding_x_from_value 
+                        (a_this, value, DIR_RIGHT) ;
+                break ;
+        case PROP_PADDING_BOTTOM:
+                status = set_padding_x_from_value 
+                        (a_this, value, DIR_RIGHT) ;
+                break ;
+
+        case PROP_PADDING_LEFT:
+                status = set_padding_x_from_value 
+                        (a_this, value, DIR_LEFT) ;
+                break ;
+                
+        case PROP_BORDER_TOP_WIDTH:
+                
+                break ;
+
+        case PROP_BORDER_RIGHT_WIDTH:
+                break ;
+
+        case PROP_BORDER_BOTTOM_WIDTH:
+                break ;
+
+        case PROP_BORDER_LEFT_WIDTH:
+                break ;
+
+        case PROP_BORDER_TOP_STYLE:
+                break ;
+
+        case PROP_BORDER_RIGHT_STYLE:
+                break ;
+
+        case PROP_BORDER_BOTTOM_STYLE:
+                break ;
+
+        case PROP_BORDER_LEFT_STYLE: 
+                break ;
+
+        case PROP_MARGIN_TOP:
+                break ;
+
+        case PROP_MARGIN_RIGHT:
+                break ;
+
+        case PROP_MARGIN_BOTTOM:
+                break ;
+
+        case PROP_MARGIN_LEFT:
+                break ;
+
+        case PROP_DISPLAY:
+                break ;
+
+        case PROP_POSITION:
+                break ;
+
+        case PROP_TOP:
+                break ;
+
+        case PROP_RIGHT:
+                break ;
+
+        case PROP_BOTTOM:
+                break ;
+
+        case PROP_LEFT:
+                break ;
+
+        case PROP_FLOAT:
+                break ;
+
+        case PROP_WIDTH:
+                break ;
+
+        default:
+                return CR_UNKNOWN_TYPE_ERROR ;
+        }
+
+        return status ;
+        
 }
 
 void

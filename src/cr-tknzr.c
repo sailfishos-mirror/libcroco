@@ -1359,7 +1359,7 @@ cr_tknzr_parse_rgb (CRTknzr *a_this, CRRgb **a_rgb)
         ENSURE_PARSING_COND
                 ((status == CR_OK) && (num!= NULL)) ;
 
-        red = num->int_part ;
+        red = num->val ;
 
         cr_num_destroy (num) ;
         num = NULL ;
@@ -1397,11 +1397,11 @@ cr_tknzr_parse_rgb (CRTknzr *a_this, CRRgb **a_rgb)
 
                 if (i == 0)
                 {
-                        green = num->int_part ;
+                        green = num->val ;
                 }
                 else if (i == 1)
                 {
-                        blue = num->int_part ;
+                        blue = num->val ;
                 }
 
                 if (num)
@@ -1417,19 +1417,9 @@ cr_tknzr_parse_rgb (CRTknzr *a_this, CRRgb **a_rgb)
 
         if (*a_rgb == NULL)
         {
-                enum TermUnit unit ;
-                        
-                if (is_percentage == TRUE)
-                {
-                        unit = UNIT_PERCENTAGE ;
-                }
-                else
-                {
-                        unit = NO_UNIT ;
-                }
-
                 *a_rgb = 
-                        cr_rgb_new_with_vals (red, green, blue, unit) ;
+                        cr_rgb_new_with_vals (red, green, blue, 
+                                              is_percentage) ;
 
                 if (*a_rgb == NULL)
                 {
@@ -1440,21 +1430,10 @@ cr_tknzr_parse_rgb (CRTknzr *a_this, CRRgb **a_rgb)
         }
         else
         {
-                enum TermUnit unit ;
-
-                if (is_percentage == TRUE)
-                {
-                        unit = UNIT_PERCENTAGE ;
-                }
-                else
-                {
-                        unit = NO_UNIT ;
-                }
-
                 (*a_rgb)->red = red ;
                 (*a_rgb)->green = green ;
                 (*a_rgb)->blue = blue ;
-                (*a_rgb)->unit = unit ;
+                (*a_rgb)->is_percentage = is_percentage ;
 
                 status = CR_OK ;
         }        
@@ -1608,11 +1587,12 @@ static enum CRStatus
 cr_tknzr_parse_num (CRTknzr *a_this, CRNum ** a_num)
 {
         enum CRStatus status = CR_PARSING_ERROR ;
+        enum CRNumType val_type = NUM_GENERIC ;
         gboolean parsing_dec = FALSE, parsed = FALSE ;
         guint32 cur_char = 0, int_part = 0, dec_part = 0, 
                 next_char = 0 ;
         CRInputPos init_pos ;
-                
+
         g_return_val_if_fail (a_this && PRIVATE (a_this)
                               && PRIVATE (a_this)->input,
                               CR_BAD_PARAM_ERROR) ;
@@ -1686,12 +1666,13 @@ cr_tknzr_parse_num (CRTknzr *a_this, CRNum ** a_num)
          */
         if (status == CR_OK)
         {
+                gdouble val = 0.0 ;
+
+                val = int_part ;
+                val += cr_utils_n_to_0_dot_n (dec_part) ;
                 if (*a_num == NULL)
-                {                        
-                        *a_num = cr_num_new_with_vals 
-                                ((parsing_dec == FALSE)?TRUE:FALSE,
-                                 int_part, 
-                                 dec_part) ;
+                {
+                        *a_num = cr_num_new_with_val (val, val_type) ;
 
                         if (*a_num == NULL)
                         {
@@ -1701,12 +1682,8 @@ cr_tknzr_parse_num (CRTknzr *a_this, CRNum ** a_num)
                 }
                 else
                 {
-                        (*a_num)->is_natural = 
-                                (parsing_dec == FALSE)?TRUE:FALSE ;
-
-                        (*a_num)->int_part = int_part ;
-
-                        (*a_num)->dec_part = dec_part ;
+                        (*a_num)->val = val ;
+                        (*a_num)->type = val_type ;
                 }
                 
                 return CR_OK ;
@@ -2312,7 +2289,8 @@ cr_tknzr_get_next_token (CRTknzr *a_this, CRToken **a_tk)
 
                         if (status == CR_OK)
                         {
-                                status = cr_token_set_comment (token, str) ;
+                                status = cr_token_set_comment (token, 
+                                                               str) ;
                                 str = NULL ;
                                 CHECK_PARSING_STATUS (status, TRUE) ;
                                 goto done ;
@@ -2437,6 +2415,7 @@ cr_tknzr_get_next_token (CRTknzr *a_this, CRToken **a_tk)
                         if (next_bytes[0]    == 'e' 
                             && next_bytes[1] == 'm')
                         {
+                                num->type = NUM_LENGTH_EM ;
                                 status = cr_token_set_ems (token, num) ;
                                 num = NULL ;
                                 SKIP_CHARS (a_this, 2) ;
@@ -2444,6 +2423,7 @@ cr_tknzr_get_next_token (CRTknzr *a_this, CRToken **a_tk)
                         else if (next_bytes[0]    == 'e' 
                                  && next_bytes[1] == 'x')
                         {
+                                num->type = NUM_LENGTH_EX ;
                                 status = cr_token_set_exs (token, num) ;
                                 num = NULL ; 
                                 SKIP_CHARS (a_this, 2) ;
@@ -2451,6 +2431,7 @@ cr_tknzr_get_next_token (CRTknzr *a_this, CRToken **a_tk)
                         else if (next_bytes[0]    == 'p' 
                                  && next_bytes[1] == 'x')
                         {
+                                num->type = NUM_LENGTH_PX ;
                                 status = cr_token_set_length 
                                         (token, num,
                                          LENGTH_PX_ET) ;
@@ -2460,6 +2441,7 @@ cr_tknzr_get_next_token (CRTknzr *a_this, CRToken **a_tk)
                         else if (next_bytes[0]    == 'c' 
                                  && next_bytes[1] == 'm')
                         {
+                                num->type = NUM_LENGTH_CM ;
                                 status = cr_token_set_length 
                                         (token, num, LENGTH_CM_ET) ;
                                 num = NULL ;
@@ -2468,6 +2450,7 @@ cr_tknzr_get_next_token (CRTknzr *a_this, CRToken **a_tk)
                         else if (next_bytes[0]    == 'm' 
                                  && next_bytes[1] == 'm')
                         {
+                                num->type = NUM_LENGTH_MM ;
                                 status = cr_token_set_length 
                                         (token, num, LENGTH_MM_ET) ;
                                 num = NULL ;
@@ -2476,6 +2459,7 @@ cr_tknzr_get_next_token (CRTknzr *a_this, CRToken **a_tk)
                         else if (next_bytes[0]    == 'i' 
                                  && next_bytes[1] == 'n')
                         {
+                                num->type = NUM_LENGTH_IN ;
                                 status = cr_token_set_length 
                                         (token, num, LENGTH_IN_ET) ;
                                 num = NULL ;
@@ -2484,6 +2468,7 @@ cr_tknzr_get_next_token (CRTknzr *a_this, CRToken **a_tk)
                         else if (next_bytes[0]    == 'p' 
                                  && next_bytes[1] == 't')
                         {
+                                num->type = NUM_LENGTH_PT ;
                                 status = cr_token_set_length 
                                         (token, num, LENGTH_PT_ET) ;
                                 num = NULL ;
@@ -2492,6 +2477,7 @@ cr_tknzr_get_next_token (CRTknzr *a_this, CRToken **a_tk)
                         else if (next_bytes[0]    == 'p' 
                                  && next_bytes[1] == 'c')
                         {
+                                num->type = NUM_LENGTH_PC ;
                                 status = cr_token_set_length 
                                         (token, num, LENGTH_PC_ET) ;
                                 num = NULL ;
@@ -2501,6 +2487,7 @@ cr_tknzr_get_next_token (CRTknzr *a_this, CRToken **a_tk)
                                  && next_bytes[1] == 'e'
                                  && next_bytes[2] == 'g')
                         {
+                                num->type = NUM_ANGLE_DEG ;
                                 status = cr_token_set_angle 
                                         (token, num, ANGLE_DEG_ET) ;
                                 num = NULL ;
@@ -2510,6 +2497,7 @@ cr_tknzr_get_next_token (CRTknzr *a_this, CRToken **a_tk)
                                  && next_bytes[1] == 'a'
                                  && next_bytes[2] == 'd')
                         {
+                                num->type = NUM_ANGLE_RAD ;
                                 status = cr_token_set_angle 
                                         (token, num, ANGLE_RAD_ET) ;
                                 num = NULL ;
@@ -2520,6 +2508,7 @@ cr_tknzr_get_next_token (CRTknzr *a_this, CRToken **a_tk)
                                  && next_bytes[2] == 'a'
                                  && next_bytes[3] == 'd')
                         {
+                                num->type = NUM_ANGLE_GRAD ;
                                 status = cr_token_set_angle 
                                         (token, num, ANGLE_GRAD_ET) ;
                                 num = NULL ;
@@ -2528,6 +2517,7 @@ cr_tknzr_get_next_token (CRTknzr *a_this, CRToken **a_tk)
                         else if (next_bytes[0]    == 'm' 
                                  && next_bytes[1] == 's')
                         {
+                                num->type = NUM_TIME_MS ;
                                 status = cr_token_set_time 
                                         (token, num,TIME_MS_ET) ;
                                 num = NULL ;
@@ -2535,6 +2525,7 @@ cr_tknzr_get_next_token (CRTknzr *a_this, CRToken **a_tk)
                         }
                         else if (next_bytes[0] =='s')
                         {
+                                num->type = NUM_TIME_S ;
                                 status = cr_token_set_time 
                                         (token, num, TIME_S_ET) ;
                                 num = NULL ;
@@ -2543,6 +2534,7 @@ cr_tknzr_get_next_token (CRTknzr *a_this, CRToken **a_tk)
                         else if (next_bytes[0]    == 'H' 
                                  && next_bytes[1] == 'z')
                         {
+                                num->type = NUM_FREQ_HZ ;
                                 status = cr_token_set_freq 
                                         (token, num, FREQ_HZ_ET) ;
                                 num = NULL ;
@@ -2552,6 +2544,7 @@ cr_tknzr_get_next_token (CRTknzr *a_this, CRToken **a_tk)
                                  && next_bytes[1] == 'H'
                                  && next_bytes[1] == 'z')
                         {
+                                num->type = NUM_FREQ_KHZ ;
                                 status = cr_token_set_freq 
                                         (token, num, FREQ_KHZ_ET) ;
                                 num = NULL ;
@@ -2559,6 +2552,7 @@ cr_tknzr_get_next_token (CRTknzr *a_this, CRToken **a_tk)
                         }
                         else if (next_bytes[0]  == '%')
                         {
+                                num->type = NUM_PERCENTAGE ;
                                 status = cr_token_set_percentage (token, 
                                                                   num) ;
                                 num = NULL ;
@@ -2570,10 +2564,12 @@ cr_tknzr_get_next_token (CRTknzr *a_this, CRToken **a_tk)
                                                                &str) ;
                                 if (status == CR_OK && str)
                                 {
+                                        num->type = NUM_UNKNOWN_TYPE ;
                                         status = cr_token_set_dimen
                                                 (token, num, str) ;
                                         num = NULL ;
-                                        CHECK_PARSING_STATUS (status, TRUE) ;
+                                        CHECK_PARSING_STATUS (status, 
+                                                              TRUE);
                                         str = NULL ;
                                 }
                                 else
@@ -2581,7 +2577,8 @@ cr_tknzr_get_next_token (CRTknzr *a_this, CRToken **a_tk)
                                         status = cr_token_set_number 
                                                 (token, num) ;
                                         num = NULL ;
-                                        CHECK_PARSING_STATUS (status, TRUE) ;
+                                        CHECK_PARSING_STATUS (status, 
+                                                              TRUE) ;
                                         str = NULL ;
                                 }
                         }

@@ -48,7 +48,7 @@ extern "C"
                  *Either NO_UNIT (integer) or 
                  *UNIT_PERCENTAGE (percentage).
                  */
-                enum TermUnit unit ;
+                gboolean is_percentage ;
 		glong red ;
 		glong green ;
 		glong blue ;
@@ -59,7 +59,7 @@ extern "C"
 
 	CRRgb *
 	cr_rgb_new_with_vals (glong a_red, glong a_green, 
-                              glong a_blue, enum TermUnit a_unit) ;
+                              glong a_blue, gboolean a_is_percentage) ;
         void
         cr_rgb_dump (CRRgb *a_this, FILE *a_fp) ;
 

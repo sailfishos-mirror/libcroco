@@ -76,9 +76,8 @@ cr_num_new (void)
  *NULL if an error arises.
  */
 CRNum *
-cr_num_new_with_vals (gboolean a_is_natural,
-		      glong a_integer_part,
-		      glong a_decimal_part)
+cr_num_new_with_val (gdouble a_val,
+                     enum CRNumType a_type)
 {
 	CRNum * result = NULL ;
 
@@ -86,13 +85,8 @@ cr_num_new_with_vals (gboolean a_is_natural,
 	
 	g_return_val_if_fail (result, NULL) ;
 
-	result->is_natural = a_is_natural ;
-	result->int_part = a_integer_part ;
-
-	if (a_is_natural == FALSE)
-	{
-		result->dec_part = a_decimal_part ;
-	}
+        result->val = a_val ;
+        result->type = a_type ;
 
 	return result ;
 }
@@ -109,24 +103,99 @@ cr_num_new_with_vals (gboolean a_is_natural,
 guchar *
 cr_num_to_string (CRNum *a_this)
 {
-        guchar *tmp_char1 = NULL, *tmp_char2 = NULL, *result = NULL ;
+        gdouble test_val = 0.0 ;
+
+        guchar *tmp_char1 = NULL, * tmp_char2 = NULL, *result = NULL ;
 
         g_return_val_if_fail (a_this, NULL) ;
         
-        tmp_char1 = g_strdup_printf ("%ld", a_this->int_part) ;
+        test_val = a_this->val - (glong) a_this->val ;
+
+        if (!test_val)
+        {
+                tmp_char1 = g_strdup_printf ("%ld", (glong)a_this->val) ;
+        }        
+        else
+        {
+                tmp_char1 = g_strdup_printf ("%.3f", a_this->val) ;
+        }
         
         g_return_val_if_fail (tmp_char1, NULL) ;
 
-        if (a_this->is_natural == FALSE)
-        {                
-                tmp_char2 = g_strdup_printf (".%ld", a_this->dec_part) ;
+        switch (a_this->type)
+        {
+        case NUM_LENGTH_EM:                
+                tmp_char2 = (guchar*) "em";
+                break ;
+
+        case NUM_LENGTH_EX:
+                tmp_char2 = (guchar*) "ex";
+                break ;
+                
+        case NUM_LENGTH_PX:
+                tmp_char2 = (guchar*) "px";
+                break ;
+
+        case NUM_LENGTH_IN:
+                tmp_char2 = (guchar*) "in";
+                break ;
+                
+        case NUM_LENGTH_CM:
+                tmp_char2 = (guchar*) "cm";
+                break ;
+
+        case NUM_LENGTH_MM:
+                tmp_char2 = (guchar*) "mm";
+                break ;
+
+        case NUM_LENGTH_PT:
+                tmp_char2 = (guchar*) "pt";
+                break ;
+
+        case NUM_LENGTH_PC:
+                tmp_char2 = (guchar*) "pc";
+                break ;
+                
+        case NUM_ANGLE_DEG:
+                tmp_char2 = (guchar*) "deg";
+                break ;
+
+        case NUM_ANGLE_RAD:
+                tmp_char2 = (guchar*) "rad";
+                break ;
+
+        case NUM_ANGLE_GRAD:
+                tmp_char2 = (guchar*) "grad";
+                break ;
+
+        case NUM_TIME_MS:
+                tmp_char2 = (guchar*) "ms";
+                break ;
+
+        case NUM_TIME_S:
+                tmp_char2 = (guchar*) "s";
+                break ;
+
+        case NUM_FREQ_HZ:
+                tmp_char2 = (guchar*) "Hz";
+                break ;
+
+        case NUM_FREQ_KHZ:
+                tmp_char2 = (guchar*) "KHz";
+                break ;
+
+        case NUM_PERCENTAGE:
+                tmp_char2 = (guchar*) "%";
+                break ;
+
+        default:
+                break ;
         }
 
         if (tmp_char2)
         {
                 result = g_strconcat (tmp_char1, tmp_char2, NULL) ;
-                g_free (tmp_char1) ;
-                g_free (tmp_char2) ;
+                g_free (tmp_char1) ;                
         }
         else
         {
@@ -134,6 +203,18 @@ cr_num_to_string (CRNum *a_this)
         }
 
         return result ;
+}
+
+
+enum CRStatus
+cr_num_copy (CRNum *a_dest, CRNum *a_src)
+{
+        g_return_val_if_fail (a_dest && a_src,
+                              CR_BAD_PARAM_ERROR) ;
+
+        memcpy (a_dest, a_src, sizeof (CRNum)) ;
+
+        return CR_OK ;
 }
 
 /**

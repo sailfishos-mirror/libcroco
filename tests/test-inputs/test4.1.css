@@ -32,13 +32,13 @@ a:active {
 h1.rubrique_info {  
     color: #990033;  
     margin: 0px 0px 0px 0px;
-    padding: 0em; 
+    padding: 0.4em; 
     border: 0px;
     font-size: 12px;
 }
 h1.connexe {
     font-size: 12px;
-    padding: 0em;
+    padding: 0.9em;
     margin: 0px 0px 0px 0px;
     color: #990033;
 }
@@ -207,8 +207,8 @@ div.leftbox h2 {
 div.leftbox ul {
     list-style-type: square;
 	margin-bottom: 10px;
-	margin-left: 0em;
-	padding-left: 0em;
+	margin-left: 0.3em;
+	padding-left: 0.2em;
 }
 div.leftbox li {
 	margin-left: 10px;

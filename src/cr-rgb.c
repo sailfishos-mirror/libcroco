@@ -66,7 +66,7 @@ cr_rgb_new (void)
  */
 CRRgb *
 cr_rgb_new_with_vals (glong a_red, glong a_green, 
-                      glong a_blue, enum TermUnit a_unit)
+                      glong a_blue, gboolean a_is_percentage)
 {
         CRRgb *result =  NULL ;
 
@@ -77,15 +77,7 @@ cr_rgb_new_with_vals (glong a_red, glong a_green,
         result->red = a_red ;
         result->green = a_green ;
         result->blue = a_blue ;
-
-        if (a_unit == UNIT_PERCENTAGE)
-        {
-                result->unit = UNIT_PERCENTAGE ;
-        }
-        else
-        {
-                result->unit = NO_UNIT ;
-        }
+        result->is_percentage = a_is_percentage ;
 
         return result ;
 }
@@ -103,7 +95,7 @@ cr_rgb_dump (CRRgb *a_this, FILE *a_fp)
 {
         g_return_if_fail (a_this) ;
 
-        if (a_this->unit == UNIT_PERCENTAGE)
+        if (a_this->is_percentage == TRUE)
         {
                 fprintf (a_fp,"%ld", a_this->red) ;
                 fputc ('%', a_fp) ;

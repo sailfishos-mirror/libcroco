@@ -44,6 +44,35 @@ G_END_DECLS
  *Declaration of the #CRTem class.
  */
 
+enum CRTermType
+{        
+        TERM_NO_TYPE = 0,
+        TERM_NUMBER,
+        TERM_FUNCTION,
+        TERM_STRING,
+        TERM_IDENT,
+        TERM_URI,
+        TERM_RGB,
+        TERM_UNICODERANGE,
+        TERM_HASH,
+} ;
+
+
+enum UnaryOperator
+{
+        NO_UNARY_UOP = 0,
+        PLUS_UOP,
+        MINUS_UOP,
+        EMPTY_UNARY_UOP
+} ;
+
+enum Operator
+{
+        NO_OP = 0,
+        DIVIDE,
+        COMMA		
+} ;
+
 struct _CRTerm ;
 typedef struct _CRTerm CRTerm ;
 
@@ -61,13 +90,8 @@ struct _CRTerm
         /**
          *The type of the term.
          */
-        enum TermType type ;
+        enum CRTermType type ;
                 
-        /**
-         *The unit of the term
-         */
-        enum TermUnit unit ;
-
         /**
          *The unary operator associated to
          *the current term.
@@ -132,31 +156,6 @@ cr_term_new (void) ;
 enum CRStatus
 cr_term_set_number (CRTerm *a_this, CRNum *a_num) ;
         
-enum CRStatus
-cr_term_set_percentage (CRTerm *a_this, CRNum *a_num) ;
-
-enum CRStatus
-cr_term_set_length (CRTerm *a_this, enum TermUnit a_unit,
-                    CRNum *a_num) ;
-
-enum CRStatus
-cr_term_set_ems (CRTerm *a_this, CRNum *a_num) ;
-
-enum CRStatus
-cr_term_set_exs (CRTerm *a_this, CRNum * a_num) ;
-
-enum CRStatus
-cr_term_set_angle (CRTerm *a_this, enum TermUnit a_unit,
-                   CRNum *a_num) ;
-
-enum CRStatus
-cr_term_set_time (CRTerm *a_this, enum TermUnit a_unit,
-                  CRNum *a_num) ;
-
-enum CRStatus
-cr_term_set_freq (CRTerm *a_this, enum TermUnit a_unit,
-                  CRNum *a_num) ;
-
 enum CRStatus
 cr_term_set_function (CRTerm *a_this, GString *a_func_name,
                       CRTerm *a_func_param) ;

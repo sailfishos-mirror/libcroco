@@ -2185,132 +2185,30 @@ cr_parser_parse_term (CRParser *a_this, CRTerm **a_term)
 
         status = cr_tknzr_get_next_token (PRIVATE (a_this)->tknzr,
                                           &token) ;
-        if (status != CR_OK) goto error ;
+        if (status != CR_OK || !token) goto error ;
 
-        if (token && token->type == DELIM_TK && token->unichar == '+')
+        if (token->type == DELIM_TK && token->unichar == '+')
         {
                 result->unary_op = PLUS_UOP ;
         }
-        else if (token && token->type == DELIM_TK && token->unichar == '-')
+        else if (token->type 
+                 == DELIM_TK && token->unichar == '-')
         {
                 result->unary_op = MINUS_UOP ;
         }
-        else if (token && token->type == EMS_TK)
-        {
-                status = cr_term_set_ems (result, token->num) ;
-                CHECK_PARSING_STATUS (status, TRUE) ;
-                token->num = NULL ;
-                status = CR_OK ;
-        }
-        else if (token && token->type == EXS_TK)
-        {
-                status = cr_term_set_exs (result, token->num) ;
-                CHECK_PARSING_STATUS (status, TRUE) ;
-                token->num = NULL ;
-                status = CR_OK ;
-        }
-        else if (token && token->type == LENGTH_TK)
-        {
-                switch (token->extra_type)
-                {
-		case LENGTH_PX_ET :
-                        status = cr_term_set_length (result, UNIT_PX,
-                                                     token->num) ;
-                        CHECK_PARSING_STATUS (status, TRUE) ;
-                        token->num = NULL ;                        
-                        break ;
-
-		case LENGTH_CM_ET :
-                        status = cr_term_set_length (result, UNIT_CM,
-                                                     token->num) ;
-                        CHECK_PARSING_STATUS (status, TRUE) ;
-                        token->num = NULL ;
-                        break ;
-
-		case LENGTH_MM_ET :
-                        status = cr_term_set_length (result, UNIT_MM,
-                                                     token->num) ;
-                        CHECK_PARSING_STATUS (status, TRUE) ;
-                        token->num = NULL ;
-                        break ;
-
-		case LENGTH_IN_ET :
-                        status = cr_term_set_length (result, UNIT_IN,
-                                                     token->num) ;
-                        CHECK_PARSING_STATUS (status, TRUE) ;
-                        token->num = NULL ;
-                        break ;
-
-		case LENGTH_PT_ET :
-                        status = cr_term_set_length (result, UNIT_PT,
-                                                     token->num) ;
-                        CHECK_PARSING_STATUS (status, TRUE) ;
-                        token->num = NULL ;
-                        break ;
-
-		case LENGTH_PC_ET :
-                        status = cr_term_set_length (result, UNIT_PC,
-                                                     token->num) ;
-                        CHECK_PARSING_STATUS (status, TRUE) ;
-                        token->num = NULL ;
-                        break ;
-                default:
-                        break ;
-                }
-        }
-        else if (token && token->type == ANGLE)
-        {
-                switch (token->extra_type)
-                {
-                case ANGLE_DEG_ET:
-                        status = cr_term_set_angle (result, UNIT_DEG,
-                                                    token->num) ;
-                        CHECK_PARSING_STATUS (status, TRUE) ;
-                        token->num = NULL ;
-                        break ;
-
-                case ANGLE_RAD_ET:
-                        status = cr_term_set_angle (result, UNIT_RAD,
-                                                    token->num) ;
-                        CHECK_PARSING_STATUS (status, TRUE) ;
-                        token->num = NULL ;
-                        break ;
-
-                case ANGLE_GRAD_ET:
-                        status = cr_term_set_angle (result, UNIT_GRAD,
-                                                    token->num) ;
-                        CHECK_PARSING_STATUS (status, TRUE) ;
-                        token->num = NULL ;
-                        break ;
-                default:
-                        break ;
-                }
-        }
-        else if (token && token->type == TIME_TK)
-        {
-                status = cr_term_set_time (result, token->extra_type,
-                                           token->num) ;
-                CHECK_PARSING_STATUS (status, TRUE) ;
-                token->num = NULL ;
-        }
-        else if (token && token->type == FREQ_TK)
-        {
-                status = cr_term_set_freq (result, token->extra_type,
-                                           token->num) ;
-                CHECK_PARSING_STATUS (status, TRUE) ;
-                token->num = NULL ;
-        }
-        else if (token && token->type == PERCENTAGE_TK)
-        {
-                status = cr_term_set_percentage (result, token->num) ;
-                CHECK_PARSING_STATUS (status, TRUE) ;
-                token->num = NULL ;
-        }
-        else if (token && token->type == NUMBER_TK)
+        else if (token->type == EMS_TK
+                || token->type == EXS_TK
+                || token->type == LENGTH_TK
+                || token->type == ANGLE_TK
+                || token->type == TIME_TK
+                || token->type == FREQ_TK
+                || token->type == PERCENTAGE_TK
+                || token->type == NUMBER_TK)
         {
                 status = cr_term_set_number (result, token->num) ;
                 CHECK_PARSING_STATUS (status, TRUE) ;
                 token->num = NULL ;
+                status = CR_OK ;
         }
         else if (token && token->type == FUNCTION_TK)
         {                
@@ -2353,7 +2251,7 @@ cr_parser_parse_term (CRParser *a_this, CRTerm **a_term)
         }
         else if (token && token->type == UNICODERANGE_TK)
         {
-                result->type = UNICODERANGE ;
+                result->type = TERM_UNICODERANGE ;
                 status = CR_PARSING_ERROR ;
         }
         else if (token && token->type == HASH_TK)

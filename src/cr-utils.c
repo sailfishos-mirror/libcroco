@@ -1422,3 +1422,16 @@ cr_utils_dump_n_chars (guchar a_char, FILE *a_fp, glong a_nb)
                 fprintf (a_fp, "%c", a_char) ;
         }
 }
+
+gdouble
+cr_utils_n_to_0_dot_n (glong a_n)
+{
+        gdouble result = a_n ;
+
+        while (ABS (result) > 1)
+        {
+                result = result / 10 ;
+        }
+
+        return result ;
+}

@@ -45,55 +45,48 @@ cr_term_clear (CRTerm *a_this)
 
         switch (a_this->type)
         {
-        case NO_TYPE:
-                break ;
-
-        case NUMBER:
-        case PERCENTAGE :
-        case EMS:
-        case EXS:
-        case LENGTH:
-        case ANGLE:
-        case TIME:
-        case FREQ:
+        case TERM_NUMBER:
                 if (a_this->content.num)
                 {
                         cr_num_destroy (a_this->content.num) ;
                         a_this->content.num = NULL ;
                 }
                 break ;
-        
-        case FUNCTION:
+
+        case TERM_FUNCTION:
                 if (a_this->ext_content.func_param)
                 {
                         cr_term_destroy (a_this->ext_content.func_param) ;
                         a_this->ext_content.func_param = NULL ;
                 }
-        case STRING:
-        case IDENT:
-        case URI:
-        case HASH:
+        case TERM_STRING:
+        case TERM_IDENT:
+        case TERM_URI:
+        case TERM_HASH:
                 if (a_this->content.str)
                 {
                         g_string_free (a_this->content.str, TRUE) ;
                         a_this->content.str = NULL ;
                 }
                 break ;
-        case RGB:
+
+        case TERM_RGB: 
                 if (a_this->content.rgb)
                 {
                         cr_rgb_destroy (a_this->content.rgb) ;
                         a_this->content.rgb = NULL ;
                 }
                 break ;
-        case UNICODERANGE:        
-        default :                
+
+        case TERM_UNICODERANGE:
+        case TERM_NO_TYPE:
+        default:        
                 break ;
         }
 
-        a_this->unit = NO_UNIT ;
-        a_this->type = NO_TYPE ;
+        a_this->type = TERM_NO_TYPE ;
 }
+
 
 /**
  *Instanciate a #CRTerm.
@@ -124,106 +117,7 @@ cr_term_set_number (CRTerm *a_this, CRNum *a_num)
 
         cr_term_clear (a_this) ;
         
-        a_this->type = NUMBER ;
-        a_this->content.num = a_num ;
-        return CR_OK ;
-}
-        
-enum CRStatus
-cr_term_set_percentage (CRTerm *a_this, CRNum *a_num)
-{
-      g_return_val_if_fail (a_this,
-                              CR_BAD_PARAM_ERROR) ;
-
-        cr_term_clear (a_this) ;
-        
-        a_this->type = PERCENTAGE ;
-        a_this->content.num = a_num ;
-        return CR_OK ;
-}
-
-enum CRStatus
-cr_term_set_length (CRTerm *a_this, enum TermUnit a_unit,
-                    CRNum *a_num)
-{
-        g_return_val_if_fail (a_this,
-                              CR_BAD_PARAM_ERROR) ;
-
-        cr_term_clear (a_this) ;
-        
-        a_this->type = LENGTH ;
-        a_this->unit = a_unit ;
-        a_this->content.num = a_num ;
-        return CR_OK ;
-}
-
-enum CRStatus
-cr_term_set_ems (CRTerm *a_this, CRNum *a_num)
-{
-        g_return_val_if_fail (a_this,
-                              CR_BAD_PARAM_ERROR) ;
-
-        cr_term_clear (a_this) ;
-        
-        a_this->type = EMS ;
-        a_this->content.num = a_num ;
-        return CR_OK ;
-}
-
-enum CRStatus
-cr_term_set_exs (CRTerm *a_this, CRNum * a_num)
-{
-        g_return_val_if_fail (a_this,
-                              CR_BAD_PARAM_ERROR) ;
-
-        cr_term_clear (a_this) ;
-        
-        a_this->type = EXS ;
-        a_this->content.num = a_num ;
-        return CR_OK ;
-}
-
-enum CRStatus
-cr_term_set_angle (CRTerm *a_this, enum TermUnit a_unit,
-                   CRNum *a_num)
-{
-        g_return_val_if_fail (a_this,
-                              CR_BAD_PARAM_ERROR) ;
-
-        cr_term_clear (a_this) ;
-        
-        a_this->type = ANGLE ;
-        a_this->unit = a_unit ;
-        a_this->content.num = a_num ;
-        return CR_OK ;
-}
-
-enum CRStatus
-cr_term_set_time (CRTerm *a_this, enum TermUnit a_unit,
-                  CRNum *a_num)
-{
-        g_return_val_if_fail (a_this,
-                              CR_BAD_PARAM_ERROR) ;
-
-        cr_term_clear (a_this) ;
-        
-        a_this->type = TIME ;
-        a_this->unit = a_unit ;
-        a_this->content.num = a_num ;
-        return CR_OK ;
-}
-
-enum CRStatus
-cr_term_set_freq (CRTerm *a_this, enum TermUnit a_unit,
-                  CRNum *a_num)
-{
-        g_return_val_if_fail (a_this,
-                              CR_BAD_PARAM_ERROR) ;
-
-        cr_term_clear (a_this) ;
-        
-        a_this->type = FREQ ;
-        a_this->unit = a_unit ;
+        a_this->type = TERM_NUMBER ;
         a_this->content.num = a_num ;
         return CR_OK ;
 }
@@ -237,7 +131,7 @@ cr_term_set_function (CRTerm *a_this, GString *a_func_name,
 
         cr_term_clear (a_this) ;
         
-        a_this->type = FUNCTION ;        
+        a_this->type = TERM_FUNCTION ;        
         a_this->content.str = a_func_name ;
         a_this->ext_content.func_param = a_func_param ;
         return CR_OK ;
@@ -251,7 +145,7 @@ cr_term_set_string (CRTerm *a_this, GString *a_str)
 
        cr_term_clear (a_this) ;
         
-       a_this->type = STRING ;        
+       a_this->type = TERM_STRING ;        
        a_this->content.str = a_str ;
        return CR_OK ;
 }
@@ -264,7 +158,7 @@ cr_term_set_ident (CRTerm *a_this, GString *a_str)
 
         cr_term_clear (a_this) ;
         
-        a_this->type = IDENT ;        
+        a_this->type = TERM_IDENT ;        
         a_this->content.str = a_str ;
         return CR_OK ;
 }
@@ -277,7 +171,7 @@ cr_term_set_uri (CRTerm *a_this, GString *a_str)
 
         cr_term_clear (a_this) ;
         
-        a_this->type = URI ;
+        a_this->type = TERM_URI ;
         a_this->content.str = a_str ;
         return CR_OK ;
 }
@@ -290,7 +184,7 @@ cr_term_set_rgb (CRTerm *a_this, CRRgb *a_rgb)
 
        cr_term_clear (a_this) ;
         
-       a_this->type = RGB ;
+       a_this->type = TERM_RGB ;
        a_this->content.rgb = a_rgb ;
        return CR_OK ;
 }
@@ -303,7 +197,7 @@ cr_term_set_hash (CRTerm *a_this, GString *a_str)
 
         cr_term_clear (a_this) ;
         
-        a_this->type = HASH ;
+        a_this->type = TERM_HASH ;
         a_this->content.str = a_str ;
         return CR_OK ;
 }
@@ -417,7 +311,7 @@ cr_term_dump (CRTerm *a_this, FILE *a_fp)
 
                 switch (cur->type)
                 {
-                case NUMBER:
+                case TERM_NUMBER:
                         if (cur->content.num)
                         {
                                 content = 
@@ -434,207 +328,7 @@ cr_term_dump (CRTerm *a_this, FILE *a_fp)
 
                         break ;
 
-                case PERCENTAGE:
-                        if (cur->content.num)
-                        {
-                                content = cr_num_to_string 
-                                        (cur->content.num) ;
-                        }
-
-                        if (content)
-                        {
-                                fprintf (a_fp, "%s", content) ;
-                                putchar ('%') ;
-                                g_free (content) ;
-                                content = NULL ;
-                        }
-                        break ;
-
-                case LENGTH:
-                        if (cur->content.num)
-                        {
-                                content = cr_num_to_string
-                                        (cur->content.num) ;
-                        }
-
-                        g_return_if_fail (content) ;
-
-                        switch (cur->unit)
-                        {
-                        case UNIT_PX:                   
-                                fprintf (a_fp, "%spx", content) ;
-                                break ;
-
-                        case UNIT_CM:
-                                fprintf (a_fp, "%scm", content) ;
-                                break ;
-
-                        case UNIT_MM:
-                                fprintf (a_fp, "%smm", content) ;
-                                break ;
-
-                        case UNIT_IN:
-                                fprintf (a_fp, "%sin", content) ;
-                                break ;
-
-                        case UNIT_PT:
-                                fprintf (a_fp, "%spt", content) ;
-                                break ;
-
-                        case UNIT_PC:
-                                fprintf (a_fp, "%spc", content) ;
-                                break ;
-
-                        default:
-                                fprintf (a_fp, "%s",content) ;
-                        }
-
-                        if (content)
-                        {
-                                g_free (content) ;
-                                content = NULL ;
-                        }
-                        break ;
-
-                case EMS:
-                        if (cur->content.num)
-                        {
-                                content = cr_num_to_string
-                                        (cur->content.num) ;
-                        }
-                        if (content)
-                        {
-                                fprintf (a_fp, "%sem", content) ;
-                                g_free (content) ;
-                                content = NULL ;
-                        }
-                        break ;
-                
-                case EXS:
-                        if (cur->content.num)
-                        {
-                                content = cr_num_to_string
-                                        (cur->content.num) ;
-                        }
-
-                        if (content)
-                        {
-                                fprintf (a_fp, "%sex", content) ;
-                                g_free (content) ;
-                                content = NULL ;
-                        }                        
-                        break;
-
-                case ANGLE:
-                        if (cur->content.num)
-                        {
-                                content = cr_num_to_string
-                                        (cur->content.num) ;
-                        }
-
-                        switch (cur->unit)
-                        {
-                        case UNIT_DEG:
-                                if (content) 
-                                {
-                                        fprintf (a_fp, "%sdeg",content) ;
-                                        g_free (content) ;
-                                        content = NULL ;
-                                }
-                                break ;
-
-                        case UNIT_RAD:
-                                if (content)
-                                {
-                                        fprintf (a_fp, "%srad",content) ;
-                                        g_free (content) ;
-                                        content = NULL ;
-                                }
-                                break ;
-
-                        case UNIT_GRAD:
-                                if (content)
-                                {
-                                        fprintf (a_fp, "%sgrad",content) ;
-                                        g_free (content) ;
-                                        content = NULL ;
-                                }
-                                break ;
-                        
-                        default :
-                                if (content)
-                                {
-                                        fprintf (a_fp, "%s", content) ;
-                                        g_free (content) ;
-                                        content = NULL ;
-                                }
-                                break ;
-                        }
-
-                        break ;
-
-                case TIME:
-                        if (cur->content.num)
-                        {
-                                content = cr_num_to_string
-                                        (cur->content.num) ;
-                        }
-                        
-                        g_return_if_fail (content) ;
-
-                        switch (cur->unit)
-                        {
-                        case UNIT_MS:
-                                fprintf (a_fp, "%sms", content) ;
-                                break ;
-
-                        case UNIT_S:
-                                fprintf (a_fp, "%ss",content) ;
-                                break ;
-
-                        default :
-                                break ;
-                        }
-
-                        if (content)
-                        {
-                                g_free (content) ;
-                                content = NULL ;
-                        }
-                        break ;
-
-                case FREQ:
-                        if (cur->content.num)
-                        {
-                                content = cr_num_to_string
-                                        (cur->content.num) ;
-                        }
-
-                        g_return_if_fail (content) ;
-
-                        switch (cur->unit)
-                        {
-                        case UNIT_HZ:
-                                fprintf (a_fp, "%sHz", content) ;
-                                break ;
-
-                        case UNIT_KHZ:
-                                fprintf (a_fp, "%sKHz",content) ;
-                                break ;
-
-                        default:
-                                fprintf (a_fp, "%s",content) ;
-                                break ;
-                        }
-
-                        if (content)
-                        {
-                                g_free (content) ;
-                                content = NULL ;
-                        }
-                        break ;
-
-                case FUNCTION:
+                case TERM_FUNCTION:
                         if (cur->content.str)
                         {
                                 content = g_strndup 
@@ -660,7 +354,7 @@ cr_term_dump (CRTerm *a_this, FILE *a_fp)
                         }
                         break ;
 
-                case STRING:
+                case TERM_STRING:
                         if (cur->content.str)
                         {
                                 content = g_strndup 
@@ -676,7 +370,7 @@ cr_term_dump (CRTerm *a_this, FILE *a_fp)
                         }                        
                         break ;
 
-                case IDENT:
+                case TERM_IDENT:
                         if (cur->content.str)
                         {
                                 content = g_strndup 
@@ -692,7 +386,7 @@ cr_term_dump (CRTerm *a_this, FILE *a_fp)
                         }                        
                         break ;
 
-                case URI:
+                case TERM_URI:
                         if (cur->content.str)
                         {
                                 content = g_strndup 
@@ -708,7 +402,7 @@ cr_term_dump (CRTerm *a_this, FILE *a_fp)
                         }                        
                         break ;
 
-                case RGB:
+                case TERM_RGB:
                         if (cur->content.rgb)
                         {
                                 fprintf (a_fp, "rgb(") ;
@@ -718,13 +412,13 @@ cr_term_dump (CRTerm *a_this, FILE *a_fp)
 
                         break ;
 
-                case UNICODERANGE:
+                case TERM_UNICODERANGE:
                        fprintf
                                 (a_fp, 
                                  "?found unicoderange: dump not supported yet?") ;
                         break ;
 
-                case HASH:
+                case TERM_HASH:
                         if (cur->content.str)
                         {
                                 content = g_strndup 

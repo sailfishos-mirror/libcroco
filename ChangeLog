@@ -1,3 +1,29 @@
+2003-03-15  dodji  <dodji@seketeli.org>
+
+	* src/cr-utils.[ch]
+	added some new helper functions/did some cleanups.
+	
+	* src/cr-tknzr.[ch]:
+	made the necessary modifs implied by the new CRNum/CRTerm type
+	system.
+
+	* src/cr-term.[ch]:
+	big cleanup of the CRTerm/CRNum typing system.
+
+	* src/cr-style.[ch]:
+	went forward in the style data structure population code.
+
+	* src/rgb.[ch]:
+	made the necessary modifs implied by the new CRNum type
+	system
+	
+	* src/cr-parser.c:
+	made the necessary modifs implied by the new CRNum type
+	system
+
+	* src/cr-num.[ch]: did some big changes for a better
+	handling of numeric types.
+
 2003-03-05  Dodji  <dodji@seketeli.org>
 
 	* src/cr-parser.c (cr_parser_new_from_buf): 

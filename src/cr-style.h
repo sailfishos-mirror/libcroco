@@ -37,20 +37,6 @@ G_BEGIN_DECLS
 
 typedef struct _CRStyle CRStyle ;
 
-enum CRLengthType
-{
-        LENGTH_NUMBER,
-        LENGTH_PX,
-        LENGTH_PERCENTAGE
-} ;
-
-typedef struct _CRLength CRLength;
-struct _CRLength
-{
-        enum CRLengthType type;
-        glong len ;
-} ;
-
 enum CRBorderStyle
 {
         BORDER_STYLE_NONE,
@@ -104,6 +90,10 @@ enum CRFloatType
 } ;
 
 
+#define BORDER_THIN 2
+#define BORDER_MEDIUM 4
+#define BORDER_THICK 6
+
 /**
  *The css2 style class.
  *Contains computed and actual values
@@ -116,22 +106,22 @@ struct _CRStyle
 
 	/**padding properties, in pixel*/
 
-	CRLength padding_top ;
-	CRLength padding_right ;
-	CRLength padding_bottom ;
-	CRLength padding_left ;
+	CRNum padding_top ;
+	CRNum padding_right ;
+	CRNum padding_bottom ;
+	CRNum padding_left ;
 
 	/**border properties*/
 
-	CRLength border_top_width ;
-	CRLength border_right_width ;
-	CRLength border_bottom_width ;
-	CRLength border_left_width ;
+	CRNum border_top_width ;
+	CRNum border_right_width ;
+	CRNum border_bottom_width ;
+	CRNum border_left_width ;
 
-	gulong border_top_color ;
-	gulong border_right_color ;
-	gulong border_bottom_color ;
-	gulong border_left_color ;
+	CRRgb border_top_color ;
+	CRRgb border_right_color ;
+	CRRgb border_bottom_color ;
+	CRRgb border_left_color ;
 
         enum CRBorderStyle border_top_style ;
         enum CRBorderStyle border_right_style ;
@@ -140,36 +130,41 @@ struct _CRStyle
 
 	/**margin properties, in pixel*/
 
-	CRLength margin_top ;
-	CRLength margin_right ;
-	CRLength margin_bottom;
-	CRLength margin_left ;
+	CRNum margin_top ;
+	CRNum margin_right ;
+	CRNum margin_bottom;
+	CRNum margin_left ;
 
         /**box display type*/
         enum CRDisplayType display ;
 
         /**the positioning scheme*/
         enum CRPositionType position ;
-
         /**box offset*/
-        CRLength top ;
-        CRLength right ;
-        CRLength bottom ;
-        CRLength left ;
+        CRNum top ;
+        CRNum right ;
+        CRNum bottom ;
+        CRNum left ;
 
         /**the float property*/
         enum CRFloatType float_type ;
 
-        CRLength width ;
+        CRNum width ;
+        CRStyle *parent_style ;
 } ;
 
 
 CRStyle *
 cr_style_new (void) ;
 
+
 enum CRStatus
-cr_style_new_from_ruleset (CRStatement *a_this, 
+cr_style_new_from_ruleset (CRStatement *a_stmt, 
+                           CRStyle *a_parent_style,
 			   CRStyle **a_style) ;
+enum CRStatus
+cr_style_set_style_from_decl (CRStyle *a_this, CRDeclaration *a_decl,
+                              CRStyle *a_parent_style) ;
 
 void
 cr_style_destroy (CRStyle *a_this) ;

@@ -39,120 +39,54 @@ G_BEGIN_DECLS
  *And global definitions.
  */
 
-	/**
-	 *The status type returned
-	 *by the methods of the croco library.
-	 */
-	enum CRStatus {
-		CR_OK,
-		CR_BAD_PARAM_ERROR,
-                CR_START_OF_INPUT_ERROR,
-		CR_END_OF_INPUT_ERROR,
-                CR_OUTPUT_TOO_SHORT_ERROR,
-                CR_INPUT_TOO_SHORT_ERROR,
-		CR_OUT_OF_BOUNDS_ERROR,
-                CR_EMPTY_PARSER_INPUT_ERROR,
-                CR_ENCODING_ERROR,
-                CR_ENCODING_NOT_FOUND_ERROR,
-                CR_PARSING_ERROR,
-                CR_SYNTAX_ERROR,
-                CR_NO_TOKEN,
-		CR_ERROR
-	} ;
+/**
+ *The status type returned
+ *by the methods of the croco library.
+ */
+enum CRStatus {
+        CR_OK,
+        CR_BAD_PARAM_ERROR,
+        CR_UNKNOWN_TYPE_ERROR,
+        CR_START_OF_INPUT_ERROR,
+        CR_END_OF_INPUT_ERROR,
+        CR_OUTPUT_TOO_SHORT_ERROR,
+        CR_INPUT_TOO_SHORT_ERROR,
+        CR_OUT_OF_BOUNDS_ERROR,
+        CR_EMPTY_PARSER_INPUT_ERROR,
+        CR_ENCODING_ERROR,
+        CR_ENCODING_NOT_FOUND_ERROR,
+        CR_PARSING_ERROR,
+        CR_SYNTAX_ERROR,
+        CR_NO_TOKEN,
+        CR_ERROR
+} ;
 
-	/**
-	 *Values used by
-	 *cr_input_seek_position() ;
-	 */
-	enum CRSeekPos {
-		CR_SEEK_CUR,
-		CR_SEEK_BEGIN,
-		CR_SEEK_END
-	} ;
+/**
+ *Values used by
+ *cr_input_seek_position() ;
+ */
+enum CRSeekPos {
+        CR_SEEK_CUR,
+        CR_SEEK_BEGIN,
+        CR_SEEK_END
+} ;
 
-        /**
-         *Encoding values.
-         */
-        enum CREncoding 
-        {
-                CR_UCS_4 = 1/*Must be not NULL*/,
-                CR_UCS_1,
-                CR_ISO_8859_1,
-                CR_ASCII,
-                CR_UTF_8,
-                CR_UTF_16,
-                CR_AUTO/*should be the last one*/
-        } ;
+/**
+ *Encoding values.
+ */
+enum CREncoding 
+{
+        CR_UCS_4 = 1/*Must be not NULL*/,
+        CR_UCS_1,
+        CR_ISO_8859_1,
+        CR_ASCII,
+        CR_UTF_8,
+        CR_UTF_16,
+        CR_AUTO/*should be the last one*/
+} ;
 
 
-	enum TermType
-	{
-                NO_TYPE = 0,
-		NUMBER,
-		PERCENTAGE ,
-		LENGTH,
-		EMS,
-		EXS,
-		ANGLE,
-		TIME,
-		FREQ,
-		FUNCTION,
-		STRING,
-		IDENT,
-		URI,
-		RGB,
-		UNICODERANGE,
-                HASH
-	} ;
 
-        /**
-         *Possible Units of
-         *LENGTH, ANGLE, FREQ, 
-         *TIME,
-         */
-        enum TermUnit
-        {
-                NO_UNIT,
-                
-                UNIT_EMS,
-                UNIT_EXS,
-
-                UNIT_PX,/*length pixel unit*/
-                UNIT_CM,/*length centimeter unit*/
-                UNIT_MM,/*length millimeter unit*/
-                UNIT_IN,/*length inch unit*/
-                UNIT_PT,/*length point unit*/
-                UNIT_PC,/*length pc? unit*/
-
-                UNIT_DEG,/*angle degre unit*/
-                UNIT_RAD, /*angle radian unit*/
-                UNIT_GRAD, /*angle gradian unit*/
-
-                UNIT_MS, /*time millisecond unit*/
-                UNIT_S, /*time second unit*/
-                
-                UNIT_HZ,  /*frequency herz unit*/
-                UNIT_KHZ, /*frequency kiloherz unit*/
-                
-                UNIT_DIMEN, /*custom dimension unit*/
-                
-                UNIT_PERCENTAGE
-        } ;
-
-	enum Operator
-	{
-                NO_OP = 0,
-		DIVIDE,
-		COMMA		
-	} ;
-
-	enum UnaryOperator
-	{
-                NO_UNARY_UOP = 0,
-		PLUS_UOP,
-		MINUS_UOP,
-		EMPTY_UNARY_UOP
-	} ;
 
 #define CROCO_LOG_DOMAIN "LIBCROCO"
 
@@ -272,6 +206,9 @@ cr_utils_is_hexa_char (guint32 a_char) ;
 
 void
 cr_utils_dump_n_chars (guchar a_char, FILE *a_fp, glong a_nb) ;
+
+gdouble
+cr_utils_n_to_0_dot_n (glong a_n) ;
 
 G_END_DECLS
 
