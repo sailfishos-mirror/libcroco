@@ -64,11 +64,15 @@ CRParser *
 cr_parser_new (CRTknzr *a_tknzr) ;
 
 CRParser *
+cr_parser_new_from_buf (guchar *a_buf, gulong a_len,
+                        enum CREncoding a_enc, 
+                        gboolean a_free_buf) ;
+CRParser *
 cr_parser_new_from_file (guchar *a_file_uril, 
                          enum CREncoding a_enc) ;
 
 CRParser *
-cr_parser_new_from_input (CRParserInput *a_input) ;
+cr_parser_new_from_input (CRInput *a_input) ;
 
 enum CRStatus
 cr_parser_set_tknzr (CRParser *a_this, CRTknzr *a_tknzr) ;

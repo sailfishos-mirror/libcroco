@@ -4812,6 +4812,39 @@ cr_parser_new (CRTknzr *a_tknzr)
         return result ;
 }
 
+/**
+ *Instanciates a new parser from a memory buffer.
+ *@param a_buf the buffer to parse.
+ *@param a_len the length of the data in the buffer.
+ *@param a_enc the encoding of the input buffer a_buf.
+ *@param a_free_buf if set to TRUE, a_buf will be freed
+ *during the destruction of the newly built instance 
+ *of #CRParser. If set to FALSE, it is up to the caller to
+ *eventually free it.
+ *@return the newly built parser, or NULL if an error arises.
+ */
+CRParser *
+cr_parser_new_from_buf (guchar *a_buf, gulong a_len,
+                        enum CREncoding a_enc, 
+                        gboolean a_free_buf)
+{
+        CRParser * result = NULL ;
+        CRInput *input = NULL ;
+        g_return_val_if_fail (a_buf && a_len, NULL) ;
+       
+        input = cr_input_new_from_buf (a_buf, a_len, a_enc, 
+                                       a_free_buf) ;
+        g_return_val_if_fail (input, NULL) ;
+
+        result = cr_parser_new_from_input (input) ;
+        if (!result)
+        {
+                cr_input_destroy (input) ;
+                input = NULL ;
+                return NULL ;
+        }
+        return result ;        
+}
 
 CRParser *
 cr_parser_new_from_input (CRInput *a_input)

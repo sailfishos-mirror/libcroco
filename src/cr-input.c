@@ -83,6 +83,7 @@ struct _CRInputPriv
          *instance.
          */
         guint ref_count ;
+        gboolean free_in_buf ;
 } ;
 
 
@@ -131,16 +132,17 @@ cr_input_new_real (void)
 /**
  *Creates a new input stream from a memory buffer.
  *@param a_buf the memory buffer to create the input stream from.
- *The newly built instance of #CRInput owns this buffer and is
- *responsible of freing it. The Caller should not try to access
- *this buffer as it content may be totally transformed at any time.
  *@param a_len the size of the input buffer.
  *@param a_enc the buffer's encoding.
+ *@param a_free_buf is set to TRUE, this a_buf will be freed
+ *at the destruction of this instance. If set to false, it is up
+ *to the caller to free it.
  *@return the newly built instance of #CRInput.
  */
 CRInput *
 cr_input_new_from_buf (guchar *a_buf, gulong a_len,
-                       enum CREncoding a_enc)
+                       enum CREncoding a_enc, 
+                       gboolean a_free_buf)
 {
         CRInput *result = NULL;
         enum CRStatus status = CR_OK ;
@@ -170,8 +172,6 @@ cr_input_new_from_buf (guchar *a_buf, gulong a_len,
 
                 PRIVATE (result)->line = 1 ;
                 PRIVATE (result)->nb_bytes =  PRIVATE (result)->in_buf_size ;
-
-                g_free (a_buf) ;
         }
         else
         {
@@ -276,7 +276,8 @@ cr_input_new_from_uri (gchar *a_file_uri, enum CREncoding a_enc)
 
         if (status == CR_OK) 
         {
-                result = cr_input_new_from_buf (buf, len, a_enc) ;
+                result = cr_input_new_from_buf (buf, len, a_enc,
+                                                TRUE) ;
                 if (!result)
                 {
                         goto error ;
@@ -467,11 +468,11 @@ cr_input_destroy (CRInput *a_this)
 
         if (PRIVATE (a_this)) 
         {
-                if (PRIVATE (a_this)->in_buf) 
+                if (PRIVATE (a_this)->in_buf 
+                    && PRIVATE (a_this)->free_in_buf) 
                 {
                         g_free (PRIVATE (a_this)->in_buf) ;
                         PRIVATE (a_this)->in_buf = NULL ;
-
                 }
 
                 g_free (PRIVATE (a_this)) ;

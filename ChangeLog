@@ -1,3 +1,8 @@
+2003-03-05  Dodji  <dodji@seketeli.org>
+
+	* src/cr-parser.c (cr_parser_new_from_buf): 
+	new method to parse stylesheets from in memory buffers.
+
 2003-03-04  Dodji  <dodji@seketeli.og>
 
 	* src/cr-input.c (cr_input_new_from_buf): 

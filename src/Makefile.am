@@ -7,7 +7,6 @@ crocoinc_HEADERS= *.h
 libcroco_la_SOURCES= \
 	cr-utils.c \
 	cr-input.c \
-	cr-parser-input.c \
 	cr-enc-handler.c \
 	cr-num.c \
 	cr-rgb.c \
