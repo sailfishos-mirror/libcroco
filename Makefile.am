@@ -14,7 +14,7 @@ man_MANS = croco-config.1
 
 EXTRA_DIST= croco-config.in libcroco.pc.in TODO Doxyfile HACKING \
 docs/examples/cssom-example.c  docs/usage.txt tests/test-inputs/*.css \
-tests/test-outputs/*.out
+tests/test-outputs/*.out $(man_MANS)
 
 apidoc:
 	if ! test -d docs/apis ; then  mkdir -p docs/apis ;  fi ;

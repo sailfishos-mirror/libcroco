@@ -11,3 +11,5 @@ INCLUDES=-I$(top_srcdir)/intl \
 
 LDFLAGS=`pkg-config --libs glib-2.0` @LIBXML2_LIBS@
 AM_CFLAGS=-Wall -I. @LIBXML2_CFLAGS@
+
+EXTRA_DIST = $(man_MANS)

@@ -1,3 +1,9 @@
+2003-03-30 Christian Schaller <uraeus@gnome.org>
+	* Fixed disting by adding manpages to EXTRA_DIST
+	* Added spec.in file, this need to be added to build 
+	  system to generate .spec file.
+	* Remove Makefile.in from CVS, this is a generated file
+	
 2003-03-30  Dodji  <dodji@seketeli.org>
 	* src/cr-lay-eng.c: 
 	Started to code a layout engine. This is more a design

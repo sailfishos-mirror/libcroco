@@ -1,0 +1,71 @@
+%define __libtoolize :
+%define __spec_install_post /usr/lib/rpm/brp-compress
+Name:             libcroco
+Summary:          An CCS2 parsing library 
+Version:          @VERSION@
+Release:          1
+License:          LGPL
+Group:            System Environment/Libraries
+Source:           %{name}-%{version}.tar.gz
+BuildRoot:        %{_tmppath}/%{name}-%{version}-root
+BuildRequires:    pkgconfig >= 0.8
+Requires:         glib2 >= 2.0.0
+Requires:         libxml2 >= 2.4.7
+BuildRequires:    glib2-devel >= 2.0.0
+BuildRequires:    libxml2-devel >= 2.4.7
+
+%description
+CCS2 parsing library for GNOME
+
+%package devel
+Summary:          Libraries and include files for developing with libcroco.
+Group:            Development/Libraries
+Requires:         %{name} = %{version}
+Requires:         pkgconfig >= 0.8
+Requires:         glib2 >= 2.0.0
+Requires:         glib2-devel >= 2.0.0
+Requires:         libxml2 >= 2.4.7
+Requires:         libxml2-devel >= 2.4.7
+
+%description devel
+This package provides the necessary development libraries and include
+files to allow you to develop with libcroco.
+
+%prep
+%setup -q -n libcroco-%{version}
+
+%build
+%configure --enable-seleng=no --enable-layeng=yes
+make
+
+%install
+rm -rf $RPM_BUILD_ROOT
+# create file that the new redhat debuginfo stuff demands
+touch $RPM_BUILD_DIR/libcroco-%{version}/debugfiles.list
+
+%makeinstall
+# Clean out files that should not be part of the rpm.
+# This is the recommended way of dealing with it for RH8
+rm -f $RPM_BUILD_ROOT%{_libdir}/*.a
+rm -f $RPM_BUILD_ROOT%{_libdir}/*.la
+
+%clean
+rm -rf $RPM_BUILD_ROOT
+
+%files
+%defattr(-, root, root)
+%doc AUTHORS COPYING COPYING.LIB ChangeLog NEWS README TODO
+%{_bindir}/croco-config
+%{_bindir}/csslint
+%{_libdir}/*.so.*
+%{_mandir}/*/*
+
+%files devel
+%defattr(-, root, root)
+%{_libdir}/*.so
+%{_includedir}/libcroco/*.h
+%{_libdir}/pkgconfig/libcroco.pc
+
+%changelog
+* Sun Mar 30 2003 Christian Schaller <uraeus@gnome.org>
+- created this thing
