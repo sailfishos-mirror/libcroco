@@ -68,11 +68,11 @@ while test $# -gt 0; do
 	;;
 
     --cflags)
-       	echo -I${includedir}/libcroco
+	echo @CROCO_CFLAGS@
        	;;
 
     --libs)
-       	echo -L${libdir} -lcroco
+	echo @CROCO_LIBS@
        	;;
 
     *)
