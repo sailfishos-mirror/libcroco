@@ -34,7 +34,7 @@
 #define __CR_TKNZR_H__
 
 #include "cr-utils.h"
-#include "cr-parser-input.h"
+#include "cr-input.h"
 #include "cr-token.h"
 
 G_BEGIN_DECLS

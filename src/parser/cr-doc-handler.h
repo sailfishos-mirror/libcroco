@@ -31,7 +31,7 @@
 
 #include <glib.h>
 #include "cr-utils.h"
-#include "cr-parser-input.h"
+#include "cr-input.h"
 #include "cr-stylesheet.h"
 
 G_BEGIN_DECLS

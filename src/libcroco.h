@@ -31,7 +31,6 @@
 #include "parser/cr-selector.h"
 #include "parser/cr-enc-handler.h"
 #include "parser/cr-doc-handler.h"
-#include "parser/cr-parser-input.h"
 #include "parser/cr-input.h"
 #include "parser/cr-parser.h"
 #include "parser/cr-statement.h"

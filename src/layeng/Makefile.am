@@ -1,11 +1,11 @@
 lib_LTLIBRARIES=libcrlayeng.la
 
 crlayengincdir=$(includedir)/@PACKAGE@/layeng
-crlayenginc_HEADERS= *.h
+crlayenginc_HEADERS= cr-box.h cr-box-view.h cr-lay-eng.h
 
 #the layout engine files
 if HAVE_LAYENG
-LAYENG_SRCS= cr-box.c cr-box-view.c cr-lay-eng.c
+LAYENG_SRCS= cr-box.c cr-box.h cr-box-view.c cr-box-view.h cr-lay-eng.c cr-lay-eng.h
 endif
 
 libcrlayeng_la_SOURCES=$(LAYENG_SRCS)

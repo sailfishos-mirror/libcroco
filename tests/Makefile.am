@@ -1,3 +1,5 @@
+SUBDIRS=test-inputs test-output-refs
+
 if HAVE_TESTS
 
 core_tests=@CORE_TESTS@

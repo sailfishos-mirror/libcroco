@@ -28,7 +28,7 @@
 #define  __CR_PARSER_H__
 
 #include <glib.h>
-#include "cr-parser-input.h"
+#include "cr-input.h"
 #include "cr-tknzr.h"
 #include "cr-utils.h"
 #include "cr-doc-handler.h"

@@ -194,7 +194,7 @@ cleanup_tests ()
 
 run_test_report ()
 {
-    diff -Nur --exclude=*CVS* --exclude=*cvs* $HERE/$TEST_OUT_REF_DIR $HERE/$TEST_OUTPUT_DIR > /tmp/toto$$
+    diff -ur --exclude=*CVS* --exclude=*cvs* --exclude=Makefile* $HERE/$TEST_OUT_REF_DIR $HERE/$TEST_OUTPUT_DIR > /tmp/toto$$
     NB_DIFF=`cat /tmp/toto$$ | wc -l`
 
     if test "$NB_DIFF" -eq 0 ; then

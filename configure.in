@@ -148,7 +148,7 @@ dnl this option enables compilation of the selection engine
 CROCO_SELENG_ENABLED=0
 AC_ARG_ENABLE(seleng, 
 	       AC_HELP_STRING([--enable-seleng=yes|no|auto], 
-	                      [Enables the css2 selector engine based on libxml2. Default=auto]),
+	                      [Enables the css2 selector engine based on libxml2. Default=no]),
 	       WITH_SELENG=$enableval,
 	       WITH_SELENG="no")
 
@@ -190,7 +190,7 @@ dnl this option enable the layout engine/box model/style stuffs.
 CROCO_LAYENG_ENABLED=0
 AC_ARG_ENABLE(layeng,
 	AC_HELP_STRING([--enable-layeng=yes|no|auto],
-	[Enables the layout engine. Default=auto]),
+	[Enables the layout engine. Default=no]),
 	WITH_LAYENG=$enableval,
 	WITH_LAYENG="no")
 
@@ -321,13 +321,18 @@ Makefile
 libcroco.pc
 libcroco.spec
 croco-config
+docs/Makefile
+docs/examples/Makefile
+tests/Makefile
+tests/test-inputs/Makefile
+tests/test-output-refs/Makefile
 src/Makefile
 src/parser/Makefile
 src/parser/libcroco-config.h
 src/seleng/Makefile
 src/layeng/Makefile
 csslint/Makefile
-tests/Makefile
+
 ])
 
 dnl =============================================================================================

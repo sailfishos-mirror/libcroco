@@ -24,8 +24,8 @@
  *$Id$
  */
 
-#include "stdio.h"
-#include "cr-parser-input.h"
+#include <stdio.h>
+#include "cr-input.h"
 #include "string.h"
 
 /**

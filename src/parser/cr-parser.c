@@ -3432,7 +3432,7 @@ cr_parser_new (CRTknzr *a_tknzr)
         CRParser * result = NULL ;
         enum CRStatus status = CR_OK ;
 
-        result = g_malloc0 (sizeof (CRParserInput)) ;
+        result = g_malloc0 (sizeof (CRParser)) ;
 
         PRIVATE (result) = g_malloc0 (sizeof (CRParserPriv)) ;
 

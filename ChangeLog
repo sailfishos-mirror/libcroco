@@ -15,6 +15,24 @@
 	(cr_style_to_pango_font_attributes): removed this function
 	from here and put it in src/layeng/cr-lay-eng.[ch]. This way,
 	we seleng doesn't depend on pango. Only layout engine does.
+	* Makefile.am: big cleanup here.
+	* configure.in: make sure seleng, layeng and tests are 
+	disabled by default. Added makefiles in docs/ docs/example
+	tests/ tests/test-inputs tests/test-output-refs
+	* csslint/Makefile.am: cleaned this up. make sure to add
+	seleng,layeng and glib compile flags whenever needed.
+	* docs/Makefile.am,docs/examples/Makefile.am: new makefiles.
+	* src/libcroco.h: removed references to cr-parser-input.h
+	* src/layeng/Makefile.am: cleanup, make distcheck is happier.
+	* src/parser/Makefile.am: cleanup, make distcheck is happier.
+	* src/parser/cr-doc-handler.h: removed reference to cr-parser-input.h
+	* src/parser/cr-layout-eng.h,src/parser/cr-parser-input.h: removed these.
+	* src/parser/cr-parser.c: 
+	(cr_parser_new): fixed a typo here.
+	* src/parser/cr-parser.h,src/parser/cr-tknzr.h: 
+	removed ref to cr-parser-input.h
+	* src/seleng/Makefile.am: cleanup, make distcheck is happier.
+	* tests/testctl: exclude makefiles when diffing outputs and re outputs.
 
 2003-08-17  Gaël CHAMOULAUD <strider@gnome.org>
 

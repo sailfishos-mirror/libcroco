@@ -1,11 +1,11 @@
 lib_LTLIBRARIES=libcrseleng.la
 
 crselengincdir=$(includedir)/@PACKAGE@/seleng
-crselenginc_HEADERS= *.h
+crselenginc_HEADERS= cr-fonts.h cr-sel-eng.h cr-style.h
 
 #the selection engine files
 if HAVE_SELENG
-SELENG_SRCS= cr-style.c cr-sel-eng.c cr-fonts.c
+SELENG_SRCS= cr-style.c cr-style.h cr-sel-eng.c cr-sel-eng.h cr-fonts.c cr-fonts.h
 endif
 
 libcrseleng_la_SOURCES=$(SELENG_SRCS)
