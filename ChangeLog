@@ -1,3 +1,10 @@
+2003-06-14  dodji  <dodji@seketeli.org>
+
+	* src/layeng/cr-lay-eng.c, src/seleng/cr-style.[hc]: 
+	more fonts selection implementation.	
+	
+	* tests/test7-main.c: updated this to test the font selection implem.	
+	
 2003-06-12  dodji  <dodji@seketeli.org>
 
 	* src/seleng/Makefile.am: added pango stuffs.

@@ -771,7 +771,6 @@ compute_text_box_inner_edge_size (CRLayEng *a_this,
         GtkWidget *label = NULL ;
         PangoLayout *pgo_layout = NULL ;
         PangoRectangle ink_rect = {0}, logical_rect = {0} ;
-        GtkRequisition requisition ;
 
         g_return_val_if_fail (a_this 
                               && a_box 
@@ -822,12 +821,10 @@ compute_text_box_inner_edge_size (CRLayEng *a_this,
 static enum CRStatus
 layout_text_in_box (CRLayEng *a_this, CRBox *a_text_box)
 {
+        enum CRStatus status = CR_OK ;
         GtkWidget *label = NULL ;
         PangoLayout * pgo_layout = NULL ;
         PangoAttrList *pgo_attr_list = NULL ;
-        PangoAttribute *pgo_attr = NULL ;
-        PangoFontDescription *pgo_font_desc = NULL ;
-        PangoRectangle ink_rect, logical_rect ;
         glong wrap_width = 0 ;
 
         g_return_val_if_fail (a_this && a_text_box
@@ -854,7 +851,7 @@ layout_text_in_box (CRLayEng *a_this, CRBox *a_text_box)
         g_return_val_if_fail (GTK_IS_LABEL (label), CR_ERROR) ;
 
         gtk_label_set_text (GTK_LABEL (label), 
-                            a_text_box->content->u.text) ;        
+                            a_text_box->content->u.text) ;
         gtk_misc_set_alignment (GTK_MISC (label),0, 0) ;
         gtk_misc_set_padding (GTK_MISC (label), 0, 0) ;
         gtk_label_set_use_markup (GTK_LABEL (label),
@@ -892,8 +889,14 @@ layout_text_in_box (CRLayEng *a_this, CRBox *a_text_box)
                 pango_attr_list_new () ;
         g_return_val_if_fail (pgo_attr_list, CR_ERROR) ;
 
+        status = cr_style_to_pango_font_attributes 
+                (a_text_box->style, 
+                 pgo_attr_list,
+                 strlen (a_text_box->content->u.text)) ;
 
-        return CR_OK ;
+        gtk_label_set_attributes (label, pgo_attr_list) ;
+
+        return status ;
 }
 
 /**
