@@ -253,7 +253,7 @@ dnl *By default compile in debug mode
 dnl **********************************
 
 if test "x$GCC" = "xyes" ; then
-	CFLAGS="$CFLAGS -g -Wall"
+	CFLAGS="$CFLAGS -Wall"
 fi
 
 
@@ -262,7 +262,7 @@ dnl*Dodji's environment.
 dnl************************
 
 if test "x$LOGNAME" = "xdodji" -a "x$GCC" = "xyes" ; then
-	CFLAGS="-g -Wunused -Wimplicit -Wreturn-type -Wswitch \
+	CFLAGS="$CFLAGS -g -Wunused -Wimplicit -Wreturn-type -Wswitch \
 	-Wcomment -Wtrigraphs -Wformat -Wchar-subscripts \ 
         -Wparentheses -Wpointer-arith -Wcast-align \
         -Wwrite-strings -Waggregate-return -Wstrict-prototypes \

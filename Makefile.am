@@ -12,7 +12,7 @@ man_MANS = croco-config.1
 
 EXTRA_DIST= croco-config.in libcroco.pc libcroco.spec TODO Doxyfile \
 HACKING COPYING.LIB COPYING docs/examples/*.c  \
-docs/usage.txt  tests/test-inputs/*.css \
+docs/usage.txt  tests/test-inputs/*.css tests/testctl \
 tests/test-output-refs/*.out $(man_MANS)
 
 cleantar:
