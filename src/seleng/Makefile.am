@@ -14,4 +14,4 @@ INCLUDES=-I$(top_srcdir) -I$(top_srcdir)/src/parser -I$(top_srcdir)/intl \
 
 LDADD=$(top_srcdir)/src/parser/libcroco.la
 
-libcrseleng_la_LDFLAGS=-version-info @LIBCROCO_VERSION_INFO@ @LIBXML2_LIBS@
+libcrseleng_la_LDFLAGS=-version-info @LIBCRSELENG_VERSION_INFO@ @LIBXML2_LIBS@

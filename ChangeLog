@@ -33,7 +33,10 @@
 	removed ref to cr-parser-input.h
 	* src/seleng/Makefile.am: cleanup, make distcheck is happier.
 	* tests/testctl: exclude makefiles when diffing outputs and re outputs.
-
+	* configure.in,src/layeng/Makefile.am,src/seleng/Makefile.am:
+	Provides libcrseleng and libcrlayeng with version info 
+	different from the one of libcroco.
+	
 2003-08-17  Gaël CHAMOULAUD <strider@gnome.org>
 
 	* src/layeng/cr-lay-eng.c: (layout_block_box):

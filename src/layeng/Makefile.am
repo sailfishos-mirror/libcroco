@@ -15,6 +15,6 @@ INCLUDES=-I$(top_srcdir) -I$(top_srcdir)/src/parser \
 
 LDADD=$(top_srcdir)/src/parser/@CROCO_PARSER_LIB@
 
-libcrlayeng_la_LDFLAGS=-version-info @LIBCROCO_VERSION_INFO@ \
+libcrlayeng_la_LDFLAGS=-version-info @LIBCRLAYENG_VERSION_INFO@ \
 $(top_srcdir)/src/seleng/@CROCO_SELENG_LIB@ @LIBXML2_LIBS@ \
 @LIBGNOMEUI2_LIBS@
