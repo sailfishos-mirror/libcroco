@@ -38,7 +38,13 @@
 	different from the one of libcroco.
 	* src/layeng/Makefile.am,src/seleng/Makefile.am: Fixed more
 	build system stuffs here.
-	
+	* docs/examples/cssom-example-1.c,docs/examples/sac-example-1.c: Make these
+	compile with g++.
+	* src/layeng/Makefile.am: another build system cleanup.
+	* docs/examples/selection-example-1.c,docs/examples/selection-example-1.css,
+	docs/examples/selection-example-1.xml: added this code example
+	from Stefan Seefeld.
+
 2003-08-17  Gaël CHAMOULAUD <strider@gnome.org>
 
 	* src/layeng/cr-lay-eng.c: (layout_block_box):

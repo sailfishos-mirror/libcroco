@@ -1,0 +1,31 @@
+report
+{ 
+  color : red;
+}
+
+report > entry
+{ 
+  color : blue;
+}
+
+note
+{ 
+  color : green;
+  frame : solid;
+}
+
+note[id]
+{ 
+  color : blue;
+  frame : solid;
+}
+
+note[id=bar]
+{ 
+  margin : 5px;
+}
+
+entry[type=notice] note[id=bar]
+{ 
+  padding : 5px;
+}

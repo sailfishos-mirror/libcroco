@@ -64,7 +64,7 @@ display_usage (unsigned char *a_prog_name)
 
 	if (!prog_name)
 	{
-		prog_name = "sac-example-1" ;
+		prog_name = (unsigned char*)"sac-example-1" ;
 	}
 
 	printf ("usage: %s [--help] | <css file name>\n", prog_name) ;	
@@ -80,7 +80,7 @@ main (int argc, char **argv)
 
 	if (argc <= 1)
 	{
-		display_usage (argv[0]) ;
+		display_usage ((unsigned char*)argv[0]) ;
 		return -1 ;
 	}
 
@@ -97,8 +97,8 @@ main (int argc, char **argv)
 		if (!strcmp (argv[i], "--help")
 		    || !strcmp (argv[i], "-h"))
 		{
-			display_usage (argv[0]) ;
-			return ;
+			display_usage ((unsigned char*)argv[0]) ;
+			return -1;
 		}
 		else
 		{
@@ -107,7 +107,7 @@ main (int argc, char **argv)
 			 *available now, so this is
 			 *a bit redundant...
 			 */
-			display_usage (argv[0]) ;
+			display_usage ((unsigned char*)argv[0]) ;
 		}
 	}
 
@@ -117,14 +117,14 @@ main (int argc, char **argv)
 		 *no file name has been given
 		 *in parameter, go out.
 		 */
-		return ;
+		return -1 ;
 	}
 	
 	/****************************************
 	 *Now, the real libcroco related stuffs...
 	 ****************************************/
 
-	file_path = argv[i] ;
+	file_path = (unsigned char*)argv[i] ;
 	
 	/*
 	 *Instanciate the libcroco parser.
@@ -136,7 +136,7 @@ main (int argc, char **argv)
 		/*
 		 *Damned, something bad happened ...
 		 */
-		return ;
+		return -1;
 	}
 
 	/*
@@ -152,7 +152,7 @@ main (int argc, char **argv)
 		 */
 
 		cr_parser_destroy (parser) ;
-		return ;
+		return -1;
 	}
 
 	/******************

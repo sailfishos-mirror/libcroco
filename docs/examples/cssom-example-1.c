@@ -3,10 +3,12 @@
 /**
  *This is an example that shows how to use
  *the CSSOM api of the libcroco CSS2 parsing library.
+ *It just parses the CSS document given in argument and
+ *it dumps it (serializes) it on the screen.
  *
  *To compile it using gcc, type
  *
- *gcc `croco-config --cflags`  `croco-config --libs` -o cssom-example cssom-example.c
+ *gcc -g `croco-config --cflags`  `croco-config --libs` -o cssom-example-1 cssom-example-1.c
  *
  *Prior to that, you must have compiled and installed libcroco, of course.
  *
@@ -52,7 +54,6 @@ main (int argc, char **argv)
 {
 	short i = 0 ;
 	enum CRStatus status = CR_OK ;
-	CROMParser *parser = NULL ;
 	CRStyleSheet *stylesheet = NULL ;
 
 	/*first parse command line arguments*/
@@ -78,7 +79,7 @@ main (int argc, char **argv)
 		return 0;
 	}
 
-        /*****************************************************
+	/*****************************************************
 	 *Enough plumbering... now, the real libcroco stuffs.
 	 ***************************************************/
 
@@ -86,7 +87,7 @@ main (int argc, char **argv)
          *What we want here is to simply parse
          *a CSS document using the cssom api.
          */
-        status = cr_om_parser_simply_parse_file (argv[i] /*sheet*/,
+        status = cr_om_parser_simply_parse_file ((const guchar*)argv[i] /*sheet*/,
                                                  CR_ASCII /*the encoding*/,
                                                  &stylesheet) ;
 	if (status == CR_OK && stylesheet)
