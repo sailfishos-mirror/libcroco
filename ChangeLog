@@ -1,5 +1,12 @@
 2004-02-29  Dodji Seketeli  <dodji@gnome.org>
 
+	* src/cr-input.c,src/cr-num.c,src/cr-prop-list.[ch],
+	src/cr-rgb.c:  applied a patch from Rob BUIS that fixes
+	numeros typos. Also adds  G_BEGIN_DECL/G_END_DECL to
+	cr-prop-list.h
+
+2004-02-29  Dodji Seketeli  <dodji@gnome.org>
+
 	* src/cr-rgb.c,src/cr-tknzr.c: remove the usage of '...' in switch/case statements
 	as this is not portable across c89 compilers.
 	

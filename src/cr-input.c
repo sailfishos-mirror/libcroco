@@ -42,7 +42,7 @@
 
 
 /**
- *The privated attributes of
+ *The private attributes of
  *the #CRInputPriv class.
  */
 struct _CRInputPriv 
@@ -131,7 +131,7 @@ cr_input_new_real (void)
  *@param a_buf the memory buffer to create the input stream from.
  *@param a_len the size of the input buffer.
  *@param a_enc the buffer's encoding.
- *@param a_free_buf is set to TRUE, this a_buf will be freed
+ *@param a_free_buf if set to TRUE, this a_buf will be freed
  *at the destruction of this instance. If set to false, it is up
  *to the caller to free it.
  *@return the newly built instance of #CRInput.
@@ -200,7 +200,7 @@ cr_input_new_from_buf (const guchar *a_buf,
  *@param a_enc the encoding of the file
  *to create the input from
  *@return the newly created input stream if
- *this method couldn read the file and create it,
+ *this method could read the file and create it,
  *NULL otherwise.
  */
 
@@ -364,12 +364,12 @@ cr_input_unref (CRInput *a_this)
 
 /**
  *Tests wether the current instance of
- *#CRInput has reached it's input buffer.
+ *#CRInput has reached its input buffer.
  *@param a_this the current instance of #CRInput.
  *@param a_end_of_input out parameter. Is set to TRUE if
  *the current instance has reached the end of its input buffer,
  *FALSE otherwise.
- *@param CR_OK upon successfull completion, an error code otherwise.
+ *@param CR_OK upon successful completion, an error code otherwise.
  *Note that all the out parameters of this method are valid if
  *and only if this method returns CR_OK.
  */
@@ -387,7 +387,7 @@ cr_input_end_of_input (CRInput *a_this, gboolean *a_end_of_input)
 
 
 /**
- *Retunrs the number of bytes left in the input stream
+ *Returns the number of bytes left in the input stream
  *before the end.
  *@param a_this the current instance of #CRInput.
  *@return the number of characters left or -1 in case of error.
@@ -417,8 +417,8 @@ cr_input_get_nb_bytes_left (CRInput *a_this)
  *
  *@param a_this the current instance of #CRInput.
  *@param a_byte out parameter the returned byte.
- *@return CR_OK upon sucessfull completion, an error code
- *otherwise. All the out param of this method are valid if
+ *@return CR_OK upon successful completion, an error code
+ *otherwise. All the out parameters of this method are valid if
  *and only if this method returns CR_OK.
  */
 enum CRStatus
@@ -459,7 +459,7 @@ cr_input_read_byte (CRInput *a_this, guchar *a_byte)
  *#CRInput.
  *@param a_this the current instance of CRInput.
  *@param a_char out parameter. The read character.
- *@return CR_OK upon successfull completion, an error code
+ *@return CR_OK upon successful completion, an error code
  *otherwise.
  */
 enum CRStatus
@@ -493,7 +493,7 @@ cr_input_read_char (CRInput *a_this, guint32 *a_char)
                 /*update next byte index*/
                 PRIVATE (a_this)->next_byte_index += consumed ;
 
-                /*upate line and column number*/
+                /*update line and column number*/
                 if (PRIVATE (a_this)->end_of_line == TRUE)
                 {
                         PRIVATE (a_this)->col = 1 ;
@@ -521,7 +521,7 @@ cr_input_read_char (CRInput *a_this, guint32 *a_char)
  *@param a_this the "this pointer" of the current instance of
  *#CRInput.
  *@param a_line_num the new line number.
- *@return CR_OK upon successfull completion, an error code otherwise.
+ *@return CR_OK upon successful completion, an error code otherwise.
  */
 enum CRStatus
 cr_input_set_line_num (CRInput *a_this, glong a_line_num)
@@ -536,11 +536,11 @@ cr_input_set_line_num (CRInput *a_this, glong a_line_num)
 
 
 /**
- *Getter of the curren line number.
+ *Getter of the current line number.
  *@param a_this the "this pointer" of the current instance of
  *#CRInput.
  *@param a_line_num the returned line number.
- *@return CR_OK upon successfull completion, an error code otherwise.
+ *@return CR_OK upon successful completion, an error code otherwise.
  */
 enum CRStatus
 cr_input_get_line_num (CRInput *a_this, glong *a_line_num)
@@ -559,8 +559,8 @@ cr_input_get_line_num (CRInput *a_this, glong *a_line_num)
  *Setter of the current column number.
  *@param a_this the "this pointer" of the current instance of
  *#CRInput.
- *@param a_col the new column column number.
- *@return CR_OK upon successfull completion, an error code otherwise.
+ *@param a_col the new column number.
+ *@return CR_OK upon successful completion, an error code otherwise.
  */
 enum CRStatus
 cr_input_set_column_num (CRInput *a_this, glong a_col)
@@ -579,7 +579,7 @@ cr_input_set_column_num (CRInput *a_this, glong a_col)
  *@param a_this the "this pointer" of the current instance of
  *#CRInput.
  *@param a_col out parameter
- *@return CR_OK upon successfull completion, an error code otherwise.
+ *@return CR_OK upon successful completion, an error code otherwise.
  */
 enum CRStatus
 cr_input_get_column_num (CRInput *a_this, glong *a_col)
@@ -597,7 +597,7 @@ cr_input_get_column_num (CRInput *a_this, glong *a_col)
  *Increments the current line number.
  *@param a_this the "this pointer" of the current instance of
  *#CRInput.
- *@return CR_OK upon successfull completion, an error code otherwise.
+ *@return CR_OK upon successful completion, an error code otherwise.
  */
 enum CRStatus
 cr_input_increment_line_num (CRInput *a_this, glong a_increment)
@@ -615,7 +615,7 @@ cr_input_increment_line_num (CRInput *a_this, glong a_increment)
  *Increments the current column number.
  *@param a_this the "this pointer" of the current instance of
  *#CRInput.
- *@return CR_OK upon successfull completion, an error code otherwise.
+ *@return CR_OK upon successful completion, an error code otherwise.
  */
 enum CRStatus
 cr_input_increment_col_num (CRInput *a_this, glong a_increment)
@@ -637,7 +637,7 @@ cr_input_increment_col_num (CRInput *a_this, glong a_increment)
  *@param a_this the this pointer.
  *@param a_char the character to consume. If set to zero,
  *consumes any character.
- *@return CR_OK upon successfull completion, CR_PARSING_ERROR if
+ *@return CR_OK upon successful completion, CR_PARSING_ERROR if
  *next char is different from a_char, an other error code otherwise
  */
 enum CRStatus
@@ -673,7 +673,7 @@ cr_input_consume_char (CRInput *a_this, guint32 a_char)
  **MUST* equal a_char to trigger the consumption, or else, the error
  *code CR_PARSING_ERROR is returned.
  *If the number of contiguous characters that equals a_char is less than
- *a_nb_char, then this function consumes all the characters it can consumed.
+ *a_nb_char, then this function consumes all the characters it can consume.
  *
  *@param a_this the this pointer of the current instance of #CRInput.
  *@param a_char the character to consume.
@@ -724,7 +724,7 @@ cr_input_consume_chars (CRInput *a_this, guint32 a_char, gulong *a_nb_char)
  *@param a_this the "this pointer" of the current instance of #CRInput.
  *@param a_nb_chars in/out parameter. The number of white spaces to
  *consume. After return, holds the number of white spaces actually consumed.
- *@return CR_OK upon successfull completion, an error code otherwise.
+ *@return CR_OK upon successful completion, an error code otherwise.
  */
 enum CRStatus
 cr_input_consume_white_spaces (CRInput *a_this, gulong *a_nb_chars)
@@ -770,7 +770,7 @@ cr_input_consume_white_spaces (CRInput *a_this, gulong *a_nb_chars)
  *return the same character as the current one.
  *@param a_this the current instance of #CRInput.
  *@param a_char out parameter. The returned character.
- *@return CR_OK upon successfull completion, an error code
+ *@return CR_OK upon successful completion, an error code
  *otherwise.
  */
 enum CRStatus
@@ -807,7 +807,7 @@ cr_input_peek_char (CRInput *a_this, guint32 *a_char)
 
 
 /**
- *Gets a byte from the input stream.
+ *Gets a byte from the input stream,
  *starting from the current position in the input stream.
  *Unlike cr_input_peek_next_byte() this method
  *does not update the state of the current input stream.
@@ -820,10 +820,10 @@ cr_input_peek_char (CRInput *a_this, guint32 *a_char)
  *@param a_offset the offset of the byte to peek, starting from
  *the origin specified by a_origin.
  *@param a_byte out parameter the peeked byte.
- *@return CR_OK upon successfull completion or,
+ *@return CR_OK upon successful completion or,
  *
  *<ul>
- *<li>CR_BAD_PARAM_ERROR if at least of of the parameters is invalid</li>
+ *<li>CR_BAD_PARAM_ERROR if at least one of the parameters is invalid</li>
  *<li>CR_OUT_OF_BOUNDS_ERROR if the indexed byte is out of bounds</li>
  *</ul>
  */
@@ -875,11 +875,11 @@ cr_input_peek_byte (CRInput *a_this, enum CRSeekPos a_origin,
  *interface.
  *@param a_this the current byte input stream.
  *@param a_offset the offset of the byte to peek, starting
- *from the current input postion pointer.
+ *from the current input position pointer.
  *@param a_eof out parameter. Is set to true is we reach end of
  *stream. If set to NULL by the caller, this parameter is not taken
  *in account.
- *@return the read byte or 0 if smthing bad happened.
+ *@return the read byte or 0 if something bad happened.
  */
 guchar 
 cr_input_peek_byte2 (CRInput *a_this, gulong a_offset, 
@@ -910,7 +910,7 @@ cr_input_peek_byte2 (CRInput *a_this, gulong a_offset,
  *in the input stream.
  *@param a_this the current instance of #CRInput.
  *@param a_offset the offset of the byte in the input stream starting
- *from the begining of the stream.
+ *from the beginning of the stream.
  *@return the address, otherwise NULL if an error occured.
  */
 guchar *
@@ -931,7 +931,7 @@ cr_input_get_byte_addr (CRInput *a_this,
  *Returns the address of the current character pointer.
  *@param a_this the current input stream
  *@param a_offset out parameter. The returned address.
- *@return CR_OK upon successfull completion, an error code otherwise.
+ *@return CR_OK upon successful completion, an error code otherwise.
  */
 enum CRStatus
 cr_input_get_cur_byte_addr (CRInput *a_this, guchar ** a_offset)
@@ -963,7 +963,7 @@ cr_input_get_cur_byte_addr (CRInput *a_this, guchar ** a_offset)
  *@param a_pos the relative offset of the new "current byte index."
  *This offset is relative to the origin a_origin.
  *
- *@return CR_OK upon successfull completion otherwise returns
+ *@return CR_OK upon successful completion otherwise returns
  *<ul>
  *<li>CR_BAD_PARAM_ERROR if at least one of the parameters is not valid</li>
  *<li>CR_OUT_BOUNDS_ERROR</li>
@@ -1020,11 +1020,11 @@ cr_input_seek_index (CRInput *a_this, enum CRSeekPos a_origin, gint a_pos)
  *
  *@param a_pos out parameter. The returned position.
  *
- *@return CR_OK upon sucessfull completion. Otherwise,
+ *@return CR_OK upon successful completion. Otherwise,
  *<ul>
- *<li>CR_BAD_PARAMETER_ERROR if at least of the arguments is invalid.</li>
- *<li>CR_START_OF_INPUT if no call to neither cr_input_read_byte()
- *not cr_input_seek_index() have been issued before calling 
+ *<li>CR_BAD_PARAMETER_ERROR if at least one of the arguments is invalid.</li>
+ *<li>CR_START_OF_INPUT if no call to either cr_input_read_byte()
+ *or cr_input_seek_index() have been issued before calling 
  *cr_input_get_cur_pos()</li>
  *</ul>
  *Note that the out parameters of this function are valid if and only if this
@@ -1053,7 +1053,7 @@ cr_input_get_cur_pos (CRInput *a_this, CRInputPos * a_pos)
  *@param a_this the "this pointer" of the current instance of
  *#CRInput
  *@param a_index out parameter. The returned index.
- *@return CR_OK upon sucessfull completion, an error code
+ *@return CR_OK upon successful completion, an error code
  *otherwise.
  */
 enum CRStatus
@@ -1075,7 +1075,7 @@ cr_input_get_cur_index (CRInput *a_this, glong *a_index)
  *@param a_this the "this pointer" of the current instance
  *of #CRInput .
  *@param a_index the new index to set.
- *@return CR_OK upon sucessfull completion, an error code otherwise.
+ *@return CR_OK upon successful completion, an error code otherwise.
  */
 enum CRStatus
 cr_input_set_cur_index (CRInput *a_this, glong a_index)
@@ -1093,7 +1093,7 @@ cr_input_set_cur_index (CRInput *a_this, glong a_index)
  *Sets the end of file flag.
  *@param a_this the current instance of #CRInput.
  *@param a_eof the new end of file flag.
- *@return CR_OK upon successfull completion, an error code otherwise.
+ *@return CR_OK upon successful completion, an error code otherwise.
  */
 enum CRStatus
 cr_input_set_end_of_file (CRInput *a_this, gboolean a_eof)
@@ -1109,9 +1109,9 @@ cr_input_set_end_of_file (CRInput *a_this, gboolean a_eof)
 /**
  *Gets the end of file flag.
  *@param a_this the current instance of #CRInput.
- *@param a_eof out parameter the place where to put the end of
+ *@param a_eof out parameter the place to put the end of
  *file flag.
- *@return CR_OK upon sucessfull completion, an error code otherwise.
+ *@return CR_OK upon successful completion, an error code otherwise.
  */
 enum CRStatus
 cr_input_get_end_of_file (CRInput *a_this, gboolean *a_eof)
@@ -1130,7 +1130,7 @@ cr_input_get_end_of_file (CRInput *a_this, gboolean *a_eof)
  *Sets the end of line flag.
  *@param a_this the current instance of #CRInput.
  *@param a_eol the new end of line flag.
- *@return CR_OK upon successfull completion, an error code
+ *@return CR_OK upon successful completion, an error code
  *otherwise.
  */
 enum CRStatus
@@ -1147,9 +1147,9 @@ cr_input_set_end_of_line (CRInput *a_this, gboolean a_eol)
 /**
  *Gets the end of line flag of the current input.
  *@param a_this the current instance of #CRInput
- *@param a_eol out parameter. The place where to put
+ *@param a_eol out parameter. The place to put
  *the returned flag
- *@return CR_OK upon successfull completion, an error code
+ *@return CR_OK upon successful completion, an error code
  *otherwise.
  */
 enum CRStatus

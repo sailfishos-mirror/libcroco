@@ -230,9 +230,9 @@ cr_rgb_new_with_vals (gulong a_red, gulong a_green,
 }
 
 /**
- *Serialises the rgb into a zero terminated string.
+ *Serializes the rgb into a zero terminated string.
  *@param a_this the instance of #CRRgb to serialize.
- *@return the zero terminated string containing the serialised
+ *@return the zero terminated string containing the serialized
  *rgb. MUST BE FREED by the caller using g_free().
  */
 guchar *
@@ -308,7 +308,7 @@ cr_rgb_dump (CRRgb *a_this, FILE *a_fp)
  *@param a_red the red value.
  *@param a_green the green value.
  *@param a_blue the blue value.
- *@return CR_OK upon successfull completion, an error code
+ *@return CR_OK upon successful completion, an error code
  *otherwise.
  */
 enum CRStatus
@@ -338,7 +338,7 @@ cr_rgb_set (CRRgb *a_this, gulong a_red,
  *Sets the rgb from an other one.
  *@param a_this the current instance of #CRRgb.
  *@param a_rgb the rgb to "copy"
- *@return CR_OK upon successfull completion, an error code otherwise.
+ *@return CR_OK upon successful completion, an error code otherwise.
  */
 enum CRStatus
 cr_rgb_set_from_rgb (CRRgb *a_this, CRRgb *a_rgb)

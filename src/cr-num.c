@@ -61,7 +61,7 @@ cr_num_new (void)
 
 /**
  *A constructor of #CRNum.
- *@param a_is_natural whether if the intance of #CRNum is 
+ *@param a_is_natural indicates whether the intance of #CRNum is 
  *a natural number or not.
  *@param a_integer_part the integer part of the instance 
  *of #CRNum
@@ -207,7 +207,7 @@ cr_num_to_string (CRNum *a_this)
  *Must be non NULL.
  *@param a_dst the destination of the copy.
  *Must be non NULL
- *@return CR_OK upon sucessfull completion, an
+ *@return CR_OK upon successful completion, an
  *error code otherwise.
  */
 enum CRStatus
@@ -266,7 +266,7 @@ cr_num_set (CRNum *a_this, gdouble a_val, enum CRNumType a_type)
 /**
  *Tests if the current instance of #CRNum is a fixed
  *length value or not. Typically a fixed length value
- *is anything from NUM_LENTGTH_EM to NUM_LENGTH_PC.
+ *is anything from NUM_LENGTH_EM to NUM_LENGTH_PC.
  *See the definition of #CRNumType to see what we mean.
  *@return TRUE if the instance of #CRNum is a fixed length number,
  *FALSE otherwise.

@@ -24,6 +24,8 @@
 #include "cr-utils.h"
 #include "cr-declaration.h"
 
+G_BEGIN_DECLS
+
 typedef struct _CRPropList CRPropList ;
 typedef struct _CRPropListPriv CRPropListPriv ;
 
@@ -67,5 +69,7 @@ enum CRStatus cr_prop_list_get_decl (CRPropList *a_this,
 				     CRDeclaration **a_decl) ;
 
 void cr_prop_list_destroy (CRPropList *a_this) ;
+
+G_END_DECLS
 
 #endif /*__CR_PROP_LIST_H__*/

@@ -98,7 +98,7 @@ cr_prop_list_append (CRPropList *a_this,
 
 
 /**
- *appends a pair of prop/declaration to
+ *Appends a pair of prop/declaration to
  *the current prop list.
  *@param a_this the current instance of #CRPropList
  *@param a_prop the property to consider
@@ -176,7 +176,7 @@ cr_prop_list_prepend2 (CRPropList *a_this,
 }
 
 /**
- *sets the property of a CRPropList
+ *Sets the property of a CRPropList
  *@param a_this the current instance of #CRPropList
  *@param a_prop the property to set
  */
@@ -195,10 +195,10 @@ cr_prop_list_set_prop (CRPropList *a_this,
 
 /**
  *Getter of the property associated to the current instance
- *of #CRpropList
+ *of #CRPropList
  *@param a_this the current instance of #CRPropList
  *@param a_prop out parameter. The returned property
- *@return CR_OK upon sucessful completion, an error code
+ *@return CR_OK upon successful completion, an error code
  *otherwise.
  */
 enum CRStatus
@@ -247,7 +247,7 @@ cr_prop_list_get_decl (CRPropList *a_this,
  *@param a_prop the property to lookup
  *@param a_prop_list out parameter. The property/declaration
  *pair found (if and only if the function returned code if CR_OK)
- *@return CR_OK upon if a prop/decl pair has been found,
+ *@return CR_OK if a prop/decl pair has been found,
  *CR_VALUE_NOT_FOUND_ERROR if not, or an error code if something
  *bad happens.
  */
