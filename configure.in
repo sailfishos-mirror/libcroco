@@ -4,7 +4,7 @@ AC_INIT(src/parser/cr-input.c)
 
 PACKAGE=libcroco
 LIBCROCO_MAJOR_VERSION=0
-LIBCROCO_MINOR_VERSION=2
+LIBCROCO_MINOR_VERSION=3
 LIBCROCO_MICRO_VERSION=0
 
 LIBCROCO_VERSION=$LIBCROCO_MAJOR_VERSION.$LIBCROCO_MINOR_VERSION.$LIBCROCO_MICRO_VERSION
@@ -262,7 +262,7 @@ dnl*Dodji's environment.
 dnl************************
 
 if test "x$LOGNAME" = "xdodji" -a "x$GCC" = "xyes" ; then
-	CFLAGS="$CFLAGS -g -Wunused -Wimplicit -Wreturn-type -Wswitch \
+	CFLAGS="-g -Wunused -Wimplicit -Wreturn-type -Wswitch \
 	-Wcomment -Wtrigraphs -Wformat -Wchar-subscripts \ 
         -Wparentheses -Wpointer-arith -Wcast-align \
         -Wwrite-strings -Waggregate-return -Wstrict-prototypes \

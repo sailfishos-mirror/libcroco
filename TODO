@@ -1,6 +1,8 @@
 
 *coding:)
 
+
+
 Well, in the cr_statement_xxx_parse_functions, memleaks 
 occur (the parsing result set in the sac callback is not freed)
 when a parsing fails. This is because the unrecoverable error
@@ -10,12 +12,14 @@ I have now to support 2 modes of parsing. Normal and standalone.
 In standalone mode, the standalone parsing functions must
 call the "unrecoverable_error" sac callback when they fail.
 
-More debug of the test case for cr_statement_parse_from_buf ().
+implements the width:20% case. (on going)
+	   implement the size wrapping using the rightmost_x field of CRLayEngPriv.
 
 Provide support for font selection. (hard, started, is well underway.)
  First make sure to be able to gather all the font related property
   values.
- Then, figure out how to implement a font selector that uses pango.
+ Then, figure out how to implement a font selector that uses
+ pango. (on going)
 
 Go forward in the cascading implementation in cr-sel-eng.c
      test/debug it.

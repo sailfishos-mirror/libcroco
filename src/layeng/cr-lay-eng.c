@@ -49,6 +49,7 @@ struct _CRLayEngPriv
         GtkLayout *layout ;
         gulong xdpi ;/*x resolution*/
         gulong ydpi ; /*y resolution*/
+        gulong rightmost_x ;
 } ;
 
 
@@ -81,8 +82,8 @@ static glong
 get_box_rightmost_x (CRBox *a_this) ;
 
 static enum CRStatus
-compute_box_size (CRLayEng *a_this,
-                  CRBox *a_cur_box) ;
+compute_and_set_box_dimensions (CRLayEng *a_this,
+                                CRBox *a_cur_box) ;
 
 static enum CRStatus
 layout_inline_box (CRLayEng *a_this,
@@ -388,10 +389,8 @@ style_specified_2_computed_values (CRLayEng *a_this,
                                                &a_style->num_props[i].sv,
                                                DIR_VERTICAL) ;
                         }
-
                         break ;
-
-                case NUM_PROP_WIDTH:
+                        
                 case NUM_PROP_RIGHT:
                 case NUM_PROP_LEFT:
                 case NUM_PROP_PADDING_LEFT:
@@ -416,7 +415,8 @@ style_specified_2_computed_values (CRLayEng *a_this,
                                                       CR_BAD_PARAM_ERROR) ;
 
                                 a_style->num_props[i].cv.val =
-                                        parent_inner_edge->width * 
+                                        a_style->parent_style->
+                                        num_props[NUM_PROP_WIDTH].cv.val *
                                         a_style->num_props[i].sv.val / 100 ;
                         }
                         else
@@ -428,6 +428,45 @@ style_specified_2_computed_values (CRLayEng *a_this,
                         }
                         break ;
 
+                case NUM_PROP_WIDTH:
+                        if (a_style->num_props[i].sv.type == NUM_PERCENTAGE)
+                        {
+                                /*
+                                 *TODO: compute the computed value
+                                 *using the parent box size.
+                                 */
+                                if (a_parent_box)
+                                {
+                                        parent_inner_edge = 
+                                                &a_parent_box->inner_edge ;
+                                }
+
+                                g_return_val_if_fail (parent_inner_edge,
+                                                      CR_BAD_PARAM_ERROR) ;
+
+                                a_style->num_props[i].cv.val =
+                                        a_style->parent_style->
+                                        num_props[NUM_PROP_WIDTH].cv.val *
+                                        a_style->num_props[i].sv.val / 100 ;
+
+                                a_style->num_props[i].cv.val -=
+                                        (a_style->num_props[NUM_PROP_MARGIN_LEFT].cv.val
+                                         +a_style->num_props[NUM_PROP_MARGIN_RIGHT].cv.val
+                                         +a_style->num_props[NUM_PROP_BORDER_LEFT].cv.val
+                                         +a_style->num_props[NUM_PROP_BORDER_RIGHT].cv.val
+                                         +a_style->num_props[NUM_PROP_PADDING_LEFT].cv.val
+                                         +a_style->num_props[NUM_PROP_PADDING_RIGHT].cv.val);
+                                a_style->num_props[i].cv.type = 
+                                        NUM_LENGTH_PX ;
+                        }
+                        else
+                        {
+                                normalize_num (a_this,
+                                               &a_style->num_props[i].cv,
+                                               &a_style->num_props[i].sv,
+                                               DIR_HORIZONTAL) ;
+                        }
+                        break ;
                 default:
                         normalize_num (a_this,
                                        &a_style->num_props[i].cv,
@@ -563,8 +602,8 @@ create_box_tree_real (CRLayEng * a_this,
                          *the positioning. The positioning will
                          *be updated later via the cr_box_layout() method.
                          */
-                        style_specified_2_computed_values 
-                                (a_this, style, a_parent_box) ;
+                        /*style_specified_2_computed_values 
+                          (a_this, style, a_parent_box) ;*/
 
                         cur_box = cr_box_new (style, TRUE) ;
                         if (!cur_box)
@@ -673,8 +712,8 @@ create_box_tree_real (CRLayEng * a_this,
                                  */
                                 init_anonymous_text_box (cur_box) ;
 
-                                style_specified_2_computed_values 
-                                        (a_this, cur_box->style, a_parent_box) ;
+                                /*style_specified_2_computed_values 
+                                  (a_this, cur_box->style, a_parent_box) ;*/
 
                                 cr_box_append_child (a_parent_box,
                                                      cur_box) ;
@@ -811,7 +850,17 @@ compute_text_box_inner_edge_size (CRLayEng *a_this,
 
         /*gtk_widget_size_request (label, &requisition) ;*/
 
-        a_box->inner_edge.width = logical_rect.width ;
+        if (cr_num_is_fixed_length 
+            (&a_box->style->num_props[NUM_PROP_WIDTH].cv))
+        {
+                a_box->inner_edge.width = 
+                        a_box->style->num_props[NUM_PROP_WIDTH].cv.val ;
+        }
+        else
+        {
+                a_box->inner_edge.width = logical_rect.width ;
+        }
+
         a_box->inner_edge.height = logical_rect.height ;
 
         return status ;
@@ -860,27 +909,11 @@ layout_text_in_box (CRLayEng *a_this, CRBox *a_text_box)
 				     FALSE) ;
         pgo_layout = gtk_label_get_layout (GTK_LABEL (label)) ;
 
-        /*
-         *set the wrap width if necessary.
-         */
-        if (cr_num_is_fixed_length 
-            (&a_text_box->style->num_props[NUM_PROP_WIDTH].cv)
-            == TRUE)
-        {
-                wrap_width = 
-                        a_text_box->style->num_props[NUM_PROP_WIDTH].cv.val;
-        }
-        else 
-        {
-                wrap_width = a_text_box->parent->inner_edge.max_width 
-                        + a_text_box->parent->inner_edge.x -
-                        a_text_box->inner_edge.x ;
-        }
+        wrap_width = a_text_box->inner_edge.max_width ;
 
         gtk_label_set_line_wrap (GTK_LABEL (label), TRUE) ;
         gtk_widget_set_size_request (label, wrap_width,
                                      -1) ;
-                
         /*
          *TODO: set the font description attributes.
          */                
@@ -890,8 +923,7 @@ layout_text_in_box (CRLayEng *a_this, CRBox *a_text_box)
         g_return_val_if_fail (pgo_attr_list, CR_ERROR) ;
 
         status = cr_style_to_pango_font_attributes 
-                (a_text_box->style, 
-                 pgo_attr_list,
+                (a_text_box->style, pgo_attr_list,
                  strlen (a_text_box->content->u.text)) ;
 
         gtk_label_set_attributes (GTK_LABEL (label), pgo_attr_list) ;
@@ -912,8 +944,8 @@ layout_text_in_box (CRLayEng *a_this, CRBox *a_text_box)
  *@return CR_OK upon successfull completion, an error code otherwise.
  */
 static enum CRStatus
-compute_box_size (CRLayEng *a_this,
-                  CRBox *a_cur_box)
+compute_and_set_box_dimensions (CRLayEng *a_this,
+                                CRBox *a_cur_box)
 {
         enum CRStatus status = CR_OK ;
 
@@ -925,7 +957,9 @@ compute_box_size (CRLayEng *a_this,
          *left padding edges.
          *2/compute the left most x and topmost y of
          *the inner box.
-         *3/Compute the outer edge of the contained
+         *3/compute the max_width of the inner edge.
+         *
+         *4/Compute the outer edge of the contained
          *box; this is recursive.
          *******************************************/
 
@@ -968,21 +1002,33 @@ compute_box_size (CRLayEng *a_this,
                 +
                 a_cur_box->style->num_props[NUM_PROP_PADDING_LEFT].cv.val ;
 
+        /*
+         *Step 3/
+         */        
         a_cur_box->inner_edge.max_width =
-                a_cur_box->outer_edge.max_width +
-                a_cur_box->outer_edge.x -
-                a_cur_box->inner_edge.x ;
+                (a_cur_box->parent->inner_edge.x + 
+                a_cur_box->parent->inner_edge.max_width) -
+                a_cur_box->inner_edge.x -                
+                (a_cur_box->style->num_props[NUM_PROP_MARGIN_RIGHT].cv.val
+                 + a_cur_box->style->num_props[NUM_PROP_BORDER_RIGHT].cv.val
+                 + a_cur_box->style->num_props[NUM_PROP_PADDING_RIGHT].cv.val) ;
 
         /*
-         *Step 3.
+         *Step 4.
          */
         if (cr_num_is_fixed_length 
-            (&a_cur_box->style->num_props[NUM_PROP_WIDTH].cv)
-            == TRUE)
+            (&a_cur_box->style->num_props[NUM_PROP_WIDTH].cv)  == TRUE)
         {
                 a_cur_box->inner_edge.width = 
                         a_cur_box->style->num_props[NUM_PROP_WIDTH].cv.val ;
-                a_cur_box->inner_edge.max_width = a_cur_box->inner_edge.width ;
+
+                if (a_cur_box->inner_edge.max_width >
+                    a_cur_box->style->num_props[NUM_PROP_WIDTH].cv.val)
+                {
+                        a_cur_box->inner_edge.max_width =
+                                a_cur_box->style->
+                                num_props[NUM_PROP_WIDTH].cv.val ;
+                }
         }
 
         if (a_cur_box->children)
@@ -993,7 +1039,6 @@ compute_box_size (CRLayEng *a_this,
                  */
                 status = layout_box (a_this, a_cur_box->children) ;
                 g_return_val_if_fail (status == CR_OK, status) ;
-
         }
         else
         {
@@ -1008,6 +1053,17 @@ compute_box_size (CRLayEng *a_this,
                         switch (a_cur_box->content->type)
                         {
                         case TEXT_CONTENT_TYPE:
+                                if (a_cur_box->parent 
+                                    && cr_num_is_fixed_length 
+                                    (&a_cur_box->parent->style->
+                                     num_props[NUM_PROP_WIDTH].cv))
+                                {
+                                        cr_num_copy 
+                                                (&a_cur_box->style->
+                                                 num_props[NUM_PROP_WIDTH].cv,
+                                                 &a_cur_box->parent->style->
+                                                 num_props[NUM_PROP_WIDTH].cv) ;
+                                }
                                 layout_text_in_box (a_this, a_cur_box) ;
                                 compute_text_box_inner_edge_size
                                         (a_this, a_cur_box) ;
@@ -1032,9 +1088,8 @@ compute_box_size (CRLayEng *a_this,
                                 break ;
                         }
                 }
-        }        
-        
-        
+        }
+
         /*******************************************
          *Inner edge position (x,y) and size computing is 
          *finished.
@@ -1063,6 +1118,14 @@ compute_box_size (CRLayEng *a_this,
                 a_cur_box->style->num_props[NUM_PROP_MARGIN_TOP].cv.val +
                 a_cur_box->style->num_props[NUM_PROP_MARGIN_BOTTOM].cv.val ;
 
+        if (a_cur_box->parent->inner_edge.child_rmost_x 
+            < a_cur_box->outer_edge.x + a_cur_box->outer_edge.width)
+        {
+                a_cur_box->parent->inner_edge.child_rmost_x = 
+                        a_cur_box->outer_edge.x + 
+                        a_cur_box->outer_edge.width ;
+        }
+
         return CR_OK ;
 }
 
@@ -1070,16 +1133,25 @@ compute_box_size (CRLayEng *a_this,
  *Adjusts the size of the inner edge of this box's parent.
  *That is, increases (if needed) the parent inner edge's width/height.
  *@param a_this the current instance of #CRBox.
+ *@param a_cur_box the box to consider.
  */
 static enum CRStatus
 adjust_parent_inner_edge_size (CRLayEng *a_this,
                                CRBox *a_cur_box)
-{        
+{
         g_return_val_if_fail (a_cur_box 
                               && a_this
                               && PRIVATE (a_this),
                               CR_BAD_PARAM_ERROR) ;
-
+/*
+        if (a_cur_box->parent 
+            && a_cur_box->parent->style
+            && (cr_num_is_fixed_length 
+            (&a_cur_box->parent->style->num_props[NUM_PROP_WIDTH].cv) == TRUE))
+        {
+                return CR_OK ;
+        }
+*/
         if (PRIVATE (a_this)->update_parent_box_size == TRUE
             && a_cur_box->parent)
         {
@@ -1165,7 +1237,7 @@ layout_block_box (CRLayEng *a_this,
         {
                 a_cur_box->outer_edge.x = 0 ;
                 a_cur_box->outer_edge.y = 0 ;
-                a_cur_box->inner_edge.width = 800 ;
+                a_cur_box->inner_edge.width = 800 ;                
                 a_cur_box->inner_edge.height = 600 ;
                 a_cur_box->inner_edge.max_width = 800 ;
         }
@@ -1180,7 +1252,7 @@ layout_block_box (CRLayEng *a_this,
                 }
                 else
                 {
-                        a_cur_box->outer_edge.y = 
+                        a_cur_box->outer_edge.y =
                                 cont_box->inner_edge.y ;
                 }
         }
@@ -1188,15 +1260,10 @@ layout_block_box (CRLayEng *a_this,
         g_return_val_if_fail (a_cur_box->parent->inner_edge.max_width 
                               + a_cur_box->parent->inner_edge.x
                               > a_cur_box->outer_edge.x,
-                              CR_ERROR) ;
-
-        a_cur_box->outer_edge.max_width = 
-                a_cur_box->parent->inner_edge.max_width 
-                + a_cur_box->parent->inner_edge.x - 
-                a_cur_box->outer_edge.x ;
-
-        status = compute_box_size (a_this,
-                                   a_cur_box) ;
+                              CR_ERROR) ;                       
+        
+        status = compute_and_set_box_dimensions (a_this,
+                                                 a_cur_box) ;        
         return status ;
 }
 
@@ -1270,13 +1337,8 @@ layout_inline_box (CRLayEng *a_this,
          *box; this is recursive.
          *******************************************/                
 
-        a_cur_box->outer_edge.max_width = 
-                a_cur_box->parent->inner_edge.max_width 
-                + a_cur_box->parent->inner_edge.x - 
-                a_cur_box->outer_edge.x ;
-
-        status = compute_box_size (a_this,
-                                   a_cur_box) ;
+        status = compute_and_set_box_dimensions (a_this,
+                                                 a_cur_box) ;
 
         return status ;
 }
@@ -1363,9 +1425,12 @@ layout_box (CRLayEng *a_this,
 
         PRIVATE (a_this)->update_parent_box_size = TRUE ;
 
-        for (cur_box = a_cur_box ; cur_box ; 
+        for (cur_box = a_cur_box ; cur_box ;
              cur_box = cur_box->next)
         {
+                style_specified_2_computed_values (a_this, cur_box->style,
+                                                   cur_box->parent) ;
+                
                 switch (cur_box->style->position)
                 {
                 case POSITION_STATIC:
@@ -1382,6 +1447,7 @@ layout_box (CRLayEng *a_this,
                 case POSITION_INHERIT:
                         break ;
                 }
+                
                 /*
                  *make sure the parent inner_edge is big enough to contain
                  *the current box.

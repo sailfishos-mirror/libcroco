@@ -169,12 +169,14 @@ set_border_line_attrs (CRBoxView *a_this,
                        enum CRBorderStyleProp a_style_prop)
 {
         enum CRNumProp border_width_dir ;
-        GdkGCValues gc_values = {0} ;
+        GdkGCValues gc_values  ;
 
         g_return_val_if_fail (a_this && PRIVATE (a_this)
                               && a_box
                               && a_style_prop < NB_BORDER_STYLE_PROPS,
                               CR_BAD_PARAM_ERROR) ;
+
+        memset (&gc_values, 0, sizeof (GdkGCValues)) ;
 
         gdk_gc_get_values (PRIVATE (a_this)->gc, &gc_values) ;        
 
@@ -723,6 +725,8 @@ cr_box_view_layout (CRBoxView *a_this)
 
         cr_lay_eng_layout_box_tree (PRIVATE (a_this)->layeng,
                                     PRIVATE (a_this)->box_model->box.children) ;
+        cr_box_dump_to_file (PRIVATE (a_this)->box_model->box.children,
+                             0, stdout) ;
 
         return CR_OK ;
 }

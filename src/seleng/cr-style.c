@@ -562,6 +562,13 @@ set_prop_border_x_width_from_value (CRStyle *a_style,
                         }
                 }
         }
+        else if (a_value->type == TERM_NUMBER)
+        {
+                if (a_value->content.num)
+                {
+                        cr_num_copy (num_val, a_value->content.num) ;
+                }
+        }
         else if (a_value->type != TERM_NUMBER
                  || a_value->content.num == NULL)
         {

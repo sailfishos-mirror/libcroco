@@ -1,3 +1,25 @@
+2003-07-05  Dodji Seketeli  <dodji at seketeli dot org>
+
+	* src/seleng/cr-style.h: rearranged the enum CRNumProp values.
+	
+	* src/seleng/cr-style.c: fixed the border-x:<a number> bug.
+	This now support also number and not only symbolic border width
+	like thin,thick etc ...
+	
+	* src/parser/cr-num.c: documented the apis here.
+	
+	* src/layeng/cr-lay-eng.c: Fixed some subtle bugs and finally implemented
+	the width:15% (set percentage to width).
+
+2003-07-01  Dodji Seketeli  <dodji at seketeli dot org>
+
+	* src/layeng/cr-lay-eng.c: put the 
+	call to style_specified_2_computed_values() in the
+	layout_box() function. It was previously in the create_box_tree_real().
+	
+	* src/layeng/cr-box-view.c: fixed a compiler warning.
+	* hmmh first commit after 0.2 release.
+
 2003-06-30  Dodji Seketeli <dodji at seketeli dot org>
 
 	* tests/test-output-refs/test4.1.css.out: updated this

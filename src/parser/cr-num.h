@@ -40,6 +40,12 @@
 G_BEGIN_DECLS
 
 /**
+ *@file
+ *The declaration of the #CRNum class.
+ *
+ */
+
+/**
  *The different types
  *of numbers.
  *Please, do not modify
@@ -71,6 +77,10 @@ enum CRNumType
 } ;
 
 
+/**
+ *An abstraction of a number (num)
+ *as defined in the css2 spec.
+ */
 typedef struct _CRNum CRNum ;
 
 /**

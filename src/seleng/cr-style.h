@@ -137,28 +137,28 @@ struct _CRRgbPropVal
 
 
 enum CRNumProp
-{
-        NUM_PROP_WIDTH = 0,
-
-        NUM_PROP_TOP,
+{        
+        NUM_PROP_TOP=0,
         NUM_PROP_RIGHT,
         NUM_PROP_BOTTOM,
-        NUM_PROP_LEFT,
+        NUM_PROP_LEFT,/*3*/
 
         NUM_PROP_PADDING_TOP,
         NUM_PROP_PADDING_RIGHT,
         NUM_PROP_PADDING_BOTTOM,
-        NUM_PROP_PADDING_LEFT,
+        NUM_PROP_PADDING_LEFT,/*7*/
 
         NUM_PROP_BORDER_TOP,
         NUM_PROP_BORDER_RIGHT,
         NUM_PROP_BORDER_BOTTOM,
-        NUM_PROP_BORDER_LEFT,
+        NUM_PROP_BORDER_LEFT,/*11*/
 
         NUM_PROP_MARGIN_TOP,
         NUM_PROP_MARGIN_RIGHT,
         NUM_PROP_MARGIN_BOTTOM,
-        NUM_PROP_MARGIN_LEFT,
+        NUM_PROP_MARGIN_LEFT,/*15*/
+
+        NUM_PROP_WIDTH,
 
         /*must be last*/
         NB_NUM_PROPS

@@ -201,7 +201,15 @@ cr_num_to_string (CRNum *a_this)
         return result ;
 }
 
-
+/**
+ *Copies an instance of #CRNum.
+ *@param a_src the instance of #CRNum to copy.
+ *Must be non NULL.
+ *@param a_dst the destination of the copy.
+ *Must be non NULL
+ *@return CR_OK upon sucessfull completion, an
+ *error code otherwise.
+ */
 enum CRStatus
 cr_num_copy (CRNum *a_dest, CRNum *a_src)
 {
@@ -213,6 +221,13 @@ cr_num_copy (CRNum *a_dest, CRNum *a_src)
         return CR_OK ;
 }
 
+
+/**
+ *Duplicates an instance of #CRNum
+ *@param a_this the instance of #CRNum to duplicate.
+ *@return the newly created (duplicated) instance of #CRNum.
+ *Must be freed by cr_num_destroy().
+ */
 CRNum *
 cr_num_dup (CRNum *a_this)
 {
@@ -230,6 +245,13 @@ cr_num_dup (CRNum *a_this)
         return result ;
 }
 
+/**
+ *Sets an instance of #CRNum.
+ *@param a_this the current instance of #CRNum to be set.
+ *@param a_val the new numerical value to be hold by the current
+ *instance of #CRNum
+ *@param a_type the new type of #CRNum.
+ */
 enum CRStatus
 cr_num_set (CRNum *a_this, gdouble a_val, enum CRNumType a_type)
 {
@@ -241,6 +263,14 @@ cr_num_set (CRNum *a_this, gdouble a_val, enum CRNumType a_type)
         return CR_OK ;
 }
 
+/**
+ *Tests if the current instance of #CRNum is a fixed
+ *length value or not. Typically a fixed length value
+ *is anything from NUM_LENTGTH_EM to NUM_LENGTH_PC.
+ *See the definition of #CRNumType to see what we mean.
+ *@return TRUE if the instance of #CRNum is a fixed length number,
+ *FALSE otherwise.
+ */
 gboolean
 cr_num_is_fixed_length (CRNum *a_this)
 {
