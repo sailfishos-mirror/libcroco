@@ -21,10 +21,6 @@
  * See COPYRIGHTS file for copyrights information.
  */
 
-
-/*
- *$Id$
- */
 #ifndef __CR_PARSER_H__
 #define  __CR_PARSER_H__
 

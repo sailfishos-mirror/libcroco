@@ -20,10 +20,6 @@
  * USA
  */
 
-/*
- *$Id$
- */
-
 #include <string.h>
 #include "cr-test-utils.h"
 #include "libcroco.h"

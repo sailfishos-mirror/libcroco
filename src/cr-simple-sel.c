@@ -21,10 +21,6 @@
  * See COPYRIGHTS file for copyright information.
  */
 
-/*
- *$Id$
- */
-
 #include <string.h>
 #include <glib.h>
 #include "cr-simple-sel.h"

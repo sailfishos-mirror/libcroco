@@ -22,10 +22,6 @@
  * See COPYRIGHTS file for copyright information.
  */
 
-/*
- *$Id$
- */
-
 #include <stdio.h>
 #include <string.h>
 #include "cr-test-utils.h"

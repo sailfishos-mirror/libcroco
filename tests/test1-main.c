@@ -20,10 +20,6 @@
  * See COPYRIGHTS file for copyright information
  */
 
-/*
- *$Id$
- */
-
 #include <stdio.h>
 #include "cr-input.h"
 #include "string.h"

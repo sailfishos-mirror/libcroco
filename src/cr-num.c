@@ -22,10 +22,6 @@
  * See COPYRIGHTS file for copyrights information.
  */
 
-/*
- *$Id$
- */
-
 /**
  *@file
  *The definition
