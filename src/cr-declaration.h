@@ -100,6 +100,15 @@ void
 cr_declaration_dump (CRDeclaration *a_this, FILE *a_fp, glong a_indent,
 		     gboolean a_one_per_line) ;
 
+int
+cr_declaration_nr_props (CRDeclaration *a_this) ;
+
+CRDeclaration *
+cr_declaration_get_from_list (CRDeclaration *a_this, int itemnr) ;
+
+CRDeclaration *
+cr_declaration_get_by_prop_name (CRDeclaration *a_this, const guchar *a_str) ;
+
 guchar *
 cr_declaration_to_string (CRDeclaration *a_this,
 			  gulong a_indent) ;

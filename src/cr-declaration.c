@@ -603,6 +603,65 @@ cr_declaration_to_string (CRDeclaration *a_this,
 }
 
 /**
+ *Return the number of properties in the declaration;
+ *@param a_this the current instance of #CRDeclaration.
+ *@return number of properties in the declaration list.
+ */
+int
+cr_declaration_nr_props (CRDeclaration *a_this)
+{
+	CRDeclaration *cur = NULL ;
+	int nr = 0;
+
+	g_return_if_fail (a_this) ;
+
+	for (cur = a_this ; cur ; cur = cur->next)
+		nr ++;
+	return nr;
+}
+
+/**
+ *Use an index to get a CRDeclaration from the declaration list.
+ *@param a_this the current instance of #CRDeclaration.
+ *@param itemnr the index into the declaration list.
+ *@return CRDeclaration at position itemnr, if itemnr > number of declarations - 1,
+ *it will return NULL.
+ */
+CRDeclaration *
+cr_declaration_get_from_list (CRDeclaration *a_this, int itemnr)
+{
+	CRDeclaration *cur = NULL ;
+	int nr = 0;
+
+	g_return_if_fail (a_this) ;
+
+	for (cur = a_this ; cur ; cur = cur->next)
+		if (nr++ == itemnr)
+			return cur;
+	return NULL;
+}
+
+/**
+ *Use property name to get a CRDeclaration from the declaration list.
+ *@param a_this the current instance of #CRDeclaration.
+ *@param a_prop the property name to search for.
+ *@return CRDeclaration with property name a_prop, or NULL if not found.
+ */
+CRDeclaration *
+cr_declaration_get_by_prop_name (CRDeclaration *a_this, const guchar *a_prop)
+{
+	CRDeclaration *cur = NULL ;
+
+	g_return_if_fail (a_this) ;
+	g_return_if_fail (a_prop) ;
+
+	for (cur = a_this ; cur ; cur = cur->next)
+		if (!strcmp (cur->property->str, a_prop))
+			return cur;
+	return NULL;
+}
+
+/**
  *Increases the ref count of the current instance of #CRDeclaration.
  *@param a_this the current instance of #CRDeclaration.
  */

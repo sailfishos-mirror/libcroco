@@ -1,3 +1,12 @@
+2004-02-14  Dodji Seketeli  <dodji@gnome.org>
+
+	* src/cr-declaration.[ch]:
+	(cr_declaration_nr_props),
+	(cr_declaration_get_from_list),
+	(cr_declaration_get_by_prop_name):
+	applied a patch from Rob BUIS<rwlbuis@xs4all.nl> that adds
+	these api entry points.
+
 2004-02-13  Dodji Seketeli  <dodji@gnome.org>
 
 	* src/cr-declaration.c: 
