@@ -188,22 +188,24 @@ cr_box_layout_normal (CRBox *a_this)
         case BOX_TYPE_ANONYMOUS_BLOCK:
         {
                 CRBox *cont_box = a_this->parent ;
-                /*****************************************
+                /************************************
                  *We are in a block formating context 
-                 *****************************************/
+                 ************************************/
 
                 /*
                  *position the 'x' of the top
                  *left corner of this box
-                 *at the leftmost abscissa of it's containing box.
-                 *Position the 'y' of the top left corner of this
+                 *at the leftmost abscissa of it's 
+                 *containing box.
+                 *Position the 'y' of 
+                 *the top left corner of this
                  *just under the previous box.
-                 */
-                
+                 */                
                 if (!cont_box)
                         a_this->outer_edge.x = 0 ;
                 else
-                        a_this->outer_edge.x = cont_box->inner_edge.x ;
+                        a_this->outer_edge.x = 
+                                cont_box->inner_edge.x ;
                 
                 a_this->outer_edge.y =
                         cr_box_get_bottommost_y (a_this->prev) ;
@@ -211,7 +213,7 @@ cr_box_layout_normal (CRBox *a_this)
                 a_this->outer_edge.x =
                         cr_box_get_rightmost_x (a_this->prev) ;
 
-                /***************************************************
+                /*******************************************
                  *Now, compute the inner edge of this box;
                  *which means 
                  *1/set the left border and 
@@ -220,13 +222,14 @@ cr_box_layout_normal (CRBox *a_this)
                  *the inner box and.
                  *3/Compute the outer edge of the containing
                  *box; this is recursive.
-                 ***************************************************/
+                 *******************************************/
 
                 /*
                  *1/ => left side of outer edge is separated from
                  *left side of border edge by "margin-left"... same
                  *principle applies for padding edge and inner edge.
                  */
+
                 /*
                  *TODO: collapse this margin !!!. 
                  *See css2 chap 8.3.1 to see what "collapsing" means.
@@ -264,12 +267,26 @@ cr_box_layout_normal (CRBox *a_this)
                 /*
                  *And now, 3/
                  */
+                if (a_this->children)
+                {
+                        cr_box_layout (a_this->children) ;
+                }
+                else
+                {
+                        /*
+                         *this box may have a content.
+                         *TODO: compute it's width and height.
+                         *then, when computed, update the
+                         *children max width size in the parent box.
+                         */                        
+                }
 
                 /*******************************************
-                 *Inner edge position (x,y) is finish. (we have it's width).
+                 *Inner edge position (x,y) computing is 
+                 *finished. (we have it's width).
                  *So now, we can compute the widths of the
-                 *remaining three other boxes (padding edge, border edge
-                 *and outer edge)
+                 *remaining three other boxes 
+                 *(padding edge, border edge and outer edge)
                  ******************************************/
                 
                 break ;
@@ -289,25 +306,31 @@ cr_box_layout_normal (CRBox *a_this)
 }
 
 static enum CRStatus
-cr_box_lay_out (CRBox *a_this)
+cr_box_layout (CRBox *a_this)
 {
+        CRBox *cur_box = NULL ;
+
         g_return_val_if_fail (a_this && a_this->style,
                               CR_BAD_PARAM_ERROR) ;
 
-        switch (a_this->style->position)
+        for (cur_box = a_this ; cur_box ; 
+             cur_box = cur_box->next)
         {
-        case POSITION_STATIC:
-        case POSITION_RELATIVE:
-                cr_box_layout_normal (a_this) ;
-                break ;
+                switch (cur_box->style->position)
+                {
+                case POSITION_STATIC:
+                case POSITION_RELATIVE:
+                        cr_box_layout_normal (cur_box) ;
+                        break ;
 
-        case POSITION_ABSOLUTE:
-        case POSITION_FIXED:
-                /*cr_box_layout_absolute (a_this) ;*/
-                break ;
+                case POSITION_ABSOLUTE:
+                case POSITION_FIXED:
+                        /*cr_box_layout_absolute (a_this) ;*/
+                        break ;
 
-        case POSITION_INHERIT:
-                break ;
+                case POSITION_INHERIT:
+                        break ;
+                }
         }
         return CR_OK ;
 }
@@ -316,6 +339,11 @@ cr_box_lay_out (CRBox *a_this)
  *Public methods
  *******************************/
 
+/**
+ *Instanciates a new #CRBoxData.
+ *@param a_node the xml node to store in the box.
+ *@return the newly built #CRBoxData, or null if an error arises.
+ */
 CRBoxData *
 cr_box_data_new (xmlNode *a_node)
 {
@@ -332,6 +360,11 @@ cr_box_data_new (xmlNode *a_node)
         return result ;
 }
 
+/**
+ *Destructor of #CRBoxData.
+ *@param a_this the current instance 
+ *of #CRBoxData to be destroyed.
+ */
 void
 cr_box_data_destroy (CRBoxData *a_this)
 {
@@ -339,6 +372,58 @@ cr_box_data_destroy (CRBoxData *a_this)
                 return ;
 
         g_free (a_this) ;
+}
+
+/**
+ *Instanciates a new #CRBoxContent and set the
+ *content to text content.
+ *@param a_text the text content.
+ */
+CRBoxContent *
+cr_box_content_new_from_text (guchar *a_text)
+{
+        CRBoxContent *result = NULL ;
+
+        result = g_try_malloc (sizeof (CRBoxContent)) ;
+        if (!result)
+        {
+                cr_utils_trace_info ("Out of memory") ;
+                return NULL ;
+        }
+        memset (result, 0, sizeof (CRBoxContent)) ;
+        result->u.text = g_strdup (a_text) ;
+        result->type = TEXT_CONTENT_TYPE ;
+        return result ;
+}
+
+/**
+ *Destructor of #CRBoxContent.
+ *@param a_this the current instance of #CRBoxContent
+ *to be destroyed.
+ */
+void
+cr_box_content_destroy (CRBoxContent *a_this)
+{
+        if (!a_this)
+                return ;
+
+        switch (a_this->type)
+        {
+        case TEXT_CONTENT_TYPE:
+                if (a_this->u.text)
+                {
+                        g_free (a_this->u.text) ;
+                        a_this->u.text = NULL ;
+                }
+                break ;
+
+        default:
+                cr_utils_trace_info ("Unrecognized box content type") ;
+                cr_utils_trace_info ("This seems to be a mem leak") ;
+                break ;
+        }
+        g_free (a_this) ;
+        return ;
 }
 
 /**

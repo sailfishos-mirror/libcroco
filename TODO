@@ -3,7 +3,9 @@
 
 Go forward in the box layout (positioning) code. (hard, very hard).
 This is gonna take me a coupe of months I think.
-
+ cr-lay-eng.c:170: finish the creation of an anoymous box "around"
+ every single text.
+ cr-box.c:281:finish the computing of the content width and height.
 
 *Doc:)
 

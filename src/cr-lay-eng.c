@@ -94,56 +94,88 @@ cr_lay_eng_create_box_tree_real (CRLayEng * a_this,
                 if (cur->parent && a_parent_box && a_parent_box->style)
                         parent_style = a_parent_box->style ;
 
-                status = 
-                        cr_sel_eng_get_matched_style 
-                        (PRIVATE (a_this)->sel_eng, 
-                         PRIVATE (a_this)->cascade,
-                         cur, parent_style, &style) ;
-
-                if (status != CR_OK
-                    || (style && style->display == DISPLAY_NONE))
+                if (cur->type == XML_ELEMENT_NODE)
                 {
-                        continue ;
-                }
+                        status = 
+                                cr_sel_eng_get_matched_style 
+                                (PRIVATE (a_this)->sel_eng, 
+                                 PRIVATE (a_this)->cascade,
+                                 cur, parent_style, &style) ;
 
-                /*here, build the box,
-                 *append it to the box tree
-                 *and update all it attributes but
-                 *the positioning. The positioning will
-                 *be updated later via the cr_box_reflow() method.
-                 */
-                cur_box = cr_box_new (style) ;
-                if (cur_box)
-                {
-                        cr_utils_trace_info
-                                ("Could not create a box") ;
-                        cr_utils_trace_info
-                                ("The system may be out of memory") ;
-                        return NULL ;
-                }
+                        if (status != CR_OK
+                            || (style && style->display == DISPLAY_NONE))
+                        {
+                                continue ;
+                        }
 
-                if (a_parent_box)
-                        cr_box_append_child (a_parent_box,
-                                             cur_box) ;
-                style = NULL ;
+                        /*here, build the box,
+                         *append it to the box tree
+                         *and update all it attributes but
+                         *the positioning. The positioning will
+                         *be updated later via the cr_box_reflow() method.
+                         */
+                        cur_box = cr_box_new (style) ;
+                        if (cur_box)
+                        {
+                                cr_utils_trace_info
+                                        ("Could not create a box") ;
+                                cr_utils_trace_info
+                                        ("The system may be out of memory") ;
+                                return NULL ;
+                        }
 
-                /*
-                 *store a pointer to the node that generated
-                 *the current box into that current box.
-                 */
-                box_data = cr_box_data_new (cur) ;
-                if (!box_data)
-                {
-                        cr_utils_trace_info ("Out of memory") ;
-                        goto error ;
-                }
-                cur_box->croco_data = (gpointer)box_data ;
-                box_data = NULL ;
-
-                if (style)
-                {
-                        cr_style_destroy (style) ;
+                        if (a_parent_box)
+                                cr_box_append_child (a_parent_box,
+                                                     cur_box) ;
                         style = NULL ;
+
+                        /*
+                         *store a pointer to the node that generated
+                         *the current box into that current box.
+                         */
+                        box_data = cr_box_data_new (cur) ;
+                        if (!box_data)
+                        {
+                                cr_utils_trace_info ("Out of memory") ;
+                                goto error ;
+                        }
+                        cur_box->croco_data = (gpointer)box_data ;
+                        box_data = NULL ;
+
+                        if (style)
+                        {
+                                cr_style_destroy (style) ;
+                                style = NULL ;
+                        }
+                }
+                else if (cur->type == XML_TEXT_NODE)
+                {
+                        CRBoxContent *box_content = NULL ;
+                        xmlChar *node_text = NULL ;
+
+                        if (xmlIsBlankNode (cur))
+                                continue ;
+
+                        node_text = xmlNodeGetContent (cur) ;
+                        if (node_text)
+                        {
+                                box_content = 
+                                        cr_box_content_new_from_text 
+                                        (node_text) ;
+                                xmlFree (node_text) ;
+                                node_text = NULL ;
+                        }
+                        if (box_content)
+                        {
+                                /*create here an anonymous box*/
+                        }
+                }
+                else 
+                {
+                        cr_utils_trace_info 
+                                ("xml node type neither element nor text") ;
+                        cr_utils_trace_info 
+                                ("this should not happen. This is a bug") ;
                 }
 
                 /*walk through what remains from the tree*/

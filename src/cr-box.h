@@ -59,7 +59,7 @@ struct _CRBoxContent
 	{
 		guchar *text ;
 		CRImageContentDesc *img_desc ;
-	} kind ;
+	} u ;
 } ;
 
 typedef struct _CRBoxEdge CRBoxEdge ;
@@ -210,6 +210,12 @@ struct _CRBox
          */
         gpointer *app_data ;
 } ;
+
+CRBoxContent *
+cr_box_content_new_from_text (guchar *a_text) ;
+
+void
+cr_box_content_destroy (CRBoxContent *a_this) ;
 
 CRBox *
 cr_box_new (CRStyle *a_this) ;
