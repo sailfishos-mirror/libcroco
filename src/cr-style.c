@@ -139,23 +139,33 @@ enum CRDirection
 } ;
 
 static enum CRStatus
-set_padding_x_from_value (CRStyle *a_style,                          
-                          CRTerm *a_value,
-                          enum CRDirection a_dir) ;
-
-static enum CRStatus
-set_border_x_width_from_value (CRStyle *a_style,
+set_prop_padding_x_from_value (CRStyle *a_style,                          
                                CRTerm *a_value,
                                enum CRDirection a_dir) ;
 
 static enum CRStatus
-set_border_x_style_from_value (CRStyle *a_style,
-                               CRTerm *a_value,
-                               enum CRDirection a_dir) ;
+set_prop_border_x_width_from_value (CRStyle *a_style,
+                                    CRTerm *a_value,
+                                    enum CRDirection a_dir) ;
 
 static enum CRStatus
-set_margin_x_from_value (CRStyle *a_style, CRTerm *a_value,
-                         enum CRDirection a_dir) ;
+set_prop_border_x_style_from_value (CRStyle *a_style,
+                                    CRTerm *a_value,
+                                    enum CRDirection a_dir) ;
+
+static enum CRStatus
+set_prop_margin_x_from_value (CRStyle *a_style, CRTerm *a_value,
+                              enum CRDirection a_dir) ;
+
+static enum CRStatus
+set_prop_display_from_value (CRStyle *a_style, CRTerm *a_value) ;
+
+static enum CRStatus
+set_prop_position_from_value (CRStyle *a_style, CRTerm *a_value) ;
+
+static enum CRStatus
+set_prop_x_from_value (CRStyle *a_style, CRTerm *a_value,
+                       enum CRDirection a_dir) ;
 
 static enum CRStatus
 cr_style_init_properties (void)
@@ -173,7 +183,7 @@ cr_style_init_properties (void)
                         return CR_ERROR ;
                 }
 
-                                /*load gv_prop_hash from gv_prop_table*/
+                /*load gv_prop_hash from gv_prop_table*/
                 for (i = 0 ; gv_prop_table[i].name ; i++)
                 {
                         g_hash_table_insert 
@@ -208,9 +218,9 @@ cr_style_get_prop_id (const guchar * a_prop)
 
 
 static enum CRStatus
-set_padding_x_from_value (CRStyle *a_style,
-                          CRTerm *a_value,
-                          enum CRDirection a_dir)
+set_prop_padding_x_from_value (CRStyle *a_style,
+                               CRTerm *a_value,
+                               enum CRDirection a_dir)
 {
         enum CRStatus status = CR_OK ;
         CRNum *num_val = NULL, *parent_num_val = NULL ;
@@ -289,9 +299,9 @@ set_padding_x_from_value (CRStyle *a_style,
 
 
 static enum CRStatus
-set_border_x_width_from_value (CRStyle *a_style,
-                               CRTerm *a_value,
-                               enum CRDirection a_dir)
+set_prop_border_x_width_from_value (CRStyle *a_style,
+                                    CRTerm *a_value,
+                                    enum CRDirection a_dir)
 {
         enum CRStatus status = CR_OK ;
         CRNum *num_val = NULL, *parent_num_val = NULL ;
@@ -395,9 +405,9 @@ set_border_x_width_from_value (CRStyle *a_style,
 
 
 static enum CRStatus
-set_border_x_style_from_value (CRStyle *a_style,
-                               CRTerm *a_value,
-                               enum CRDirection a_dir)
+set_prop_border_x_style_from_value (CRStyle *a_style,
+                                    CRTerm *a_value,
+                                    enum CRDirection a_dir)
 {
         g_return_val_if_fail (a_style && a_value, 
                               CR_BAD_PARAM_ERROR) ;
@@ -523,8 +533,8 @@ set_border_x_style_from_value (CRStyle *a_style,
 }
 
 static enum CRStatus
-set_margin_x_from_value (CRStyle *a_style, CRTerm *a_value,
-                         enum CRDirection a_dir)
+set_prop_margin_x_from_value (CRStyle *a_style, CRTerm *a_value,
+                              enum CRDirection a_dir)
 {
         enum CRStatus status = CR_OK ;
         CRNum *num_val = NULL, *parent_num_val = NULL ;
@@ -598,6 +608,223 @@ set_margin_x_from_value (CRStyle *a_style, CRTerm *a_value,
         return status ;
 }
 
+struct CRPropDisplayValPair
+{
+        const guchar *prop_name ;
+        enum CRDisplayType type;
+} ;
+
+static enum CRStatus
+set_prop_display_from_value (CRStyle *a_style, CRTerm *a_value)
+{
+        enum CRDisplayType default_display_val = DISPLAY_INLINE ;
+        static const struct CRPropDisplayValPair disp_vals_map[] =
+                {
+                        {"none", DISPLAY_NONE},
+                        {"inline", DISPLAY_INLINE},
+                        {"block", DISPLAY_BLOCK},
+                        {"run-in", DISPLAY_RUN_IN},
+                        {"compact", DISPLAY_COMPACT},
+                        {"marker", DISPLAY_MARKER},
+                        {"table", DISPLAY_TABLE},
+                        {"inline-table", DISPLAY_INLINE_TABLE},
+                        {"table-row-group", DISPLAY_TABLE_ROW_GROUP},
+                        {"table-header-group", DISPLAY_TABLE_HEADER_GROUP},
+                        {"table-footer-group", DISPLAY_TABLE_FOOTER_GROUP},
+                        {"table-row", DISPLAY_TABLE_ROW},
+                        {"table-column-group", DISPLAY_TABLE_COLUMN_GROUP},
+                        {"table-column", DISPLAY_TABLE_COLUMN},
+                        {"table-cell", DISPLAY_TABLE_CELL},
+                        {"table-caption", DISPLAY_TABLE_CAPTION},
+                        {"inherit", DISPLAY_INHERIT},
+                        {NULL, DISPLAY_NONE}
+                } ;
+
+        g_return_val_if_fail (a_style && a_value, CR_BAD_PARAM_ERROR) ;
+
+        /*Sets to its default value according to the css2 spec.*/
+        a_style->display = default_display_val ;
+
+        switch (a_value->type)
+        {
+        case TERM_STRING:
+        {
+                int i = 0 ;
+
+                if (!a_value->content.str || !a_value->content.str->str)
+                        break ;
+
+                for (i = 0; disp_vals_map[i].prop_name ; i++)
+                {
+                        if (!strncmp (disp_vals_map[i].prop_name,
+                                      a_value->content.str->str,
+                                      strlen (disp_vals_map[i].prop_name)))
+                        {
+                                a_style->display = disp_vals_map[i].type ;
+                        }
+                }
+
+                if (a_style->display == DISPLAY_INHERIT)
+                {
+                        if (a_style->parent_style)
+                        {
+                                a_style->display = 
+                                        a_style->parent_style->display ;
+                        }
+                        else
+                        {
+                                a_style->display = default_display_val ;
+                        }
+                }
+        }
+        break ;
+
+        default :
+                break ;
+        }
+
+        return CR_OK ;
+}
+
+struct CRPropPositionValPair
+{
+        const guchar * name ;
+        enum CRPositionType type ;
+} ;
+
+static enum CRStatus
+set_prop_position_from_value (CRStyle *a_style, CRTerm *a_value)
+{
+        enum CRStatus status = CR_UNKNOWN_PROP_VAL_ERROR ;
+        static const struct CRPropPositionValPair position_vals_map [] =
+                {
+                        {"static", POSITION_STATIC},
+                        {"relative", POSITION_RELATIVE},
+                        {"absolute", POSITION_ABSOLUTE},
+                        {"fixed", POSITION_FIXED},
+                        {"inherited", POSITION_INHERIT},
+                        {NULL, POSITION_STATIC} /*must alwas be the last one*/
+                } ;
+
+        g_return_val_if_fail (a_value, CR_BAD_PARAM_ERROR) ;
+
+        /*set to it's default value according to the css2 spec*/
+        a_style->position = POSITION_STATIC ;
+
+        switch (a_value->type)
+        {
+        case TERM_STRING:
+        {
+                int i = 0 ;
+
+                if (!a_value->content.str || !a_value->content.str->str)
+                        break ;
+
+                for (i = 0; position_vals_map[i].name ; i++)
+                {
+                        if (!strncmp (position_vals_map[i].name,
+                                      a_value->content.str->str,
+                                      strlen (position_vals_map[i].name)))
+                        {
+                                a_style->position = position_vals_map[i].type ;
+                                status = CR_OK ;
+                        }
+                }
+                if (a_style->position == POSITION_INHERIT)
+                {
+                        if (a_style->parent_style)
+                        {
+                                a_style->position =
+                                        a_style->parent_style->position ;
+                        }
+                        else
+                        {
+                                a_style->position = POSITION_STATIC ;
+                        }
+                }
+        }
+                break ;
+
+        default:
+                break ;
+        }
+
+        return CR_OK ;
+}
+
+static enum CRStatus
+set_prop_x_from_value (CRStyle *a_style, CRTerm *a_value,
+                       enum CRDirection a_dir)
+{
+        CRBoxOffset *box_offset = NULL, *parent_box_offset = NULL ;
+        
+        g_return_val_if_fail (a_style && a_value, CR_BAD_PARAM_ERROR) ;
+
+        
+        if (!(a_value->type == TERM_NUMBER)
+            && !(a_value->type == TERM_STRING))
+        {
+                return CR_UNKNOWN_PROP_VAL_ERROR ;
+        }
+        
+        switch (a_dir)
+        {
+        case DIR_TOP:
+                box_offset = &a_style->top ;
+                if (a_style->parent_style)
+                        parent_box_offset = &a_style->parent_style->top ;
+                break ;
+        case DIR_RIGHT: 
+                box_offset = &a_style->right ;
+                if (a_style->parent_style)
+                        parent_box_offset = &a_style->parent_style->right ;
+                break ;
+        case DIR_BOTTOM:
+                box_offset = &a_style->bottom ;
+                if (a_style->parent_style)
+                        parent_box_offset = &a_style->parent_style->bottom;
+                break ;
+        case DIR_LEFT:
+                box_offset = &a_style->left ;
+                if (a_style->parent_style)
+                        parent_box_offset = &a_style->parent_style->left ;
+                break ;
+
+        default:
+                break ;
+        }
+
+        box_offset->type = OFFSET_AUTO ;
+
+        if (a_value->type == TERM_NUMBER 
+            && a_value->content.num)
+        {
+                cr_num_copy (&box_offset->num, a_value->content.num) ;
+                box_offset->type = OFFSET_DEFINED ;
+        }
+        else if (a_value->type == TERM_STRING
+                 && a_value->content.str
+                 && a_value->content.str->str)
+        {
+                if (!strncmp ("inherit", 
+                              a_value->content.str->str,
+                              strlen ("inherit")))
+                {
+                        cr_num_copy (&box_offset->num, 
+                                     &parent_box_offset->num) ;
+                        box_offset->type = OFFSET_DEFINED ;
+                }
+                else if (!strncmp ("auto", 
+                                   a_value->content.str->str,
+                                   strlen ("auto")))
+                {
+                        box_offset->type = OFFSET_AUTO ;
+                }
+        }
+
+        return CR_OK ;        
+}
+
 CRStyle *
 cr_style_new (void)
 {
@@ -661,7 +888,7 @@ cr_style_set_style_from_decl (CRStyle *a_this, CRDeclaration *a_decl,
         g_return_val_if_fail (a_this && a_decl
                               && a_decl
                               && a_decl->property
-                              && a_decl->property->str, 
+                              && a_decl->property->str,
                               CR_BAD_PARAM_ERROR) ;
 
         a_this->parent_style = a_parent_style ;
@@ -672,100 +899,110 @@ cr_style_set_style_from_decl (CRStyle *a_this, CRDeclaration *a_decl,
         switch (prop_id)
         {
         case PROP_PADDING_TOP:
-                status = set_padding_x_from_value 
+                status = set_prop_padding_x_from_value 
                         (a_this, value, DIR_TOP) ;
                 break ;
 
         case PROP_PADDING_RIGHT:
-                status = set_padding_x_from_value 
+                status = set_prop_padding_x_from_value 
                         (a_this, value, DIR_RIGHT) ;
                 break ;
         case PROP_PADDING_BOTTOM:
-                status = set_padding_x_from_value 
+                status = set_prop_padding_x_from_value 
                         (a_this, value, DIR_RIGHT) ;
                 break ;
 
         case PROP_PADDING_LEFT:
-                status = set_padding_x_from_value 
+                status = set_prop_padding_x_from_value 
                         (a_this, value, DIR_LEFT) ;
                 break ;
                 
         case PROP_BORDER_TOP_WIDTH:
-                status = set_border_x_width_from_value (a_this, value,
-                                                        DIR_TOP) ;
+                status = set_prop_border_x_width_from_value (a_this, value,
+                                                             DIR_TOP) ;
                 break ;
 
         case PROP_BORDER_RIGHT_WIDTH:
-                status = set_border_x_width_from_value (a_this, value,
-                                                        DIR_RIGHT) ;
+                status = set_prop_border_x_width_from_value (a_this, value,
+                                                             DIR_RIGHT) ;
                 break ;
 
         case PROP_BORDER_BOTTOM_WIDTH:
-                status = set_border_x_width_from_value (a_this, value,
-                                                        DIR_BOTTOM) ;
+                status = set_prop_border_x_width_from_value (a_this, value,
+                                                             DIR_BOTTOM) ;
                 break ;
 
         case PROP_BORDER_LEFT_WIDTH:
-                status = set_border_x_width_from_value (a_this, value,
-                                                        DIR_BOTTOM) ;
+                status = set_prop_border_x_width_from_value (a_this, value,
+                                                             DIR_BOTTOM) ;
                 break ;
 
         case PROP_BORDER_TOP_STYLE:
-                status = set_border_x_style_from_value (a_this, value,
-                                                        DIR_TOP) ;
+                status = set_prop_border_x_style_from_value (a_this, value,
+                                                             DIR_TOP) ;
                 break ;
 
         case PROP_BORDER_RIGHT_STYLE:
-                status = set_border_x_style_from_value (a_this, value,
-                                                        DIR_RIGHT) ;
+                status = set_prop_border_x_style_from_value (a_this, value,
+                                                             DIR_RIGHT) ;
                 break ;
 
         case PROP_BORDER_BOTTOM_STYLE:
-                status = set_border_x_style_from_value (a_this, value,
-                                                        DIR_BOTTOM) ;
+                status = set_prop_border_x_style_from_value (a_this, value,
+                                                             DIR_BOTTOM) ;
                 break ;
 
         case PROP_BORDER_LEFT_STYLE: 
-                status = set_border_x_style_from_value (a_this, value,
-                                                        DIR_LEFT) ;
+                status = set_prop_border_x_style_from_value (a_this, value,
+                                                             DIR_LEFT) ;
                 break ;
 
         case PROP_MARGIN_TOP:
-                status = set_margin_x_from_value (a_this, value,
-                                                  DIR_TOP) ;
+                status = set_prop_margin_x_from_value (a_this, value,
+                                                       DIR_TOP) ;
                 break ;
 
         case PROP_MARGIN_RIGHT:
-                status = set_margin_x_from_value (a_this, value,
-                                                  DIR_RIGHT) ;
+                status = set_prop_margin_x_from_value (a_this, value,
+                                                       DIR_RIGHT) ;
                 break ;
 
         case PROP_MARGIN_BOTTOM:
-                status = set_margin_x_from_value (a_this, value,
-                                                  DIR_BOTTOM) ;
+                status = set_prop_margin_x_from_value (a_this, value,
+                                                       DIR_BOTTOM) ;
                 break ;
 
         case PROP_MARGIN_LEFT:
-                status = set_margin_x_from_value (a_this, value,
-                                                  DIR_TOP) ;
+                status = set_prop_margin_x_from_value (a_this, value,
+                                                       DIR_TOP) ;
                 break ;
 
         case PROP_DISPLAY:
+                status = set_prop_display_from_value (a_this, value) ;
                 break ;
 
         case PROP_POSITION:
+                status = set_prop_position_from_value (a_this, value) ;
                 break ;
 
         case PROP_TOP:
+                status = set_prop_x_from_value (a_this, value,
+                                                DIR_TOP) ;
                 break ;
 
         case PROP_RIGHT:
+                status = set_prop_x_from_value (a_this, value,
+                                                DIR_RIGHT) ;
                 break ;
 
         case PROP_BOTTOM:
+                status = set_prop_x_from_value (a_this, value,
+                                                DIR_BOTTOM) ;
                 break ;
 
         case PROP_LEFT:
+                status = set_prop_x_from_value (a_this, value,
+                                                DIR_LEFT) ;
                 break ;
 
         case PROP_FLOAT:

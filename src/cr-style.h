@@ -76,6 +76,7 @@ enum CRPositionType
         POSITION_RELATIVE,
         POSITION_ABSOLUTE,
         POSITION_FIXED,
+        POSITION_INHERIT,
 } ;
 
 enum CRFloatType
@@ -86,6 +87,19 @@ enum CRFloatType
         FLOAT_INHERIT
 } ;
 
+
+enum CRBoxOffsetType
+{
+        OFFSET_DEFINED,
+        OFFSET_AUTO        
+} ;
+
+typedef struct _CRBoxOffset CRBoxOffset ;
+struct _CRBoxOffset
+{
+        enum CRBoxOffsetType type ;
+        CRNum num ;
+} ;
 
 #define BORDER_THIN 2
 #define BORDER_MEDIUM 4
@@ -126,7 +140,6 @@ struct _CRStyle
         enum CRBorderStyle border_left_style ;
 
 	/**margin properties, in pixel*/
-
 	CRNum margin_top ;
 	CRNum margin_right ;
 	CRNum margin_bottom;
@@ -137,11 +150,12 @@ struct _CRStyle
 
         /**the positioning scheme*/
         enum CRPositionType position ;
+
         /**box offset*/
-        CRNum top ;
-        CRNum right ;
-        CRNum bottom ;
-        CRNum left ;
+        CRBoxOffset top ;
+        CRBoxOffset right ;
+        CRBoxOffset bottom ;
+        CRBoxOffset left ;
 
         /**the float property*/
         enum CRFloatType float_type ;
