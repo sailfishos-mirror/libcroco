@@ -1,0 +1,12 @@
+
+*coding:)
+
+ Continue the testing of the css2 parsing using the test4 test.
+ The test4 test justs reads a css2 stylesheets and dumps it on stdout. 
+ 
+*Doc:)
+Finish the design of the instruction set of the selection engine.
+	The draft design is in the file 
+	docs/designs/docs/design/sel-instr.txt.
+
+Write a litte doc about how to use the parser as it is today.

@@ -1,0 +1,11 @@
+prefix=@prefix@
+exec_prefix=@exec_prefix@
+libdir=@libdir@
+includedir=@includedir@
+
+Name: libcroco
+Version: @VERSION@
+Description: a CSS2 Parsing Library in C.
+Requires: glib-2.0 @REQUIRE_LIBXML2@
+Libs: @CROCO_LIBS@
+Cflags: @CROCO_CFLAGS@

@@ -1,0 +1,8 @@
+2002-09-25  dodji  <dodji@seketeli.org>
+
+	* src/cr-utils.h: updated this file to define stuffs needed by
+	other modules.
+
+	* src/cr-parser-input.c: started to write down code to handle
+	the stacked parser input.
+

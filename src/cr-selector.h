@@ -1,0 +1,101 @@
+/* -*- Mode: C; indent-tabs-mode: ni; c-basic-offset: 8 -*- */
+
+/*
+ *This file is part of the Croco Library
+ *
+ *The Croco Library is free software; 
+ *you can redistribute it and/or modify it under the terms of 
+ *the GNU General Public License as 
+ *published by the Free Software Foundation; either version 2, 
+ *or (at your option) any later version.
+ *
+ *The Croco Library is distributed in the hope 
+ *that it will be useful, but WITHOUT ANY WARRANTY; 
+ *without even the implied warranty of 
+ *MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ *See the GNU General Public License for more details.
+ *
+ *You should have received a copy of the 
+ *GNU General Public License along with The Croco Library; 
+ *see the file COPYING. If not, write to 
+ *the Free Software Foundation, Inc., 
+ *59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *
+ *Copyright 2002-2003 Dodji Seketeli <dodji@seketeli.org>
+ */
+
+/*
+ *$Id$
+ */
+#ifndef __CR_SELECTOR_H__
+#define __CR_SELECTOR_H__
+
+#include <stdio.h>
+#include "cr-utils.h"
+#include "cr-simple-sel.h"
+
+/**
+ *@file
+ *The declaration file of the #CRSelector file.
+ */
+
+#define G_BEGIN_DECLS
+typedef struct _CRSelector CRSelector ;
+
+/**
+ *Abstracts a CSS2 selector as defined in the right part
+ *of the 'ruleset" production in the appendix D.1 of the
+ *css2 spec.
+ *It is actually the abstraction of a comma separated list
+ *of a simple selectors list.
+ *In a css2 file, a selector is a list of simple selectors
+ *separated by a comma.
+ *e.g: sel0, sel1, sel2 ...
+ *Each seln is a simple selector
+ */
+struct _CRSelector
+{
+	/**
+	 *A Selection expression.
+	 *It is a list of basic selectors.
+	 *Each basic selector can be either an element
+	 *selector, an id selector, a class selector, an
+	 *attribute selector, an universal selector etc ...
+	 */
+	CRSimpleSel *simple_sel ;
+
+	/**The next selector list element*/
+	CRSelector *next ;
+	CRSelector *prev ;
+
+	glong ref_count ;
+};
+
+CRSelector*
+cr_selector_new (CRSimpleSel *a_sel_expr) ;
+
+CRSelector*
+cr_selector_append (CRSelector *a_this, CRSelector *a_new) ;
+
+CRSelector*
+cr_selector_append_simple_sel (CRSelector *a_this,
+			       CRSimpleSel *a_simple_sel) ;
+
+CRSelector*
+cr_selector_prepend (CRSelector *a_this, CRSelector *a_new) ;
+
+void
+cr_selector_dump (CRSelector *a_this, FILE *a_fp) ;
+
+void
+cr_selector_ref (CRSelector *a_this) ;
+
+gboolean
+cr_selector_unref (CRSelector *a_this) ;
+
+void
+cr_selector_destroy (CRSelector *a_this) ;
+
+#define G_END_DECLS
+
+#endif /*__CR_SELECTOR_H__*/

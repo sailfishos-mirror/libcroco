@@ -1,0 +1,153 @@
+dnl Process this file with autoconf to produce a configure script.
+AC_PREREQ(2.5)
+AC_INIT(src/cr-input.c)
+
+PACKAGE=libcroco
+LIBCROCO_MAJOR_VERSION=0
+LIBCROCO_MINOR_VERSION=1
+LIBCROCO_MICRO_VERSION=0
+
+LIBCROCO_VERSION=$LIBCROCO_MAJOR_VERSION.$LIBCROCO_MINOR_VERSION.$LIBCROCO_MICRO_VERSION
+LIBCROCO_VERSION_INFO=$LIBCROCO_MAJOR_VERSION:$LIBCROCO_MINOR_VERSION:$LIBCROCO_MICRO_VERSION
+LIBCROCO_VERSION_NUMBER=`expr "$LIBCROCO_MAJOR_VERSION \* 10000 +$LIBCROCO_MINOR_VERSION \* 100 + $LIBCROCO_MICRO_VERSION"`
+VERSION=$LIBCROCO_VERSION
+
+USE_LIBXML2=no
+WITH_SELENG=no
+
+AC_SUBST(LIBCROCO_MAJOR_VERSION)
+AC_SUBST(LIBCROCO_MINOR_VERSION)
+AC_SUBST(LIBCROCO_MICRO_VERSION)
+AC_SUBST(LIBCROCO_VERSION)
+AC_SUBST(LIBCROCO_VERSION_INFO)
+AC_SUBST(LIBCROCO_VERSION_NUMBER)
+AC_SUBST(VERSION)
+
+AM_INIT_AUTOMAKE($PACKAGE, $LIBCROCO_VERSION)
+AM_CONFIG_HEADER(libcroco-config.h)
+
+dnl Checks for programs.
+AC_PROG_CC
+AC_PROG_INSTALL
+AC_PROG_CPP
+
+dnl Make sure we have an ANSI compiler
+AM_C_PROTOTYPES
+test "x$U" != "x" && AC_MSG_ERROR(Compiler not ANSI compliant)
+
+dnl Checks for libraries.
+dnl Checks for header files.
+AC_STDC_HEADERS
+AC_ISC_POSIX
+
+AM_PROG_LIBTOOL
+
+dnl **************************************************************
+dnl check for the different --enable-option=val  
+dnl messages issued by the user
+dnl ***************************************************************
+
+dnl -
+dnl --enable-seleng
+dnl this option enables compilation of the selection engine
+AC_ARG_ENABLE(seleng, 
+	       AC_HELP_STRING([--enable-seleng=yes|no], 
+	                      [Enables the css2 selector engine based on libxml2. Default=yes]),
+	       WITH_SELENG=$enableval,
+	       WITH_SELENG="yes")
+
+if test "$WITH_SELENG" = "yes" ; then
+	USE_LIBXML2=yes
+	AC_DEFINE(WITH_SELENG, 1, [use css2 selection engine])
+fi
+AC_SUBST(WITH_SELENG)
+
+dnl ************************************************
+dnl end of check of the different --enable-feature options
+dnl *************************************************
+
+dnl
+dnl Find pkg-config
+dnl
+
+AC_PATH_PROG(PKG_CONFIG, pkg-config, no)
+if test x$PKG_CONFIG = xno ; then
+  AC_MSG_ERROR([*** pkg-config not found. See http://www.freedesktop.org/software/pkgconfig/])
+fi
+
+
+dnl check libxml2 version
+if test "$USE_LIBXML2" = "yes" ; then
+    dnl
+    dnl Find awk
+    dnl
+
+    AC_PROG_AWK
+
+    AC_MSG_CHECKING([checking for libxml2])
+
+    LIBXML_MAJOR=2
+    LIBXML_MINOR=5
+    LIBXML_MICRO=1
+    LIBXML=`pkg-config --list-all|grep libxml-2.0`
+    if test "empty$LIBXML" = "empty" ; then
+    	AC_MSG_ERROR([*** libxml2 not found. See http://xmlsoft.org. Make sure "pkg-config --modversion libxml2" prints at least $LIBXML_MAJOR.$LIBXML_MINOR.$LIBXML_MICRO]) ;	
+    fi
+    LIBXML_VERSION=`pkg-config --modversion libxml-2.0`
+
+    MAJOR=`echo $LIBXML_VERSION |awk 'BEGIN {FS="."} {print $1}'`
+    MINOR=`echo $LIBXML_VERSION |awk 'BEGIN {FS="."} {print $2}'`
+    MICRO=`echo $LIBXML_VERSION |awk 'BEGIN {FS="."} {print $3}'`
+    LIBXML_VERSION=$MAJOR.$MINOR.$MICRO
+
+    if test "$LIBXML_MAJOR" -lt "2" ; then
+    	AC_MSG_ERROR([libxml2 version at least $LIBXML_MAJOR.$LIBXML_MINOR.$LIBXML_MICRO required. Found version $LIBXML_VERSION])
+    fi
+
+    if test "$LIBXML_MINOR" -gt "$MINOR" ; then
+    	AC_MSG_ERROR([libxml2 version at least $LIBXML_MAJOR.$LIBXML_MINOR.$LIBXML_MICRO required. Found version $LIBXML_VERSION])
+    fi
+
+    if test "$LIBXML_MICRO" -gt "$MICRO" ; then
+    	AC_MSG_ERROR([libxml2 version at least $LIBXML_MAJOR.$LIBXML_MINOR.$LIBXML_MICRO required]. Found version $LIBXML_VERSION)
+    fi
+    
+    AC_DEFINE(HAVE_LIBXML2, 1, [use libxml2])
+    AC_MSG_RESULT([yes])
+fi
+
+dnl By default compile in debug mode
+CFLAGS=-g
+
+CROCO_LIBS='-L${libdir}'
+CROCO_CFLAGS='-I${includedir}'
+
+if test "$USE_LIBXML2" = "yes" ; then
+	LIBXML2_LIBS=`pkg-config --libs libxml-2.0`
+	CROCO_LIBS="$CROCO_LIBS $LIBXML2_LIBS"
+	LIBXML2_CFLAGS=`pk-config --cflags libxml-2.0`
+	CROCO_CFLAGS="$CROCO_CFLAGS $LIBXML2_CFLAGS"
+	REQUIRE_LIBXML2=libxml-2.0
+else
+	CROCO_LIBS=
+	CROCO_FLAGS=
+	REQUIRE_LIBXML2=
+fi
+
+AC_SUBST(CROCO_CFLAGS)
+AC_SUBST(CROCO_LIBS)
+AC_SUBST(LIBXML2_LIBS)
+AC_SUBST(LIBXML2_CFLAGS)
+AC_SUBST(REQUIRE_LIBXML2)
+
+AC_SUBST(LDFLAGS)
+AC_SUBST(CFLAGS)
+
+AC_PROG_MAKE_SET
+AC_OUTPUT([
+Makefile
+libcroco.pc
+croco-config
+src/Makefile
+tests/Makefile
+])
