@@ -57,10 +57,15 @@ enum CRPropertyID
 	PROP_ID_BORDER_RIGHT_STYLE,
 	PROP_ID_BORDER_BOTTOM_STYLE,
 	PROP_ID_BORDER_LEFT_STYLE,
+        PROP_ID_BORDER_TOP_COLOR,
+        PROP_ID_BORDER_RIGHT_COLOR,
+        PROP_ID_BORDER_BOTTOM_COLOR,
+        PROP_ID_BORDER_LEFT_COLOR,
         PROP_ID_BORDER_TOP,
         PROP_ID_BORDER_RIGHT,
         PROP_ID_BORDER_BOTTOM,
         PROP_ID_BORDER_LEFT,
+        PROP_ID_BORDER,
 	PROP_ID_MARGIN_TOP,
 	PROP_ID_MARGIN_RIGHT,
 	PROP_ID_MARGIN_BOTTOM,
@@ -108,6 +113,7 @@ static CRPropertyDesc gv_prop_table [] =
         {"border-right", PROP_ID_BORDER_RIGHT},
         {"border-bottom", PROP_ID_BORDER_BOTTOM},
         {"border-left", PROP_ID_BORDER_LEFT},
+        {"border", PROP_ID_BORDER},
 	{"margin-top", PROP_ID_MARGIN_TOP},
 	{"margin-right", PROP_ID_MARGIN_RIGHT},
 	{"margin-bottom", PROP_ID_MARGIN_BOTTOM},
@@ -211,8 +217,7 @@ set_prop_border_x_from_value (CRStyle *a_style, CRTerm *a_value,
                               enum CRDirection a_dir) ;
 
 static enum CRStatus
-set_prop_border_from_value (CRStyle *a_style, CRTerm *a_value,
-                            enum CRDirection a_dir) ;
+set_prop_border_from_value (CRStyle *a_style, CRTerm *a_value) ;
 
 static enum CRStatus
 cr_style_init_properties (void)
@@ -1191,7 +1196,7 @@ set_prop_border_x_from_value (CRStyle *a_style, CRTerm *a_value,
                 if (status != CR_OK)
                 {
                         status = set_prop_border_x_color_from_value 
-                                (a_style, a_value, a_dir) ;
+                                (a_style, cur_term, a_dir) ;
                 }
         }
 
@@ -1199,8 +1204,7 @@ set_prop_border_x_from_value (CRStyle *a_style, CRTerm *a_value,
 }
 
 static enum CRStatus
-set_prop_border_from_value (CRStyle *a_style, CRTerm *a_value,
-                            enum CRDirection a_dir)
+set_prop_border_from_value (CRStyle *a_style, CRTerm *a_value)
 {
         enum CRDirection direction = 0 ;
 
@@ -1409,25 +1413,63 @@ cr_style_set_style_from_decl (CRStyle *a_this, CRDeclaration *a_decl,
                                                             DIR_LEFT) ;
                 break ;
 
-                /*TODO!!*/
-        case PROP_ID_BORDER_TOP:                
+        case PROP_ID_BORDER_TOP_COLOR:
+                status =
+                        set_prop_border_x_color_from_value (a_this, value,
+                                                            DIR_TOP) ;
+                break ;
+
+        case PROP_ID_BORDER_RIGHT_COLOR:
+                status =
+                        set_prop_border_x_color_from_value (a_this, value,
+                                                            DIR_RIGHT) ;
+                break ;
+
+        case PROP_ID_BORDER_BOTTOM_COLOR:
+                status =
+                        set_prop_border_x_color_from_value (a_this, value,
+                                                            DIR_BOTTOM) ;
+                break ;
+
+        case PROP_ID_BORDER_LEFT_COLOR:
+                status =
+                        set_prop_border_x_color_from_value (a_this, value,
+                                                            DIR_BOTTOM) ;
+                break ;
+
+        case PROP_ID_BORDER_TOP:
+                status =
+                        set_prop_border_x_from_value (a_this, value,
+                                                      DIR_TOP) ;
                 break ;
 
         case PROP_ID_BORDER_RIGHT:
+                status =
+                        set_prop_border_x_from_value (a_this, value,
+                                                      DIR_TOP) ;
                 break ;
 
         case PROP_ID_BORDER_BOTTOM:
+                status =
+                        set_prop_border_x_from_value (a_this, value,
+                                                      DIR_BOTTOM) ;
                 break ;
 
         case PROP_ID_BORDER_LEFT:
+                status =
+                        set_prop_border_x_from_value (a_this, value,
+                                                      DIR_BOTTOM) ;
                 break ;
 
         case PROP_ID_MARGIN_TOP:
-                break ;
-
                 status = 
                         set_prop_margin_x_from_value (a_this, value,
                                                       DIR_TOP) ;
+                break ;
+
+        case PROP_ID_BORDER:
+                status =
+                        set_prop_border_from_value (a_this, value) ;
                 break ;
 
         case PROP_ID_MARGIN_RIGHT:

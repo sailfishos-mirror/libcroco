@@ -195,7 +195,7 @@ CORE_TESTS=
 SELENG_TESTS=
 LAYENG_TESTS=
 
-if test "$CROCO_WITH_TESTS" = "yes" ; then
+if test "$WITH_TESTS" = "yes" ; then
 	CORE_TESTS="test0 test1 test2 test3 test4 test6"
 	if test "$WITH_SELENG" = yes ; then
 		SELENG_TESTS="test5"
