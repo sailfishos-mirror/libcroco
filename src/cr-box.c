@@ -541,6 +541,7 @@ cr_box_append_child (CRBox *a_this, CRBox *a_to_append)
 	{
 		a_this->children = a_to_append ;
                 a_to_append->prev = NULL ;
+                a_to_append->parent = a_this ;
 
 		return CR_OK ;
 	}
@@ -550,6 +551,7 @@ cr_box_append_child (CRBox *a_this, CRBox *a_to_append)
 
 	cur->next = a_to_append ;
         a_to_append->prev = cur ;
+        a_to_append->parent = cur ;
 
 	return CR_OK ;
 }
@@ -577,6 +579,7 @@ cr_box_insert_sibling (CRBox *a_prev,
 	a_to_insert->prev = a_prev ;
 	a_to_insert->next = a_next ;
 	a_next->prev = a_to_insert ;
+        a_to_insert->parent = a_prev->parent ;
 
 	return CR_OK ;
 }
