@@ -3048,7 +3048,8 @@ cr_parser_parse_stylesheet (CRParser *a_this)
 
         PRIVATE (a_this)->state = READY_STATE ;
 
-        if (PRIVATE (a_this)->sac_handler->start_document)
+        if (PRIVATE (a_this)->sac_handler
+            && PRIVATE (a_this)->sac_handler->start_document)
         {
                 PRIVATE (a_this)->sac_handler->start_document 
                         (PRIVATE (a_this)->sac_handler) ;
@@ -3161,8 +3162,8 @@ cr_parser_parse_stylesheet (CRParser *a_this)
                         if (status == CR_OK)
                         {
                                 if (import_string 
-                                    && PRIVATE
-                                    (a_this)->sac_handler->
+                                    && PRIVATE (a_this)->sac_handler
+                                    && PRIVATE(a_this)->sac_handler->
                                     import_style)
                                 {
                                         PRIVATE (a_this)->sac_handler->
@@ -4924,7 +4925,8 @@ cr_parser_parse_font_face (CRParser *a_this)
          *here, call the relevant SAC handler.
          */
 
-        if (PRIVATE (a_this)->sac_handler->start_font_face)
+        if (PRIVATE (a_this)->sac_handler 
+            && PRIVATE (a_this)->sac_handler->start_font_face)
         {
                 PRIVATE (a_this)->sac_handler->start_font_face 
                         (PRIVATE (a_this)->sac_handler) ;
@@ -4948,7 +4950,8 @@ cr_parser_parse_font_face (CRParser *a_this)
                  */
                 cr_term_ref (css_expression) ;
 
-                if (PRIVATE (a_this)->sac_handler->property)
+                if (PRIVATE (a_this)->sac_handler &&
+                    PRIVATE (a_this)->sac_handler->property)
                 {
                         PRIVATE (a_this)->sac_handler->property
                                 (PRIVATE (a_this)->sac_handler,

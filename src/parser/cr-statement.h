@@ -169,7 +169,7 @@ enum CRStatementType
 	AT_CHARSET_RULE_STMT,
 
 	/**A css2 font face rule*/
-	AT_FONT_FACE_RULE_STMT	
+	AT_FONT_FACE_RULE_STMT
 } ;
 
 
@@ -232,6 +232,10 @@ struct _CRStatement
 } ;
 
 
+CRStatement *
+cr_statement_parse_from_buf (const guchar *a_buf,
+			     enum CREncoding a_encoding) ;
+
 CRStatement*
 cr_statement_new_ruleset (CRStyleSheet *a_sheet,
                           CRSelector *a_sel_list, 
@@ -251,6 +255,9 @@ CRStatement *
 cr_statement_new_at_media_rule (CRStyleSheet *a_sheet,
                                 CRStatement *a_ruleset,
 				GList *a_media) ;
+CRStatement *
+cr_statement_at_media_rule_parse_from_buf (const guchar *a_buf,
+					   enum CREncoding a_enc) ;
 
 CRStatement *
 cr_statement_new_at_charset_rule (CRStyleSheet *a_sheet,
@@ -258,13 +265,14 @@ cr_statement_new_at_charset_rule (CRStyleSheet *a_sheet,
 CRStatement *
 cr_statement_at_charset_rule_parse_from_buf (const guchar *a_buf,
 					     enum CREncoding a_encoding);
-CRStatement *
-cr_statement_at_media_rule_parse_from_buf (const guchar *a_buf,
-					   enum CREncoding a_enc) ;
+
 
 CRStatement *
 cr_statement_new_at_font_face_rule (CRStyleSheet *a_sheet,
                                     CRDeclaration *a_font_decls) ;
+CRStatement *
+cr_statement_font_face_rule_parse_from_buf (const guchar *a_buf,
+					    enum CREncoding a_encoding) ;
 
 CRStatement *
 cr_statement_new_at_page_rule (CRStyleSheet *a_sheet,

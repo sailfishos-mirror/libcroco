@@ -1,5 +1,14 @@
 2003-06-18  Dodji Seketeli  <dodji@seketeli.org>
 
+	* src/parser/cr-statement.[ch]:
+	added cr_statement_font_face_rule_parse_from_buf () .
+	and a generic cr_statement_parse_from_buf () that knows
+	how to a parse virtually any css2 statement. This needs debugging
+	though.
+
+	* src/parser/cr-parser.c: fixed some possible sigsev
+	that could occur when trying to access a null sac handler.
+
 	* tests/test4-main.c: updated the test routine to test
 	cr_statement_at_charset_rule_parse_from_buf().
 	

@@ -1,4 +1,4 @@
-/* -*- Mode: C; indent-tabs-mode: ni; c-basic-offset: 8 -*- */
+/* -*- Mode: C; indent-tabs-mode: nil; c-basic-offset: 8 -*- */
 
 /*
  * This file is part of The Croco Library
@@ -56,6 +56,82 @@ static void
 cr_statement_dump_import_rule (CRStatement *a_this, FILE *a_fp,
 			       gulong a_indent) ;
 
+static void
+parse_font_face_start_font_face_cb (CRDocHandler *a_this)
+{
+	CRStatement *stmt = NULL ;
+	enum CRStatus status = CR_OK ;
+
+	stmt = cr_statement_new_at_font_face_rule (NULL,
+						   NULL) ;
+	g_return_if_fail (stmt) ;
+	
+	status = cr_doc_handler_set_ctxt (a_this, stmt) ;
+	g_return_if_fail (status == CR_OK) ;
+}
+
+static void
+parse_font_face_property_cb (CRDocHandler *a_this,
+			     GString *a_name,
+			     CRTerm *a_value)
+{
+	enum CRStatus status = CR_OK ;
+	GString *name = NULL ;
+	CRDeclaration *decl = NULL ;
+	CRStatement *stmt = NULL ;
+
+	g_return_if_fail (a_this && a_name) ;
+	
+	status = cr_doc_handler_get_ctxt (a_this, (gpointer*)&stmt) ;
+	g_return_if_fail (status == CR_OK && stmt) ;
+	g_return_if_fail (stmt->type == AT_FONT_FACE_RULE_STMT) ;
+	
+	name = g_string_new_len (a_name->str, a_name->len) ;
+	g_return_if_fail (name) ;	
+	decl = cr_declaration_new (stmt, name, a_value) ;
+	if (!decl)
+	{
+		cr_utils_trace_info ("cr_declaration_new () failed.") ;
+		goto error ;
+	}
+	name = NULL ;
+
+	stmt->kind.font_face_rule->decls_list = 
+		cr_declaration_append (stmt->kind.font_face_rule->decls_list,
+				       decl) ;
+	if (!stmt->kind.font_face_rule->decls_list)
+		goto error ;
+	decl = NULL ;
+
+ error:
+	if (decl)
+	{
+		cr_declaration_unref (decl) ;
+		decl = NULL ;
+	}
+	if (name)
+	{
+		g_string_free (name, TRUE) ;
+		name = NULL ;
+	}
+}
+
+static void
+parse_font_face_end_font_face_cb (CRDocHandler *a_this)
+
+{	
+	CRStatement *result = NULL ;
+	enum CRStatus status = CR_OK ;
+	
+	g_return_if_fail (a_this) ;
+	
+	status = cr_doc_handler_get_ctxt (a_this, (gpointer*)&result) ;
+	g_return_if_fail (status == CR_OK && result) ;
+	g_return_if_fail (result->type == AT_FONT_FACE_RULE_STMT) ;
+
+	status = cr_doc_handler_set_result (a_this, result) ;
+	g_return_if_fail (status == CR_OK) ;
+}
 
 static void
 parse_page_start_page_cb (CRDocHandler *a_this, 
@@ -691,6 +767,78 @@ cr_statement_dump_import_rule (CRStatement *a_this, FILE *a_fp,
  *public functions
  ******************/
 
+/**
+ *Parses a buffer that contains a css statement and returns 
+ *an instance of #CRStatement in case of successfull parsing.
+ *TODO: at support of "@import" rules.
+ *@param a_buf the buffer to parse.
+ *@param a_encoding the character encoding of a_buf.
+ *@return the newly built instance of #CRStatement in case
+ *of successfull parsing, NULL otherwise.
+ */
+CRStatement *
+cr_statement_parse_from_buf (const guchar *a_buf,
+			     enum CREncoding a_encoding)
+{
+	CRStatement *result = NULL ;
+
+	/*
+	 *The strategy of this function is "brute force".
+	 *It tries to parse all the types of #CRStatement it knows about.
+	 *I could do this a smarter way but I don't have the time now.
+	 *I think I will revisit this when time of performances and
+	 *pull based incremental parsing comes.
+	 */
+
+	result = cr_statement_ruleset_parse_from_buf (a_buf, a_encoding) ;
+	if (!result)
+	{
+		result = cr_statement_at_charset_rule_parse_from_buf 
+			(a_buf, a_encoding) ;
+		if (result)
+			goto out ;
+	}
+	if (!result)
+	{
+		result = cr_statement_at_media_rule_parse_from_buf
+			(a_buf, a_encoding) ;
+		if (result)
+			goto out ;
+	}
+	if (!result)
+	{
+		result = cr_statement_at_charset_rule_parse_from_buf 
+			(a_buf, a_encoding) ;
+		if (result)
+			goto out ;
+	}
+	if (!result)
+	{
+		result = cr_statement_font_face_rule_parse_from_buf
+			(a_buf, a_encoding) ;
+		if (result)
+			goto out ;
+	}
+	if (!result)
+	{
+		result = cr_statement_at_page_rule_parse_from_buf
+			(a_buf, a_encoding) ;
+		if (result)
+			goto out ;
+	}
+
+ out:
+	return result ;
+}
+
+/**
+ *Parses a buffer that contains a ruleset statement an instanciates
+ *a #CRStatement of type RULESET_STMT.
+ *@param a_buf the buffer to parse.
+ *@param a_enc the character encoding of a_buf.
+ *@param the newly built instance of #CRStatement in case of successfull parsing,
+ *NULL otherwise.
+ */
 CRStatement *
 cr_statement_ruleset_parse_from_buf (const guchar * a_buf,
 				     enum CREncoding a_enc)
@@ -1239,8 +1387,6 @@ cr_statement_new_at_font_face_rule (CRStyleSheet *a_sheet,
 {
 	CRStatement *result = NULL ;
 	
-	g_return_val_if_fail (a_sheet, NULL) ;
-
 	result = g_try_malloc (sizeof (CRStatement)) ;
 
 	if (!result)
@@ -1264,8 +1410,76 @@ cr_statement_new_at_font_face_rule (CRStyleSheet *a_sheet,
 		sizeof (CRAtFontFaceRule));
 	
 	result->kind.font_face_rule->decls_list = a_font_decls ;
-	cr_statement_set_parent_sheet (result, a_sheet) ;
+	if (a_sheet)
+		cr_statement_set_parent_sheet (result, a_sheet) ;
 
+	return result ;
+}
+
+/**
+ *Parses a buffer that contains an "@font-face" rule and builds
+ *an instance of #CRStatement of type AT_FONT_FACE_RULE_STMT out of it.
+ *@param a_buf the buffer to parse.
+ *@param a_encoding the character encoding of a_buf.
+ *@return the newly built instance of #CRStatement in case of successufull
+ *parsing, NULL otherwise.
+ */
+CRStatement *
+cr_statement_font_face_rule_parse_from_buf (const guchar *a_buf,
+					    enum CREncoding a_encoding)
+{
+	CRStatement *result = NULL ;
+	CRParser *parser = NULL ;
+	CRDocHandler *sac_handler = NULL ;
+	enum CRStatus status = CR_OK ;
+
+	parser = cr_parser_new_from_buf (a_buf, strlen (a_buf),
+					 a_encoding, FALSE) ;
+	if (!parser)
+		goto cleanup ;
+
+	sac_handler = cr_doc_handler_new () ;
+	if (!sac_handler)
+		goto cleanup ;
+
+	/*
+	 *set sac callbacks here
+	 */
+	sac_handler->start_font_face = parse_font_face_start_font_face_cb ;
+	sac_handler->property = parse_font_face_property_cb ;
+	sac_handler->end_font_face = parse_font_face_end_font_face_cb ;	
+
+	status = cr_parser_set_sac_handler (parser, sac_handler) ;
+	if (status != CR_OK)
+		goto cleanup ;
+
+	/*
+	 *cleanup spaces of comment that may be there before the real
+	 *"@font-face" thing.
+	 */
+	status = cr_parser_try_to_skip_spaces_and_comments (parser) ;
+	if (status != CR_OK)
+		goto cleanup ;
+
+	status = cr_parser_parse_font_face (parser) ;
+	if (status != CR_OK)
+		goto cleanup ;
+
+	status = cr_doc_handler_get_result (sac_handler, (gpointer*)&result) ;
+	if (status != CR_OK || !result)
+		goto cleanup ;
+
+ cleanup:
+	if (parser)
+	{
+		cr_parser_destroy (parser) ;
+		parser = NULL ;
+	}
+	if (sac_handler)
+	{
+		cr_doc_handler_unref (sac_handler) ;
+		sac_handler = NULL ;
+	}
 	return result ;
 }
 

@@ -56,6 +56,13 @@ const guchar *gv_at_charset_buf =
 "@charset \"ISO-8859-1\" ; "
 ;
 
+const guchar *gv_at_font_face_buf=
+"@font-face {"
+" font-family: \"Robson Celtic\";"
+" src: url(\"http://site/fonts/rob-celt\")"
+"}"
+;
+
 static void 
 display_help (char *prg_name) ;
 
@@ -232,6 +239,24 @@ test_cr_statement_at_charset_rule_parse (void)
         return CR_OK ;
 }
 
+
+static enum CRStatus
+test_cr_statement_font_face_rule_parse_from_buf (void)
+{
+        CRStatement *stmt = NULL ;
+        
+        stmt =  cr_statement_font_face_rule_parse_from_buf (gv_at_font_face_buf,
+                                                            CR_UTF_8) ;
+        g_return_val_if_fail (stmt, CR_ERROR) ;
+        if (stmt)
+        {
+                cr_statement_destroy (stmt) ;
+                stmt = NULL ;
+        }
+
+        return CR_OK ;
+}
+
 /**
  *The entry point of the testing routine.
  */
@@ -269,7 +294,14 @@ main (int argc, char ** argv)
                 return 0 ;
         }
 
-        test_cr_statement_at_charset_rule_parse () ;
+        status = test_cr_statement_at_charset_rule_parse () ;
+        if (status != CR_OK)
+        {
+                g_print ("\nKO\n") ;
+                return 0 ;
+        }
+
+        status = test_cr_statement_font_face_rule_parse_from_buf () ;
         if (status != CR_OK)
         {
                 g_print ("\nKO\n") ;

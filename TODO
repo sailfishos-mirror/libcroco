@@ -1,7 +1,12 @@
 
 *coding:)
 
-Provide support for font selection. (hard, started well underway.)
+Code a cr_statement_at_import_rule_parse () function and
+include it support in cr_statement_parse_from_buf ().
+
+Code a test case for cr_statement_parse_from_buf ().
+
+Provide support for font selection. (hard, started, is well underway.)
  First make sure to be able to gather all the font related property
   values.
  Then, figure out how to implement a font selector that uses pango.
