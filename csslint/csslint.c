@@ -36,7 +36,7 @@ struct Options
 {
 	gboolean show_version ;
 	gboolean use_cssom ;
-
+        gboolean display_help ;
 	gchar ** files_list ;
 };
 
@@ -86,6 +86,11 @@ csslint_parse_cmd_line (int a_argc, char **a_argv,
 		{
 			a_options->use_cssom = TRUE ;
 		}
+                if (!strcmp (a_argv[i], "--help") ||
+                    !strcmp (a_argv[i], "-h"))
+                {
+                        a_options->display_help = TRUE ;
+                }
 	}
 	
 	if (i >= a_argc)
@@ -190,6 +195,11 @@ main (int argc, char **argv)
 		return 0;
 	}
 
+        if (options.display_help == TRUE) 
+        {
+                csslint_usage (argv[0]) ;
+                return 0 ;
+        }
 	if (options.use_cssom == TRUE)
 	{
 		if (options.files_list != NULL)
@@ -200,7 +210,7 @@ main (int argc, char **argv)
 		} 
 		else
 		{
-			csslint_show_version(argv[0]);
+			csslint_usage (argv[0]);
 			return 0;
 		}
 

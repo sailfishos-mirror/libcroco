@@ -1,3 +1,15 @@
+2003-12-27  Dodji Seketeli  <dodji@gnome.org>
+
+	* csslint/csslint.c: did some fixes/cleanup here.
+	Make sure csslint --help shows a proper help.
+	* src/parser/cr-statement.c: 
+	(cr_statement_dump): when a NULL statement is given, do
+	not dump anything, instead considering this as an error.
+	* src/parser/cr-stylesheet.c: 
+	(cr_stylesheet_dump): give the possibility to dump
+	empty sheets, instead of considering this case as
+	an error case.
+	
 2003-12-24  Dodji Seketeli  <dodji@gnome.org>
 
 	* src/parser/cr-additional-sel.h,src/parser/cr-pseudo.h,

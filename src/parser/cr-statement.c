@@ -2303,7 +2303,9 @@ cr_statement_at_font_face_rule_add_decl (CRStatement *a_this,
 void
 cr_statement_dump (CRStatement *a_this, FILE *a_fp, gulong a_indent)
 {
-	g_return_if_fail (a_this) ;
+
+        if (!a_this)
+                return ;
 
 	if (a_this->prev)
 	{

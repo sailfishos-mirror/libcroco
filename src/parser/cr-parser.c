@@ -176,7 +176,7 @@ if ((status) != CR_OK) \
  *on the parser error stack when an error arises.
  *@param a_this the current instance of #CRParser .
  *@param a_status the status to check. Is of type enum #CRStatus.
- *@param a_is_exception in case of error, if is FALSE, the status
+ *@param a_is_exception in case of error, if is TRUE, the status
  *is set to CR_PARSING_ERROR before goto error. If is false, the
  *real low level status is kept and will be returned by the
  *upper level function that called this macro. Usally,this must
@@ -4001,7 +4001,7 @@ cr_parser_parse_ruleset (CRParser *a_this)
                 }
         }
 
-        CHECK_PARSING_STATUS_ERR 
+        CHECK_PARSING_STATUS_ERR
                 (a_this, status, FALSE,
                  "while parsing ruleset: next construction should be a declaration",
                  CR_SYNTAX_ERROR) ;
@@ -4018,6 +4018,7 @@ cr_parser_parse_ruleset (CRParser *a_this)
 
                 status = cr_parser_parse_declaration (a_this, &property,
                                                       &expr) ;
+
                 if (expr)
                 {
                         cr_term_ref (expr) ;

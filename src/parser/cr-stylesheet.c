@@ -3,7 +3,7 @@
 /*
  * This file is part of The Croco Library
  *
- * Copyright (C) 2002-2003 Dodji Seketeli <dodji@seketeli.org>
+ * Copyright (C) 2002-2003 Dodji Seketeli <dodji seketeli.org>
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of version 2.1 of the GNU Lesser General Public
@@ -68,7 +68,7 @@ cr_stylesheet_dump (CRStyleSheet *a_this, FILE *a_fp)
 {
 	CRStatement * cur_stmt = NULL ;
 
-	g_return_if_fail (a_this && a_this->statements) ;
+	g_return_if_fail (a_this) ;
 
 	for (cur_stmt = a_this->statements ; 
 	     cur_stmt ;
