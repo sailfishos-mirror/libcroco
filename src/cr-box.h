@@ -35,25 +35,25 @@ G_BEGIN_DECLS
  *@file 
  *the declaration of the #CRBox class.
  */
-enum BoxContentType
+enum CRBoxContentType
 {
 	NO_CONTENT_TYPE ;
 	TEXT_CONTENT_TYPE ;
 	IMAGE_CONTENT_TYPE ;
 } ;
 
-typedef struct _ImageContentDesc ImageContentDesc ;
-struct _ImageContentDesc
+typedef struct _CRImageContentDesc CRImageContentDesc ;
+struct _CRImageContentDesc
 {
 	guchar *img_buf ;
 	gulong *len ;
 	guchar *img_path ;
 } ;
 
-typedef struct _BoxContent BoxContent ;
-struct _BoxContent
+typedef struct _CRBoxContent CRBoxContent ;
+struct _CRBoxContent
 {
-	enum BoxContentType type ;
+	enum CRBoxContentType type ;
 	union 
 	{
 		guchar *text ;
@@ -61,7 +61,7 @@ struct _BoxContent
 	} kind ;
 } ;
 
-typedef struct _BoxEdge BoxEdge ;
+typedef struct _CRBoxEdge CRBoxEdge ;
 
 /**
  *An internal data structure
@@ -72,11 +72,26 @@ typedef struct _BoxEdge BoxEdge ;
  *(x0,y0) is the top left delimiter point of the bias, and
  *(x1,y1) is the bottom right delimiter point of the bias.
  */
-struct _BoxEdge
+struct _CRBoxEdge
 {
 	gulong x0,y0,x1,y1 ;
 } ;
 
+
+enum CRBoxType
+{
+
+} ;
+
+enum CRBoxType
+{
+        BOX_TYPE_BLOCK,
+        BOX_TYPE_ANONYMOUS_BLOCK,
+        BOX_TYPE_INLINE,
+        BOX_TYPE_ANONYMOUS_INLINE
+        BOX_TYPE_COMPACT,
+        BOX_TYPE_RUN_IN
+} ;
 
 typedef struct _CRBox CRBox ;
 /**
@@ -87,7 +102,9 @@ typedef struct _CRBox CRBox ;
  *by an xml document tree node.
  */
 struct _CRBox
-{	
+{
+        enum CRBoxType type ;
+
 	/**
 	 *The inner edge, or content edge.
 	 *Is the one that immediately wraps
@@ -98,7 +115,7 @@ struct _CRBox
 	 *this set is inevitably the set of children
 	 *boxes of this current box.
 	 */
-	BoxEdge inner_edge ;
+	CRBoxEdge inner_edge ;
 
 	/**
 	 *The padding edge.
@@ -107,7 +124,7 @@ struct _CRBox
 	 *When the padding is inexistent, the
 	 *padding edge equals the inner or content edge.
 	 */
-	BoxEdge padding_edge ;
+	CRBoxEdge padding_edge ;
 
 	/**
 	 *The border edge.
@@ -117,7 +134,7 @@ struct _CRBox
 	 *border edge equals the padding edge.
 	 *
 	 */
-	BoxEdge border_edge ;
+	CRBoxEdge border_edge ;
 
 	/**
 	 *The outer edge aka margin edge.
@@ -126,7 +143,7 @@ struct _CRBox
 	 *If the border is inexistant, the outer
 	 *edge equals the border_edge.
 	 */
-	BoxEdge outer_edge ;
+	CRBoxEdge outer_edge ;
 
 	/**
 	 *The values of all the preceding
@@ -138,7 +155,7 @@ struct _CRBox
 	 *The content (text or image) of this
 	 *box
 	 */
-	BoxContent content ;
+	CRBoxContent content ;
 
 	/**
 	 *if TRUE, it means that this box has

@@ -36,6 +36,50 @@ G_BEGIN_DECLS
 
 typedef struct _CRStyle CRStyle ;
 
+enum CRBorderStyle
+{
+        BORDER_STYLE_NONE,
+        BORDER_STYLE_HIDDEN,
+        BORDER_STYLE_DOTTED,
+        BORDER_STYLE_DASHED,
+        BORDER_STYLE_SOLID,
+        BORDER_STYLE_DOUBLE,
+        BORDER_STYLE_GROOVE,
+        BORDER_STYLE_RIDGE,
+        BORDER_STYLE_INSET,
+        BORDER_STYLE_OUTSET
+} ;
+
+enum CRDisplayType
+{
+        DISPLAY_NONE,
+        DISPLAY_INLINE,
+        DISPLAY_BLOCK,
+        DISPLAY_LIST_ITEM,
+        DISPLAY_RUN_IN,
+        DISPLAY_COMPACT,
+        DISPLAY_MARKER,
+        DISPLAY_TABLE,
+        DISPLAY_INLINE_TABLE,
+        DISPLAY_TABLE_ROW_GROUP,
+        DISPLAY_TABLE_HEADER_GROUP,
+        DISPLAY_TABLE_FOOTER_GROUP,
+        DISPLAY_TABLE_ROW,
+        DISPLAY_TABLE_COLUMN_GROUP,
+        DISPLAY_TABLE_COLUMN,
+        DISPLAY_TABLE_CELL,
+        DISPLAY_TABLE_CAPTION,
+        DISPLAY_INHERIT
+} ;
+
+enum CRPositionType
+{
+        POSITION_STATIC,
+        POSITION_RELATIVE,
+        POSITION_ABSOLUTE,
+        POSITION_FIXED,
+} ;
+
 /**
  *The css2 style class.
  *Contains computed and actual values
@@ -65,6 +109,11 @@ struct _CRStyle
 	gulong border_bottom_color ;
 	gulong border_left_color ;
 
+        enum CRBorderStyle border_top_style ;
+        enum CRBorderStyle border_right_style ;
+        enum CRBorderStyle border_bottom_style ;
+        enum CRBorderStyle border_left_style ;
+
 	/**margin properties, in pixel*/
 
 	gulong margin_top ;
@@ -72,7 +121,17 @@ struct _CRStyle
 	gulong margin_bottom;
 	gulong margin_left ;
 
+        /**box display type*/
+        enum CRDisplayType display ;
 
+        /**the positioning scheme*/
+        enum CRPositionType position ;
+
+        /**box offset*/
+        gulong top ;
+        gulong right ;
+        gulong bottom ;
+        gulong left ;
 } ;
 
 G_END_DECLS
