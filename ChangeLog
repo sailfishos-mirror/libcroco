@@ -1,3 +1,9 @@
+2004-05-31  Dodji Seketeli  <dodji@gnome.org>
+
+	* docs/examples/selection-example-1.c:
+	(print_properties_real):
+	fix some ansi C compilation errors.
+	
 2004-05-29  Dodji Seketeli  <dodji@gnome.org>
 
 	* tests/test-functional-notation.sh,tests/test-inputs/functional-notation.css,
