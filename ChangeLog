@@ -1,3 +1,18 @@
+2003-04-26  dodji  <dodji@seketeli.org>
+	
+	* configure.in: made sure to include the libgnomeui clflags and
+	 libsflags to croco libs and croco cflags when the layeng is turned
+	 on.
+	* csslint/Makefile.am: made sure to use the CROCO_LIBS and CROCO_CLFAGS
+	 variables.
+	* src/libcroco.h: added the cr-box-view.h include file
+	* src/layeng/cr-box-view.c: started to write a draw_box() function that
+	 will draw the box tree on the screen.
+	* src/layeng/cr-lay-eng.c: removed the adjust_edges_on_inner_edge () function.
+	* tests/Makefile.am: made sure to include libgnomeui clfags and libs
+	 when layeng is turned on.
+	* tests/test7-main.c: made started to include a cr-box-view.c test.
+
 2003-04-20  dodji  <dodji@seketeli.org>
 
 	* tests/test7-main.c: updated the test7 code to see the layout in
