@@ -340,8 +340,6 @@ status = cr_tknzr_get_next_token (PRIVATE (a_this)->tknzr, \
                                   a_token_ptr) ; \
 ENSURE_PARSING_COND (status == CR_OK) ;
 
-static enum CRStatus
-cr_parser_try_to_skip_spaces_and_comments (CRParser *a_this) ;
 
 #ifdef WITH_UNICODE_ESCAPE_AND_RANGE
 static enum CRStatus
@@ -694,7 +692,7 @@ cr_parser_clear_errors (CRParser *a_this)
  *@param a_this the current instance of #CRParser.
  *@return CR_OK upon successfull completion, an error code otherwise.
  */
-static enum CRStatus
+enum CRStatus
 cr_parser_try_to_skip_spaces_and_comments (CRParser *a_this)
 {
         enum CRStatus status = CR_ERROR ;
@@ -1874,7 +1872,7 @@ cr_parser_parse_any_core (CRParser *a_this)
  *The caller *must* free the returned pointer.
  *@return CR_OK upon successfull completion, an error code otherwise.
  */
-static enum CRStatus
+enum CRStatus
 cr_parser_parse_declaration (CRParser *a_this, GString **a_property,
                              CRTerm **a_expr)
 {

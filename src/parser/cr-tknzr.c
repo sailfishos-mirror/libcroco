@@ -1737,7 +1737,7 @@ cr_tknzr_new (CRInput *a_input)
 
 
 CRTknzr *
-cr_tknzr_new_from_buf (guchar *a_buf, gulong a_len,
+cr_tknzr_new_from_buf (const guchar *a_buf, gulong a_len,
                        enum CREncoding a_enc,
                        gboolean a_free_at_destroy)
 {
@@ -1755,7 +1755,7 @@ cr_tknzr_new_from_buf (guchar *a_buf, gulong a_len,
 }
 
 CRTknzr *
-cr_tknzr_new_from_uri (guchar *a_file_uri,
+cr_tknzr_new_from_uri (const guchar *a_file_uri,
                        enum CREncoding a_enc)
 {
         CRTknzr * result = NULL ;
@@ -2412,16 +2412,8 @@ cr_tknzr_get_next_token (CRTknzr *a_this, CRToken **a_tk)
                         goto done ;
                 }
                 break ;
-        case '0':
-        case '1':
-        case '2':
-        case '3':
-        case '4':
-        case '5':
-        case '6':
-        case '7':
-        case '8':
-        case '9':
+
+        case '0' ... '9':
         case '.':
         {
                 CRNum *num = NULL ;

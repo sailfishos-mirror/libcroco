@@ -51,11 +51,11 @@ CRTknzr *
 cr_tknzr_new (CRInput *a_input) ;
 
 CRTknzr *
-cr_tknzr_new_from_uri (guchar *a_file_uri,
+cr_tknzr_new_from_uri (const guchar *a_file_uri,
                        enum CREncoding a_enc) ;
 
 CRTknzr *
-cr_tknzr_new_from_buf (guchar *a_buf, gulong a_len,
+cr_tknzr_new_from_buf (const guchar *a_buf, gulong a_len,
                        enum CREncoding a_enc,
                        gboolean a_free_at_destroy) ;
 

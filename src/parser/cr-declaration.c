@@ -27,6 +27,7 @@
 #include <string.h>
 #include "cr-declaration.h"
 #include "cr-statement.h"
+#include "cr-parser.h"
 
 /**
  *@file
@@ -141,6 +142,77 @@ cr_declaration_new (CRStatement *a_statement,
 	return result ;
 }
 
+
+/**
+ *Parses a text buffer that contains
+ *a css declaration.
+ *
+ *@param a_statement the parent css2 statement of this
+ *this declaration. Must be non NULL and of type
+ *RULESET_STMT (must be a ruleset).
+ *@param a_str the string that contains the statement.
+ *@param a_enc the encoding of a_str.
+ *@return the parsed declaration, or NULL in case of error.
+ */
+CRDeclaration *
+cr_declaration_parse (CRStatement *a_statement,
+		      const guchar *a_str,
+		      enum CREncoding a_enc)
+{
+	enum CRStatus status = CR_OK ;
+	CRTerm *value = NULL ;
+	GString *property = NULL;
+	CRDeclaration *result = NULL ;
+	CRParser * parser = NULL ;
+
+	g_return_val_if_fail (a_statement 
+			      && a_statement->type == RULESET_STMT
+			      && a_str, NULL);
+
+	parser = cr_parser_new_from_buf (a_str, 
+					 strlen (a_str),
+					 a_enc, FALSE) ;
+	g_return_val_if_fail (parser, NULL) ;
+
+	status = cr_parser_try_to_skip_spaces_and_comments (parser) ;
+	if (status != CR_OK)
+		goto cleanup ;
+
+	status = cr_parser_parse_declaration (parser, &property,
+					      &value) ;
+	if (status != CR_OK || !property)
+		goto cleanup ;
+
+	result = cr_declaration_new (a_statement, property, value) ;
+	if (result)
+	{
+		property = NULL ;
+		value = NULL ;
+	}
+
+ cleanup:
+
+	if (parser)
+	{
+		cr_parser_destroy (parser) ;
+		parser = NULL ;
+	}
+
+	if (property)
+	{
+		g_string_free (property, TRUE) ;
+		property = NULL ;
+	}
+
+	if (value)
+	{
+		cr_term_destroy (value) ;
+		value = NULL ;
+	}
+
+	return result ;
+}
+
 /**
  *Appends a new declaration to the current declarations list.
  *@param a_this the current declaration list.
@@ -247,6 +319,7 @@ cr_declaration_dump (CRDeclaration *a_this, FILE *a_fp, glong a_indent,
 		dump (cur, a_fp, a_indent) ;
 	}
 }
+
 
 /**
  *Increases the ref count of the current instance of #CRDeclaration.

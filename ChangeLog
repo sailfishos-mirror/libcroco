@@ -1,5 +1,17 @@
 2003-06-09  Dodji  <dodji@seketeli.org>
 
+	* src/seleng/cr-style.[ch]: went forward in the font properties 
+	gathering.
+	
+	* src/parser/cr-tknzr.[ch]: fixed some 'const" related compilation
+	warnings.
+	
+	* src/parser/cr-parser.[ch]: exported the declaration parsing api
+	so that cr_declaration_parse () can use it.
+	
+	* src/parser/cr-declaration.[ch]:
+	added cr_declaration_parse () api. Not tested yet.
+	
 	* tests/test7-main.c: updated the test to reflect all the changes
 	that happened today.
 	

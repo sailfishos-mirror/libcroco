@@ -75,6 +75,12 @@ cr_parser_set_tknzr (CRParser *a_this, CRTknzr *a_tknzr) ;
 
 
 enum CRStatus
+cr_parser_try_to_skip_spaces_and_comments (CRParser *a_this) ;
+
+enum CRStatus
+cr_parser_parse_declaration (CRParser *a_this, GString **a_property,
+                             CRTerm **a_expr) ;
+enum CRStatus
 cr_parser_set_sac_handler (CRParser *a_this, 
                            CRDocHandler *a_handler) ;
 

@@ -148,7 +148,6 @@ delete_event_cb (GtkWidget *a_widget, GdkEvent *a_event,
 static enum CRStatus
 test_layout_box (void)
 {
-        enum CRStatus status = CR_OK ;
         CRBoxView *box_view = NULL ;
         GtkWidget *window = NULL, *scroll = NULL ;
 

@@ -84,7 +84,8 @@ enum CRPropertyID
         PROP_ID_BACKGROUND_COLOR,
         PROP_ID_FONT_FAMILY,
         PROP_ID_FONT_SIZE,
-
+        PROP_ID_FONT_STYLE,
+        PROP_ID_FONT_WEIGHT,
         /*should be the last one.*/
         NB_PROP_IDS
 } ;
@@ -136,7 +137,8 @@ static CRPropertyDesc gv_prop_table [] =
         {"background-color", PROP_ID_BACKGROUND_COLOR},
         {"font-family", PROP_ID_FONT_FAMILY},
         {"font-size", PROP_ID_FONT_SIZE},
-
+        {"font-style", PROP_ID_FONT_STYLE},
+        {"font-weight", PROP_ID_FONT_WEIGHT},
         /*must be the last one*/
 	{NULL, 0}
 } ;
@@ -242,6 +244,12 @@ init_style_font_size_field (CRStyle *a_style) ;
 static enum CRStatus
 set_prop_font_size_from_value (CRStyle *a_style, CRTerm *a_value) ;
 
+
+static enum CRStatus
+set_prop_font_style_from_value (CRStyle *a_style, CRTerm *a_value) ;
+
+static enum CRStatus
+set_prop_font_weight_from_value (CRStyle *a_style, CRTerm *a_value) ;
 
 static enum CRStatus
 cr_style_init_properties (void)
@@ -1664,6 +1672,148 @@ set_prop_font_size_from_value (CRStyle *a_style, CRTerm *a_value)
         return CR_OK ;
 }
 
+static enum CRStatus
+set_prop_font_style_from_value (CRStyle *a_style, CRTerm *a_value)
+{
+        enum CRStatus status = CR_OK ;
+
+        g_return_val_if_fail (a_style && a_value,
+                              CR_BAD_PARAM_ERROR) ;
+
+        switch (a_value->type)
+        {
+        case TERM_IDENT:
+                if (a_value->content.str && a_value->content.str->str)
+                {
+                        if (!strcmp (a_value->content.str->str, "normal"))
+                        {
+                                a_style->font_style = FONT_STYLE_NORMAL ;
+                        }
+                        else if (!strcmp (a_value->content.str->str, "italic"))
+                        {
+                                a_style->font_style = FONT_STYLE_ITALIC ;
+                        }
+                        else if (!strcmp (a_value->content.str->str, "oblique"))
+                        {
+                                a_style->font_style = FONT_STYLE_OBLIQUE ;
+                        }
+                        else if (!strcmp (a_value->content.str->str, "inherit"))
+                        {
+                                if (!a_style->font_style)
+                                        a_style->font_style = FONT_STYLE_NORMAL;
+                                else
+                                        a_style->font_style = 
+                                                a_style->parent_style->
+                                                font_style ;
+                        }
+                        else
+                        {
+                                status = CR_UNKNOWN_PROP_VAL_ERROR ;
+                        }
+                }
+                break ;
+
+        default:
+                status = CR_UNKNOWN_PROP_VAL_ERROR ;
+                break ;
+        }
+
+        return status ;
+}
+
+static enum CRStatus
+set_prop_font_weight_from_value (CRStyle *a_style, CRTerm *a_value)
+{
+        enum CRStatus status = CR_OK ;
+
+        g_return_val_if_fail (a_style && a_value,
+                              CR_BAD_PARAM_ERROR) ;
+
+        switch (a_value->type)
+        {
+        case TERM_IDENT:
+                if (a_value->content.str && a_value->content.str->str)
+                {
+                        if (!strcmp (a_value->content.str->str,
+                                     "normal"))
+                        {
+                                a_style->font_weight = FONT_WEIGHT_BOLD ;
+                        }
+                        else if (!strcmp (a_value->content.str->str,
+                                          "bold"))
+                        {
+                                a_style->font_weight = FONT_WEIGHT_BOLD ;
+                        }
+                        else if (!strcmp (a_value->content.str->str,
+                                          "bolder"))
+                        {
+                                a_style->font_weight = FONT_WEIGHT_BOLDER ;
+                        }
+                        else if (!strcmp (a_value->content.str->str,
+                                          "lighter"))
+                        {
+                                a_style->font_weight = FONT_WEIGHT_LIGHTER ;
+                        }
+                        else
+                        {
+                                status = CR_UNKNOWN_PROP_VAL_ERROR ;
+                        }
+
+                }
+                break ;
+
+        case TERM_NUMBER:
+                if (a_value->content.num 
+                    && (a_value->content.num->type == NUM_GENERIC
+                        ||a_value->content.num->type == NUM_AUTO))
+                {
+                        if (a_value->content.num->val <= 150)
+                        {
+                                a_style->font_weight = FONT_WEIGHT_100 ;
+                        }
+                        else if (a_value->content.num->val <= 250)
+                        {
+                                a_style->font_weight = FONT_WEIGHT_200 ;
+                        }
+                        else if (a_value->content.num->val <= 350)
+                        {
+                                a_style->font_weight = FONT_WEIGHT_300 ;
+                        }
+                        else if (a_value->content.num->val <= 450)
+                        {
+                                a_style->font_weight = FONT_WEIGHT_400 ;
+                        }
+                        else if (a_value->content.num->val <= 550)
+                        {
+                                a_style->font_weight = FONT_WEIGHT_500 ;
+                        }
+                        else if (a_value->content.num->val <= 650)
+                        {
+                                a_style->font_weight = FONT_WEIGHT_600 ;
+                        }
+                        else if (a_value->content.num->val <= 750)
+                        {
+                                a_style->font_weight = FONT_WEIGHT_700 ;
+                        }
+                        else if (a_value->content.num->val <= 850)
+                        {
+                                a_style->font_weight = FONT_WEIGHT_800 ;
+                        }
+                        else
+                        {
+                                a_style->font_weight = FONT_WEIGHT_900 ;
+                        }                        
+                }
+                break ;
+
+        default:
+                status = CR_UNKNOWN_PROP_VAL_ERROR ;
+                break ;
+        }
+
+        return status ;
+}
+
 /******************
  *Public methods
  ******************/
@@ -1927,6 +2077,16 @@ cr_style_set_style_from_decl (CRStyle *a_this, CRDeclaration *a_decl)
         case PROP_ID_FONT_SIZE:
                 status =
                         set_prop_font_size_from_value (a_this, value) ;
+                break ;
+
+        case PROP_ID_FONT_STYLE:
+                status =
+                        set_prop_font_style_from_value (a_this, value) ;
+                break ;
+
+        case PROP_ID_FONT_WEIGHT:
+                status =
+                        set_prop_font_weight_from_value (a_this, value) ;
                 break ;
 
         default:
