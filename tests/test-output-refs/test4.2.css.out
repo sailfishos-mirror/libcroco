@@ -7,7 +7,7 @@
   src : url(http://site/fonts/rob-celt)
 }
 
-@page left:one-two {
+@page left :one-two {
   margin : 10pt;
   border : none
 }

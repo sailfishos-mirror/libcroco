@@ -74,7 +74,7 @@ enum CRTokenType
         BO_TK, /*opening bracket*/
         BC_TK, /*closing bracket*/
         DELIM_TK,
-        VENDOR_SPECIFIC_IDENT_TK,
+        VENDOR_SPECIFIC_IDENT_TK
 } ;
 
 enum CRTokenExtraType
@@ -92,7 +92,7 @@ enum CRTokenExtraType
         TIME_MS_ET,
         TIME_S_ET,
         FREQ_HZ_ET,
-        FREQ_KHZ_ET,
+        FREQ_KHZ_ET
 } ;
  
 typedef struct _CRToken CRToken ;

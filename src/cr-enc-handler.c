@@ -122,7 +122,7 @@ cr_enc_handler_resolve_enc_alias (const guchar *a_alias_name,
 	g_return_val_if_fail (a_alias_name != NULL, CR_BAD_PARAM_ERROR) ;
 
 	alias_name_up = g_strdup (a_alias_name) ;
-	g_strup (alias_name_up) ;
+	g_ascii_strup (alias_name_up, -1) ;
 
 	for (i = 0 ; gv_default_aliases[i].name ; i++)
 	{

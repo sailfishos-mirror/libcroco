@@ -50,7 +50,7 @@ enum SimpleSelectorType
 {
         NO_SELECTOR_TYPE = 0,
         UNIVERSAL_SELECTOR = 1,
-        TYPE_SELECTOR = 1 << 1,
+        TYPE_SELECTOR = 1 << 1
 } ;
 
 typedef struct _CRSimpleSel CRSimpleSel ;

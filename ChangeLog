@@ -1,3 +1,21 @@
+2004-03-04  Dodji Seketeli  <dodji@gnome.org>
+
+	* src/cr-enc-handler.c:
+	(cr_enc_handler_resolve_enc_alias): applied a patch
+	from Kjartan Maraas to replace the g_strup() g_ascii_strup().
+	This closes 
+	* csslint/Makefile.am,src/cr-simple-sel.h,src/cr-term.h
+	src/cr-token.h,tests/Makefile.am:
+	Applied patch
+	http://bugzilla.gnome.org/showattachment.cgi?attach_id=23422.
+	Modified the patch a little bit so that I use prog_LDFLAGS instead
+	of AM_LDFLAGS. AM_LDFLAGS just seems not to be supported by my
+	automake-1.4.
+	This fixes http://bugzilla.gnome.org/show_bug.cgi?id=131643 .
+	* tests/test-output-refs/test4.2.css.out: updated this non
+	regresstion test reference output due to a small modification
+	in the @page rule dump format.
+
 2004-03-03  Dodji Seketeli  <dodji@gnome.org>
 
 	* csslint/csslint.c:

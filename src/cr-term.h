@@ -50,7 +50,7 @@ enum CRTermType
         TERM_URI,
         TERM_RGB,
         TERM_UNICODERANGE,
-        TERM_HASH,
+        TERM_HASH
 } ;
 
 
