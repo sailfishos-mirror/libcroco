@@ -131,7 +131,6 @@ cr_term_parse_expression_from_buf (const guchar *a_buf,
         {
                 goto cleanup ;
         }
-
         status = cr_parser_parse_expr (parser, &result) ;
         if (status != CR_OK)
         {

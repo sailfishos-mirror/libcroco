@@ -1677,8 +1677,14 @@ cr_tknzr_parse_num (CRTknzr *a_this, CRNum ** a_num)
 
         for (;;)
         {
-                PEEK_NEXT_CHAR (a_this, &next_char) ;
-
+                status = cr_tknzr_peek_char  (a_this,
+                                              &next_char) ;
+                if (status != CR_OK)
+                {
+                        if (status == CR_END_OF_INPUT_ERROR)
+                                status = CR_OK ;
+                        break ;
+                }
                 if (next_char == '.')
                 {
                         if (parsing_dec == TRUE)

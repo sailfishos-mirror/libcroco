@@ -3722,7 +3722,7 @@ cr_parser_parse_expr (CRParser *a_this, CRTerm **a_expr)
                                 {
                                         goto error ;
                                 }
-                                */                                       
+                                */
                                 status = CR_OK ;
                                 break ;
                         }

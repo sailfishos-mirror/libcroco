@@ -1,12 +1,17 @@
 2004-03-06  Dodji  <dodji@gnome.org>
 
+	* src/cr-tknzr.c: 
+	(cr_tknzr_parse_num): when you reach an EOF, don't assume it's
+	an error. Return the already parsed part of the number.
+	Next attempt of parsing will result in an CR_END_OF_INPUT_ERROR.
+	* tests/test4-main.c: udpated this test the fix made above.	
 	* Doxyfile: reflect the removal of src/parser src/seleng and
 	src/layeng
 	* src/cr-declaration.c: 
 	(cr_declaration_list_to_string2): added this new method.
 	* src/cr-sel-eng.c: fix a bug in the !important handling
 	in the cascading algorithm.
-	
+
 2004-03-06  Dodji Seketeli  <dodji@gnome.org>
 
 	* csslint/csslint.c: applied a patch from Rob BUIS

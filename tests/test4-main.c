@@ -35,6 +35,8 @@
 
 CRDocHandler * gv_test_handler = {0} ;
 
+const guchar * gv_term_buf= "106" ;
+
 const guchar * gv_decl_buf =
 "toto: tutu, tata" ;
 
@@ -147,6 +149,32 @@ test_cr_parser_parse (guchar * a_file_uri)
 	cr_om_parser_destroy (parser) ;
 
         return status ;
+}
+
+
+static enum CRStatus
+test_cr_term_parse_expression_from_buf (void)
+{
+        guchar * tmp_str = NULL ;
+        CRTerm * term = NULL ;
+
+        term = cr_term_parse_expression_from_buf (gv_term_buf,
+                                                  CR_UTF_8) ;
+
+        if (!term)
+                return CR_ERROR ;
+        tmp_str = cr_term_to_string (term) ;
+        if (term)
+        {
+                cr_term_destroy (term) ;
+                term = NULL ;
+        }
+        if (tmp_str)
+        {
+                g_free (tmp_str) ;
+                tmp_str = NULL ;
+        }
+        return CR_OK ;
 }
 
 static enum CRStatus
@@ -397,66 +425,63 @@ main (int argc, char ** argv)
         struct Options options ;
         enum CRStatus status = CR_OK ;
 
+        status = test_cr_term_parse_expression_from_buf() ;
+        if (status != CR_OK)
+        {
+                g_print ("\ntest \"cr_term_parse_expression_from_buf failed\"") ;
+        }
         status = test_cr_declaration_parse () ;
         if (status != CR_OK)
         {
-                g_print ("\nKO\n") ;
-                return 0 ;
+                g_print ("\n test \"cr_declaration_parse() failed\"\n") ;
         }
 
         status = test_cr_declaration_parse_list () ;
         if (status != CR_OK)
         {
-                g_print ("\nKO\n") ;
-                return 0 ;
+                g_print ("\ntest cr_declaration_parse_list() failed\n") ;
         }
         status = test_cr_statement_ruleset_parse () ;
         if (status != CR_OK)
         {
-                g_print ("\nKO\n") ;
-                return 0 ;
+                g_print ("\ntest cr_statement_ruleset_parse() failed\n") ;
         }
 
         status = test_cr_statement_at_media_rule_parse () ;
         if (status != CR_OK)
         {
-                g_print ("\nKO\n") ;
-                return 0 ;
+                g_print ("\ntest cr_statement_at_media_rule_parse() failed\n") ;
         }
 
         test_cr_statement_at_page_rule_parse () ;
         if (status != CR_OK)
         {
-                g_print ("\nKO\n") ;
+                g_print ("\ntest cr_statement_at_page_rule_parse() failed\n") ;
                 return 0 ;
         }
 
         status = test_cr_statement_at_charset_rule_parse () ;
         if (status != CR_OK)
         {
-                g_print ("\nKO\n") ;
-                return 0 ;
+                g_print ("\ntest cr_statement_at_charset_rule_parse() failed\n") ;
         }
 
         status = test_cr_statement_font_face_rule_parse_from_buf () ;
         if (status != CR_OK)
         {
-                g_print ("\nKO\n") ;
-                return 0 ;
+                g_print ("\ntest cr_statement_font_face_rule_parse_from_buf() failed\n") ;
         }
 
         test_cr_statement_at_import_rule_parse_from_buf () ;
         if (status != CR_OK)
         {
-                g_print ("\nKO\n") ;
-                return 0 ;
+                g_print ("\ntest cr_statement_at_import_rule() failed\n") ;
         }
 
         status = test_cr_statement_parse_from_buf () ;
         if (status != CR_OK)
         {
-                g_print ("\nKO\n") ;
-                return 0 ;
+                g_print ("\ntest cr_statement_parse_from_buf() failed\n") ;
         }
 
         cr_test_utils_parse_cmd_line (argc, argv, &options) ;
