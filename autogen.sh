@@ -19,7 +19,7 @@ which gnome-autogen.sh || {
     exit 1
 }
 
-if test "$@empty" = "empty" ; then
+if test $# -eq 0 ; then
     default_args="--enable-tests=yes --enable-seleng=auto --enable-layeng=auto"
 fi
 

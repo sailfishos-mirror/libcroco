@@ -143,6 +143,7 @@ struct _CRStyle
 	CRNum border_bottom_width ;
 	CRNum border_left_width ;
 
+        CRRgb color ;
 	CRRgb border_top_color ;
 	CRRgb border_right_color ;
 	CRRgb border_bottom_color ;
@@ -176,6 +177,7 @@ struct _CRStyle
 
         CRWidth width ;
         CRStyle *parent_style ;
+        gulong ref_count ;
 } ;
 
 
@@ -190,6 +192,12 @@ cr_style_new_from_ruleset (CRStatement *a_stmt,
 enum CRStatus
 cr_style_set_style_from_decl (CRStyle *a_this, CRDeclaration *a_decl,
                               CRStyle *a_parent_style) ;
+
+enum CRStatus
+cr_style_ref (CRStyle *a_this) ;
+
+gboolean
+cr_style_unref (CRStyle *a_this) ;
 
 void
 cr_style_destroy (CRStyle *a_this) ;

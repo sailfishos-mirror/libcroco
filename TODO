@@ -1,9 +1,9 @@
 
 *coding:)
 
-Code an empty place holder for the CRCascade and make get it used
-by the CRLayEng.
- 
+Code a test function to debug the cr_lay_eng_build_annotated_doc()
+and all at it underlying functions.
+
 *Doc:)
 
 Write examples of how to use the SAC api of libcroco and how to

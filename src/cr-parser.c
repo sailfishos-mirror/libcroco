@@ -135,6 +135,7 @@ struct _CRParserPriv
         GList *err_stack ;
 
         enum CRParserState state ;
+        gboolean resolve_import ;
         gboolean is_case_sensitive ;
         gboolean use_core_grammar ;
 } ;
@@ -4280,7 +4281,7 @@ cr_parser_parse_stylesheet (CRParser *a_this)
                         (PRIVATE (a_this)->tknzr, &token) ;
                 if (status == CR_END_OF_INPUT_ERROR)  goto done ;
                 CHECK_PARSING_STATUS (status, TRUE) ;
-                
+
                 if (token && token->type == IMPORT_SYM_TK)
                 {
                         GList *media_list = NULL ;
@@ -4298,16 +4299,40 @@ cr_parser_parse_stylesheet (CRParser *a_this)
                         if (status == CR_OK)
                         {
                                 if (import_string 
-                                    && PRIVATE 
-                                    (a_this)->sac_handler->import_style)
+                                    && PRIVATE
+                                    (a_this)->sac_handler->
+                                    import_style)
                                 {
-                                        PRIVATE (a_this)->
-                                                sac_handler->import_style 
+                                        PRIVATE (a_this)->sac_handler->
+                                                import_style (PRIVATE
+                                                              (a_this)->
+                                                              sac_handler,
+                                                              media_list, 
+                                                              import_string, 
+                                                              NULL) ;
+
+                                        if ((PRIVATE (a_this)->sac_handler->
+                                             resolve_import == TRUE) )
+                                        {
+                                                /*
+                                                 *TODO: resolve the
+                                                 *import rule.
+                                                 */
+                                        }
+
+                                        if ((PRIVATE (a_this)->sac_handler->
+                                              import_style_result))
+                                        {
+                                                PRIVATE (a_this)->
+                                                sac_handler->
+                                                import_style_result
                                                 (PRIVATE (a_this)->
                                                  sac_handler,
-                                                 media_list, 
-                                                 import_string, 
+                                                 media_list,
+                                                 import_string,
+                                                 NULL,
                                                  NULL) ;
+                                        }
                                 }
                         }
                         else if (status != CR_END_OF_INPUT_ERROR)
@@ -4317,7 +4342,7 @@ cr_parser_parse_stylesheet (CRParser *a_this)
                                         error)
                                 {
                                         PRIVATE (a_this)->sac_handler->
-                                                error 
+                                                error
                                                 (PRIVATE 
                                                  (a_this)->sac_handler) ;
                                 }
@@ -4948,7 +4973,6 @@ cr_parser_set_tknzr (CRParser *a_this, CRTknzr *a_tknzr)
 }
 
 
-
 enum CRStatus
 cr_parser_parse_buf (CRParser *a_this, guchar *a_buf, 
                      gulong a_len, enum CREncoding a_enc)
@@ -4972,6 +4996,7 @@ cr_parser_parse_buf (CRParser *a_this, guchar *a_buf,
 
         return status ;
 }
+
 
 /**
  *Parses a the given in parameter.

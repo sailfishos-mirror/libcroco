@@ -77,6 +77,7 @@ enum CRStatus
 cr_sel_eng_get_matched_style (CRSelEng *a_this,
                               CRCascade *a_cascade,
                               xmlNode *a_node,
+                              CRStyle * a_parent_style,
                               CRStyle **a_style) ;
 
 void

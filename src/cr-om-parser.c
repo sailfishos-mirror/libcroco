@@ -843,6 +843,15 @@ cr_om_parser_new (CRInput *a_input)
 }
 
 
+/**
+ *Parses the content of an in memory  buffer.
+ *@param a_this the current instance of #CROMParser.
+ *@param a_buf the in memory buffer to parse.
+ *@param a_len the length of the in memory buffer in number of bytes.
+ *@param a_enc the encoding of the in memory buffer.
+ *@param a_result out parameter the resulting style sheet
+ *@return CR_OK upon successfull completion, an error code otherwise.
+ */
 enum CRStatus
 cr_om_parser_parse_buf (CROMParser *a_this,
                         guchar *a_buf,
@@ -877,6 +886,42 @@ cr_om_parser_parse_buf (CROMParser *a_this,
         return status ;
 }
 
+/**
+ *The simpler way to parse an in memory css2 buffer.
+ *@param a_buf the css2 in memory buffer.
+ *@param a_len the length of the in memory buffer.
+ *@param a_enc the encoding of the in memory buffer.
+ *@param a_result out parameter. The resulting css2 style sheet.
+ *@return CR_OK upon successfull completion, an error code otherwise.
+ */
+enum CRStatus
+cr_om_parser_simply_parse_buf (guchar *a_buf,
+                               gulong a_len,
+                               enum CREncoding a_enc,
+                               CRStyleSheet **a_result)
+{
+        CROMParser *parser = NULL ;
+        enum CRStatus status = CR_OK ;
+
+        parser = cr_om_parser_new (NULL) ;
+        if (!parser)
+        {
+                cr_utils_trace_info ("Could not create om parser") ;
+                cr_utils_trace_info ("System possibly out of memory") ;
+                return CR_ERROR ;
+        }
+
+        status = cr_om_parser_parse_buf (parser, a_buf, a_len,
+                                         a_enc, a_result) ;
+
+        if (parser)
+        {
+                cr_om_parser_destroy (parser) ;
+                parser = NULL ;
+        }
+        
+        return status ;
+}
 
 /**
  *Parses a css2 stylesheet contained
@@ -923,6 +968,45 @@ cr_om_parser_parse_file (CROMParser *a_this,
 
         return status ;
 }
+
+
+/**
+ *The simpler method to parse a css2 file.
+ *@param a_file_path the css2 local file path.
+ *@param a_enc the file encoding.
+ *@param a_result out parameter. The returned css stylesheet.
+ *Must be freed by the caller using cr_stylesheet_destroy.
+ *@return CR_OK upon successfull completion, an error code otherwise.
+ *Note that this method uses cr_om_parser_parse_file() so both methods
+ *have the same return values.
+ */
+enum CRStatus
+cr_om_parser_simply_parse_file (guchar *a_file_path,
+                                enum CREncoding a_enc,
+                                CRStyleSheet **a_result)
+{
+        CROMParser * parser = NULL ;
+        enum CRStatus status = CR_OK ;
+
+        parser = cr_om_parser_new (NULL) ;
+        if (!parser)
+        {
+                cr_utils_trace_info ("Could not allocate om parser") ;
+                cr_utils_trace_info ("System maybe out of memory") ;
+                return CR_ERROR ;
+        }
+        
+        status = cr_om_parser_parse_file (parser, a_file_path,
+                                          a_enc, a_result) ;
+        if (parser)
+        {
+                cr_om_parser_destroy (parser) ;
+                parser = NULL ;
+        }
+
+        return status ;
+}
+
 
 /**
  *Destructor of the #CROMParser.

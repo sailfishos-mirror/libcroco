@@ -37,10 +37,16 @@
 #include "cr-statement.h"
 #include "cr-stylesheet.h"
 #include "cr-om-parser.h"
+#include "cr-sel-eng.h"
 
 #ifdef WITH_SELENG
+#include "cr-style.h"
 #include "cr-sel-eng.h"
-#endif
+#endif /*WITH_SELENG*/
 
+#ifdef WITH_LAYENG
+#include "cr-box.h"
+#include "cr-lay-eng.h"
+#endif
 
 #endif /*__LIBCROCO_H__*/

@@ -61,8 +61,8 @@ cr_rgb_new (void)
  *@return the newly built instance of #CRRgb.
  */
 CRRgb *
-cr_rgb_new_with_vals (glong a_red, glong a_green, 
-                      glong a_blue, gboolean a_is_percentage)
+cr_rgb_new_with_vals (gulong a_red, gulong a_green, 
+                      gulong a_blue, gboolean a_is_percentage)
 {
         CRRgb *result =  NULL ;
 
@@ -149,6 +149,69 @@ cr_rgb_dump (CRRgb *a_this, FILE *a_fp)
                 g_free (str) ;
                 str = NULL ;
         }
+}
+
+/**
+ *Sets rgb values to the RGB.
+ *If the rgb values are percentages, make
+ *sure that the sum of the 3 values makes 100%.
+ *@param a_this the current instance of #CRRgb.
+ *@param a_red the red value.
+ *@param a_green the green value.
+ *@param a_blue the blue value.
+ *@return CR_OK upon successfull completion, an error code
+ *otherwise.
+ */
+enum CRStatus
+cr_rgb_set (CRRgb *a_this, gulong a_red,
+            gulong a_green, gulong a_blue,
+            gboolean a_is_percentage)
+{
+        g_return_val_if_fail (a_this, CR_BAD_PARAM_ERROR) ;
+        if (a_is_percentage != FALSE)
+        {
+                g_return_val_if_fail (a_red <= 100
+                                      && a_green <= 100
+                                      && a_blue <= 100,
+                                      CR_BAD_PARAM_ERROR) ;
+        }
+
+        a_this->is_percentage = a_is_percentage ;
+
+        a_this->red = a_red ;
+        a_this->green = a_green ;
+        if (a_is_percentage != FALSE)
+        {
+                if (a_red + a_green >= 100)
+                {
+                        a_green = 100 - a_red ;
+                }
+                a_this->blue = 100 - a_red - a_green ;
+        }
+        else
+        {
+                a_this->blue = a_blue ;
+        }
+
+        return CR_OK ;
+}
+
+/**
+ *Sets the rgb from an other one.
+ *@param a_this the current instance of #CRRgb.
+ *@param a_rgb the rgb to "copy"
+ *@return CR_OK upon successfull completion, an error code otherwise.
+ */
+enum CRStatus
+cr_rgb_set_from_rgb (CRRgb *a_this, CRRgb *a_rgb)
+{
+        g_return_val_if_fail (a_this && a_rgb,
+                              CR_BAD_PARAM_ERROR) ;
+
+        cr_rgb_set (a_this, a_rgb->red, a_rgb->green,
+                    a_rgb->blue, a_rgb->is_percentage) ;
+
+        return CR_OK ;
 }
 
 /**

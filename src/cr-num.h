@@ -93,7 +93,8 @@ enum CRStatus
 cr_num_copy (CRNum *a_dest, CRNum *a_src) ;
 
 enum CRStatus
-cr_num_set (CRNum *a_this, gdouble a_val, enum CRNumType a_type) ;
+cr_num_set (CRNum *a_this, gdouble a_val, 
+            enum CRNumType a_type) ;
 
 void
 cr_num_destroy (CRNum *a_this) ;

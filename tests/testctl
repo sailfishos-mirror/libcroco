@@ -1,0 +1,166 @@
+#!/bin/sh
+
+#####################################
+#This script just runs the tests of 
+#libcroco, saves their result, diff them
+#against a set of reference results and
+#displays OK/KO.
+####################################
+
+#the directory that contains the tests
+HERE=`dirname $0`
+
+#the list of tests to be run
+TEST_PROG_LIST=
+
+#the test input dirs.
+TEST_INPUT_DIR=test-inputs
+
+#the reference test output dirs.
+TEST_OUTPUT_DIR=test-outputs
+
+#temporary test result dir
+TEMP_RES_DIR_NAME=tmp-test-results
+
+EGREP=`which egrep`
+if test "empty$EGREP" = "empty" ; then
+    echo "You don't have the egrep program installed"
+    echo "Please, install it first"
+fi
+
+COMMAND_LIST=
+COMMAND=
+
+#builds the list of available test functions.
+build_tests_list ()
+{
+    for TEST_PROG in `ls -1 $HERE | egrep ^test\([0-9]\)+$` ; do
+	echo "$un test: $TEST_PROG"
+	TEST_PROG_LIST="$TEST_PROG_LIST $TEST_PROG"
+    done
+	
+}
+
+#runs a test programs.
+#usage run_test_prog <test-name> <reference>
+#where "test-name" is the name of the test program to run
+#"reference" is a boolean value: yes/no. (the string "yes" or the string no)
+#if yes, means that the output of the test is to be saved as a reference.
+#if no, means that the output of the test is to be saved as a result of a test.
+run_test_prog ()
+{
+    TEST_PROG=$1
+    REFERENCE=$2
+    
+    OUTPUT_DIR=
+    OUTPUT_SUFFIX=
+
+    for TEST_INPUT in `ls -1 $HERE/$TEST_INPUT_DIR | egrep ^${TEST_PROG}\([\.0-9]\)+\css\$` ; do
+	echo "test input: $TEST_INPUT"
+	TEST_INPUT_LIST="$TEST_INPUT_LIST $TEST_INPUT"
+    done
+
+    if test "$REFERENCE" = "yes" ; then
+	OUTPUT_DIR=$HERE/$TEST_OUTPUT_DIR
+	OUTPUT_SUFFIX=.ref
+    else
+	if test ! -d $HERE/$TEMP_RES_DIR_NAME/ ; then
+	    echo "creating tmp directory $$HERE/$TEMP_RES_DIR_NAME ..."
+	    mkdir $HERE/$TEMP_RES_DIR_NAME ;
+	    echo "done"
+	fi
+
+	OUTPUT_DIR=$HERE/$TEMP_RES_DIR_NAME
+	OUTPUT_SUFFIX=.out
+    fi    
+
+    if test "empty$TEST_INPUT_LIST" != "empty" ; then
+	for TEST_INPUT in $TEST_INPUT_LIST ; do
+	    echo "$HERE/$TEST_PROG $HERE/$TEST_INPUT_DIR/$TEST_INPUT > $OUTPUT_DIR/${TEST_INPUT}${OUTPUT_SUFFIX}"
+	    $HERE/$TEST_PROG $HERE/$TEST_INPUT_DIR/$TEST_INPUT > $OUTPUT_DIR/${TEST_INPUT}${OUTPUT_SUFFIX}
+	done
+    fi
+}
+
+cleanup_tests ()
+{
+    if test -d $HERE/$TEMP_RES_DIR_NAME ; then
+	echo "removing $HERE/$TEMP_RES_DIR_NAME"
+	rm -rf
+    fi
+}
+
+
+display_usage ()
+{
+    echo ""
+    echo "usage: $0 [options] <command>"
+    echo ""
+    echo "where options are:"
+    echo "===================="
+    echo "-h|--help     displays this help"
+    echo ""
+    echo "commands are:"
+    echo "=============="
+    echo "run           run the tests and display their result"
+    echo "mkref         run the tests but saves their output as a reference"
+    echo "mkcleanup     removes the tmp directories that may have been created"    
+}
+
+parse_command_line ()
+{
+    while true ; do
+
+	arg=$1 ;
+
+	case "$arg" in
+
+	    -h|--help)
+		display_usage $@
+		exit 0
+		;;
+	    -*)
+		echo "$0: unknown option: $arg"
+		display_usage $@
+		exit 0
+		;;
+
+	    run|mkref|mkcleanup)
+		COMMAND_LIST="$COMMAND_LIST $arg"
+		shift
+		;;
+
+	    *)
+		display_usage $@
+		exit 0
+		;;
+	esac
+    done
+}
+
+execute_command ()
+{
+    arg=$1 ;
+
+    case "$arg"in
+	run)
+	    ;;
+
+	mkref)
+	    ;;
+
+	mkcleanup)
+	    ;;
+
+	*)
+	    echo "unknown command"
+	    exit ;
+    esac
+    
+}
+main ()
+{
+    parse_command_line $@
+}
+
+main $@

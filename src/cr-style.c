@@ -140,6 +140,9 @@ enum CRDirection
 } ;
 
 static enum CRStatus
+cr_style_set_props_to_defaults (CRStyle *a_this) ;
+
+static enum CRStatus
 set_prop_padding_x_from_value (CRStyle *a_style,                          
                                CRTerm *a_value,
                                enum CRDirection a_dir) ;
@@ -203,6 +206,83 @@ cr_style_init_properties (void)
 
         return CR_OK ;
 }
+
+/**
+ *Sets the style properties to their default values
+ *according to the css2 spec.
+ *@param a_this the current instance of #CRStyle.
+ *@return CR_OK upon successfull completion, an error code otherwise.
+ */
+static enum CRStatus
+cr_style_set_props_to_defaults (CRStyle *a_this)
+{
+        g_return_val_if_fail (a_this, CR_BAD_PARAM_ERROR) ;
+
+        cr_num_set (&a_this->padding_top,
+                    0, NUM_LENGTH_PX) ;
+
+        cr_num_set (&a_this->padding_top,
+                    0, NUM_LENGTH_PX) ;
+        cr_num_set (&a_this->padding_right,
+                    0, NUM_LENGTH_PX) ;
+        cr_num_set (&a_this->padding_bottom,
+                    0, NUM_LENGTH_PX) ;
+        cr_num_set (&a_this->padding_left,
+                    0, NUM_LENGTH_PX) ;
+
+        cr_num_set (&a_this->border_top_width,
+                    0, BORDER_MEDIUM) ;
+        cr_num_set (&a_this->border_right_width,
+                    0, BORDER_MEDIUM) ;
+        cr_num_set (&a_this->border_bottom_width,
+                    0, BORDER_MEDIUM) ;
+        cr_num_set (&a_this->border_left_width,
+                    0, BORDER_MEDIUM) ;
+
+        /*default foreground color is black*/
+        cr_rgb_set (&a_this->color, 0, 0, 0,
+                    FALSE) ;
+        cr_rgb_set_from_rgb (&a_this->border_top_color,
+                             &a_this->color) ;
+        cr_rgb_set_from_rgb (&a_this->border_right_color,
+                             &a_this->color) ;
+        cr_rgb_set_from_rgb (&a_this->border_bottom_color,
+                             &a_this->color) ;
+        cr_rgb_set_from_rgb (&a_this->border_left_color,
+                             &a_this->color) ;
+
+        a_this->border_top_style = BORDER_STYLE_NONE ;
+        a_this->border_right_style = BORDER_STYLE_NONE ;
+        a_this->border_bottom_style = BORDER_STYLE_NONE ;
+        a_this->border_left_style = BORDER_STYLE_NONE ;
+
+        cr_num_set (&a_this->margin_top, 0, NUM_LENGTH_PX) ;
+        cr_num_set (&a_this->margin_right, 0, NUM_LENGTH_PX) ;
+        cr_num_set (&a_this->margin_bottom, 0, NUM_LENGTH_PX) ;
+        cr_num_set (&a_this->margin_left, 0, NUM_LENGTH_PX) ;
+
+        a_this->display = DISPLAY_INLINE ;
+        a_this->position = POSITION_STATIC ;
+
+        a_this->top.type = OFFSET_AUTO;
+        cr_num_set (&a_this->top.num, 0, NUM_LENGTH_PX) ;
+        a_this->right.type = OFFSET_AUTO;
+        cr_num_set (&a_this->right.num, 0, NUM_LENGTH_PX) ;
+        a_this->bottom.type = OFFSET_AUTO;
+        cr_num_set (&a_this->bottom.num, 0, NUM_LENGTH_PX) ;
+        a_this->left.type = OFFSET_AUTO;
+        cr_num_set (&a_this->left.num, 0, NUM_LENGTH_PX) ;
+
+        a_this->float_type = FLOAT_NONE ;
+
+        a_this->width.type = WIDTH_AUTO ;
+        cr_num_set (&a_this->width.num, 0, NUM_LENGTH_PX) ;
+
+        a_this->parent_style = NULL ;
+
+        return CR_OK ;
+}
+
 
 static enum CRPropertyID
 cr_style_get_prop_id (const guchar * a_prop)
@@ -654,7 +734,7 @@ set_prop_display_from_value (CRStyle *a_style, CRTerm *a_value)
 
         switch (a_value->type)
         {
-        case TERM_STRING:
+        case TERM_IDENT:
         {
                 int i = 0 ;
 
@@ -669,6 +749,7 @@ set_prop_display_from_value (CRStyle *a_style, CRTerm *a_value)
                                       (disp_vals_map[i].prop_name)))
                         {
                                 a_style->display = disp_vals_map[i].type ;
+                                break ;
                         }
                 }
 
@@ -722,7 +803,7 @@ set_prop_position_from_value (CRStyle *a_style, CRTerm *a_value)
 
         switch (a_value->type)
         {
-        case TERM_STRING:
+        case TERM_IDENT:
         {
                 int i = 0 ;
 
@@ -738,6 +819,7 @@ set_prop_position_from_value (CRStyle *a_style, CRTerm *a_value)
                                 a_style->position = 
                                         position_vals_map[i].type ;
                                 status = CR_OK ;
+                                break ;
                         }
                 }
                 if (a_style->position == POSITION_INHERIT)
@@ -772,7 +854,7 @@ set_prop_x_from_value (CRStyle *a_style, CRTerm *a_value,
 
         
         if (!(a_value->type == TERM_NUMBER)
-            && !(a_value->type == TERM_STRING))
+            && !(a_value->type == TERM_IDENT))
         {
                 return CR_UNKNOWN_PROP_VAL_ERROR ;
         }
@@ -813,7 +895,7 @@ set_prop_x_from_value (CRStyle *a_style, CRTerm *a_value,
                 cr_num_copy (&box_offset->num, a_value->content.num) ;
                 box_offset->type = OFFSET_DEFINED ;
         }
-        else if (a_value->type == TERM_STRING
+        else if (a_value->type == TERM_IDENT
                  && a_value->content.str
                  && a_value->content.str->str)
         {
@@ -845,7 +927,7 @@ set_prop_float (CRStyle *a_style, CRTerm *a_value)
         /*the default float type as specified by the css2 spec*/
         a_style->float_type = FLOAT_NONE ;
 
-        if (a_value->type != TERM_STRING
+        if (a_value->type != TERM_IDENT
             || !a_value->content.str
             || !a_value->content.str->str) 
         {/*unknow type, the float type is set to it's default value*/
@@ -890,7 +972,7 @@ set_prop_width (CRStyle *a_style, CRTerm *a_value)
         
         a_style->width.type = WIDTH_AUTO ;
         
-        if (a_value->type == TERM_STRING)
+        if (a_value->type == TERM_IDENT)
         {
                 if (a_value->content.str
                     && a_value->content.str->str)
@@ -944,6 +1026,9 @@ cr_style_new (void)
 	}
 	memset (result, 0, sizeof (CRStyle)) ;
         gv_prop_hash_ref_count ++ ;
+
+        /*set the style properties to their default values*/
+        cr_style_set_props_to_defaults (result) ;
 
 	return result ;
 }
@@ -1161,6 +1246,33 @@ cr_style_set_style_from_decl (CRStyle *a_this, CRDeclaration *a_decl,
 
         return status ;
         
+}
+
+enum CRStatus
+cr_style_ref (CRStyle *a_this)
+{
+        g_return_val_if_fail (a_this, CR_BAD_PARAM_ERROR) ;
+
+        a_this->ref_count ++ ;
+        return CR_OK ;
+}
+
+gboolean
+cr_style_unref (CRStyle *a_this)
+{
+        g_return_val_if_fail (a_this,
+                              FALSE) ;
+
+        if (a_this->ref_count)
+                a_this->ref_count -- ;
+
+        if (!a_this->ref_count)
+        {
+                cr_style_destroy (a_this) ;
+                return TRUE ;
+        }
+
+        return FALSE ;
 }
 
 

@@ -1,3 +1,22 @@
+2003-04-01  Dodji  <dodji@seketeli.org>
+
+	* tests/testctl: started to code the libcroco test launcher script.
+	it is not useable yet, but work is in progress.
+
+2003-03-31  Dodji  <dodji@seketeli.org>
+	* src/cr-lay-eng.c: started to code the tree annotation process.
+	I seriously need to debug this.
+	
+	* configure.in: put in there the list of tests to be compile
+	and the conditions cause AM_CONDITIONAL() is buggy and does
+	not seem to fit my needs. Also modified tests/Makefile.am
+	to take this in account.
+	
+	* tests/test7-main.c: added this file to debug the layout engine
+	related stuffs.
+
+	* croco-config.1: some minor fixes in the man page.
+	
 2003-03-30 Christian Schaller <uraeus@gnome.org>
 	* Fixed disting by adding manpages to EXTRA_DIST
 	* Added spec.in file, this need to be added to build 
@@ -5,6 +24,11 @@
 	* Remove Makefile.in from CVS, this is a generated file
 	
 2003-03-30  Dodji  <dodji@seketeli.org>
+	* autogen.sh: 
+	Made sure that in dev mode, the configure scripts
+	gets called with --enable-tests=yes --enable-seleng=yes
+	--enable-layeng=yes. This options being set to 'no' by default.
+
 	* src/cr-lay-eng.c: 
 	Started to code a layout engine. This is more a design
 	sketch than real usefull code so far.

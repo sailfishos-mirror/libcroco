@@ -95,7 +95,6 @@ fi
 AC_SUBST(WITH_TESTS)
 AM_CONDITIONAL(HAVE_TESTS, test "$WITH_TESTS" = "yes")
 
-
 dnl --enable-seleng
 dnl this option enables compilation of the selection engine
 AC_ARG_ENABLE(seleng, 
@@ -135,7 +134,7 @@ if test "$WITH_LAYENG" = "auto" ; then
 	else
 		WITH_LAYENG="no"
 	fi
-	
+
 elif test "$WITH_LAYENG" = "yes" ; then
 	AC_DEFINE(WITH_LAYENG, 1, [use layout engine])
 else
@@ -144,6 +143,29 @@ fi
 
 AC_SUBST(WITH_LAYENG)
 AM_CONDITIONAL(HAVE_LAYENG, test "$WITH_LAYENG" = "yes")
+
+dnl choose which tests to launch and in which condition
+dnl okay, this should not go here but it seems like 
+dnl AM_CONDITIONAL() and it peer if/endif construction
+dnl is bugged and does not properly support a serie 
+dnl of several non nested if/endif. So, I will handle this
+dnl this way until I find a better way.
+CORE_TESTS=
+SELENG_TESTS=
+LAYENG_TESTS=
+
+if test "$WITH_TESTS" = "yes" ; then
+	CORE_TESTS="test0 test1 test2 test3 test4 test6"
+	if test "$WITH_SELENG" = yes ; then
+		SELENG_TESTS="test5"
+	fi
+	if test "$WITH_LAYENG" = "yes" ; then
+		LAYENG_TESTS="test7" ;
+	fi
+fi
+AC_SUBST(CORE_TESTS)
+AC_SUBST(SELENG_TESTS)
+AC_SUBST(LAYENG_TESTS)
 
 dnl By default compile in debug mode
 CFLAGS="-g -Wunused -Wimplicit -Wreturn-type -Wswitch \

@@ -32,8 +32,7 @@
 #include <glib.h>
 #include "cr-utils.h"
 #include "cr-parser-input.h"
-#include "cr-selector.h"
-#include "cr-term.h"
+#include "cr-stylesheet.h"
 
 G_BEGIN_DECLS
 
@@ -104,11 +103,16 @@ struct _CRDocHandler
 	 *of the imported style sheet.
 	 */
 	void (*import_style) (CRDocHandler *a_this,
-			      GList *a_media_list,
-			      GString *a_uri,
-			      GString *a_uri_default_ns) ;
+				     GList *a_media_list,
+				     GString *a_uri,
+				     GString *a_uri_default_ns) ;
 
-		
+	void (*import_style_result) (CRDocHandler *a_this,
+				     GList *a_media_list,
+				     GString *a_uri,
+				     GString *a_uri_default_ns,
+				     CRStyleSheet *a_sheet) ;
+
 	/**
 	 *Is called to notify a namespace declaration.
 	 *Not used yet.
@@ -261,6 +265,7 @@ struct _CRDocHandler
 	 */
 	void (*unrecoverable_error) (CRDocHandler *a_this) ;
 
+	gboolean resolve_import ;
 	gulong ref_count ;
 } ;
 

@@ -64,6 +64,17 @@ cr_om_parser_parse_file (CROMParser *a_this,
                          CRStyleSheet **a_result) ;
 
 enum CRStatus
+cr_om_parser_simply_parse_file (guchar *a_file_path,
+                                enum CREncoding a_enc,
+                                CRStyleSheet **a_result) ;
+
+enum CRStatus
+cr_om_parser_simply_parse_buf (guchar *a_buf,
+                               gulong a_len,
+                               enum CREncoding a_enc,
+                               CRStyleSheet **a_result) ;
+
+enum CRStatus
 cr_om_parser_parse_buf (CROMParser *a_this,
                         guchar *a_buf,
                         gulong a_len,

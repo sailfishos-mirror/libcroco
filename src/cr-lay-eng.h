@@ -27,12 +27,20 @@
 
 #include <libxml/tree.h>
 #include "cr-utils.h"
-#include "cr-stylesheet.h"
+#include "cr-cascade.h"
+
+/**
+ *@file
+ *the declaration of the #CRLayEng class.
+ */
 
 G_BEGIN_DECLS
 
 typedef struct _CRLayEngPriv CRLayEngPriv ;
 
+/**
+ *The abstraction of the Layout engine of libcroco.
+ */
 typedef struct
 {
 	CRLayEngPriv *priv ;
@@ -42,11 +50,12 @@ typedef struct
 CRLayEng *
 cr_lay_eng_new (void) ;
 
-
 enum CRStatus
-cr_lay_eng_build_annotate_tree (CRLayEng *a_this,
-				xmlDoc *a_xml_doc,
-				CRStyleSheet *a_sheet) ;
+cr_lay_eng_build_annotated_doc (CRLayEng *a_this,
+                                xmlDoc *a_xml_doc,
+                                CRCascade *a_cascade) ;
+enum CRStatus
+cr_lay_eng_destroy_doc_annotation (xmlDoc *a_xml_doc) ;
 
 void
 cr_lay_eng_destroy (CRLayEng *a_this) ;

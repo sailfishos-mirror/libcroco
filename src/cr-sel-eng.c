@@ -28,9 +28,9 @@
  *@file:
  *The definition of the  #CRSelEng class.
  *The #CRSelEng is actually the "Selection Engine"
- *class.
+ *class. This is highly experimental for at the moment and
+ *its api is very likely to change in a near future.
  */
-#ifdef WITH_SELENG
 
 #define PRIVATE(a_this) (a_this)->priv
 
@@ -849,6 +849,7 @@ cr_sel_eng_get_matched_rulesets (CRSelEng *a_this,
         return status ;
 }
 
+
 /**
  *Retrieves the style structure that matches the xml node
  *from the cascade.
@@ -872,9 +873,49 @@ cr_sel_eng_get_matched_style (CRSelEng *a_this,
                               xmlNode *a_node,
                               CRStyle *a_parent_style,
                               CRStyle **a_style)
-{        
+{       
+        CRStatement **rulesets = NULL ;
+        CRStyleSheet *author_sheet = NULL ;
+        gulong len = 0 ;
+        CRStyle *result_style = NULL ;
+
+        enum CRStatus status = CR_OK ;
+
         g_return_val_if_fail (a_this && a_cascade
-                              && a_node && a_style) ;
+                              && a_node && a_style
+                              && (*a_style == NULL),
+                              CR_BAD_PARAM_ERROR) ;
+
+        author_sheet = cr_cascade_get_sheet (a_cascade, 
+                                             ORIGIN_AUTHOR) ;
+        if (!author_sheet)
+        {
+                cr_utils_trace_info ("Could not get author sheet from cascade") ;
+                return CR_ERROR ;
+        }
+
+        status = cr_sel_eng_get_matched_rulesets (a_this, author_sheet,
+                                                  a_node, &rulesets,
+                                                  &len) ;
+        if (len && rulesets[len - 1])
+        {
+                status = cr_style_new_from_ruleset 
+                        (rulesets[len - 1], a_parent_style,
+                         &result_style) ;
+                
+        }
+
+        if (result_style)
+        {
+                *a_style = result_style ;
+                result_style = NULL ;
+        }
+
+        if (rulesets)
+        {
+                g_free (rulesets) ;
+                rulesets = NULL ;
+        }
 
         return CR_OK ;
 }
@@ -901,4 +942,3 @@ cr_sel_eng_destroy (CRSelEng *a_this)
 	}
 }
 
-#endif /*WITH_SELENG*/

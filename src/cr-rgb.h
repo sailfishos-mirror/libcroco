@@ -54,8 +54,16 @@ extern "C"
 	cr_rgb_new (void) ;
 
 	CRRgb *
-	cr_rgb_new_with_vals (glong a_red, glong a_green, 
-                              glong a_blue, gboolean a_is_percentage) ;
+	cr_rgb_new_with_vals (gulong a_red, gulong a_green, 
+                              gulong a_blue, gboolean a_is_percentage) ;
+
+        enum CRStatus
+        cr_rgb_set (CRRgb *a_this, gulong a_red,
+                    gulong a_green, gulong a_blue,
+                    gboolean a_is_percentage) ;
+        
+        enum CRStatus
+        cr_rgb_set_from_rgb (CRRgb *a_this, CRRgb *a_rgb) ;
 
         guchar *
         cr_rgb_to_string (CRRgb *a_this) ;
