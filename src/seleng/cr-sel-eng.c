@@ -1170,7 +1170,7 @@ cr_sel_eng_get_matched_properties_from_cascade  (CRSelEng *a_this,
  *the returned *a_style using cr_style_destroy().
  *@return CR_OK upon successfull completion, an error code otherwise.
  */
-#if 1
+#if 0
 enum CRStatus
 cr_sel_eng_get_matched_style (CRSelEng *a_this,
                               CRCascade *a_cascade,

@@ -245,14 +245,7 @@ cr_style_new (void) ;
 
 
 enum CRStatus
-cr_style_new_from_ruleset (CRStatement *a_stmt, 
-                           CRStyle *a_parent_style,
-			   CRStyle **a_style) ;
-enum CRStatus
 cr_style_set_style_from_decl (CRStyle *a_this, CRDeclaration *a_decl) ;
-
-enum CRStatus
-cr_style_set_style_from_ruleset (CRStyle *a_this, CRStatement *a_stmt) ;
 
 enum CRStatus
 cr_style_ref (CRStyle *a_this) ;
