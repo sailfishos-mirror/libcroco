@@ -11,4 +11,6 @@ test4.1.css \
 test4.2.css \
 test5.1.css \
 unknown-at-rule2.css \
-unknown-at-rule.css
+unknown-at-rule.css \
+several-media.css
+
