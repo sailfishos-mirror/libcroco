@@ -253,11 +253,7 @@ dnl *By default compile in debug mode
 dnl **********************************
 
 if test "x$GCC" = "xyes" ; then
-	CFLAGS="$CFLAGS -Wunused -Wimplicit -Wreturn-type -Wswitch \
-	-Wcomment -Wtrigraphs -Wformat -Wchar-subscripts \
-        -Wparentheses -Wpointer-arith -Wcast-align \
-        -Wwrite-strings -Waggregate-return -Wstrict-prototypes \
-        -Wmissing-prototypes -Wnested-externs -Winline -Wredundant-decls"		
+	CFLAGS="$CFLAGS -g -Wall"
 fi
 
 
