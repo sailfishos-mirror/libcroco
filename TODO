@@ -1,14 +1,10 @@
 
 *coding:)
 
-Go forward in the box layout (positioning/rendering) code. (hard, very hard).
-This is gonna take a coupe of months I think.
- Implement the style properties (of the 4 edges of the box model).
- test/debug the properties used in test7  
- code the shortcut properties (border, margin border-style etc ...)
-      WIRE the use of the "border" properties and all it sub
-      properties and debug this.
- code the color 16 name aliases defined in the html 4.01 spec. (debug this)
+Code the cascading in cr-sel-eng.c
+     code the cascade precedence rules (in
+     put_css_properties_in_hashtable() )
+
 
 *Doc:)
 

@@ -13,7 +13,7 @@ if HAVE_LAYENG
 croco_layeng_lib=$(top_builddir)/src/layeng/@CROCO_LAYENG_LIB@
 endif
 
-LDADD=@GLIB2_LIBS@ $(croco_parser_lib) $(croco_seleng_lib) $(croco_layeng_lib)
+LDADD=$(croco_layeng_lib) $(croco_seleng_lib) $(croco_parser_lib) 
 
 INCLUDES=-I$(top_srcdir)/intl \
 	-I$(top_srcdir)/src \
@@ -24,5 +24,6 @@ INCLUDES=-I$(top_srcdir)/intl \
 
 AM_CFLAGS=$(INCLUDES)
 
+LDFLAGS=@GLIB2_LIBS@
 
 EXTRA_DIST = $(man_MANS)

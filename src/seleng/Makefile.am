@@ -5,7 +5,7 @@ crselenginc_HEADERS= *.h
 
 #the selection engine files
 if HAVE_SELENG
-SELENG_SRCS= cr-sel-eng.c
+SELENG_SRCS= cr-style.c cr-sel-eng.c
 endif
 
 libcrseleng_la_SOURCES=$(SELENG_SRCS)

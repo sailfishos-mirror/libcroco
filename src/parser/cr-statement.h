@@ -40,8 +40,18 @@ G_BEGIN_DECLS
  *Declaration of the #CRStatement class.
  */
 
+/*
+ *forward declaration of CRStyleSheet which is defined in
+ *cr-stylesheet.h
+ */
+
 struct _CRStatement ;
-typedef struct _CRStatement CRStatement ;
+
+/*
+ *typedef struct _CRStatement CRStatement ; 
+ *this is forward declared in 
+ *cr-declaration.h already.
+ */
 
 struct _CRAtMediaRule ;
 typedef struct _CRAtMediaRule CRAtMediaRule ;
@@ -186,6 +196,11 @@ struct _CRStatement
 		CRAtFontFaceRule *font_face_rule ;
 	} kind ;
 
+        /*
+         *the style sheet that contains
+         *this css statement.
+         */
+        CRStyleSheet *parent_sheet ;
 	CRStatement *next ;
 	CRStatement *prev ;
 
@@ -204,33 +219,48 @@ struct _CRStatement
          *pointer.
          */
         gpointer *croco_data ;
+
 } ;
 
 
 CRStatement*
-cr_statement_new_ruleset (CRSelector *a_sel_list, 
+cr_statement_new_ruleset (CRStyleSheet *a_sheet,
+                          CRSelector *a_sel_list, 
 			  CRDeclaration *a_decl_list,
 			  CRAtMediaRule *a_media_rule) ;
 
 CRStatement*
-cr_statement_new_at_import_rule (GString *a_url,
+cr_statement_new_at_import_rule (CRStyleSheet *a_container_sheet,
+                                 GString *a_url,
                                  GList *a_media_list,
-				 CRStyleSheet *a_sheet) ;
+				 CRStyleSheet *a_imported_sheet) ;
 
 CRStatement *
-cr_statement_new_at_media_rule (CRStatement *a_ruleset,
+cr_statement_new_at_media_rule (CRStyleSheet *a_sheet,
+                                CRStatement *a_ruleset,
 				GList *a_media) ;
 
 CRStatement *
-cr_statement_new_at_charset_rule (GString *a_charset) ;
+cr_statement_new_at_charset_rule (CRStyleSheet *a_sheet,
+                                  GString *a_charset) ;
 
 CRStatement *
-cr_statement_new_at_font_face_rule (CRDeclaration *a_font_decls) ;
+cr_statement_new_at_font_face_rule (CRStyleSheet *a_sheet,
+                                    CRDeclaration *a_font_decls) ;
 
 CRStatement *
-cr_statement_new_at_page_rule (CRDeclaration *a_decl_list,
+cr_statement_new_at_page_rule (CRStyleSheet *a_sheet,
+                               CRDeclaration *a_decl_list,
 			       GString *a_name,
 			       GString *a_pseudo) ;
+enum CRStatus
+cr_statement_set_parent_sheet (CRStatement *a_this, 
+                               CRStyleSheet *a_sheet) ;
+
+enum CRStatus
+cr_statement_get_parent_sheet (CRStatement *a_this, 
+                               CRStyleSheet **a_sheet) ;
+
 CRStatement *
 cr_statement_append (CRStatement *a_this,
 		     CRStatement *a_new) ;
@@ -264,12 +294,12 @@ cr_statement_ruleset_append_decl (CRStatement *a_this,
 				  CRDeclaration *a_decl) ;
 
 enum CRStatus
-cr_statement_at_import_rule_set_sheet (CRStatement *a_this,
-				       CRStyleSheet *a_sheet) ;
+cr_statement_at_import_rule_set_imported_sheet (CRStatement *a_this,
+                                                CRStyleSheet *a_sheet) ;
 
 enum CRStatus
-cr_statement_at_import_rule_get_sheet (CRStatement *a_this,
-				       CRStyleSheet **a_sheet) ;
+cr_statement_at_import_rule_get_imported_sheet (CRStatement *a_this,
+                                                CRStyleSheet **a_sheet) ;
 
 enum CRStatus
 cr_statement_at_import_rule_set_url (CRStatement *a_this,

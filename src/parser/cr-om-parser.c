@@ -237,7 +237,10 @@ start_font_face (CRDocHandler *a_this)
         ctxt = a_this->context ;
         g_return_if_fail (ctxt->cur_stmt == NULL) ;
 
-        ctxt->cur_stmt = cr_statement_new_at_font_face_rule (NULL) ;
+        ctxt->cur_stmt = 
+                cr_statement_new_at_font_face_rule 
+                (ctxt->stylesheet, NULL) ;
+
         g_return_if_fail (ctxt->cur_stmt) ;
 }
 
@@ -325,7 +328,8 @@ charset (CRDocHandler *a_this, GString *a_charset)
         charset = g_string_new_len (a_charset->str, 
                                     a_charset->len) ;
 
-        stmt = cr_statement_new_at_charset_rule (charset) ;
+        stmt = cr_statement_new_at_charset_rule 
+                (ctxt->stylesheet, charset) ;
         g_return_if_fail (stmt) ;
 
         stmt2 = cr_statement_append (ctxt->stylesheet->statements,
@@ -359,7 +363,8 @@ start_page (CRDocHandler *a_this, GString *a_page,
         ctxt = a_this->context ;
         g_return_if_fail (ctxt->cur_stmt == NULL) ;
 
-        ctxt->cur_stmt = cr_statement_new_at_page_rule (NULL, NULL, NULL) ;
+        ctxt->cur_stmt = cr_statement_new_at_page_rule 
+                (ctxt->stylesheet, NULL, NULL, NULL) ;
 
         if (a_page)
         {
@@ -459,7 +464,8 @@ start_media (CRDocHandler *a_this, GList *a_media_list)
         }
 
         ctxt->cur_media_stmt = 
-                cr_statement_new_at_media_rule (NULL, media_list) ;
+                cr_statement_new_at_media_rule 
+                (ctxt->stylesheet, NULL, media_list) ;
         
 }
 
@@ -521,9 +527,8 @@ import_style (CRDocHandler *a_this, GList *a_media_list,
                 }
         }
 
-        stmt = cr_statement_new_at_import_rule (uri,
-                                                media_list,
-                                                NULL) ;    
+        stmt = cr_statement_new_at_import_rule 
+                (ctxt->stylesheet, uri, media_list, NULL) ;    
         if (!stmt) 
                 goto error ;
         
@@ -579,7 +584,7 @@ start_selector (CRDocHandler *a_this,
         }
 
         ctxt->cur_stmt =cr_statement_new_ruleset 
-                (a_selector_list,NULL, NULL) ;
+                (ctxt->stylesheet, a_selector_list,NULL, NULL) ;
 }
 
 
@@ -672,7 +677,8 @@ property (CRDocHandler *a_this,
 	}
 
         /*instanciates a new declaration*/
-        decl = cr_declaration_new (str, a_expression) ;
+        decl = cr_declaration_new (ctxt->cur_stmt,
+                                   str, a_expression) ;
         g_return_if_fail (decl) ;
         str = NULL ;
 

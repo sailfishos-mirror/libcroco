@@ -40,10 +40,10 @@
 
 #ifdef CROCO_SELENG_ENABLED /*The selection engine headers*/
 #include "seleng/cr-sel-eng.h"
+#include "seleng/cr-style.h"
 #endif /*CROCO_SELENG_ENABLED*/
 
 #ifdef CROCO_LAYENG_ENABLED /*the layout engine headers*/
-#include "layeng/cr-style.h"
 #include "layeng/cr-box.h"
 #include "layeng/cr-box-view.h"
 #include "layeng/cr-lay-eng.h"

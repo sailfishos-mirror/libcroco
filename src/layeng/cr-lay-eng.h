@@ -55,12 +55,7 @@ cr_lay_eng_init (glong a_argc, gchar ** a_argv) ;
 CRLayEng *
 cr_lay_eng_new (void) ;
 
-enum CRStatus
-cr_lay_eng_get_matched_style (CRLayEng *a_this,
-                              CRCascade *a_cascade,
-                              xmlNode *a_node,
-                              CRStyle *a_parent_style,
-                              CRStyle **a_style) ;
+
 enum CRStatus
 cr_lay_eng_create_box_model (CRLayEng *a_this,
                              xmlDoc *a_xml_doc,

@@ -26,6 +26,7 @@
 
 #include <string.h>
 #include "cr-declaration.h"
+#include "cr-statement.h"
 
 /**
  *@file
@@ -107,9 +108,20 @@ dump (CRDeclaration *a_this, FILE *a_fp, glong a_indent)
  *case of error.
  */
 CRDeclaration *
-cr_declaration_new (GString *a_property, CRTerm *a_value)
+cr_declaration_new (CRStatement *a_statement,
+		    GString *a_property, 
+		    CRTerm *a_value)
 {
 	CRDeclaration *result = NULL ;
+
+	g_return_val_if_fail (a_statement 
+			      && ((a_statement->type 
+				   == RULESET_STMT) 
+				  || (a_statement->type 
+				      == AT_FONT_FACE_RULE_STMT)
+				  || (a_statement->type 
+				      == AT_PAGE_RULE_STMT)),
+			      NULL) ;
 
 	result = g_try_malloc (sizeof (CRDeclaration)) ;
 	if (!result)
@@ -125,7 +137,7 @@ cr_declaration_new (GString *a_property, CRTerm *a_value)
 	{
 		cr_term_ref (a_value) ;
 	}
-
+	result->parent_statement = a_statement ;
 	return result ;
 }
 
@@ -187,12 +199,23 @@ cr_declaration_prepend (CRDeclaration *a_this, CRDeclaration *a_new)
  *case of an error.
  */
 CRDeclaration *
-cr_declaration_append2 (CRDeclaration *a_this, GString *a_prop,
+cr_declaration_append2 (CRDeclaration *a_this,
+			GString *a_prop,
 			CRTerm *a_value)
 {
 	CRDeclaration *new_elem = NULL ;
 
-	new_elem = cr_declaration_new (a_prop, a_value) ;
+	g_return_val_if_fail (a_this && a_this->parent_statement
+			      && ((a_this->parent_statement->type 
+				   == RULESET_STMT) 
+				  || (a_this->parent_statement->type 
+				      == AT_FONT_FACE_RULE_STMT)
+				  || (a_this->parent_statement->type 
+				      == AT_PAGE_RULE_STMT)),
+			      NULL) ;
+
+	new_elem = cr_declaration_new (a_this->parent_statement,
+				       a_prop, a_value) ;
 	g_return_val_if_fail (new_elem, NULL) ;
 	
 	return cr_declaration_append (a_this, new_elem) ;

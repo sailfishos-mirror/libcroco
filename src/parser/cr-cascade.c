@@ -73,7 +73,7 @@ cr_cascade_new (CRStyleSheet *a_author_sheet,
 	}
 	memset (result, 0, sizeof (CRCascade)) ;
 
-	PRIVATE (result) = g_try_malloc (sizeof (CRCascade)) ;
+	PRIVATE (result) = g_try_malloc (sizeof (CRCascadePriv)) ;
 	if (!PRIVATE (result))
 	{
 		cr_utils_trace_info ("Out of memory") ;
@@ -83,19 +83,18 @@ cr_cascade_new (CRStyleSheet *a_author_sheet,
 
 	if (a_author_sheet)
 	{
-		PRIVATE (result)->sheets[ORIGIN_AUTHOR] = 
-			a_author_sheet ;
-		cr_stylesheet_ref (a_author_sheet) ;
+                cr_cascade_set_sheet (result, a_author_sheet,
+                                      ORIGIN_AUTHOR) ;
 	}
 	if (a_user_sheet)
 	{
-		PRIVATE (result)->sheets[ORIGIN_USER] = a_user_sheet ;
-		cr_stylesheet_ref (a_user_sheet) ;
+                cr_cascade_set_sheet (result, a_user_sheet,
+                                      ORIGIN_USER) ;
 	}
 	if (a_ua_sheet)
 	{
-		PRIVATE (result)->sheets[ORIGIN_UA] = a_ua_sheet ;
-		cr_stylesheet_ref (a_ua_sheet) ;
+                cr_cascade_set_sheet (result, a_user_sheet,
+                                      ORIGIN_UA) ;
 	}
 
 	return result ;
@@ -120,7 +119,7 @@ cr_cascade_get_sheet (CRCascade *a_this,
 {
 	g_return_val_if_fail (a_this
 			      && a_origin >= ORIGIN_AUTHOR
-			      && a_origin < ORIGIN_END,
+			      && a_origin < NB_ORIGINS,
 			      NULL) ;
 
 	return PRIVATE (a_this)->sheets[a_origin] ;
@@ -143,7 +142,7 @@ cr_cascade_set_sheet (CRCascade *a_this,
 	g_return_val_if_fail (a_this
 			      && a_sheet
 			      && a_origin >= ORIGIN_AUTHOR
-			      && a_origin < ORIGIN_END,
+			      && a_origin < NB_ORIGINS,
 			      CR_BAD_PARAM_ERROR) ;
 
 	if (PRIVATE (a_this)->sheets[a_origin])
@@ -151,7 +150,7 @@ cr_cascade_set_sheet (CRCascade *a_this,
 			(PRIVATE (a_this)->sheets[a_origin]) ;
 	PRIVATE (a_this)->sheets[a_origin] = a_sheet ;
 	cr_stylesheet_ref (a_sheet) ;
-
+        a_sheet->origin = a_origin ;
 	return CR_OK ;
 }
 
@@ -170,7 +169,7 @@ cr_cascade_destroy (CRCascade *a_this)
 
 		for (i = 0 ; 
 		     PRIVATE (a_this)->sheets
-			     && i < ORIGIN_END ; 
+			     && i < NB_ORIGINS ; 
 		     i++)
 		{
 			if (PRIVATE (a_this)->sheets[i])

@@ -39,19 +39,6 @@
 G_BEGIN_DECLS
 
 
-enum CRStyleOrigin
-{
-        /*Please don't change the order of
-         *the values enumerated here ...
-         *New values should be added at the end,
-         *just before ORIGIN_END.
-         */
-	ORIGIN_AUTHOR = 0,
-	ORIGIN_USER ,
-	ORIGIN_UA,
-        ORIGIN_END /*must always be the last one*/
-} ;
-
 typedef struct _CRCascadePriv CRCascadePriv ;
 
 /**

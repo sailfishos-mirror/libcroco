@@ -35,6 +35,22 @@
  *The declaration of the #CRStyleSheet class.
  */
 
+
+enum CRStyleOrigin
+{
+        /*Please don't change the order of
+         *the values enumerated here ...
+         *New values should be added at the end,
+         *just before ORIGIN_END.
+         */
+        ORIGIN_UA = 0,
+        ORIGIN_USER,
+	ORIGIN_AUTHOR,	
+
+        /*must always be the last one*/
+        NB_ORIGINS 
+} ;
+
 /**
  *An abstraction of a css stylesheet as defined
  *by the css2 spec in chapter 4.
@@ -43,6 +59,11 @@ struct _CRStyleSheet
 {
 	/**The css statements list*/
 	CRStatement *statements ;
+
+        enum CRStyleOrigin origin ;
+
+        /*the parent import rule, if any.*/
+        CRStatement *parent_import_rule ;
 
 	/**custom data used by libcroco*/
 	void *croco_data ;

@@ -98,12 +98,13 @@ set_color (CRBoxView *a_this, CRRgb *a_rgb_color,
 static void
 cr_box_view_class_init (CRBoxViewClass *a_klass)
 {
-	GObjectClass *gobject_class = G_OBJECT_CLASS (a_klass) ;
-	GtkObjectClass *gtk_object_class = GTK_OBJECT_CLASS (a_klass) ;
+        GtkObjectClass *gtk_object_class = GTK_OBJECT_CLASS (a_klass) ;
 
-	gv_parent_class =  (GtkLayoutClass *)
-		g_type_class_peek_parent (gobject_class) ;
-
+	gv_parent_class = 
+		g_type_class_peek_parent (a_klass) ;
+        
+        g_return_if_fail (gv_parent_class) ;
+        g_return_if_fail (gtk_object_class) ;
 	gtk_object_class->destroy = cr_box_view_destroy ;
 }
 
@@ -689,7 +690,7 @@ cr_box_view_get_box_model (CRBoxView *a_this, CRBoxModel **a_box_model)
 
 void
 cr_box_view_destroy (GtkObject *a_this)
-{	
+{
 	CRBoxView *self = NULL ;
 
 	g_return_if_fail (a_this && CR_IS_BOX_VIEW (a_this)) ;

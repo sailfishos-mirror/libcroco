@@ -58,6 +58,11 @@ cr_sel_eng_get_matched_rulesets_real (CRSelEng *a_this,
                                       xmlNode *a_node,
                                       CRStatement **a_rulesets, 
                                       gulong *a_len) ;
+
+static enum CRStatus
+put_css_properties_in_hashtable (GHashTable **a_props_hashtable,
+                                 CRStatement *a_ruleset) ;
+
 struct _CRSelEngPriv
 {
         /*not used yet*/
@@ -701,7 +706,87 @@ cr_sel_eng_get_matched_rulesets_real (CRSelEng *a_this,
         return CR_OK ;
 }
 
+/**
+ *Walks through the property/value pairs of a ruleset
+ *statement and put the properties found into a hashtable.
+ *Each key of the hashtable is a css property. The
+ *associated value is a pointer to the current #CRStatement.
+ *
+ *@param a_props_hashtable in/out parameter. The hashtable into
+ *which the the property/statement pairs will be added.
+ *Note that each hashtable key (a statement property) is a null terminated 
+ *instance of guchar *.
+ *Each value associated to a key is an instance of #CRStatement. The statement
+ *is actually the css ruleset that contains the property (the key).
+ *@param a_ruleset the ruleset from wich the properties are gathered.
+ *@return CR_OK upon successfull completion, an error code otherwise.
+ */
+static enum CRStatus
+put_css_properties_in_hashtable (GHashTable **a_props_hashtable,
+                                 CRStatement *a_ruleset)
+{
+        CRStatement *cur_stmt = NULL ;
+        GHashTable *props_hash = NULL ;
 
+        g_return_val_if_fail (a_props_hashtable && a_ruleset
+                              && a_ruleset->type == RULESET_STMT,
+                              CR_BAD_PARAM_ERROR) ;
+
+        if (!*a_props_hashtable)
+        {
+                *a_props_hashtable = g_hash_table_new (g_str_hash,
+                                                       g_str_equal) ;
+        }
+        props_hash = *a_props_hashtable ;
+
+        for (cur_stmt = a_ruleset ; cur_stmt ; cur_stmt = cur_stmt->next)
+        {
+                CRDeclaration *cur_decl = NULL ;
+
+                if (cur_stmt->type != RULESET_STMT
+                    || !cur_stmt->kind.ruleset)
+                        continue ;
+
+                for (cur_decl = cur_stmt->kind.ruleset->decl_list ; 
+                     cur_decl ; cur_decl = cur_decl->next)
+                {
+                        if (cur_decl->property && cur_decl->property->str)
+                        {
+                                GString *prop = NULL ;
+                                gboolean insert_property = FALSE ;
+
+                                /*
+                                 *First, test if the property is not
+                                 *already present in our properties hashtable.
+                                 *If yes, apply the cascading rules to
+                                 *compute the precedence. If not, insert
+                                 *the property into the hashtable.
+                                 */
+                                prop = g_hash_table_lookup 
+                                        (props_hash, cur_decl->property->str) ;
+
+                                if (prop)
+                                {
+                                        /*
+                                         *the property already exists.
+                                         *TODO: We must apply here some cascading rule
+                                         *to compute the precedence.
+                                         */
+                                        
+                                }
+
+
+                                if (insert_property == TRUE)
+                                        g_hash_table_replace 
+                                                (props_hash,
+                                                 cur_decl->property,
+                                                 a_ruleset) ;
+                        }
+                }
+        }
+
+        return CR_OK ;
+}
 
 /**
  *Creates a new instance of #CRSelEng.
@@ -791,7 +876,7 @@ cr_sel_eng_get_matched_rulesets (CRSelEng *a_this,
 {
         CRStatement ** stmts_tab = NULL ;
         enum CRStatus status = CR_OK ;
-        gulong tab_size = 0, tab_len = 0 ;
+        gulong tab_size = 0, tab_len = 0, index = 0 ;
         gushort stmts_chunck_size = 8 ;
 
         g_return_val_if_fail (a_this
@@ -816,10 +901,9 @@ cr_sel_eng_get_matched_rulesets (CRSelEng *a_this,
         tab_len = tab_size ;
 
         while ((status = cr_sel_eng_get_matched_rulesets_real 
-                (a_this, a_sheet, a_node, stmts_tab, &tab_len))
+                (a_this, a_sheet, a_node, stmts_tab + index, &tab_len))
                == CR_OUTPUT_TOO_SHORT_ERROR)
         {
-                tab_size += tab_len ;
                 stmts_tab = g_try_realloc (stmts_tab,
                                            (tab_size + stmts_chunck_size)
                                            * sizeof (CRStatement*)) ;
@@ -829,7 +913,11 @@ cr_sel_eng_get_matched_rulesets (CRSelEng *a_this,
                         status = CR_ERROR ;
                         goto error ;
                 }
+                tab_size +=  stmts_chunck_size ;
+                index += tab_len ;
+                tab_len = tab_size - index ;
         }
+
 
         tab_len = tab_size - stmts_chunck_size +tab_len ;
         *a_rulesets = stmts_tab ;
@@ -850,7 +938,183 @@ cr_sel_eng_get_matched_rulesets (CRSelEng *a_this,
         return status ;
 }
 
+enum CRStatus
+cr_sel_eng_get_matched_rulesets_from_cascade  (CRSelEng *a_this,
+                                               CRCascade *a_cascade,
+                                               xmlNode *a_node,
+                                               GHashTable **a_props_hashtable)
+{
+        CRStatement ** stmts_tab = NULL ;
+        enum CRStatus status = CR_OK ;
+        gulong tab_size = 0, tab_len = 0, index = 0, i = 0  ;
+        enum CRStyleOrigin origin = 0 ;
+        gushort stmts_chunck_size = 8 ;
+        CRStyleSheet *sheet = NULL ;
 
+        g_return_val_if_fail (a_this
+                              && a_cascade
+                              && a_node
+                              && a_props_hashtable,
+                              CR_BAD_PARAM_ERROR) ;
+
+        stmts_tab = g_try_malloc (stmts_chunck_size *
+                                  sizeof (CRStatement *)) ;
+
+        if (!stmts_tab)
+        {
+                cr_utils_trace_info ("Out of memory") ;
+                status = CR_ERROR ;
+                goto error ;
+        }
+        memset (stmts_tab, 0, stmts_chunck_size * sizeof (CRStatement*)) ;
+        tab_size = stmts_chunck_size ;
+                tab_len = tab_size ;
+
+        for (origin = ORIGIN_UA ; origin < NB_ORIGINS ; origin++)
+        {
+                sheet = cr_cascade_get_sheet (a_cascade, origin) ;
+                if (!sheet)
+                        continue ;                
+
+                while ((status = cr_sel_eng_get_matched_rulesets_real 
+                        (a_this, sheet, a_node, stmts_tab + index, &tab_len))
+                       == CR_OUTPUT_TOO_SHORT_ERROR)
+                {
+                        stmts_tab = g_try_realloc 
+                                (stmts_tab,
+                                 (tab_size + stmts_chunck_size)
+                                 * sizeof (CRStatement*)) ;
+                        if (!stmts_tab)
+                        {
+                                cr_utils_trace_info ("Out of memory") ;
+                                status = CR_ERROR ;
+                                goto error ;
+                        }
+                        tab_size +=  stmts_chunck_size ;
+                        index += tab_len ;
+                        tab_len = tab_size - index ;
+                }
+                if (status != CR_OK)
+                {
+                        cr_utils_trace_info ("Error while running "
+                                             "selector engine") ;
+                        goto error ;
+                }                
+                
+        }
+
+        /*
+         *TODO, walk down the stmts_tab and build the
+         *property_name/declaration hashtable.
+         *Make sure one can walk from the declaration to
+         *the stylesheet.
+         */
+        for (i = 0 ; i < tab_len ; i ++)
+        {
+                CRStatement *stmt = stmts_tab[i] ;
+
+                if (!stmt)
+                        continue ;
+                
+                switch (stmt->type)
+                {
+                case RULESET_STMT:
+                        if (!stmt->parent_sheet)
+                                continue ;
+                        put_css_properties_in_hashtable 
+                                (a_props_hashtable,
+                                 stmt) ;
+                        break ;
+
+                default:
+                        break ;
+                }
+                
+        }
+
+        return CR_OK ;
+ error:
+
+        if (stmts_tab)
+        {
+                g_free (stmts_tab) ;
+                stmts_tab = NULL ;
+                
+        }
+
+        return status ;
+}
+
+/**
+ *Retrieves the style structure that matches the xml node
+ *from the cascade.
+ *NOTE: this does not implement the complex cascade algorithms
+ *described in the css2 spec from chapter 6.4 on, but instead,
+ *is just an empty design sketch so that other hackers (yeah, we can dream) 
+ *can come an implement it. I don't have the time for this right now.
+ *@param a_this the current instance of #CRLayEng.
+ *@param a_cascade the cascade from which the request is to be made.
+ *@param a_node the xml node to match
+ *@param a_parent_style the style of the parent xml node.
+ *@param a_style out parameter. a pointer to the style 
+ *structure to be returned. *a_style must be set to NULL, otherwise
+ *a CR_BAD_PARAM_ERROR is returned. The caller must free the
+ *the returned *a_style using cr_style_destroy().
+ *@return CR_OK upon successfull completion, an error code otherwise.
+ */
+enum CRStatus
+cr_sel_eng_get_matched_style (CRSelEng *a_this,
+                              CRCascade *a_cascade,
+                              xmlNode *a_node,
+                              CRStyle *a_parent_style,
+                              CRStyle **a_style)
+{
+        CRStatement **rulesets = NULL ;
+        CRStyleSheet *author_sheet = NULL ;
+        gulong len = 0 ;
+        CRStyle *result_style = NULL ;
+        enum CRStatus status = CR_OK ;
+
+        g_return_val_if_fail (a_this && a_cascade
+                              && a_node && a_style
+                              && (*a_style == NULL),
+                              CR_BAD_PARAM_ERROR) ;
+
+        author_sheet = cr_cascade_get_sheet (a_cascade, 
+                                             ORIGIN_AUTHOR) ;
+        if (!author_sheet)
+        {
+                cr_utils_trace_info ("Could not get author sheet "
+                                     "from cascade") ;
+                return CR_ERROR ;
+        }
+
+        status = cr_sel_eng_get_matched_rulesets
+                (a_this, author_sheet,
+                 a_node, &rulesets, &len) ;
+
+        if (len && rulesets[len - 1])
+        {
+                status = cr_style_new_from_ruleset 
+                        (rulesets[len - 1], a_parent_style,
+                         &result_style) ;
+                
+        }
+
+        if (result_style)
+        {
+                *a_style = result_style ;
+                result_style = NULL ;
+        }
+
+        if (rulesets)
+        {
+                g_free (rulesets) ;
+                rulesets = NULL ;
+        }
+
+        return status ;
+}
 
 /**
  *The destructor of #CRSelEng

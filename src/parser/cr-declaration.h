@@ -38,9 +38,13 @@ G_BEGIN_DECLS
  *The declaration of the #CRDeclaration class.
  */
 
+/*forward declaration of what is defined in cr-statement.h*/
+typedef struct _CRStatement CRStatement ;
+
 /**
  *The abstraction of a css declaration defined by the
  *css2 spec in chapter 4.
+ *It is actually a chained list of property/value pairs.
  */
 typedef struct _CRDeclaration CRDeclaration ;
 struct _CRDeclaration
@@ -51,14 +55,23 @@ struct _CRDeclaration
 	/**The value of the property.*/
 	CRTerm *value ;
 	
+	/*the ruleset that contains this declaration*/
+	CRStatement *parent_statement ;
+
+	/*the next declaration*/
 	CRDeclaration *next ;
+
+	/*the previous one declaration*/
 	CRDeclaration *prev ;
+
 	glong ref_count ;
 } ;
 
 
 CRDeclaration *
-cr_declaration_new (GString *a_property, CRTerm *a_value) ;
+cr_declaration_new (CRStatement *a_statement,
+		    GString *a_property, 
+		    CRTerm *a_value) ;
 
 CRDeclaration *
 cr_declaration_append (CRDeclaration *a_this, CRDeclaration *a_new) ;

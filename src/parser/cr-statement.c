@@ -450,11 +450,14 @@ cr_statement_dump_import_rule (CRStatement *a_this, FILE *a_fp,
  *went wrong.
  */
 CRStatement*
-cr_statement_new_ruleset (CRSelector *a_sel_list, 
+cr_statement_new_ruleset (CRStyleSheet * a_sheet,
+			  CRSelector *a_sel_list, 
 			  CRDeclaration *a_decl_list,
 			  CRAtMediaRule *a_media_rule)
 {
 	CRStatement *result = NULL ;
+
+	g_return_val_if_fail (a_sheet, NULL) ;
 
 	result = g_try_malloc (sizeof (CRStatement)) ;
 
@@ -482,6 +485,8 @@ cr_statement_new_ruleset (CRSelector *a_sel_list,
 	result->kind.ruleset->decl_list = a_decl_list;
 	result->kind.ruleset->media_rule = a_media_rule;
 
+	cr_statement_set_parent_sheet (result, a_sheet) ;
+
 	return result ;
 }
 
@@ -493,11 +498,14 @@ cr_statement_new_ruleset (CRSelector *a_sel_list,
  *@param a_media, the media string list. A list of GString pointers.
  */
 CRStatement *
-cr_statement_new_at_media_rule (CRStatement *a_rulesets,
+cr_statement_new_at_media_rule (CRStyleSheet *a_sheet,
+				CRStatement *a_rulesets,
 				GList *a_media)
 {
 	CRStatement *result = NULL ;
-	
+
+	g_return_val_if_fail (a_sheet, NULL) ;
+
 	if (a_rulesets)
 		g_return_val_if_fail (a_rulesets->type == RULESET_STMT,
 				      NULL) ;
@@ -523,6 +531,8 @@ cr_statement_new_at_media_rule (CRStatement *a_rulesets,
 	memset (result->kind.media_rule, 0, sizeof (CRAtMediaRule)) ;
 	result->kind.media_rule->rulesets = a_rulesets ;
 	result->kind.media_rule->media_list = a_media ;
+	cr_statement_set_parent_sheet (result, a_sheet) ;
+
 	return result ;
 }
 
@@ -536,11 +546,14 @@ cr_statement_new_at_media_rule (CRStatement *a_rulesets,
  *@return the newly built instance of #CRStatement.
  */
 CRStatement*
-cr_statement_new_at_import_rule (GString *a_url,
+cr_statement_new_at_import_rule (CRStyleSheet *a_container_sheet,
+				 GString *a_url,
 				 GList *a_media_list,
-				 CRStyleSheet *a_sheet)
+				 CRStyleSheet *a_imported_sheet)
 {
 	CRStatement *result = NULL ;
+
+	g_return_val_if_fail (a_container_sheet, NULL) ;
 
 	result = g_try_malloc (sizeof (CRStatement)) ;
 
@@ -566,7 +579,8 @@ cr_statement_new_at_import_rule (GString *a_url,
 	memset (result->kind.import_rule, 0, sizeof (CRAtImportRule)) ;
 	result->kind.import_rule->url = a_url;
 	result->kind.import_rule->media_list = a_media_list ;
-	result->kind.import_rule->sheet = a_sheet;
+	result->kind.import_rule->sheet = a_imported_sheet;
+	cr_statement_set_parent_sheet (result, a_container_sheet) ;
 
 	return result ;
 }
@@ -582,11 +596,14 @@ cr_statement_new_at_import_rule (GString *a_url,
  *in case of error.
  */
 CRStatement *
-cr_statement_new_at_page_rule (CRDeclaration *a_decl_list,
+cr_statement_new_at_page_rule (CRStyleSheet *a_sheet,
+	                       CRDeclaration *a_decl_list,
 			       GString *a_name,
 			       GString *a_pseudo)
 {
 	CRStatement *result = NULL ;
+
+	g_return_val_if_fail (a_sheet, NULL) ;
 
 	result = g_try_malloc (sizeof (CRStatement)) ;
 
@@ -612,6 +629,8 @@ cr_statement_new_at_page_rule (CRDeclaration *a_decl_list,
 	result->kind.page_rule->decls_list = a_decl_list;
 	result->kind.page_rule->name = a_name ;
 	result->kind.page_rule->name = a_pseudo ;
+	cr_statement_set_parent_sheet (result, a_sheet) ;
+
 	return result ;
 }
 
@@ -623,9 +642,12 @@ cr_statement_new_at_page_rule (CRDeclaration *a_decl_list,
  *if an error arises.
  */
 CRStatement *
-cr_statement_new_at_charset_rule (GString *a_charset)
+cr_statement_new_at_charset_rule (CRStyleSheet *a_sheet,
+				  GString *a_charset)
 {
 	CRStatement * result = NULL ;
+
+	g_return_val_if_fail (a_sheet, NULL) ;
 
 	result = g_try_malloc (sizeof (CRStatement)) ;
 
@@ -649,6 +671,7 @@ cr_statement_new_at_charset_rule (GString *a_charset)
 	}
 	memset (result->kind.charset_rule, 0, sizeof (CRAtCharsetRule)) ;
 	result->kind.charset_rule->charset = a_charset ;
+	cr_statement_set_parent_sheet (result, a_sheet) ;
 
 	return result ;
 }
@@ -660,11 +683,15 @@ cr_statement_new_at_charset_rule (GString *a_charset)
  *@return the newly built instance of #CRStatement.
  */
 CRStatement *
-cr_statement_new_at_font_face_rule (CRDeclaration *a_font_decls)
+cr_statement_new_at_font_face_rule (CRStyleSheet *a_sheet,
+				    CRDeclaration *a_font_decls)
 {
 	CRStatement *result = NULL ;
 	
+	g_return_val_if_fail (a_sheet, NULL) ;
+
 	result = g_try_malloc (sizeof (CRStatement)) ;
+
 	if (!result)
 	{
 		cr_utils_trace_info ("Out of memory") ;
@@ -686,8 +713,40 @@ cr_statement_new_at_font_face_rule (CRDeclaration *a_font_decls)
 		sizeof (CRAtFontFaceRule));
 	
 	result->kind.font_face_rule->decls_list = a_font_decls ;
+	cr_statement_set_parent_sheet (result, a_sheet) ;
 
 	return result ;
+}
+
+/**
+ *Sets the container stylesheet.
+ *@param a_this the current instance of #CRStatement.
+ *@param a_sheet the sheet that contains the current statement.
+ *@return CR_OK upon successfull completion, an errror code otherwise.
+ */
+enum CRStatus
+cr_statement_set_parent_sheet (CRStatement *a_this, 
+			       CRStyleSheet *a_sheet)
+{
+	g_return_val_if_fail (a_this, CR_BAD_PARAM_ERROR) ;
+	a_this->parent_sheet = a_sheet ;
+	return CR_OK ;
+}
+
+/**
+ *Gets the sheets that contains the current statement.
+ *@param a_this the current #CRStatement.
+ *@param a_sheet out parameter. A pointer to the sheets that
+ *@return CR_OK upon successfull completion, an error code otherwise.
+ */
+enum CRStatus
+cr_statement_get_parent_sheet (CRStatement *a_this, 
+			       CRStyleSheet **a_sheet)
+{
+	g_return_val_if_fail (a_this && a_sheet, 
+			      CR_BAD_PARAM_ERROR) ;
+	*a_sheet  = a_this->parent_sheet ;
+	return CR_OK ;
 }
 
 /**
@@ -915,8 +974,8 @@ cr_statement_ruleset_append_decl (CRStatement *a_this,
  *@return CR_OK upon successfull completion, an error code otherwise.
  */
 enum CRStatus
-cr_statement_at_import_rule_set_sheet (CRStatement *a_this,
-				       CRStyleSheet *a_sheet)
+cr_statement_at_import_rule_set_imported_sheet (CRStatement *a_this,
+						CRStyleSheet *a_sheet)
 {
 	g_return_val_if_fail (a_this 
 			      && a_this->type == AT_IMPORT_RULE_STMT
@@ -937,16 +996,14 @@ cr_statement_at_import_rule_set_sheet (CRStatement *a_this,
  *@return CR_OK upon sucessfull completion, an error code otherwise.
  */
 enum CRStatus
-cr_statement_at_import_rule_get_sheet (CRStatement *a_this,
-				       CRStyleSheet **a_sheet)
+cr_statement_at_import_rule_get_imported_sheet (CRStatement *a_this,
+						CRStyleSheet **a_sheet)
 {
 	g_return_val_if_fail (a_this 
 			      && a_this->type == AT_IMPORT_RULE_STMT
 			      && a_this->kind.import_rule,
 			      CR_BAD_PARAM_ERROR) ;
-
 	*a_sheet = a_this->kind.import_rule->sheet ;
-
 	return CR_OK ;
 
 }
