@@ -133,6 +133,20 @@ test_cr_parser_parse (guchar * a_file_uri)
 }
 
 static enum CRStatus
+test_cr_statement_at_page_rule_parse_from_buf (void)
+{
+        CRStatement *stmt = NULL ;
+        
+        stmt = cr_statement_at_page_rule_parse_from_buf 
+                (gv_at_page_buf, CR_UTF_8) ;
+        if (!stmt) {
+                return CR_ERROR ;
+                
+        }
+        return CR_OK ;
+}
+
+static enum CRStatus
 test_cr_term_parse_expression_from_buf (void)
 {
         guchar *tmp_str = NULL;
@@ -244,23 +258,6 @@ test_cr_statement_at_media_rule_parse (void)
         return CR_OK;
 }
 
-static enum CRStatus
-test_cr_statement_at_page_rule_parse (void)
-{
-        CRStatement *stmt = NULL;
-
-        stmt = cr_statement_at_page_rule_parse_from_buf (gv_at_page_buf,
-                                                         CR_UTF_8);
-
-        g_return_val_if_fail (stmt, CR_ERROR);
-
-        if (stmt) {
-                cr_statement_destroy (stmt);
-                stmt = NULL;
-        }
-
-        return CR_OK;
-}
 
 static enum CRStatus
 test_cr_statement_at_charset_rule_parse (void)
@@ -392,8 +389,7 @@ main (int argc, char **argv)
         if (status != CR_OK) {
                 g_print ("\ntest cr_statement_at_media_rule_parse() failed\n");
         }
-
-        test_cr_statement_at_page_rule_parse ();
+        test_cr_statement_at_page_rule_parse_from_buf ();
         if (status != CR_OK) {
                 g_print ("\ntest cr_statement_at_page_rule_parse() failed\n");
                 return 0;

@@ -1,5 +1,18 @@
 2004-03-07  Dodji Seketeli  <dodji@gnome.org>
 
+	* src/cr-statement.c: 
+	(parse_page_start_page_cb) fixed a memory management bug
+	reported by Rob BUIS.
+	(cr_statement_at_page_rule_to_string): added this new
+	helper function.
+	(cr_statement_dump_page): make this use 
+	cr_statement_at_page_rule_to_string().
+	* tests/test4-main.c: 
+	(test_cr_statement_at_page_rule_parse_from_buf): added this
+	to start debugging a problem related to @page rule parsing.
+	
+2004-03-07  Dodji Seketeli  <dodji@gnome.org>
+
 	* src/*.c: re-indented the source files to make'em comply
 	with gnome indentation rules.
 	* libcroco-indent: added this indentation script.

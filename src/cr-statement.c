@@ -155,9 +155,18 @@ parse_page_start_page_cb (CRDocHandler * a_this,
 {
         CRStatement *stmt = NULL;
         enum CRStatus status = CR_OK;
+        GString *page_name = NULL, *pseudo_name = NULL ;
 
-        stmt = cr_statement_new_at_page_rule (NULL, NULL, a_name,
-                                              a_pseudo_page);
+        if (a_name)
+                page_name = g_string_new_len (a_name->str,
+                                              a_name->len) ;
+        if (a_pseudo_page)
+                pseudo_name = g_string_new_len (a_pseudo_page->str,
+                                                a_pseudo_page->len) ;
+        stmt = cr_statement_new_at_page_rule (NULL, NULL, page_name,
+                                              pseudo_name);
+        page_name = NULL ;
+        pseudo_name = NULL ;
         g_return_if_fail (stmt);
         status = cr_doc_handler_set_ctxt (a_this, stmt);
         g_return_if_fail (status == CR_OK);
@@ -688,6 +697,55 @@ cr_statement_dump_charset (CRStatement * a_this, FILE * a_fp, gulong a_indent)
 }
 
 /**
+ *Serialises the at page rule statement into a string
+ *@param a_this the current instance of #CRStatement. Must
+ *be an "@page" rule statement.
+ *@return the serialized string. Must be freed by the caller
+ */
+static gchar *
+cr_statement_at_page_rule_to_string (CRStatement *a_this,
+                                     gulong a_indent)
+{
+        GString *stringue = NULL;
+        gchar *result = NULL ;
+
+        stringue = g_string_new (NULL) ;
+
+        cr_utils_dump_n_chars2 (' ', stringue, a_indent) ;
+        g_string_append_printf (stringue, "@page");
+
+        if (a_this->kind.page_rule->name) {
+                g_string_append_printf 
+                        (stringue, " %s",
+                         a_this->kind.page_rule->name->str) ;
+        } else {
+                g_string_append_printf (stringue, " ");
+        }
+        if (a_this->kind.page_rule->pseudo) {
+                g_string_append_printf 
+                        (stringue,  " :%s",
+                         a_this->kind.page_rule->pseudo->str) ;
+        }
+        if (a_this->kind.page_rule->decl_list) {
+                gchar *str = NULL ;
+                g_string_append_printf (stringue, " {\n");
+                str = cr_declaration_list_to_string2
+                        (a_this->kind.page_rule->decl_list,
+                         a_indent + DECLARATION_INDENT_NB, TRUE) ;
+                if (str) {
+                        g_string_append_printf (stringue, "%s", str) ;
+                        g_free (str) ;
+                        str = NULL ;
+                }
+                g_string_append_printf (stringue, "%s", "\n}\n");
+        }
+        result = stringue->str ;
+        g_string_free (stringue, FALSE) ;
+        stringue = NULL ;
+        return result ;
+}
+
+/**
  *Dumps an @page rule statement on stdout.
  *@param a_this the statement to dump on stdout.
  *@param a_fp the destination file pointer.
@@ -702,41 +760,14 @@ cr_statement_dump_page (CRStatement * a_this, FILE * a_fp, gulong a_indent)
                           && a_this->type == AT_PAGE_RULE_STMT
                           && a_this->kind.page_rule);
 
-        cr_utils_dump_n_chars (' ', a_fp, a_indent);
-        fprintf (a_fp, "@page");
-
-        if (a_this->kind.page_rule->name) {
-                str = g_strndup (a_this->kind.page_rule->name->str,
-                                 a_this->kind.page_rule->name->len);
-                g_return_if_fail (str);
-                fprintf (a_fp, " %s", str);
-                if (str) {
-                        g_free (str);
-                        str = NULL;
-                }
-        } else {
-                fprintf (a_fp, " ");
-        }
-
-        if (a_this->kind.page_rule->pseudo) {
-                str = g_strndup (a_this->kind.page_rule->pseudo->str,
-                                 a_this->kind.page_rule->pseudo->len);
-                g_return_if_fail (str);
-                fprintf (a_fp, " :%s", str);
-                if (str) {
-                        g_free (str);
-                        str = NULL;
-                }
-        }
-
-        if (a_this->kind.page_rule->decl_list) {
-                fprintf (a_fp, " {\n");
-                cr_declaration_dump
-                        (a_this->kind.page_rule->decl_list,
-                         a_fp, a_indent + DECLARATION_INDENT_NB, TRUE);
-                fprintf (a_fp, "\n}\n");
+        str = cr_statement_at_page_rule_to_string (a_this, a_indent) ;
+        if (str) {
+                fprintf (a_fp, str);
+                g_free (str) ;
+                str = NULL ; 
         }
 }
+
 
 /**
  *Return the number of rules in the statement list;
@@ -1384,7 +1415,7 @@ cr_statement_new_at_page_rule (CRStyleSheet * a_sheet,
                 cr_declaration_ref (a_decl_list);
         }
         result->kind.page_rule->name = a_name;
-        result->kind.page_rule->name = a_pseudo;
+        result->kind.page_rule->pseudo = a_pseudo;
         if (a_sheet)
                 cr_statement_set_parent_sheet (result, a_sheet);
 
