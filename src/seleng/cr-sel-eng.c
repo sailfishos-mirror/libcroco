@@ -751,15 +751,16 @@ cr_sel_eng_get_matched_rulesets_real (CRSelEng *a_this,
  *Walks through the property/value pairs of a ruleset
  *statement and put the properties found into a hashtable.
  *Each key of the hashtable is a css property. The
- *associated value is a pointer to the current #CRStatement.
+ *associated value is a pointer to the current #CRDeclaration.
  *This function is where the cascading property sorting is done.
  *
  *@param a_props_hashtable in/out parameter. The hashtable into
- *which the the property/statement pairs will be added.
+ *which the the property/Declaration pairs will be added.
  *Note that each hashtable key (a statement property) is a null terminated 
  *instance of guchar *.
- *Each value associated to a key is an instance of #CRStatement. The statement
- *is actually the css ruleset that contains the property (the key).
+ *Each value associated to a key is an instance of #CRDeclaration. 
+ *The declaration is actually the css declaration (rule) 
+ *that contains the property (the key).
  *@param a_ruleset the ruleset from wich the properties are gathered.
  *@return CR_OK upon successfull completion, an error code otherwise.
  */
