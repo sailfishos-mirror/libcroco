@@ -304,8 +304,6 @@ cr_rgb_dump (CRRgb *a_this, FILE *a_fp)
 
 /**
  *Sets rgb values to the RGB.
- *If the rgb values are percentages, make
- *sure that the sum of the 3 values makes 100%.
  *@param a_this the current instance of #CRRgb.
  *@param a_red the red value.
  *@param a_green the green value.
@@ -331,18 +329,7 @@ cr_rgb_set (CRRgb *a_this, gulong a_red,
 
         a_this->red = a_red ;
         a_this->green = a_green ;
-        if (a_is_percentage != FALSE)
-        {
-                if (a_red + a_green >= 100)
-                {
-                        a_green = 100 - a_red ;
-                }
-                a_this->blue = 100 - a_red - a_green ;
-        }
-        else
-        {
-                a_this->blue = a_blue ;
-        }
+        a_this->blue = a_blue ;
 
         return CR_OK ;
 }
