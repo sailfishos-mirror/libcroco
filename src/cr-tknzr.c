@@ -1628,10 +1628,13 @@ cr_tknzr_parse_num (CRTknzr *a_this, CRNum ** a_num)
 
                 parsed = TRUE ;
         }
-        else if (cur_char != '.')
+        else if (cur_char == '.')
+        {
+                parsing_dec = TRUE ;
+        }
+        else
         {
                 status = CR_PARSING_ERROR ;
-
                 goto error ;
         }
 

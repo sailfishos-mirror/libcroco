@@ -2108,7 +2108,7 @@ cr_parser_parse_attribute_selector (CRParser *a_this, CRAttrSel **a_sel)
 
         cr_tknzr_set_cur_pos (PRIVATE (a_this)->tknzr, &init_pos) ;
 
-        return CR_OK ;
+        return status ;
 }
 
 
