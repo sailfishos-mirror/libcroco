@@ -1,3 +1,18 @@
+2003-05-07  Dodji  <dodji@seketeli.org>
+
+	* tests/test7-main.c: just added a test for the "background-color" 
+	property.
+
+	* src/layeng/cr-box-view.c:
+	(set_color ()) added this function to manage the setting
+	of rgb color in an easier way than set_background/foreground().
+	(set_border_line_attrs ()) implemented the border-x-color
+	property setting in this function. This uses the new set_color ()
+	function.
+	(draw_padding ()) revisited this function to make it draw
+	a padding area that has "background" color.
+	
+	
 2003-05-06  Dodji  <dodji@seketeli.org>
 
 	* src/layeng/cr-style.[ch]: started to add the support of

@@ -53,7 +53,7 @@ const guchar *gv_xmlbuf =
 ;
 const guchar *gv_cssbuf =
 "INSTRUMENT { display: inline}"
-"ARTICLE, HEADLINE, AUTHOR, PARA { display: block ; position: static}"
+"ARTICLE, HEADLINE, AUTHOR, PARA { display: block ; position: static; background-color: rgb(255,0,0)}"
 ;
 
 static enum CRStatus

@@ -90,6 +90,11 @@ static enum CRStatus
 set_border_line_attrs (CRBoxView *a_this,
                        CRBox *a_box,
                        enum CRBorderStyleProp a_style_prop) ;
+
+static enum CRStatus
+set_color (CRBoxView *a_this, CRRgb *a_rgb_color,
+           gboolean a_foreground) ;
+
 static void
 cr_box_view_class_init (CRBoxViewClass *a_klass)
 {
@@ -173,18 +178,34 @@ set_border_line_attrs (CRBoxView *a_this,
         {
         case BORDER_STYLE_PROP_TOP:
                 border_width_dir = NUM_PROP_BORDER_TOP ;
+                set_color 
+                        (a_this, 
+                         &a_box->style->rgb_props[RGB_PROP_BORDER_TOP_COLOR].cv,
+                           TRUE /*foreground*/) ;
                 break ;
 
         case BORDER_STYLE_PROP_RIGHT:
                 border_width_dir = NUM_PROP_BORDER_RIGHT ;
+                set_color (a_this, 
+                           &a_box->style->
+                           rgb_props[RGB_PROP_BORDER_RIGHT_COLOR].cv,
+                           TRUE /*foreground*/) ;
                 break ;
 
         case BORDER_STYLE_PROP_BOTTOM:
                 border_width_dir = NUM_PROP_BORDER_BOTTOM ;
+                set_color (a_this, 
+                           &a_box->style->
+                           rgb_props[RGB_PROP_BORDER_BOTTOM_COLOR].cv,
+                           TRUE /*foreground*/) ;
                 break ;
 
         case BORDER_STYLE_PROP_LEFT:
                 border_width_dir = NUM_PROP_BORDER_LEFT ;
+                set_color (a_this, 
+                           &a_box->style->
+                           rgb_props[RGB_PROP_BORDER_LEFT_COLOR].cv,
+                           TRUE /*foreground*/) ;
                 break ;
 
         default:
@@ -240,63 +261,34 @@ set_border_line_attrs (CRBoxView *a_this,
         return CR_OK ;
 }
 
-
 static enum CRStatus
-set_background_color (CRBoxView *a_this, CRBox *a_box)
+set_color (CRBoxView *a_this, CRRgb *a_rgb_color,
+           gboolean a_foreground)
 {
-        g_return_val_if_fail (a_this && a_box, CR_BAD_PARAM_ERROR) ;
+        GdkColor gdk_color = {0} ;
+        g_return_val_if_fail (a_this && a_rgb_color, 
+                              CR_BAD_PARAM_ERROR) ;
 
-        /*
-         *this code is inspired by gtkhtml2's set_foreground_color()'s code
-         *in htmlgdkpainter.c
-         */
-        if (a_box->style)
+        gdk_color.red = (a_rgb_color->red << 8)     | a_rgb_color->red ;
+        gdk_color.green = (a_rgb_color->green << 8) | a_rgb_color->green;
+        gdk_color.blue = (a_rgb_color->blue << 8)   | a_rgb_color->blue ;
+
+        gdk_rgb_find_color
+                (gdk_drawable_get_colormap
+                 (GDK_DRAWABLE (GTK_LAYOUT (a_this)->bin_window)),
+                 &gdk_color) ;
+
+        if (a_foreground == FALSE)
         {
-                GdkColor gdk_color ;
-                CRRgb *rgb_color = &a_box->style->
-                        rgb_props[RGB_PROP_BACKGROUND_COLOR].cv ;
-
-                gdk_color.red = (rgb_color->red << 8)   | rgb_color->red ;
-                gdk_color.green = (rgb_color->green << 8) | rgb_color->green ;
-                gdk_color.blue = (rgb_color->blue << 8)  | rgb_color->blue ;
-
-                gdk_rgb_find_color
-                        (gdk_drawable_get_colormap
-                         (GDK_DRAWABLE (GTK_LAYOUT (a_this)->bin_window)),
-                         &gdk_color) ;
-
-                gdk_gc_set_background (PRIVATE (a_this)->gc, &gdk_color) ;
+                gdk_gc_set_background (PRIVATE (a_this)->gc, 
+                                       &gdk_color) ;
+        }
+        else
+        {
+                gdk_gc_set_foreground (PRIVATE (a_this)->gc, 
+                                       &gdk_color) ;
         }
 
-        return CR_OK ;
-}
-
-static enum CRStatus
-set_foreground_color (CRBoxView *a_this, CRBox *a_box)
-{
-        g_return_val_if_fail (a_this && a_box, CR_BAD_PARAM_ERROR) ;
-
-        /*
-         *this code is inspired by gtkhtml2's set_foreground_color()'s code
-         *in htmlgdkpainter.c
-         */
-        if (a_box->style)
-        {
-                GdkColor gdk_color ;
-                CRRgb *rgb_color = &a_box->style->
-                        rgb_props[RGB_PROP_COLOR].cv ;
-
-                gdk_color.red = (rgb_color->red << 8)   | rgb_color->red ;
-                gdk_color.green = (rgb_color->green << 8) | rgb_color->green ;
-                gdk_color.blue = (rgb_color->blue << 8)  | rgb_color->blue ;
-
-                gdk_rgb_find_color
-                        (gdk_drawable_get_colormap
-                         (GDK_DRAWABLE (GTK_LAYOUT (a_this)->bin_window)),
-                         &gdk_color) ;
-
-                gdk_gc_set_foreground (PRIVATE (a_this)->gc, &gdk_color) ;
-        }
 
         return CR_OK ;
 }
@@ -439,7 +431,7 @@ draw_borders (CRBoxView *a_this,
         x1 = x0 ;
         /*y1 remains the same as y0*/
         status = set_border_line_attrs (a_this, a_box,
-                                              BORDER_STYLE_PROP_RIGHT) ;
+                                        BORDER_STYLE_PROP_RIGHT) ;
         g_return_val_if_fail (status == CR_OK, status) ;
 
         if (PRIVATE (a_this)->draw == TRUE)
@@ -489,7 +481,6 @@ draw_paddings (CRBoxView *a_this,
         GdkWindow * window = NULL ;
         GtkWidget *widget = NULL ;
         CRBox *box = NULL ;
-        GdkRectangle rect ;
 
         g_return_val_if_fail (a_this
                               && CR_IS_BOX_VIEW (a_this)
@@ -503,62 +494,16 @@ draw_paddings (CRBoxView *a_this,
         box = a_box ;
         g_return_val_if_fail (box, CR_ERROR) ;
 
-        set_background_color (a_this, a_box) ;
-        set_foreground_color (a_this, a_box) ;
+        set_color (a_this, 
+                   &a_box->style->rgb_props[RGB_PROP_BACKGROUND_COLOR].cv,
+                   TRUE/*foreground*/) ;
 
-        /*
-         *draw the left padding
-         */
-        rect.x = box->padding_edge.x ;
-        rect.y = box->inner_edge.y ;
-        rect.width = box->inner_edge.x - box->padding_edge.x ;
-        rect.height = box->inner_edge.height ;
         gdk_draw_rectangle 
                 (window,
                  PRIVATE (a_this)->gc,
-                 FALSE,
-                 rect.x, rect.y, rect.width, rect.height) ;
-
-        /*
-         *draw the right padding rectangle.
-         */
-        rect.x = box->inner_edge.x + box->inner_edge.width ;
-        /*rect.y remains the same*/
-        rect.width = box->padding_edge.width -
-                (rect.width + box->inner_edge.width) ;
-        /*rect.height remains the same*/
-        gdk_draw_rectangle 
-                (window,
-                 PRIVATE (a_this)->gc,
-                 FALSE,
-                 rect.x, rect.y, rect.width, rect.height) ;
-
-        /*
-         *draw the top padding rectangle.
-         */
-        rect.x = box->padding_edge.x ;
-        rect.y = box->padding_edge.y ;
-        rect.width = box->padding_edge.width ;
-        rect.height = box->inner_edge.y - box->padding_edge.y ;
-        gdk_draw_rectangle 
-                (window,
-                 PRIVATE (a_this)->gc,
-                 FALSE,
-                 rect.x, rect.y, rect.width, rect.height) ;
-
-        /*
-         *draw the the bottom padding rectangle.
-         */
-        /*rect.x remains the same*/
-        rect.y = box->inner_edge.y + box->inner_edge.height ;
-        /*rect.width remains the same*/
-        rect.height = box->padding_edge.height -
-                (rect.height + box->inner_edge.height) ;
-        gdk_draw_rectangle 
-                (window,
-                 PRIVATE (a_this)->gc,
-                 FALSE,
-                 rect.x, rect.y, rect.width, rect.height) ;
+                 TRUE,
+                 box->padding_edge.x, box->padding_edge.y,
+                 box->padding_edge.width, box->padding_edge.height) ;
 
         return CR_OK ;
 }
