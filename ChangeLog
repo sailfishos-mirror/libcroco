@@ -1,5 +1,24 @@
-2003-03-24  dodji  <dodji@seketeli.org>
+2003-03-30  Dodji  <dodji@seketeli.org>
+	* src/cr-lay-eng.c: 
+	Started to code a layout engine. This is more a design
+	sketch than real usefull code so far.
 
+        * src/cr-cascade.c:
+	Started to code a #CRCascade class to abstract a css2 cascade.	
+	This is more a placeholder (or a design sketch) than real
+	usefull code today.
+	
+	* tests/Makefile.am: improved the conditional compilation
+	of the tests; e.g if the selection engine feature is disabled
+	the selection engine tests won't be compiled.	
+	* configure.in: added --enable-layeng to contionaly compile
+	the layout engine files. Also improved the handling of
+	of the enable-xxx arguments => 'yes' forces the feature to
+	be enabled (the coder knows what he is doing); 'auto' checks
+	if the features xxx depends on are available and then
+	switches xxx on.
+
+2003-03-24  dodji  <dodji@seketeli.org>
 	* src/cr-style.c (cr_style_set_style_from_decl): 
 	Have a first hot (and bugged) implem of this function.	
 	I can now, go and get worried about building the annotated

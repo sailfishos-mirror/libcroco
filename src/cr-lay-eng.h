@@ -29,6 +29,8 @@
 #include "cr-utils.h"
 #include "cr-stylesheet.h"
 
+G_BEGIN_DECLS
+
 typedef struct _CRLayEngPriv CRLayEngPriv ;
 
 typedef struct
@@ -48,5 +50,7 @@ cr_lay_eng_build_annotate_tree (CRLayEng *a_this,
 
 void
 cr_lay_eng_destroy (CRLayEng *a_this) ;
+
+G_END_DECLS
 
 #endif /*__CR_LAYOUT_ENG_H__*/

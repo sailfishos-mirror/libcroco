@@ -111,7 +111,7 @@ walk_xml_tree_and_lookup_rules (CRSelEng *a_sel_eng,
 
         for (cur_node = a_node ;cur_node ; cur_node = cur_node->next)
         {
-                status = cr_sel_eng_sel_get_matched_rulesets 
+                status = cr_sel_eng_get_matched_rulesets 
                 (a_sel_eng, a_sheet, 
                  cur_node, &stmts_tab, &tab_len) ;
 

@@ -56,6 +56,7 @@ enum CRStatus {
         CR_ENCODING_NOT_FOUND_ERROR,
         CR_PARSING_ERROR,
         CR_SYNTAX_ERROR,
+        CR_NO_ROOT_NODE_ERROR,
         CR_NO_TOKEN,
         CR_ERROR
 } ;

@@ -28,7 +28,6 @@
 #include <string.h>
 #include "cr-style.h"
 
-
 /**
  *@file
  *The definition of the #CRStyle class.

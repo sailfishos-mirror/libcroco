@@ -661,7 +661,7 @@ cr_sel_eng_get_matched_rulesets_real (CRSelEng *a_this,
                         if (!cur_sel->simple_sel)
                                 continue ;
 
-                        status = cr_sel_eng_sel_matches_node 
+                        status = cr_sel_eng_matches_node 
                                 (a_this, cur_sel->simple_sel,
                                  a_node, &matches) ;
 
@@ -747,8 +747,8 @@ cr_sel_eng_new (void)
  *@return the CR_OK if the selection ran correctly, an error code otherwise.
  */
 enum CRStatus
-cr_sel_eng_sel_matches_node (CRSelEng *a_this, CRSimpleSel *a_sel,
-			     xmlNode *a_node, gboolean *a_result)
+cr_sel_eng_matches_node (CRSelEng *a_this, CRSimpleSel *a_sel,
+                         xmlNode *a_node, gboolean *a_result)
 {
 	g_return_val_if_fail (a_this && PRIVATE (a_this)
 			      && a_this && a_node 
@@ -782,11 +782,11 @@ cr_sel_eng_sel_matches_node (CRSelEng *a_this, CRSimpleSel *a_sel,
  *@return CR_OK upon sucessfull completion, an error code otherwise.
  */
 enum CRStatus
-cr_sel_eng_sel_get_matched_rulesets (CRSelEng *a_this,
-                                     CRStyleSheet *a_sheet,
-                                     xmlNode *a_node,
-                                     CRStatement ***a_rulesets,
-                                     gulong *a_len)
+cr_sel_eng_get_matched_rulesets (CRSelEng *a_this,
+                                 CRStyleSheet *a_sheet,
+                                 xmlNode *a_node,
+                                 CRStatement ***a_rulesets,
+                                 gulong *a_len)
 {
         CRStatement ** stmts_tab = NULL ;
         enum CRStatus status = CR_OK ;
@@ -848,6 +848,37 @@ cr_sel_eng_sel_get_matched_rulesets (CRSelEng *a_this,
         *a_len = 0 ;
         return status ;
 }
+
+/**
+ *Retrieves the style structure that matches the xml node
+ *from the cascade.
+ *NOTE: this does not implement the complex cascade algorithms
+ *described in the css2 spec from chapter 6.4 on, but instead,
+ *is just an empty design sketch so that other hackers (yeah, we can dream) 
+ *can come an implement it. I don't have the time for this right now.
+ *@param a_this the current instance of #CRSelEng.
+ *@param a_cascade the cascade from which the request is to be made.
+ *@param a_node the xml node to match
+ *@param a_parent_style the style of the parent xml node.
+ *@param a_style out parameter. a pointer to the style 
+ *structure to be returned. *a_style must be set to NULL, otherwise
+ *a CR_BAD_PARAM_ERROR is returned. The caller must free the
+ *the returned *a_style using cr_style_destroy().
+ *@return CR_OK upon successfull completion, an error code otherwise.
+ */
+enum CRStatus
+cr_sel_eng_get_matched_style (CRSelEng *a_this,
+                              CRCascade *a_cascade,
+                              xmlNode *a_node,
+                              CRStyle *a_parent_style,
+                              CRStyle **a_style)
+{        
+        g_return_val_if_fail (a_this && a_cascade
+                              && a_node && a_style) ;
+
+        return CR_OK ;
+}
+
 
 /**
  *The destructor of #CRSelEng

@@ -73,48 +73,77 @@ dnl check libxml2 version
 have_libxml2=no
 PKG_CHECK_MODULES(LIBXML2, [libxml-2.0 >= 2.5.1], 
 			   [have_libxml2=yes
-			   AC_DEFINE(HAVE_LIBXML2, 1, [use libxml2])], have_libxml2=no)
+			   AC_DEFINE(HAVE_LIBXML2, 1, 
+					[use libxml2])], 
+					have_libxml2=no)
 
-dnl --enable-test
+dnl --enable-tests
 dnl this option enables compilation of the unit tests built in to .c files
 dnl and also some stuff in the test/ subdir
-WITH_TESTS=no
-AC_ARG_ENABLE(test, 
-	       AC_HELP_STRING([--enable-test=yes|no|auto], 
+AC_ARG_ENABLE(tests, 
+	       AC_HELP_STRING([--enable-test=yes|no], 
 	                      [Enables unit test code, Default=no]),
 	       WITH_TESTS=$enableval,
-	       WITH_TESTS="no")
+	       WITH_TESTS=no)
 
-if test "$WITH_TESTS" != no ; then
-   if test "$have_libxml2" != no; then
+if test "$WITH_TESTS" = "yes" ; then
 	AC_DEFINE(WITH_TESTS, 1, [enable the unit tests])
-   else
-	WITH_TESTS=no
-   fi
+else
+	WITH_TESTS="no"
 fi
 
 AC_SUBST(WITH_TESTS)
-AM_CONDITIONAL(HAVE_TESTS, test $WITH_TESTS != no)
-			    
+AM_CONDITIONAL(HAVE_TESTS, test "$WITH_TESTS" = "yes")
+
+
 dnl --enable-seleng
 dnl this option enables compilation of the selection engine
-WITH_SELENG=no
 AC_ARG_ENABLE(seleng, 
 	       AC_HELP_STRING([--enable-seleng=yes|no|auto], 
 	                      [Enables the css2 selector engine based on libxml2. Default=auto]),
 	       WITH_SELENG=$enableval,
-	       WITH_SELENG="auto")
+	       WITH_SELENG="no")
 
-if test "$WITH_SELENG" != no ; then
-   if test "$have_libxml2" != no; then
+if test "$WITH_SELENG" = "auto" ; then
+	if test "$have_libxml2" != no; then
+		AC_DEFINE(WITH_SELENG, 1, [use css2 selection engine])	
+		WITH_SELENG="yes"
+	else
+		WITH_SELENG="no"
+   	fi
+elif test "$WITH_SELENG" = "yes" ; then
 	AC_DEFINE(WITH_SELENG, 1, [use css2 selection engine])
-   else
-	WITH_SELENG=no
-   fi
+else
+  WITH_SELENG="no"
 fi
 
 AC_SUBST(WITH_SELENG)
-AM_CONDITIONAL(HAVE_SELENG, test $WITH_SELENG != no)
+AM_CONDITIONAL(HAVE_SELENG, test "$WITH_SELENG" = "yes")
+
+dnl --enable-layeng
+dnl this option enable the layout engine/box model/style stuffs.
+AC_ARG_ENABLE(layeng,
+	AC_HELP_STRING([--enable-layeng=yes|no|auto],
+	[Enables the layout engine. Default=auto]),
+	WITH_LAYENG=$enableval,
+	WITH_LAYENG="no")
+
+if test "$WITH_LAYENG" = "auto" ; then
+	if test "$WITH_SELENG" = "yes" ; then
+		AC_DEFINE(WITH_LAYENG, 1, [use layout engine])
+		WITH_LAYENG="yes"
+	else
+		WITH_LAYENG="no"
+	fi
+	
+elif test "$WITH_LAYENG" = "yes" ; then
+	AC_DEFINE(WITH_LAYENG, 1, [use layout engine])
+else
+	WITH_LAYENG="no"
+fi
+
+AC_SUBST(WITH_LAYENG)
+AM_CONDITIONAL(HAVE_LAYENG, test "$WITH_LAYENG" = "yes")
 
 dnl By default compile in debug mode
 CFLAGS="-g -Wunused -Wimplicit -Wreturn-type -Wswitch \
@@ -170,6 +199,6 @@ echo "
 	Maintainer mode:		      :	${USE_MAINTAINER_MODE}
 	Building unit tests:		      :	${WITH_TESTS}
 	Building with selection engine:	      :	${WITH_SELENG}
-	
+	Building with layout engine:	      : ${WITH_LAYENG}
 
 "

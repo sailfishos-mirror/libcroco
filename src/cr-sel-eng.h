@@ -25,6 +25,8 @@
 
 #include "cr-utils.h"
 #include "cr-stylesheet.h"
+#include "cr-cascade.h"
+#include "cr-style.h"
 
 #ifdef HAVE_LIBXML2
  #include <libxml/tree.h>
@@ -61,15 +63,22 @@ CRSelEng *
 cr_sel_eng_new (void) ;
 
 enum CRStatus
-cr_sel_eng_sel_matches_node (CRSelEng *a_this, CRSimpleSel *a_sel,
-			     xmlNode *a_node, gboolean *a_result) ;
+cr_sel_eng_matches_node (CRSelEng *a_this, CRSimpleSel *a_sel,
+                         xmlNode *a_node, gboolean *a_result) ;
 
 enum CRStatus
-cr_sel_eng_sel_get_matched_rulesets (CRSelEng *a_this,
-                                     CRStyleSheet *a_sheet,
-                                     xmlNode *a_node,
-                                     CRStatement ***a_rulesets,
-                                     gulong *a_len) ;
+cr_sel_eng_get_matched_rulesets (CRSelEng *a_this,
+                                 CRStyleSheet *a_sheet,
+                                 xmlNode *a_node,
+                                 CRStatement ***a_rulesets,
+                                 gulong *a_len) ;
+
+enum CRStatus
+cr_sel_eng_get_matched_style (CRSelEng *a_this,
+                              CRCascade *a_cascade,
+                              xmlNode *a_node,
+                              CRStyle **a_style) ;
+
 void
 cr_sel_eng_destroy (CRSelEng *a_this) ;
 

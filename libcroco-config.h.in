@@ -63,6 +63,9 @@
 /* Version number of package */
 #undef VERSION
 
+/* use layout engine */
+#undef WITH_LAYENG
+
 /* use css2 selection engine */
 #undef WITH_SELENG
 

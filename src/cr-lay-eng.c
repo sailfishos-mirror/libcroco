@@ -27,10 +27,50 @@ n * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 
 #define PRIVATE(a_this) ((a_this)->priv)
 
+static enum CRStatus
+cr_lay_eng_annotate_tree_real (CRLayEng *a_this,
+                               xmlNode *a_root_node) ;
+
 struct _CRLayEngPriv
 {
-	
+	CRStyleSheet *cur_sheet ;
 } ;
+
+
+static enum CRStatus
+cr_lay_eng_annotate_tree_real (CRLayEng *a_this,
+                               xmlNode *a_root_node)
+{
+        enum CRStatus status = CR_OK ;
+        xmlNode *cur = NULL ;
+        g_return_val_if_fail (a_this 
+                              && PRIVATE (a_this)
+                              && PRIVATE (a_this)->cur_sheet
+                              && a_root_node,                              
+                              CR_BAD_PARAM_ERROR) ;
+
+        for (cur = a_root_node ; cur ; cur = cur->next)
+        {
+                /*TODO: build here the annotated node*/
+
+                /*walk through what remains from the tree*/
+                if (cur->children)
+                {
+                        status = 
+                                cr_lay_eng_annotate_tree_real 
+                                (a_this, cur->children) ;
+
+                        if (status != CR_OK)
+                                return status ;
+                }
+                else
+                {
+                        return status ;
+                }
+        }
+
+        return CR_OK ;
+}
 
 
 CRLayEng *
@@ -59,6 +99,26 @@ cr_lay_eng_new (void)
 	return result ;
 }
 
+
+enum CRStatus
+cr_lay_eng_build_annotate_tree (CRLayEng *a_this,
+				xmlDoc *a_doc,
+				CRStyleSheet *a_sheet)
+{
+        xmlNode *root_node = NULL ;
+
+        g_return_val_if_fail (a_this && a_doc && a_sheet,
+                              CR_BAD_PARAM_ERROR) ;
+
+        root_node = xmlDocGetRootElement (a_doc) ;
+        if (!root_node)
+                return CR_NO_ROOT_NODE_ERROR ;
+
+        PRIVATE (a_this)->cur_sheet = a_sheet ;
+        return cr_lay_eng_annotate_tree_real (a_this, root_node) ;
+
+        return CR_OK ;
+}
 
 void
 cr_lay_eng_destroy (CRLayEng *a_this)

@@ -78,6 +78,32 @@ cr_stylesheet_dump (CRStyleSheet *a_this, FILE *a_fp)
 	}
 }
 
+void
+cr_stylesheet_ref (CRStyleSheet *a_this)
+{
+	g_return_if_fail (a_this) ;
+
+	a_this->ref_count ++ ;
+}
+
+gboolean
+cr_stylesheet_unref (CRStyleSheet *a_this)
+{
+	g_return_val_if_fail (a_this, FALSE) ;
+	
+	if (a_this->ref_count)
+		a_this->ref_count -- ;
+
+	if (!a_this->ref_count)
+	{
+		cr_stylesheet_destroy (a_this) ;
+		return TRUE ;
+	}
+
+	return FALSE ;
+}
+
+
 /**
  *Destructor of the #CRStyleSheet class.
  *@param a_this the current instance of the #CRStyleSheet class.

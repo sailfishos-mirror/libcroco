@@ -1,4 +1,4 @@
-/* -*- Mode: C; indent-tabs-mode: ni; c-basic-offset: 8 -*- */
+/* -*- Mode: C; indent-tabs-mode: nil; c-basic-offset: 8 -*- */
 
 /*
  * This file is part of The Croco Library
@@ -43,14 +43,36 @@ struct _CRStyleSheet
 {
 	/**The css statements list*/
 	CRStatement *statements ;
-} ;
 
+	/**custom data used by libcroco*/
+	void *croco_data ;
+
+	/**
+	 *custom application data pointer
+	 *Can be used by applications.
+	 */
+	void * app_data ;
+
+	/**
+	 *the reference count of this insance
+	 *Please, don't never ever modify it
+	 *directly. Use cr_stylesheet_ref()
+	 *and cr_stylesheet_unref() instead.
+	 */
+	gulong ref_count ;
+} ;
 
 CRStyleSheet *
 cr_stylesheet_new (CRStatement *a_stmts) ;
 
 void
 cr_stylesheet_dump (CRStyleSheet *a_this, FILE *a_fp) ;
+
+void
+cr_stylesheet_ref (CRStyleSheet *a_this) ;
+
+gboolean
+cr_stylesheet_unref (CRStyleSheet *a_this) ;
 
 void
 cr_stylesheet_destroy (CRStyleSheet *a_this) ;
