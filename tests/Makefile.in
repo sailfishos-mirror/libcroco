@@ -106,7 +106,7 @@ INCLUDES = -I$(top_srcdir)/intl 	-I$(top_srcdir)/src 	`pkg-config --cflags glib-
 
 
 LDFLAGS = `pkg-config --libs glib-2.0` @LIBXML2_LIBS@
-AM_CFLAGS = -Wall -I.
+AM_CFLAGS = -Wall -I. @LIBXML2_CFLAGS@
 mkinstalldirs = $(SHELL) $(top_srcdir)/mkinstalldirs
 CONFIG_HEADER = ../libcroco-config.h
 CONFIG_CLEAN_FILES = 

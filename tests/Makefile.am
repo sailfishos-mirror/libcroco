@@ -14,4 +14,4 @@ INCLUDES=-I$(top_srcdir)/intl \
 	`pkg-config --cflags glib-2.0`
 
 LDFLAGS=`pkg-config --libs glib-2.0` @LIBXML2_LIBS@
-AM_CFLAGS=-Wall -I.
+AM_CFLAGS=-Wall -I. @LIBXML2_CFLAGS@
