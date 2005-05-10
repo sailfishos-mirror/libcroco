@@ -25,7 +25,8 @@
 #include "cr-sel-eng.h"
 
 /**
- *@file:
+ *@CRSelEng:
+ *
  *The definition of the  #CRSelEng class.
  *The #CRSelEng is actually the "Selection Engine"
  *class. This is highly experimental for at the moment and
@@ -1102,8 +1103,10 @@ set_style_from_props (CRStyle * a_style, CRPropList * a_props)
  ****************************************/
 
 /**
+ * cr_sel_eng_new:
  *Creates a new instance of #CRSelEng.
- *@return the newly built instance of #CRSelEng of
+ *
+ *Returns the newly built instance of #CRSelEng of
  *NULL if an error occurs.
  */
 CRSelEng *
@@ -1138,13 +1141,16 @@ cr_sel_eng_new (void)
 }
 
 /**
- *Adds a new handler entry in the handlers entry table.
- *@param a_this the current instance of #CRSelEng
- *@param a_pseudo_class_sel_name the name of the pseudo class selector.
- *@param a_pseudo_class_type the type of the pseudo class selector.
- *@param a_handler the actual handler or callback to be called during
+ * cr_sel_eng_register_pseudo_class_sel_handler:
+ *@a_this: the current instance of #CRSelEng
+ *@a_pseudo_class_sel_name: the name of the pseudo class selector.
+ *@a_pseudo_class_type: the type of the pseudo class selector.
+ *@a_handler: the actual handler or callback to be called during
  *the selector evaluation process.
- *@return CR_OK, upon successful completion, an error code otherwise.
+ *
+ *Adds a new handler entry in the handlers entry table.
+ *
+ *Returns CR_OK, upon successful completion, an error code otherwise.
  */
 enum CRStatus
 cr_sel_eng_register_pseudo_class_sel_handler (CRSelEng * a_this,
@@ -1212,10 +1218,13 @@ cr_sel_eng_unregister_pseudo_class_sel_handler (CRSelEng * a_this,
 }
 
 /**
+ * cr_sel_eng_unregister_all_pseudo_class_sel_handlers:
+ *@a_this: the current instance of #CRSelEng .
+ *
  *Unregisters all the pseudo class sel handlers
  *and frees all the associated allocated datastructures.
- *@param a_this the current instance of #CRSelEng .
- *@return CR_OK upon succesful completion, an error code
+ *
+ *Returns CR_OK upon succesful completion, an error code
  *otherwise.
  */
 enum CRStatus
@@ -1276,17 +1285,20 @@ cr_sel_eng_get_pseudo_class_selector_handler (CRSelEng * a_this,
 }
 
 /**
+ * cr_sel_eng_matches_node:
+ *@a_this: the selection engine.
+ *@a_sel: the simple selector against which the xml node 
+ *is going to be matched.
+ *@a_node: the node against which the selector is going to be matched.
+ *@a_result: out parameter. The result of the match. Is set to
+ *TRUE if the selector matches the node, FALSE otherwise. This value
+ *is considered if and only if this functions returns CR_OK.
+ *
  *Evaluates a chained list of simple selectors (known as a css2 selector).
  *Says wheter if this selector matches the xml node given in parameter or
  *not.
- *@param a_this the selection engine.
- *@param a_sel the simple selector against which the xml node 
- *is going to be matched.
- *@param a_node the node against which the selector is going to be matched.
- *@param a_result out parameter. The result of the match. Is set to
- *TRUE if the selector matches the node, FALSE otherwise. This value
- *is considered if and only if this functions returns CR_OK.
- *@return the CR_OK if the selection ran correctly, an error code otherwise.
+ *
+ *Returns the CR_OK if the selection ran correctly, an error code otherwise.
  */
 enum CRStatus
 cr_sel_eng_matches_node (CRSelEng * a_this, CRSimpleSel * a_sel,
@@ -1307,20 +1319,22 @@ cr_sel_eng_matches_node (CRSelEng * a_this, CRSimpleSel * a_sel,
 }
 
 /**
- *Returns an array of pointers to selectors that matches
- *the xml node given in parameter.
- *
- *@param a_this the current instance of the selection engine.
- *@param a_sheet the stylesheet that holds the selectors.
- *@param a_node the xml node to consider during the walk thru
+ * cr_sel_eng_get_matched_rulesets:
+ *@a_this: the current instance of the selection engine.
+ *@a_sheet: the stylesheet that holds the selectors.
+ *@a_node: the xml node to consider during the walk thru
  *the stylesheet.
- *@param a_rulesets out parameter. A pointer to an array of
+ *@a_rulesets: out parameter. A pointer to an array of
  *rulesets statement pointers. *a_rulesets is allocated by
  *this function and must be freed by the caller. However, the caller
  *must not alter the rulesets statements pointer because they
  *point to statements that are still in the css stylesheet.
- *@param a_len the length of *a_ruleset.
- *@return CR_OK upon sucessfull completion, an error code otherwise.
+ *@a_len: the length of *a_ruleset.
+ *
+ *Returns an array of pointers to selectors that matches
+ *the xml node given in parameter.
+ *
+ *Returns CR_OK upon sucessfull completion, an error code otherwise.
  */
 enum CRStatus
 cr_sel_eng_get_matched_rulesets (CRSelEng * a_this,
@@ -1531,8 +1545,10 @@ cr_sel_eng_get_matched_style (CRSelEng * a_this,
 }
 
 /**
+ * cr_sel_eng_destroy:
+ *@a_this: the current instance of the selection engine.
+ *
  *The destructor of #CRSelEng
- *@param a_this the current instance of the selection engine.
  */
 void
 cr_sel_eng_destroy (CRSelEng * a_this)

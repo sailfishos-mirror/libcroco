@@ -1,4 +1,4 @@
-#!/bin/sh
+#! /bin/sh
 
 valgrind=`which valgrind`
 awk=`which awk`

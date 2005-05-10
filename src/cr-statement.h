@@ -176,8 +176,8 @@ enum CRStatementType
  *The abstraction of css statement as defined
  *in the chapter 4 and appendix D.1 of the css2 spec.
  *A statement is actually a double chained list of
- *statements.A statement can be a ruleset, an @import
- *rule, an @page rule etc ...
+ *statements.A statement can be a ruleset, an \@import
+ *rule, an \@page rule etc ...
  */
 struct _CRStatement
 {

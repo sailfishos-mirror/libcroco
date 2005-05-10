@@ -55,6 +55,8 @@ AC_ISC_POSIX
 
 AM_PROG_LIBTOOL
 
+GTK_DOC_CHECK([1.0])
+
 dnl **************************************************************
 dnl check for the different --enable-option=val  
 dnl messages issued by the user
@@ -150,17 +152,18 @@ libcroco.spec
 croco-config
 docs/Makefile
 docs/examples/Makefile
+docs/reference/Makefile
 tests/Makefile
 tests/test-inputs/Makefile
 tests/test-output-refs/Makefile
-tests/global-vars.sh
+global-test-vars.sh
 src/Makefile
 src/libcroco-config.h
 csslint/Makefile
 
 ])
 
-dnl =============================================================================================
+dnl =======================================================================
 echo "
 	=====================================================================
 	      LIBCROCO, GNOME CSS2 PARSING AND MANIPULATION TOOLKIT $VERSION

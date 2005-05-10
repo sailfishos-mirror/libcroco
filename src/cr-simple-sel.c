@@ -26,9 +26,11 @@
 #include "cr-simple-sel.h"
 
 /**
+ * cr_simple_sel_new:
+ *
  *The constructor of #CRSimpleSel.
  *
- *@return the new instance of #CRSimpleSel.
+ *Returns the new instance of #CRSimpleSel.
  */
 CRSimpleSel *
 cr_simple_sel_new (void)
@@ -46,11 +48,13 @@ cr_simple_sel_new (void)
 }
 
 /**
+ * cr_simple_sel_append_simple_sel:
+ *
  *Appends a simpe selector to the current list of simple selector.
  *
- *@param a_this the this pointer of the current instance of #CRSimpleSel.
- *@param a_sel the simple selector to append.
- *@return the new list upon successfull completion, an error code otherwise.
+ *@a_this: the this pointer of the current instance of #CRSimpleSel.
+ *@a_sel: the simple selector to append.
+ *Returns: the new list upon successfull completion, an error code otherwise.
  */
 CRSimpleSel *
 cr_simple_sel_append_simple_sel (CRSimpleSel * a_this, CRSimpleSel * a_sel)
@@ -71,10 +75,14 @@ cr_simple_sel_append_simple_sel (CRSimpleSel * a_this, CRSimpleSel * a_sel)
 }
 
 /**
+ * cr_simple_sel_prepend_simple_sel:
+ *
+ *@a_this: the this pointer of the current instance of #CRSimpleSel.
+ *@a_sel: the simple selector to prepend.
+ *
  *Prepends a simple selector to the current list of simple selectors.
- *@param a_this the this pointer of the current instance of #CRSimpleSel.
- *@param a_sel the simple selector to prepend.
- *@return the new list upon successfull completion, an error code otherwise.
+ *
+ *Returns the new list upon successfull completion, an error code otherwise.
  */
 CRSimpleSel *
 cr_simple_sel_prepend_simple_sel (CRSimpleSel * a_this, CRSimpleSel * a_sel)
@@ -194,12 +202,14 @@ cr_simple_sel_one_to_string (CRSimpleSel * a_this)
 }
 
 /**
+ * cr_simple_sel_dump:
+ *@a_this: the current instance of #CRSimpleSel.
+ *@a_fp: the destination file pointer.
+ *
  *Dumps the selector to a file.
  *TODO: add the support of unicode in the dump.
  *
- *@param a_this the current instance of #CRSimpleSel.
- *@param a_fp the destination file pointer.
- *@return CR_OK upon successfull completion, an error code
+ *Returns CR_OK upon successfull completion, an error code
  *otherwise.
  */
 enum CRStatus
@@ -222,10 +232,14 @@ cr_simple_sel_dump (CRSimpleSel * a_this, FILE * a_fp)
 }
 
 /**
+ * cr_simple_sel_compute_specificity:
+ *
+ *@a_this: the current instance of #CRSimpleSel
+ *
  *Computes the selector (combinator separated list of simple selectors)
  *as defined in the css2 spec in chapter 6.4.3
- *@param a_this the current instance of #CRSimpleSel
- *@return CR_OK upon successfull completion, an error code otherwise.
+ *
+ *Returns CR_OK upon successfull completion, an error code otherwise.
  */
 enum CRStatus
 cr_simple_sel_compute_specificity (CRSimpleSel * a_this)
@@ -278,10 +292,12 @@ cr_simple_sel_compute_specificity (CRSimpleSel * a_this)
 }
 
 /**
+ * cr_simple_sel_destroy:
+ *
+ *@a_this: the this pointer of the current instance of #CRSimpleSel.
+ *
  *The destructor of the current instance of
  *#CRSimpleSel.
- *@param a_this the this pointer of the current instance of #CRSimpleSel.
- *
  */
 void
 cr_simple_sel_destroy (CRSimpleSel * a_this)

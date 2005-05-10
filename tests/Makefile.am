@@ -27,6 +27,6 @@ test6_LDFLAGS=$(EXTRALDFLAGS)
 croco_lib=$(top_builddir)/src/@CROCO_LIB@
 LDADD=$(croco_lib)
 
-INCLUDES=-I$(top_srcdir)/intl -I$(top_srcdir)/src
+INCLUDES=-I$(top_srcdir)/intl -I$(top_srcdir)/src -I$(top_builddir)/src
 
 AM_CFLAGS=-I. @LIBXML2_CFLAGS@ @GLIB2_CFLAGS@

@@ -8,6 +8,7 @@ LDADD=$(croco_lib)
 
 INCLUDES=-I$(top_srcdir)/intl \
 	-I$(top_srcdir)/src \
+	-I$(top_builddir)/src \
 	@GLIB2_CFLAGS@ \
 	@LIBXML2_CFLAGS@
 

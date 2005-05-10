@@ -32,6 +32,8 @@
 #include "cr-utils.h"
 #include "cr-parsing-location.h"
 
+G_BEGIN_DECLS
+
 typedef struct _CRString CRString ;
 
 /**
@@ -68,5 +70,7 @@ gchar *cr_string_dup2 (CRString *a_this) ;
 const gchar *cr_string_peek_raw_str (CRString *a_this) ;
 gint cr_string_peek_raw_str_len (CRString *a_this) ;
 void cr_string_destroy (CRString *a_this) ;
+
+G_END_DECLS
 
 #endif 

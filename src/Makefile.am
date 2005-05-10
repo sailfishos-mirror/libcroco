@@ -90,6 +90,6 @@ lib_LTLIBRARIES=libcroco-0.6.la
 libcroco_0_6_la_SOURCES= $(SRCS)
 
 INCLUDES=-I$(top_srcdir) -I$(top_srcdir)/intl \
-@GLIB2_CFLAGS@ @LIBXML2_CFLAGS@
+-I $(top_builddir)/src @GLIB2_CFLAGS@ @LIBXML2_CFLAGS@
 libcroco_0_6_la_LDFLAGS=-version-info @LIBCROCO_VERSION_INFO@ \
 @GLIB2_CFLAGS@

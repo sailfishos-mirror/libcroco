@@ -35,6 +35,11 @@ $(CROCO_CONFIG_FILE_UNINSTALLED) $(CROCO_CONFIG_FILE)
 %-@LIBCROCO_MAJOR_VERSION@.@LIBCROCO_MINOR_VERSION@-config-uninstalled: %-config
 	cp $< $@
 
+clean-local: cleantest
+
+cleantest:
+	if test -x $(top_srcdir)/tests/testctl ; then $(top_srcdir)/tests/testctl cleanup ; fi
+
 cleantar:
 	@(rm -f libcroco*.tar.gz)
 	@(rm -rf $(top_srcdir)/rpmbuildroot)
@@ -42,7 +47,7 @@ cleantar:
 rpm: cleantar
 	@(mkdir -p $(top_srcdir)/rpmbuildroot ; $(MAKE) dist && rpmbuild  -ta --buildroot $(top_srcdir)/rpmbuildroot $(distdir).tar.gz)
 
-test:	
+test:	all
 	if test -x $(top_srcdir)/tests/testctl ; then $(top_srcdir)/tests/testctl cleanup ; $(top_srcdir)/tests/testctl run ; fi 
 
 apidoc:

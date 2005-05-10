@@ -1,4 +1,4 @@
-#!/bin/sh
+#! /bin/sh
 
 #####################################
 #This script just runs the tests of 
@@ -9,8 +9,20 @@
 #just to run 'testctl run' and see the result.
 ####################################
 
-#the directory that contains the tests
-HERE=`dirname $0`
+#the directory that contains the tests sources is:
+#$TEST_SOURCE_DIR. User can set this var in the environment
+#before calling this script. Otherwise, we set it to a default value
+if test x$TEST_SOURCE_DIR = x ; then
+	TEST_SOURCE_DIR=`dirname "$0"`
+fi
+
+#the directory that contains the test outputs is:
+#$TEST_OUT_DIR
+#User can set this var in the environment before
+#calling this script. Otherwise, we set it to a default value.
+if test x$TEST_OUT_DIR = x ; then
+	TEST_OUT_DIR=tests
+fi
 
 
 #the list of tests to be run
@@ -117,7 +129,7 @@ parse_command_line ()
 #builds the list of available test functions.
 build_tests_list ()
 {
-    for TEST_PROG in `find $HERE -type f -print | egrep ^$HERE/test\(\([-0-9a-zA-Z_]\)+\)?\(\.sh\)?$ | grep -v testctl` ; do
+    for TEST_PROG in "$TEST_SOURCE_DIR"/test*.sh "$TEST_OUT_DIR"/test?; do
 	TEST_PROG=`basename $TEST_PROG`	
 	echo "run test: $TEST_PROG"
 	TEST_PROG_LIST="$TEST_PROG_LIST $TEST_PROG"
@@ -132,23 +144,23 @@ build_tests_list ()
 #if no, means that the output of the test is to be saved as a result of a test.
 run_test_prog ()
 {
-    TEST_PROG=$1
-    REFERENCE=$2
-    DISPLAY_ON_STDOUT=$3
+    TEST_PROG="$1"
+    REFERENCE="$2"
+    DISPLAY_ON_STDOUT="$3"
     OUTPUT_DIR=
     OUTPUT_SUFFIX=
     TEST_INPUT_LIST=
-    VALGRIND_OPTIONS="--error-limit=no --num-callers=100 --logfile=$HERE/$VALGRIND_LOGS_DIR/$TEST_PROG-valgrind.log  --leak-check=yes --show-reachable=yes --quiet --suppressions=$HERE/vg.supp"
+    VALGRIND_OPTIONS="--error-limit=no --num-callers=100 --logfile=$TEST_OUT_DIR/$VALGRIND_LOGS_DIR/$TEST_PROG-valgrind.log  --leak-check=yes --show-reachable=yes --quiet --suppressions=$TEST_SOURCE_DIR/vg.supp"
     if test x$RUN_VALGRIND = xno ; then
 	VALGRIND=
     else
-	if ! test -x $HERE/valgrind-version.sh ; then
-	    echo "Argh! Could not find file $HERE/valgrind-version.sh"
+	if ! test -x "$TEST_SOURCE_DIR"/valgrind-version.sh ; then
+	    echo "Argh! Could not find file $TEST_SOURCE_DIR/valgrind-version.sh"
 	    exit -1 ;
 	fi
-	version=`$HERE/valgrind-version.sh`
+	version=`"$TEST_SOURCE_DIR"/valgrind-version.sh`
 	if ! test "x$version" = "xokay" ; then
-	    echo "You must install a valgrind versin greater than 2.1.1"
+	    echo "You must install a valgrind version greater than 2.1.1"
 	    echo "version=$version"
 	    exit -1
 	fi
@@ -166,36 +178,30 @@ run_test_prog ()
 	fi
     fi
     export VALGRIND
-    is_shell_script=`echo $TEST_PROG | egrep "(.*)?.sh"`
-    if test x$is_shell_script = x ; then
-	is_shell_script=no
-    else
-	is_shell_script=yes
+    case "$TEST_PROG" in
+      *.sh) is_shell_script=yes ;;
+      *)    is_shell_script=no ;;
+    esac
+
+    if ! test -d "$TEST_OUT_DIR/$VALGRIND_LOGS_DIR" ; then
+	mkdir "$TEST_OUT_DIR/$VALGRIND_LOGS_DIR"
     fi
 
-    if ! test -d $HERE/$VALGRIND_LOGS_DIR ; then
-	mkdir $HERE/$VALGRIND_LOGS_DIR
-    fi
-
-    for TEST_INPUT in `ls -1 $HERE/$TEST_INPUT_DIR | egrep ^${TEST_PROG}\([\.0-9]\)+\css\$` ; do
+    for TEST_INPUT in `ls -1 "$TEST_SOURCE_DIR/$TEST_INPUT_DIR" | egrep "^${TEST_PROG}"'[.0-9]+css$'` ; do
 	TEST_INPUT_LIST="$TEST_INPUT_LIST $TEST_INPUT"
     done
 
     if test "$REFERENCE" = "yes" ; then
-	OUTPUT_DIR=$HERE/$TEST_OUT_REF_DIR
+	OUTPUT_DIR="$TEST_SOURCE_DIR/$TEST_OUT_REF_DIR"
 	OUTPUT_SUFFIX=.out
-
-	if test ! -d $HERE/$OUTPUT_DIR ; then
-	    mkdir $HERE/$OUTPUT_DIR
-	fi
     else
-	if test ! -d $HERE/$TEST_OUTPUT_DIR/ ; then
-	    echo "creating tmp directory $$HERE/$TEST_OUTPUT_DIR ..."
-	    mkdir $HERE/$TEST_OUTPUT_DIR ;
+	OUTPUT_DIR="$TEST_OUT_DIR/$TEST_OUTPUT_DIR"
+	OUTPUT_SUFFIX=.out
+	if test ! -d "$OUTPUT_DIR" ; then
+	    echo "creating tmp directory $OUTPUT_DIR ..."
+	    mkdir "$OUTPUT_DIR"
 	    echo "done"
 	fi
-	OUTPUT_DIR=$HERE/$TEST_OUTPUT_DIR
-	OUTPUT_SUFFIX=.out
     fi
 
     if test "empty$TEST_INPUT_LIST" != "empty" ; then
@@ -203,44 +209,44 @@ run_test_prog ()
 	    TEST_INPUT_NAME=`basename $TEST_INPUT .sh`
 	    if test "$DISPLAY_ON_STDOUT" = "yes" ; then
 		echo "###############################################"
-		echo "launching $VALGRIND $HERE/$TEST_PROG $HERE/$TEST_INPUT_DIR/$TEST_INPUT"....
+		echo "launching $VALGRIND $TEST_PROG $TEST_SOURCE_DIR/$TEST_INPUT_DIR/$TEST_INPUT"....
 		echo "###############################################"		
 		if test x$is_shell_script = xyes ; then
-		    $HERE/$TEST_PROG $HERE/$TEST_INPUT_DIR/$TEST_INPUT
+		    "$TEST_SOURCE_DIR/$TEST_PROG" "$TEST_SOURCE_DIR/$TEST_INPUT_DIR/$TEST_INPUT"
 		else
-		    $VALGRIND $HERE/.libs/$TEST_PROG $HERE/$TEST_INPUT_DIR/$TEST_INPUT
+		    $VALGRIND "$TEST_OUT_DIR/.libs/$TEST_PROG" "$TEST_SOURCE_DIR/$TEST_INPUT_DIR/$TEST_INPUT"
 		fi		
 		echo "###############################################"
 		echo  "done"
 		echo "###############################################"
 		echo ""
 	    else
-		echo "executing $VALGRIND $HERE/$TEST_PROG $HERE/$TEST_INPUT_DIR/$TEST_INPUT > $OUTPUT_DIR/${TEST_INPUT_NAME}${OUTPUT_SUFFIX} ..."
-		$VALGRIND $HERE/.libs/$TEST_PROG $HERE/$TEST_INPUT_DIR/$TEST_INPUT > $OUTPUT_DIR/${TEST_INPUT_NAME}${OUTPUT_SUFFIX}
+		echo "executing $VALGRIND $TEST_PROG $TEST_SOURCE_DIR/$TEST_INPUT_DIR/$TEST_INPUT > $OUTPUT_DIR/${TEST_INPUT_NAME}${OUTPUT_SUFFIX} ..."
+		$VALGRIND "$TEST_OUT_DIR/.libs/$TEST_PROG" "$TEST_SOURCE_DIR/$TEST_INPUT_DIR/$TEST_INPUT" > "$OUTPUT_DIR/${TEST_INPUT_NAME}${OUTPUT_SUFFIX}"
 		echo "done"
 	    fi
 	done
     else
 	if test "$DISPLAY_ON_STDOUT" = "yes" ; then
 	    echo "####################################################"
-	    echo "launching $VALGRIND $HERE/$TEST_PROG ..."
+	    echo "launching $VALGRIND $TEST_PROG ..."
 	    echo "####################################################"
 	    if test x$is_shell_script = xyes ; then
-		$HERE/$TEST_PROG
+		"$TEST_SOURCE_DIR/$TEST_PROG"
 	    else
-		$VALGRIND $HERE/.libs/$TEST_PROG
+		$VALGRIND "$TEST_OUT_DIR/.libs/$TEST_PROG"
 	    fi
 	    echo "####################################################"
 	    echo "done"
 	    echo "####################################################"
 	    echo ""
 	else
-	    TEST_INPUT_NAME=`basename $TEST_PROG .sh`
-	    echo "executing $VALGRIND $HERE/$TEST_PROG  > $OUTPUT_DIR/${TEST_PROG}${OUTPUT_SUFFIX} ..."
+	    TEST_INPUT_NAME=`basename "$TEST_PROG" .sh`
+	    echo "executing $VALGRIND $TEST_PROG  > $OUTPUT_DIR/${TEST_PROG}${OUTPUT_SUFFIX} ..."
 	    if test x$is_shell_script = xyes ; then
-		$HERE/$TEST_PROG > $OUTPUT_DIR/${TEST_INPUT_NAME}${OUTPUT_SUFFIX}
+		"$TEST_SOURCE_DIR/$TEST_PROG" > "$OUTPUT_DIR/${TEST_INPUT_NAME}${OUTPUT_SUFFIX}"
 	    else
-		$VALGRIND $HERE/.libs/$TEST_PROG > $OUTPUT_DIR/${TEST_INPUT_NAME}${OUTPUT_SUFFIX}
+		$VALGRIND "$TEST_OUT_DIR/.libs/$TEST_PROG" > "$OUTPUT_DIR/${TEST_INPUT_NAME}${OUTPUT_SUFFIX}"
 	    fi
 	    echo "done"
 	fi
@@ -250,46 +256,46 @@ run_test_prog ()
 
 cleanup_tests ()
 {
-    if test -d $HERE/$TEST_OUTPUT_DIR ; then
-	echo "removing $HERE/$TEST_OUTPUT_DIR"
-	rm -rf $HERE/$TEST_OUTPUT_DIR/*
-	rm -rf $HERE/$VALGRIND_LOGS_DIR
+    if test -d "$TEST_OUT_DIR/$TEST_OUTPUT_DIR" ; then
+	echo "removing $TEST_OUT_DIR/$TEST_OUTPUT_DIR/*"
+	rm -rf "$TEST_OUT_DIR/$TEST_OUTPUT_DIR"
+	rm -rf "$TEST_OUT_DIR/$VALGRIND_LOGS_DIR"
     fi
-    if test -f $HERE/$ERROR_REPORT_FILE ; then
-	rm $HERE/$ERROR_REPORT_FILE
+    if test -f "$TEST_OUT_DIR/$ERROR_REPORT_FILE" ; then
+	rm "$TEST_OUT_DIR/$ERROR_REPORT_FILE"
     fi
 }
 
 run_test_report ()
 {
-    diff -ur --exclude=*CVS* --exclude=*cvs* --exclude=Makefile* --exclude=.arch-ids $HERE/$TEST_OUT_REF_DIR $HERE/$TEST_OUTPUT_DIR > /tmp/toto$$
-    NB_DIFF=`cat /tmp/toto$$ | wc -l`
+    diff -ur --exclude='*CVS*' --exclude='*cvs*' --exclude='Makefile*' --exclude=.arch-ids "$TEST_SOURCE_DIR/$TEST_OUT_REF_DIR" "$TEST_OUT_DIR/$TEST_OUTPUT_DIR" > "$TEST_OUT_DIR/tmpdiff.$$"
+    NB_DIFF=`wc -l < "$TEST_OUT_DIR/tmpdiff.$$"`
 
     if test "$NB_DIFF" -eq 0 ; then
 	echo "/////////////ALL THE TESTS ARE OK :) //////////////////"
-	rm /tmp/toto$$
+	rm "$TEST_OUT_DIR/tmpdiff.$$"
     else
 	echo "SOME TESTS ARE KO :("
-	mv /tmp/toto$$ $HERE/$ERROR_REPORT_FILE
-	echo "See $HERE/$ERROR_REPORT_FILE to see what's going on"
+	mv "$TEST_OUT_DIR/tmpdiff.$$" "$TEST_OUT_DIR/$ERROR_REPORT_FILE"
+	echo "See $TEST_OUT_DIR/$ERROR_REPORT_FILE to see what's going on"
     fi
 
     ###################
     #Valgrind errors  #
     ###################
     memleaks=no
-    for vg_log in `find $HERE/$VALGRIND_LOGS_DIR -name "*-valgrind.log*" -print` ; do
-	if test -s $vg_log ; then
-	    leaks=`cat $vg_log | grep -i leak | grep -v no`
-	    errors=`cat $vg_log | grep -w Invalid`
+    for vg_log in `find "$TEST_OUT_DIR/$VALGRIND_LOGS_DIR" -name '*-valgrind.log*' -print` ; do
+	if test -s "$vg_log" ; then
+	    leaks=`cat "$vg_log" | grep -i leak | grep -v no`
+	    errors=`cat "$vg_log" | grep -w Invalid`
 	    if test "x$leaks" = "x" -a "x$errors" = "x" ; then
-		rm -f $vg_log ;
+		rm -f "$vg_log" ;
 	    else
 		echo "valgrind reported some memory leaks/corruptions in $vg_log"
 		memleaks=yes
 	    fi
 	else
-	    rm $vg_log
+	    rm "$vg_log"
 	fi
     done
     if test "x$RUN_VALGRIND" = "xyes" ; then
@@ -303,7 +309,7 @@ run_test_report ()
 
 ############################
 #Executes the "run" command along with
-#it's command options.
+#its command options.
 #For the sake of safety checking
 ############################
 execute_run_cmd ()
@@ -352,12 +358,12 @@ execute_run_cmd ()
 	fi
 
 	for TEST in $TEST_PROG_LIST ; do
-	    run_test_prog $TEST no no;
+	    run_test_prog "$TEST" no no;
 	done
 	run_test_report ;
     else
 	#run the test and display result on stdout
-	run_test_prog $TEST_PROG no yes ;
+	run_test_prog "$TEST_PROG" no yes ;
     fi
 }
 
@@ -372,12 +378,12 @@ execute_run_cmd ()
 #############################
 execute_command ()
 {
-    arg=$1 ;
+    arg="$1" ;
 
     case "$arg" in
 
 	run)
-	    execute_run_cmd $@
+	    execute_run_cmd "$@"
 	    ;;
 
 	ref)
@@ -388,7 +394,7 @@ execute_command ()
 	    fi
 
 	    for TEST in $TEST_PROG_LIST ; do
-		run_test_prog $TEST yes no;
+		run_test_prog "$TEST" yes no;
 	    done
 	    ;;
 

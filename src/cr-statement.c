@@ -575,10 +575,14 @@ cr_statement_clear (CRStatement * a_this)
 }
 
 /**
+ * cr_statement_ruleset_to_string:
+ *
+ *@a_this: the current instance of #CRStatement
+ *@a_indent: the number of whitespace to use for indentation
+ *
  *Serializes the ruleset statement into a string
- *@param a_this the current instance of #CRStatement
- *@param a_indent the number of whitespace to use for indentation
- *@return the newly allocated serialised string. Must be freed
+ *
+ *Returns the newly allocated serialised string. Must be freed
  *by the caller, using g_free().
  */
 static gchar *
@@ -634,11 +638,15 @@ cr_statement_ruleset_to_string (CRStatement * a_this, glong a_indent)
 
 
 /**
- *Serializes a font face rule statement into a string.
- *@param a_this the current instance of #CRStatement to consider
+ * cr_statement_font_face_rule_to_string:
+ *
+ *@a_this: the current instance of #CRStatement to consider
  *It must be a font face rule statement.
- *@param a_indent the number of white spaces of indentation.
- *@return the serialized string. Must be deallocated by the caller
+ *@a_indent: the number of white spaces of indentation.
+ *
+ *Serializes a font face rule statement into a string.
+ *
+ *Returns the serialized string. Must be deallocated by the caller
  *using g_free().
  */
 static gchar *
@@ -680,9 +688,12 @@ cr_statement_font_face_rule_to_string (CRStatement * a_this,
 
 
 /**
+ * cr_statetement_charset_to_string:
+ *
  *Serialises an @charset statement into a string.
- *@param a_this the statement to serialize.
- *@return the serialized charset statement. Must be
+ *@a_this: the statement to serialize.
+ *@a_indent: the number of indentation spaces
+ *Returns the serialized charset statement. Must be
  *freed by the caller using g_free().
  */
 static gchar *
@@ -722,10 +733,12 @@ cr_statement_charset_to_string (CRStatement *a_this,
 
 
 /**
+ * cr_statement_at_page_rule_to_string:
+ *
  *Serialises the at page rule statement into a string
- *@param a_this the current instance of #CRStatement. Must
+ *@a_this: the current instance of #CRStatement. Must
  *be an "@page" rule statement.
- *@return the serialized string. Must be freed by the caller
+ *Returns the serialized string. Must be freed by the caller
  */
 static gchar *
 cr_statement_at_page_rule_to_string (CRStatement *a_this,
@@ -901,12 +914,16 @@ cr_statement_import_rule_to_string (CRStatement *a_this,
  ******************/
 
 /**
+ * cr_statement_does_buf_parses_against_core:
+ *
+ *@a_buf: the buffer to parse.
+ *@a_encoding: the character encoding of a_buf.
+ *
  *Tries to parse a buffer and says whether if the content of the buffer
  *is a css statement as defined by the "Core CSS Grammar" (chapter 4 of the
  *css spec) or not.
- *@param a_buf the buffer to parse.
- *@param a_encoding the character encoding of a_buf.
- *@return TRUE if the buffer parses against the core grammar, false otherwise.
+ *
+ *Returns TRUE if the buffer parses against the core grammar, false otherwise.
  */
 gboolean
 cr_statement_does_buf_parses_against_core (const guchar * a_buf,
@@ -939,12 +956,16 @@ cr_statement_does_buf_parses_against_core (const guchar * a_buf,
 }
 
 /**
+ * cr_statement_parse_from_buf:
+ *
+ *@a_buf: the buffer to parse.
+ *@a_encoding: the character encoding of a_buf.
+ *
  *Parses a buffer that contains a css statement and returns 
  *an instance of #CRStatement in case of successfull parsing.
  *TODO: at support of "@import" rules.
- *@param a_buf the buffer to parse.
- *@param a_encoding the character encoding of a_buf.
- *@return the newly built instance of #CRStatement in case
+ *
+ *Returns the newly built instance of #CRStatement in case
  *of successfull parsing, NULL otherwise.
  */
 CRStatement *
@@ -1009,11 +1030,15 @@ cr_statement_parse_from_buf (const guchar * a_buf, enum CREncoding a_encoding)
 }
 
 /**
+ * cr_statement_ruleset_parse_from_buf:
+ *
+ *@a_buf: the buffer to parse.
+ *@a_enc: the character encoding of a_buf.
+ *
  *Parses a buffer that contains a ruleset statement an instanciates
  *a #CRStatement of type RULESET_STMT.
- *@param a_buf the buffer to parse.
- *@param a_enc the character encoding of a_buf.
- *@param the newly built instance of #CRStatement in case of successfull parsing,
+ *
+ *Returns the newly built instance of #CRStatement in case of successfull parsing,
  *NULL otherwise.
  */
 CRStatement *
@@ -1073,15 +1098,19 @@ cr_statement_ruleset_parse_from_buf (const guchar * a_buf,
 }
 
 /**
+ * cr_statement_new_ruleset:
+ *
+ *@a_sel_list: the list of #CRSimpleSel (selectors)
+ *the rule applies to.
+ *@a_decl_list: the list of instances of #CRDeclaration
+ *that composes the ruleset.
+ *@a_media_types: a list of instances of GString that
+ *describe the media list this ruleset applies to.
+ *
  *Creates a new instance of #CRStatement of type
  *#CRRulSet.
- *@param a_sel_list the list of #CRSimpleSel (selectors)
- *the rule applies to.
- *@param a_decl_list the list of instances of #CRDeclaration
- *that composes the ruleset.
- *@param a_media_types a list of instances of GString that
- *describe the media list this ruleset applies to.
- *@return the new instance of #CRStatement or NULL if something
+ *
+ *Returns the new instance of #CRStatement or NULL if something
  *went wrong.
  */
 CRStatement *
@@ -1140,11 +1169,15 @@ cr_statement_new_ruleset (CRStyleSheet * a_sheet,
 }
 
 /**
+ * cr_statement_at_media_rule_parse_from_buf:
+ *
+ *@a_buf: the input to parse.
+ *@a_enc: the encoding of the buffer.
+ *
  *Parses a buffer that contains an "@media" declaration
  *and builds an @media css statement.
- *@param a_buf the input to parse.
- *@param a_enc the encoding of the buffer.
- *@return the @media statement, or NULL if the buffer could not
+ *
+ *Returns the @media statement, or NULL if the buffer could not
  *be successfully parsed.
  */
 CRStatement *
@@ -1213,11 +1246,15 @@ cr_statement_at_media_rule_parse_from_buf (const guchar * a_buf,
 }
 
 /**
+ * cr_statement_new_at_media_rule:
+ *
+ *@a_ruleset: the ruleset statements contained
+ *in the @media rule.
+ *@a_media: the media string list. A list of GString pointers.
+ *
  *Instanciates an instance of #CRStatement of type
  *AT_MEDIA_RULE_STMT (@media ruleset).
- *@param a_ruleset the ruleset statements contained
- *in the @media rule.
- *@param a_media, the media string list. A list of GString pointers.
+ *
  */
 CRStatement *
 cr_statement_new_at_media_rule (CRStyleSheet * a_sheet,
@@ -1269,12 +1306,16 @@ cr_statement_new_at_media_rule (CRStyleSheet * a_sheet,
 }
 
 /**
+ * cr_statement_new_at_import_rule:
+ *
+ *@a_url: the url to connect to the get the file
+ *to be imported.
+ *@a_sheet: the imported parsed stylesheet.
+ *
  *Creates a new instance of #CRStatment of type
  *#CRAtImportRule.
- *@param a_url the url to connect to the get the file
- *to be imported.
- *@param a_sheet the imported parsed stylesheet.
- *@return the newly built instance of #CRStatement.
+ *
+ *Returns the newly built instance of #CRStatement.
  */
 CRStatement *
 cr_statement_new_at_import_rule (CRStyleSheet * a_container_sheet,
@@ -1313,11 +1354,15 @@ cr_statement_new_at_import_rule (CRStyleSheet * a_container_sheet,
 }
 
 /**
+ * cr_statement_at_import_rule_parse_from_buf:
+ *
+ *@a_buf: the buffer to parse.
+ *@a_encoding: the encoding of a_buf.
+ *
  *Parses a buffer that contains an "@import" rule and
  *instanciate a #CRStatement of type AT_IMPORT_RULE_STMT
- *@param a_buf the buffer to parse.
- *@param a_encoding the encoding of a_buf.
- *@return the newly built instance of #CRStatement in case of 
+ *
+ *Returns the newly built instance of #CRStatement in case of 
  *a successfull parsing, NULL otherwise.
  */
 CRStatement *
@@ -1385,13 +1430,17 @@ cr_statement_at_import_rule_parse_from_buf (const guchar * a_buf,
 }
 
 /**
- *Creates a new instance of #CRStatement of type
- *#CRAtPageRule.
- *@param a_decl_list a list of instances of #CRDeclarations
+ * cr_statement_new_at_page_rule:
+ *
+ *@a_decl_list: a list of instances of #CRDeclarations
  *which is actually the list of declarations that applies to
  *this page rule.
- *@param a_selector the page rule selector.
- *@return the newly built instance of #CRStatement or NULL
+ *@a_selector: the page rule selector.
+ *
+ *Creates a new instance of #CRStatement of type
+ *#CRAtPageRule.
+ *
+ *Returns the newly built instance of #CRStatement or NULL
  *in case of error.
  */
 CRStatement *
@@ -1433,11 +1482,15 @@ cr_statement_new_at_page_rule (CRStyleSheet * a_sheet,
 }
 
 /**
+ * cr_statement_at_page_rule_parse_from_buf:
+ *
+ *@a_buf: the character buffer to parse.
+ *@a_encoding: the character encoding of a_buf.
+ *
  *Parses a buffer that contains an "@page" production and,
  *if the parsing succeeds, builds the page statement.
- *@param a_buf the character buffer to parse.
- *@param a_encoding the character encoding of a_buf.
- *@return the newly built at page statement in case of successfull parsing,
+ *
+ *Returns the newly built at page statement in case of successfull parsing,
  *NULL otherwise.
  */
 CRStatement *
@@ -1502,12 +1555,16 @@ cr_statement_at_page_rule_parse_from_buf (const guchar * a_buf,
 }
 
 /**
- *Creates a new instance of #CRStatement of type
- *#CRAtCharsetRule.
- *@param a_charset the string representing the charset.
+ * cr_statement_new_at_charset_rule:
+ *
+ *@a_charset: the string representing the charset.
  *Note that the newly built instance of #CRStatement becomes
  *the owner of a_charset. The caller must not free a_charset !!!.
- *@return the newly built instance of #CRStatement or NULL
+ *
+ *Creates a new instance of #CRStatement of type
+ *#CRAtCharsetRule.
+ *
+ *Returns the newly built instance of #CRStatement or NULL
  *if an error arises.
  */
 CRStatement *
@@ -1543,11 +1600,15 @@ cr_statement_new_at_charset_rule (CRStyleSheet * a_sheet,
 }
 
 /**
+ * cr_statement_at_charset_rule_parse_from_buf:
+ *
+ *@a_buf: the buffer to parse.
+ *@a_encoding: the character encoding of the buffer.
+ *
  *Parses a buffer that contains an '@charset' rule and
  *creates an instance of #CRStatement of type AT_CHARSET_RULE_STMT.
- *@param a_buf the buffer to parse.
- *@param the character encoding of the buffer.
- *@return the newly built instance of #CRStatement.
+ *
+ *Returns the newly built instance of #CRStatement.
  */
 CRStatement *
 cr_statement_at_charset_rule_parse_from_buf (const guchar * a_buf,
@@ -1593,10 +1654,14 @@ cr_statement_at_charset_rule_parse_from_buf (const guchar * a_buf,
 }
 
 /**
- *Creates an instance of #CRStatement of type #CRAtFontFaceRule.
- *@param a_font_decls a list of instances of #CRDeclaration. Each declaration
+ * cr_statemeent_new_at_font_face_rule:
+ *
+ *@a_font_decls: a list of instances of #CRDeclaration. Each declaration
  *is actually a font declaration.
- *@return the newly built instance of #CRStatement.
+ *
+ *Creates an instance of #CRStatement of type #CRAtFontFaceRule.
+ *
+ *Returns the newly built instance of #CRStatement.
  */
 CRStatement *
 cr_statement_new_at_font_face_rule (CRStyleSheet * a_sheet,
@@ -1631,11 +1696,16 @@ cr_statement_new_at_font_face_rule (CRStyleSheet * a_sheet,
 }
 
 /**
+ * cr_statement_font_face_rule_parse_from_buf:
+ *
+ *
+ *@a_buf: the buffer to parse.
+ *@a_encoding: the character encoding of a_buf.
+ *
  *Parses a buffer that contains an "@font-face" rule and builds
  *an instance of #CRStatement of type AT_FONT_FACE_RULE_STMT out of it.
- *@param a_buf the buffer to parse.
- *@param a_encoding the character encoding of a_buf.
- *@return the newly built instance of #CRStatement in case of successufull
+ *
+ *Returns the newly built instance of #CRStatement in case of successufull
  *parsing, NULL otherwise.
  */
 CRStatement *
@@ -1702,10 +1772,14 @@ cr_statement_font_face_rule_parse_from_buf (const guchar * a_buf,
 }
 
 /**
+ * cr_statement_set_parent_sheet:
+ *
+ *@a_this: the current instance of #CRStatement.
+ *@a_sheet: the sheet that contains the current statement.
+ *
  *Sets the container stylesheet.
- *@param a_this the current instance of #CRStatement.
- *@param a_sheet the sheet that contains the current statement.
- *@return CR_OK upon successfull completion, an errror code otherwise.
+ *
+ *Returns CR_OK upon successfull completion, an errror code otherwise.
  */
 enum CRStatus
 cr_statement_set_parent_sheet (CRStatement * a_this, CRStyleSheet * a_sheet)
@@ -1716,10 +1790,14 @@ cr_statement_set_parent_sheet (CRStatement * a_this, CRStyleSheet * a_sheet)
 }
 
 /**
+ * cr_statement_get_parent_sheet:
+ *
+ *@a_this: the current #CRStatement.
+ *@a_sheet: out parameter. A pointer to the sheets that
+ *
  *Gets the sheets that contains the current statement.
- *@param a_this the current #CRStatement.
- *@param a_sheet out parameter. A pointer to the sheets that
- *@return CR_OK upon successfull completion, an error code otherwise.
+ *
+ *Returns CR_OK upon successfull completion, an error code otherwise.
  */
 enum CRStatus
 cr_statement_get_parent_sheet (CRStatement * a_this, CRStyleSheet ** a_sheet)
@@ -1730,10 +1808,14 @@ cr_statement_get_parent_sheet (CRStatement * a_this, CRStyleSheet ** a_sheet)
 }
 
 /**
+ * cr_statement_append:
+ *
+ *@a_this: the current instance of the statement list.
+ *@a_new: a_new the new instance of #CRStatement to append.
+ *
  *Appends a new statement to the statement list.
- *@param a_this the current instance of the statement list.
- *@param a_this a_new the new instance of #CRStatement to append.
- *@return the new list statement list, or NULL in cas of failure.
+ *
+ *Returns the new list statement list, or NULL in cas of failure.
  */
 CRStatement *
 cr_statement_append (CRStatement * a_this, CRStatement * a_new)
@@ -1756,11 +1838,15 @@ cr_statement_append (CRStatement * a_this, CRStatement * a_new)
 }
 
 /**
+ * cr_statement_prepend:
+ *
+ *@a_this: the current instance of #CRStatement.
+ *@a_new: the new statement to prepend.
+ *
  *Prepends the an instance of #CRStatement to
  *the current statement list.
- *@param a_this the current instance of #CRStatement.
- *@param a_new the new statement to prepend.
- *@return the new list with the new statement prepended,
+ *
+ *Returns the new list with the new statement prepended,
  *or NULL in case of an error.
  */
 CRStatement *
@@ -1783,10 +1869,14 @@ cr_statement_prepend (CRStatement * a_this, CRStatement * a_new)
 }
 
 /**
+ * cr_statement_unlink:
+ *
+ *@a_this: the current statements list.
+ *@a_to_unlink: the statement to unlink from the list.
+ *Returns the new list where a_to_unlink has been unlinked
+ *
  *Unlinks a statement from the statements list.
- *@param a_this the current statements list.
- *@param a_to_unlink the statement to unlink from the list.
- *@return the new list where a_to_unlink has been unlinked
+ *
  *from, or NULL in case of error.
  */
 CRStatement *
@@ -1830,9 +1920,13 @@ cr_statement_unlink (CRStatement * a_stmt)
 }
 
 /**
- *Return the number of rules in the statement list;
- *@param a_this the current instance of #CRStatement.
- *@return number of rules in the statement list.
+ * cr_statement_nr_rules:
+ *
+ *@a_this: the current instance of #CRStatement.
+ *
+ *Gets the number of rules in the statement list;
+ *
+ *Returns number of rules in the statement list.
  */
 gint
 cr_statement_nr_rules (CRStatement * a_this)
@@ -1848,10 +1942,14 @@ cr_statement_nr_rules (CRStatement * a_this)
 }
 
 /**
+ * cr_statement_get_from_list:
+ *
+ *@a_this: the current instance of #CRStatement.
+ *@itemnr: the index into the statement list.
+ *
  *Use an index to get a CRStatement from the statement list.
- *@param a_this the current instance of #CRStatement.
- *@param itemnr the index into the statement list.
- *@return CRStatement at position itemnr, if itemnr > number of statements - 1,
+ *
+ *Returns CRStatement at position itemnr, if itemnr > number of statements - 1,
  *it will return NULL.
  */
 CRStatement *
@@ -1869,13 +1967,17 @@ cr_statement_get_from_list (CRStatement * a_this, int itemnr)
 }
 
 /**
- *Sets a selector list to a ruleset statement.
- *@param a_this the current ruleset statement.
- *@param a_sel_list the selector list to set. Note
+ * cr_statement_ruleset_set_sel_list:
+ *
+ *@a_this: the current ruleset statement.
+ *@a_sel_list: the selector list to set. Note
  *that this function increments the ref count of a_sel_list.
  *The sel list will be destroyed at the destruction of the
  *current instance of #CRStatement.
- *@return CR_OK upon successfull completion, an error code otherwise.
+ *
+ *Sets a selector list to a ruleset statement.
+ *
+ *Returns CR_OK upon successfull completion, an error code otherwise.
  */
 enum CRStatus
 cr_statement_ruleset_set_sel_list (CRStatement * a_this,
@@ -1896,12 +1998,16 @@ cr_statement_ruleset_set_sel_list (CRStatement * a_this,
 }
 
 /**
+ * cr_statement_ruleset_get_declarations:
+ *
+ *@a_this: the current instance of #CRStatement.
+ *@a_decl_list: out parameter. A pointer to the the returned
+ *list of declaration. Must not be NULL.
+ *
  *Gets a pointer to the list of declaration contained
  *in the ruleset statement.
- *@param a_this the current instance of #CRStatement.
- *@a_decl_list out parameter. A pointer to the the returned
- *list of declaration. Must not be NULL.
- *@return CR_OK upon successfull completion, an error code if something
+ *
+ *Returns CR_OK upon successfull completion, an error code if something
  *bad happened.
  */
 enum CRStatus
@@ -1919,12 +2025,16 @@ cr_statement_ruleset_get_declarations (CRStatement * a_this,
 }
 
 /**
+ * cr_statement_get_sel_list:
+ *
+ *@a_this: the current ruleset statement.
+ *@a_list: out parameter. The returned selector list,
+ *if and only if the function returned CR_OK.
+ *
  *Gets a pointer to the selector list contained in
  *the current ruleset statement.
- *@param a_this the current ruleset statement.
- *@param a_list out parameter. The returned selector list,
- *if and only if the function returned CR_OK.
- *@return CR_OK upon successfull completion, an error code otherwise.
+ *
+ *Returns CR_OK upon successfull completion, an error code otherwise.
  */
 enum CRStatus
 cr_statement_ruleset_get_sel_list (CRStatement * a_this, CRSelector ** a_list)
@@ -1938,11 +2048,15 @@ cr_statement_ruleset_get_sel_list (CRStatement * a_this, CRSelector ** a_list)
 }
 
 /**
- *Sets a declaration list to the current ruleset statement.
- *@param a_this the current ruleset statement.
- *@param a_list the declaration list to be added to the current
+ * cr_statement_ruleset_sel_decl_list:
+ *
+ *@a_this: the current ruleset statement.
+ *@a_list: the declaration list to be added to the current
  *ruleset statement.
- *@return CR_OK upon successfull completion, an error code otherwise.
+ *
+ *Sets a declaration list to the current ruleset statement.
+ *
+ *Returns CR_OK upon successfull completion, an error code otherwise.
  */
 enum CRStatus
 cr_statement_ruleset_set_decl_list (CRStatement * a_this,
@@ -1964,11 +2078,15 @@ cr_statement_ruleset_set_decl_list (CRStatement * a_this,
 }
 
 /**
+ * cr_statement_ruleset_append_decl2:
+ *
+ *@a_this: the current statement.
+ *@a_prop: the property of the declaration.
+ *@a_value: the value of the declaration.
+ *
  *Appends a declaration to the current ruleset statement.
- *@param a_this the current statement.
- *@param a_prop the property of the declaration.
- *@param a_value the value of the declaration.
- *@return CR_OK uppon successfull completion, an error code
+ *
+ *@Returns CR_OK uppon successfull completion, an error code
  *otherwise.
  */
 enum CRStatus
@@ -1991,10 +2109,13 @@ cr_statement_ruleset_append_decl2 (CRStatement * a_this,
 }
 
 /**
+ * cr_statement_ruleset_append_decl:
+ *
  *Appends a declaration to the current statement.
- *@param a_this the current statement.
- *@param a_declaration the declaration to append.
- *@return CR_OK upon sucessfull completion, an error code
+ *
+ *@a_this: the current statement.
+ *@a_declaration: the declaration to append.
+ *Returns CR_OK upon sucessfull completion, an error code
  *otherwise.
  */
 enum CRStatus
@@ -2015,13 +2136,15 @@ cr_statement_ruleset_append_decl (CRStatement * a_this,
 }
 
 /**
+ * cr_statement_ruleset_append_decl:
+ *
  *Sets a stylesheet to the current @import rule.
- *@param a_this the current @import rule.
- *@param a_sheet the stylesheet. The stylesheet is owned
+ *@a_this: the current @import rule.
+ *@a_sheet: the stylesheet. The stylesheet is owned
  *by the current instance of #CRStatement, that is, the 
  *stylesheet will be destroyed when the current instance
  *of #CRStatement will be destroyed.
- *@return CR_OK upon successfull completion, an error code otherwise.
+ *Returns CR_OK upon successfull completion, an error code otherwise.
  */
 enum CRStatus
 cr_statement_at_import_rule_set_imported_sheet (CRStatement * a_this,
@@ -2038,11 +2161,14 @@ cr_statement_at_import_rule_set_imported_sheet (CRStatement * a_this,
 }
 
 /**
- *Gets the stylesheet contained by the @import rule statement.
- *@param a_this the current @import rule statement.
- *@param a_sheet out parameter. The returned stylesheet if and
+ * cr_statement_at_import_rule_get_importe_sheet:
+ *
+ *@a_this: the current @import rule statement.
+ *@a_sheet: out parameter. The returned stylesheet if and
  *only if the function returns CR_OK.
- *@return CR_OK upon sucessfull completion, an error code otherwise.
+ *
+ *Gets the stylesheet contained by the @import rule statement.
+ *Returns CR_OK upon sucessfull completion, an error code otherwise.
  */
 enum CRStatus
 cr_statement_at_import_rule_get_imported_sheet (CRStatement * a_this,
@@ -2058,10 +2184,14 @@ cr_statement_at_import_rule_get_imported_sheet (CRStatement * a_this,
 }
 
 /**
+ * cr_statement_at_import_rule_set_url:
+ *
+ *@a_this: the current @import rule statement.
+ *@a_url: the url to set.
+ *
  *Sets an url to the current @import rule statement.
- *@param a_this the current @import rule statement.
- *@param a_url the url to set.
- *@return CR_OK upon successfull completion, an error code otherwise.
+ *
+ *Returns CR_OK upon successfull completion, an error code otherwise.
  */
 enum CRStatus
 cr_statement_at_import_rule_set_url (CRStatement * a_this, 
@@ -2082,10 +2212,14 @@ cr_statement_at_import_rule_set_url (CRStatement * a_this,
 }
 
 /**
- *Gets the url of the @import rule statement.
- *@param the current @import rule statement.
- *@param a_url out parameter. The returned url if
+ * cr_statement_at_import_rule_get_url:
+ *
+ *@a_this: the current @import rule statement.
+ *@a_url: out parameter. The returned url if
  *and only if the function returned CR_OK.
+ *
+ *Gets the url of the @import rule statement.
+ *Returns CR_OK upon successful completion, an error code otherwise.
  */
 enum CRStatus
 cr_statement_at_import_rule_get_url (CRStatement * a_this, 
@@ -2102,9 +2236,10 @@ cr_statement_at_import_rule_get_url (CRStatement * a_this,
 }
 
 /**
- *Return the number of rules in the media rule;
- *@param a_this the current instance of #CRStatement.
- *@return number of rules in the media rule.
+ * cr_statement_at_media_nr_rules:
+ *
+ *@a_this: the current instance of #CRStatement.
+ *Returns the number of rules in the media rule;
  */
 int
 cr_statement_at_media_nr_rules (CRStatement * a_this)
@@ -2117,10 +2252,14 @@ cr_statement_at_media_nr_rules (CRStatement * a_this)
 }
 
 /**
+ * cr_statement_at_media_get_from_list:
+ *
+ *@a_this: the current instance of #CRStatement.
+ *@itemnr: the index into the media rule list of rules.
+ *
  *Use an index to get a CRStatement from the media rule list of rules.
- *@param a_this the current instance of #CRStatement.
- *@param itemnr the index into the media rule list of rules.
- *@return CRStatement at position itemnr, if itemnr > number of rules - 1,
+ *
+ *Returns CRStatement at position itemnr, if itemnr > number of rules - 1,
  *it will return NULL.
  */
 CRStatement *
@@ -2135,11 +2274,15 @@ cr_statement_at_media_get_from_list (CRStatement * a_this, int itemnr)
 }
 
 /**
- *Sets a declaration list to the current @page rule statement.
- *@param a_this the current @page rule statement.
- *@param a_decl_list the declaration list to add. Will be freed
+ * cr_statement_at_page_rule_get_declarations:
+ *
+ *@a_this: the current @page rule statement.
+ *@a_decl_list: the declaration list to add. Will be freed
  *by the current instance of #CRStatement when it is destroyed.
- *@return CR_OK upon successfull completion, an error code otherwise.
+ *
+ *Sets a declaration list to the current @page rule statement.
+ *
+ *Returns CR_OK upon successfull completion, an error code otherwise.
  */
 enum CRStatus
 cr_statement_at_page_rule_set_declarations (CRStatement * a_this,
@@ -2163,11 +2306,15 @@ cr_statement_at_page_rule_set_declarations (CRStatement * a_this,
 }
 
 /**
+ * cr_statemenet_at_page_rule_get_declarations:
+ *
+ *@a_this: the current  @page rule statement.
+ *@a_decl_list: out parameter. The returned declaration list.
+ *
  *Gets the declaration list associated to the current @page rule
  *statement.
- *@param a_this the current  @page rule statement.
- *@param a_decl_list out parameter. The returned declaration list.
- *@return CR_OK upon successfull completion, an error code otherwise.
+ *
+ *Returns CR_OK upon successfull completion, an error code otherwise.
  */
 enum CRStatus
 cr_statement_at_page_rule_get_declarations (CRStatement * a_this,
@@ -2183,10 +2330,15 @@ cr_statement_at_page_rule_get_declarations (CRStatement * a_this,
 }
 
 /**
+ * cr_statement_at_charset_rule_set_charset:
+ *
+ *
+ *@a_this: the current @charset rule statement.
+ *@a_charset: the charset to set.
+ *
  *Sets the charset of the current @charset rule statement.
- *@param a_this the current @charset rule statement.
- *@param a_charset the charset to set.
- *@return CR_OK upon successfull completion, an error code otherwise.
+ *
+ *Returns CR_OK upon successfull completion, an error code otherwise.
  */
 enum CRStatus
 cr_statement_at_charset_rule_set_charset (CRStatement * a_this,
@@ -2205,11 +2357,15 @@ cr_statement_at_charset_rule_set_charset (CRStatement * a_this,
 }
 
 /**
+ * cr_statement_at_charset_rule_get_charset:
+ *@a_this: the current @charset rule statement.
+ *@a_charset: out parameter. The returned charset string if
+ *and only if the function returned CR_OK.
+ *
  *Gets the charset string associated to the current
  *@charset rule statement.
- *@param a_this the current @charset rule statement.
- *@param a_charset out parameter. The returned charset string if
- *and only if the function returned CR_OK.
+ *
+ * Returns CR_OK upon successful completion, an error code otherwise.
  */
 enum CRStatus
 cr_statement_at_charset_rule_get_charset (CRStatement * a_this,
@@ -2226,10 +2382,14 @@ cr_statement_at_charset_rule_get_charset (CRStatement * a_this,
 }
 
 /**
+ * cr_statement_at_font_face_rule_set_decls:
+ *
+ *@a_this: the current @font-face rule statement.
+ *@a_decls: the declarations list to set.
+ *
  *Sets a declaration list to the current @font-face rule statement.
- *@param a_this the current @font-face rule statement.
- *@param a_decls the declarations list to set.
- *@return CR_OK upon successfull completion, an error code otherwise.
+ *
+ *Returns CR_OK upon successfull completion, an error code otherwise.
  */
 enum CRStatus
 cr_statement_at_font_face_rule_set_decls (CRStatement * a_this,
@@ -2251,12 +2411,16 @@ cr_statement_at_font_face_rule_set_decls (CRStatement * a_this,
 }
 
 /**
+ * cr_statement_at_fot_face_rule_set_decls:
+ *
+ *@a_this: the current @font-face rule statement.
+ *@a_decls: out parameter. The returned declaration list if
+ *and only if this function returns CR_OK.
+ *
  *Gets the declaration list associated to the current instance
  *of @font-face rule statement.
- *@param a_this the current @font-face rule statement.
- *@param a_decls out parameter. The returned declaration list if
- *and only if this function returns CR_OK.
- *@return CR_OK upon successfull completion, an error code otherwise.
+ *
+ *Returns CR_OK upon successfull completion, an error code otherwise.
  */
 enum CRStatus
 cr_statement_at_font_face_rule_get_decls (CRStatement * a_this,
@@ -2273,12 +2437,16 @@ cr_statement_at_font_face_rule_get_decls (CRStatement * a_this,
 }
 
 /**
+ * cr_statement_at_font_face_rule_add_decl:
+ *
+ *@a_this: the current @font-face rule statement.
+ *@a_prop: the property of the declaration.
+ *@a_value: the value of the declaration.
+ *
  *Adds a declaration to the current @font-face rule
  *statement.
- *@param a_this the current @font-face rule statement.
- *@param a_prop the property of the declaration.
- *@param a_value the value of the declaration.
- *@return CR_OK upon successfull completion, an error code otherwise.
+ *
+ *Returns CR_OK upon successfull completion, an error code otherwise.
  */
 enum CRStatus
 cr_statement_at_font_face_rule_add_decl (CRStatement * a_this,
@@ -2305,11 +2473,16 @@ cr_statement_at_font_face_rule_add_decl (CRStatement * a_this,
         return CR_OK;
 }
 
+
 /**
+ * cr_statement_to_string:
+ *
+ *@a_this: the current statement to serialize
+ *@a_indent: the number of white space of indentation.
+ *
  *Serializes a css statement into a string
- *@param a_this the current statement to serialize
- *@param a_indent the number of white space of indentation.
- *@return the serialized statement. Must be freed by the caller
+ *
+ *Returns the serialized statement. Must be freed by the caller
  *using g_free().
  */
 gchar *
@@ -2392,10 +2565,13 @@ cr_statement_list_to_string (CRStatement *a_this, gulong a_indent)
 }
 
 /**
+ * cr_statement_dump:
+ *
+ *@a_this: the current css2 statement.
+ *@a_fp: the destination file pointer.
+ *@a_indent: the number of white space indentation characters.
+ *
  *Dumps the css2 statement to a file.
- *@param a_this the current css2 statement.
- *@param a_fp the destination file pointer.
- *@param a_indent the number of white space indentation characters.
  */
 void
 cr_statement_dump (CRStatement * a_this, FILE * a_fp, gulong a_indent)
@@ -2414,10 +2590,13 @@ cr_statement_dump (CRStatement * a_this, FILE * a_fp, gulong a_indent)
 }
 
 /**
+ * cr_statement_dump_ruleset:
+ *
+ *@a_this: the current instance of #CRStatement.
+ *@a_fp: the destination file pointer.
+ *@a_indent: the number of indentation white spaces to add.
+ *
  *Dumps a ruleset statement to a file.
- *@param a_this the current instance of #CRStatement.
- *@param a_fp the destination file pointer.
- *@param a_indent the number of indentation white spaces to add.
  */
 void
 cr_statement_dump_ruleset (CRStatement * a_this, FILE * a_fp, glong a_indent)
@@ -2434,10 +2613,13 @@ cr_statement_dump_ruleset (CRStatement * a_this, FILE * a_fp, glong a_indent)
 }
 
 /**
+ * cr_statement_dump_font_face_rule:
+ *
+ *@a_this: the current instance of font face rule statement.
+ *@a_fp: the destination file pointer.
+ *@a_indent: the number of white space indentation.
+ *
  *Dumps a font face rule statement to a file.
- *@param a_this the current instance of font face rule statement.
- *@param a_fp the destination file pointer.
- *@param a_indent the number of white space indentation.
  */
 void
 cr_statement_dump_font_face_rule (CRStatement * a_this, FILE * a_fp,
@@ -2457,10 +2639,13 @@ cr_statement_dump_font_face_rule (CRStatement * a_this, FILE * a_fp,
 }
 
 /**
+ * cr_statement_dump_charset:
+ *
+ *@a_this: the current instance of the @charset rule statement.
+ *@a_fp: the destination file pointer.
+ *@a_indent: the number of indentation white spaces.
+ *
  *Dumps an @charset rule statement to a file.
- *@param a_this the current instance of the @charset rule statement.
- *@param a_fp the destination file pointer.
- *@param a_indent the number of indentation white spaces.
  */
 void
 cr_statement_dump_charset (CRStatement * a_this, FILE * a_fp, gulong a_indent)
@@ -2480,10 +2665,13 @@ cr_statement_dump_charset (CRStatement * a_this, FILE * a_fp, gulong a_indent)
 
 
 /**
+ * cr_statement_dump_page:
+ *
+ *@a_this: the statement to dump on stdout.
+ *@a_fp: the destination file pointer.
+ *@a_indent: the number of indentation white spaces.
+ *
  *Dumps an @page rule statement on stdout.
- *@param a_this the statement to dump on stdout.
- *@param a_fp the destination file pointer.
- *@param a_indent the number of indentation white spaces.
  */
 void
 cr_statement_dump_page (CRStatement * a_this, FILE * a_fp, gulong a_indent)
@@ -2504,10 +2692,13 @@ cr_statement_dump_page (CRStatement * a_this, FILE * a_fp, gulong a_indent)
 
 
 /**
+ * cr_statement_dump_media_rule:
+ *
+ *@a_this: the statement to dump.
+ *@a_fp: the destination file pointer
+ *@a_indent: the number of white spaces indentation.
+ *
  *Dumps an @media rule statement to a file.
- *@param a_this the statement to dump.
- *@param a_fp the destination file pointer
- *@param a_indent the number of white spaces indentation.
  */
 void
 cr_statement_dump_media_rule (CRStatement * a_this, 
@@ -2526,9 +2717,12 @@ cr_statement_dump_media_rule (CRStatement * a_this,
 }
 
 /**
+ * cr_statement_dump_import_rule:
+ *
+ *@a_fp: the destination file pointer.
+ *@a_indent: the number of white space indentations.
+ *
  *Dumps an @import rule statement to a file.
- *@param a_fp the destination file pointer.
- *@param a_indent the number of white space indentations.
  */
 void
 cr_statement_dump_import_rule (CRStatement * a_this, FILE * a_fp,
@@ -2549,6 +2743,9 @@ cr_statement_dump_import_rule (CRStatement * a_this, FILE * a_fp,
 }
 
 /**
+ * cr_statement_destroy:
+ *
+ * @a_this: the current instance of #CRStatement.
  *Destructor of #CRStatement.
  */
 void

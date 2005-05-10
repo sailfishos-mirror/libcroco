@@ -1,3 +1,66 @@
+Thu May  5 19:15:27 CEST 2005 Dodji Seketeli <dodji@gnome.org>
+
+	* src/cr-string.h, cr-parser.c: applied a patch from Peter Moulder
+	to fix a typo in cr-parser.c and add G_BEGIN_DECLS/G_END_DECLS to
+	cr-string.h
+
+Thu May  5 18:47:10 CEST 2005 Dodji Seketeli <dodji@gnome.org>
+
+	* docs/reference/tmpl/*.sgml: added these to the archive.
+	* docs/reference/libcroco-docs.sgml: added this to the archive.
+
+Thu may  5 18:35:04 CEST 2005 Dodji Seketeli <dodji@gnome.org> 
+
+	* src/*.[ch]: made wak loads of comments change to comply with 
+	gtk-doc. Big thanks to Sven Herzberg for the initial work on this
+	topic.
+
+2005-04-01  Sven Herzberg  <herzi@gnome-de.org>
+
+	* autogen.sh: require automake 1.7
+	* configure.in: added a check for gtk-doc, build
+	docs/reference/Makefile
+	* docs/Makefile.am: added the reference subdir
+	* src/cr-additional-sel.c: migrated the comments to gtk-doc style (sed
+	rocks)
+	* src/cr-additional-sel.h: moved the class description into the .c
+	file 
+
+Sun feb 13 14:10:35 CET 2005 Dodji Seketeli <dodji@gnome.org>
+
+	* src/cr-simple-sel.h, src/cr-statement.h: added better documentation.
+	[Peter Moulder]
+	
+	* tests/Makefile.am: add the $top_builddir/src to the include search patch.
+	This is is necessary to support building in a directory different from
+	the source directory
+	*  tests/test-*.sh:  adapt these files so that 'make test' works even
+	when building in a directory different from the source dir
+	* tests/testctl: adapt this script to progapate the changes necessary
+	to make the 'test' target work in a directory different from the
+	source directory
+	This entry has been added thanks to the initial 
+	work of Peter Moulder. I have
+	modified it a bit so that building and testing 
+	from a directory different from the source dir actually works.
+
+	* Makefile.am: make sure the 'all' target is a prerequisite of the
+	'test' target. This is a patch from [Peter Moulder]
+
+Thu feb 10 22:34:57 CET 2005 Dodji Seketeli <dodji@gnome.org>
+
+	* Makefile.am,test/testctl: applied a patchlet from Peter Moulder
+	to clean the test outputs when issuing 'make clean'.
+	* autogen.sh: force the thingy to use automake 1.7.2. better
+	late than never.
+
+Mon Sep 20 18:10:50 CEST 2004 Dodji Seketeli <dodji@gnome.org>
+
+	* src/cr-om-parser.c:
+	(cr_om_parser_parse_paths_into_cascade)	:
+	Fixed a nasty memory management bug reported by ArjanV and Daniel
+	Veillard.
+
 2004-06-09  Dodji Seketeli  <dodji@gnome.org>
 
 ===================== 0.6.0 release ==================================	

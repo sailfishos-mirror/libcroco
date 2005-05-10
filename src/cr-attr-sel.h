@@ -58,7 +58,7 @@ struct _CRAttrSel
 CRAttrSel * cr_attr_sel_new (void) ;
 
 enum CRStatus cr_attr_sel_append_attr_sel (CRAttrSel * a_this, 
-                                           CRAttrSel *a_new) ;
+                                           CRAttrSel *a_attr_sel) ;
 
 enum CRStatus cr_attr_sel_prepend_attr_sel (CRAttrSel *a_this, 
                                             CRAttrSel *a_attr_sel) ;

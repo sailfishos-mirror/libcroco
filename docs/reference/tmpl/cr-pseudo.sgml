@@ -1,0 +1,59 @@
+<!-- ##### SECTION Title ##### -->
+cr-pseudo
+
+<!-- ##### SECTION Short_Description ##### -->
+
+
+<!-- ##### SECTION Long_Description ##### -->
+<para>
+
+</para>
+
+<!-- ##### SECTION See_Also ##### -->
+<para>
+
+</para>
+
+<!-- ##### STRUCT CRPseudo ##### -->
+<para>
+
+</para>
+
+@name: 
+@extra: 
+@location: 
+
+<!-- ##### FUNCTION cr_pseudo_new ##### -->
+<para>
+
+</para>
+
+@Returns: 
+
+
+<!-- ##### FUNCTION cr_pseudo_to_string ##### -->
+<para>
+
+</para>
+
+@a_this: 
+@Returns: 
+
+
+<!-- ##### FUNCTION cr_pseudo_dump ##### -->
+<para>
+
+</para>
+
+@a_this: 
+@a_fp: 
+
+
+<!-- ##### FUNCTION cr_pseudo_destroy ##### -->
+<para>
+
+</para>
+
+@a_this: 
+
+
