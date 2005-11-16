@@ -1,3 +1,17 @@
+2005-11-16  Tor Lillqvist  <tml@novell.com>
+
+	* libcroco-zip.in: New file. libcroco-zip is used to build a
+	libcroco distribution for Win32.
+
+	* Makefile.am: Distribute libcroco-zip.in
+
+	* configure.in: AC_SUBST also LIBCROCO_CURRENT and LIBCROCO_AGE as
+	libcroco-zip needs them to construct the DLL name. Check for
+	Win32, set OS_WIN32 Automake conditional. Expand libcroco-zip.
+
+	* src/Makefile.am: Use -no-undefined on Win32. Link libcroco with
+	GLIB2_LIBS and LIBXML2_LIBS.
+
 Thu May  5 19:15:27 CEST 2005 Dodji Seketeli <dodji@gnome.org>
 
 	* src/cr-string.h, cr-parser.c: applied a patch from Peter Moulder

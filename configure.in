@@ -28,6 +28,8 @@ AC_SUBST(LIBCROCO_MICRO_VERSION)
 AC_SUBST(LIBCROCO_VERSION)
 AC_SUBST(LIBCROCO_VERSION_INFO)
 AC_SUBST(LIBCROCO_VERSION_NUMBER)
+AC_SUBST(LIBCROCO_CURRENT)
+AC_SUBST(LIBCROCO_AGE)
 AC_SUBST(VERSION)
 
 dnl
@@ -54,6 +56,16 @@ AC_STDC_HEADERS
 AC_ISC_POSIX
 
 AM_PROG_LIBTOOL
+
+case "$host" in
+  *-*-mingw*)
+    os_win32=yes
+    ;;
+  *)
+    os_win32=no
+    ;;
+esac
+AM_CONDITIONAL(OS_WIN32, [test "$os_win32" = "yes"])
 
 GTK_DOC_CHECK([1.0])
 
@@ -149,6 +161,7 @@ AC_OUTPUT([
 Makefile
 libcroco.pc
 libcroco.spec
+libcroco-zip
 croco-config
 docs/Makefile
 docs/examples/Makefile

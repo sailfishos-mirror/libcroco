@@ -1,3 +1,7 @@
+if OS_WIN32
+no_undefined = -no-undefined
+endif
+
 #Headers files to be distributed
 INSTALL_DIR_NAME=@PACKAGE@-@LIBCROCO_MAJOR_VERSION@.@LIBCROCO_MINOR_VERSION@
 crocoincdir=$(includedir)/$(INSTALL_DIR_NAME)/libcroco
@@ -92,4 +96,5 @@ libcroco_0_6_la_SOURCES= $(SRCS)
 INCLUDES=-I$(top_srcdir) -I$(top_srcdir)/intl \
 -I $(top_builddir)/src @GLIB2_CFLAGS@ @LIBXML2_CFLAGS@
 libcroco_0_6_la_LDFLAGS=-version-info @LIBCROCO_VERSION_INFO@ \
-@GLIB2_CFLAGS@
+@GLIB2_CFLAGS@ $(no_undefined)
+libcroco_0_6_la_LIBADD=@GLIB2_LIBS@ @LIBXML2_LIBS@
