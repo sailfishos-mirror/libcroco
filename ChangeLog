@@ -2,6 +2,7 @@
 
 	* src/cr-tknzr.c: Parse fractional parts of numbers properly (bug 333057)
 	* src/cr-utils.[ch]: Ditto
+	* configure.in: bump version to so that librsvg can depend on its fixes
 	
 2005-11-16  Tor Lillqvist  <tml@novell.com>
 
