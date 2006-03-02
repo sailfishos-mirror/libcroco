@@ -1489,7 +1489,8 @@ cr_tknzr_parse_num (CRTknzr * a_this,
         guint32 cur_char = 0,
                 int_part = 0,
                 dec_part = 0,
-                next_char = 0;
+                next_char = 0,
+                decimal_places = 0;
         CRInputPos init_pos;
         CRParsingLocation location = {0} ;
 
@@ -1534,6 +1535,7 @@ cr_tknzr_parse_num (CRTknzr * a_this,
                         if (parsing_dec == FALSE) {
                                 int_part = int_part * 10 + (cur_char - '0');
                         } else {
+                                decimal_places++;
                                 dec_part = dec_part * 10 + (cur_char - '0');
                         }
                 } else {
@@ -1552,7 +1554,7 @@ cr_tknzr_parse_num (CRTknzr * a_this,
                 gdouble val = 0.0;
 
                 val = int_part;
-                val += cr_utils_n_to_0_dot_n (dec_part);
+                val += cr_utils_n_to_0_dot_n (dec_part, decimal_places);
                 if (*a_num == NULL) {
                         *a_num = cr_num_new_with_val (val, val_type);
 

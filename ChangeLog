@@ -1,3 +1,8 @@
+2006-03-01  Dom Lachowicz <cinamod@hotmail.com>
+
+	* src/cr-tknzr.c: Parse fractional parts of numbers properly (bug 333057)
+	* src/cr-utils.[ch]: Ditto
+	
 2005-11-16  Tor Lillqvist  <tml@novell.com>
 
 	* libcroco-zip.in: New file. libcroco-zip is used to build a
