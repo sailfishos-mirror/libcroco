@@ -1,3 +1,14 @@
+0.6.1:  March 5, 2006
+
+    Bugfixes since 0.6.0
+    ====================
+
+    - parse fractional parts of numbers properly [Dom Lachowicz]
+    - win32 port [Tor Lillqvist]
+    - gtk-doc compliance [Sven Herzberg]
+    - test infrastructure enhancements [Peter Moulder]
+    - nasty memory management bug fix [ArjanV, Daniel Veillard]
+
 0.6.0: June 9, 2004
 
      Enhancements since 0.5.1

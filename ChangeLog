@@ -1,3 +1,13 @@
+============= 0.6.1 release =======================
+
+dim mar  5 23:32:14 CET 2006 Dodji Seketeli
+
+	* configure.in,docs/Makefile.am: 
+	  unwire gtk-doc temporarily. Couldn't make it
+	  distcheck otherwise.
+	* tests/Makefile.am: add global-vars.sh.in to EXTRA_DIST files.
+	* confifure.in: increase library REVISION number, for 0.6.1 release.
+
 2006-03-01  Dom Lachowicz <cinamod@hotmail.com>
 
 	* src/cr-tknzr.c: Parse fractional parts of numbers properly (bug 333057)

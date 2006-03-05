@@ -36,6 +36,8 @@ $(CROCO_CONFIG_FILE_UNINSTALLED) $(CROCO_CONFIG_FILE)
 	cp $< $@
 
 clean-local: cleantest
+distclean-local:
+	-rm ./croco-0.6-config ./libcroco-0.6.pc ./libcroco-0.6-uninstalled.pc ./croco-0.6-config-uninstalled
 
 cleantest:
 	if test -x $(top_srcdir)/tests/testctl ; then $(top_srcdir)/tests/testctl cleanup ; fi

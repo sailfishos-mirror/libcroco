@@ -13,7 +13,7 @@ LIBCROCO_MINOR_VERSION=6
 LIBCROCO_MICRO_VERSION=1
 
 LIBCROCO_CURRENT=3
-LIBCROCO_REVISION=0
+LIBCROCO_REVISION=1
 LIBCROCO_AGE=0
 
 #LIBCROCO_VERSION_INFO=`expr $LIBCROCO_MAJOR_VERSION + $LIBCROCO_MINOR_VERSION`:$LIBCROCO_MICRO_VERSION:$LIBCROCO_MINOR_VERSION
@@ -165,7 +165,6 @@ libcroco-zip
 croco-config
 docs/Makefile
 docs/examples/Makefile
-docs/reference/Makefile
 tests/Makefile
 tests/test-inputs/Makefile
 tests/test-output-refs/Makefile
