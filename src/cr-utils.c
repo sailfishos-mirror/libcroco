@@ -1292,19 +1292,6 @@ cr_utils_dump_n_chars2 (guchar a_char, GString * a_string, glong a_nb)
         }
 }
 
-gdouble
-cr_utils_n_to_0_dot_n (glong a_n, glong decimal_places)
-{
-        gdouble result = a_n;
-
-        while (decimal_places > 0) {
-                result = result / 10;
-                decimal_places--;
-        }
-
-        return result;
-}
-
 /**
  *Duplicates a list of GString instances.
  *@return the duplicated list of GString instances or NULL if

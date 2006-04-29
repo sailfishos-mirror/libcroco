@@ -1,4 +1,10 @@
-============= 0.6.1 release =======================
+2006-04-29  Dom Lachowicz <cinamod@hotmail.com>
+
+	* src/cr-tknzr.c: Revert my previous change and instead use Inkscape's
+	patch in bug #306823, as it improves precision
+	* src/cr-utils.[ch]: Ditto
+
+	============= 0.6.1 release =======================
 
 dim mar  5 23:32:14 CET 2006 Dodji Seketeli
 
