@@ -1,3 +1,7 @@
+2006-05-02  Dom Lachowicz <cinamod@hotmail.com>
+
+	* src/Makefile.am: Fix linking by adding proper dependencies (bug 148790)
+	
 2006-04-29  Dom Lachowicz <cinamod@hotmail.com>
 
 	* src/cr-tknzr.c: Revert my previous change and instead use Inkscape's
