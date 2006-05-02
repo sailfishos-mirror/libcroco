@@ -1,6 +1,8 @@
 2006-05-02  Dom Lachowicz <cinamod@hotmail.com>
 
 	* src/Makefile.am: Fix linking by adding proper dependencies (bug 148790)
+	Cygwin build fixes
+	* configure.in: Detect Cygwin in addition to Mingw (bug 333834)
 	
 2006-04-29  Dom Lachowicz <cinamod@hotmail.com>
 
