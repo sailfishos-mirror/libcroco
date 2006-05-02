@@ -144,7 +144,7 @@ cr_relative_font_size_to_string (enum CRRelativeFontSize a_code)
 /**
  * cr_font_family_new:
  * @a_type: the type of font family to create.
- * @a_name: the name of the font family:
+ * @a_name: the name of the font family.
  *
  * create a font family.
  *
@@ -701,7 +701,7 @@ cr_font_size_adjust_to_string (CRFontSizeAdjust * a_this)
 
 /**
  * cr_font_style_to_string:
- * @a_code the current instance of #CRFontStyle
+ * @a_code: the current instance of #CRFontStyle .
  *
  * Returns the serialized #CRFontStyle. The caller must free the returned
  * string using g_free().

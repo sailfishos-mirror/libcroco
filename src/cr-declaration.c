@@ -593,7 +593,7 @@ cr_declaration_list_to_string (CRDeclaration * a_this, gulong a_indent)
  * cr_declaration_list_to_string2:
  *@a_this: the current instance of #CRDeclaration.
  *@a_indent: the number of indentation white char
- @a_one_decl_per_line: whether to output one doc per line or not.
+ *@a_one_decl_per_line: whether to output one doc per line or not.
  *to put before the actual serialisation.
  *
  *Serializes the declaration list into a string
@@ -731,14 +731,13 @@ cr_declaration_ref (CRDeclaration * a_this)
 
 /**
  * cr_declaration_unref:
- *@param a_this the current instance of #CRDeclaration.
- *@return TRUE if the current instance of #CRDeclaration has been destroyed
- *(ref count reached zero), FALSE otherwise.
+ *@a_this: the current instance of #CRDeclaration.
  *
  *Decrements the ref count of the current instance of #CRDeclaration.
  *If the ref count reaches zero, the current instance of #CRDeclaration
  *if destroyed.
- *Returns TRUE if the object got destroyed, FALSE otherwise.
+ *Returns TRUE if @a_this was destroyed (ref count reached zero),
+ *FALSE otherwise.
  */
 gboolean
 cr_declaration_unref (CRDeclaration * a_this)

@@ -1,3 +1,7 @@
+2006-05-02  Peter Moulder <pmoulder at mail.csse.monash.edu.au>
+	
+	* src/*.[ch]: Bug 340298 - Fixes to documentation markup.
+
 2006-05-02  Dom Lachowicz <cinamod@hotmail.com>
 
 	* src/Makefile.am: Fix linking by adding proper dependencies (bug 148790)

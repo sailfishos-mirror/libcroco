@@ -47,6 +47,7 @@ cr_pseudo_new (void)
 /**
  * cr_pseudo_to_string:
  * @a_this: the current instance of #CRPseud.
+ *
  * Returns the serialized pseudo. Caller must free the returned
  * string using g_free().
  */

@@ -260,6 +260,7 @@ cr_doc_handler_destroy (CRDocHandler * a_this)
 /**
  * cr_doc_handler_associate_a_parser:
  *Associates a parser to the current document handler
+ *
  *@a_this: the current instance of document handler.
  *@a_parser: the parser to associate.
  */

@@ -3532,7 +3532,7 @@ cr_parser_parse_ruleset (CRParser * a_this)
  *in appendix D.1:
  *
  *import ::=
- *@import [STRING|URI] S* [ medium [ ',' S* medium]* ]? ';' S*
+ *\@import [STRING|URI] S* [ medium [ ',' S* medium]* ]? ';' S*
  *
  *Returns CR_OK upon sucessfull completion, an error code otherwise.
  */
@@ -3689,11 +3689,11 @@ cr_parser_parse_import (CRParser * a_this,
  *Parses a 'media' declaration as specified in the css2 spec at
  *appendix D.1:
  *
- *media ::= @media S* medium [ ',' S* medium ]* '{' S* ruleset* '}' S*
+ *media ::= \@media S* medium [ ',' S* medium ]* '{' S* ruleset* '}' S*
  *
  *Note that this function calls the required sac handlers during the parsing
  *to notify media productions. See #CRDocHandler to know the callback called
- *during @media parsing.
+ *during \@media parsing.
  *
  *Returns CR_OK upon successfull completion, an error code otherwise.
  */
@@ -3857,7 +3857,7 @@ cr_parser_parse_media (CRParser * a_this)
  * cr_parser_parse_page:
  *@a_this: the "this pointer" of the current instance of #CRParser.
  *
- *Parses '@page' rule as specified in the css2 spec in appendix D.1:
+ *Parses '\@page' rule as specified in the css2 spec in appendix D.1:
  *page ::= PAGE_SYM S* IDENT? pseudo_page? S* 
  *'{' S* declaration [ ';' S* declaration ]* '}' S*
  *
@@ -4199,7 +4199,7 @@ cr_parser_parse_charset (CRParser * a_this, CRString ** a_value,
  * cr_parser_parse_font_face:
  *@a_this: the current instance of #CRParser.
  *
- *Parses the "@font-face" rule specified in the css1 spec in
+ *Parses the "\@font-face" rule specified in the css1 spec in
  *appendix D.1:
  *
  *font_face ::= FONT_FACE_SYM S* 

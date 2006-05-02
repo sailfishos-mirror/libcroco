@@ -54,6 +54,7 @@ cr_simple_sel_new (void)
  *
  *@a_this: the this pointer of the current instance of #CRSimpleSel.
  *@a_sel: the simple selector to append.
+ *
  *Returns: the new list upon successfull completion, an error code otherwise.
  */
 CRSimpleSel *

@@ -84,7 +84,7 @@ struct _CRStyleSheet ;
 typedef struct _CRStyleSheet CRStyleSheet;
 
 
-/**The @import rule abstraction.*/
+/**The \@import rule abstraction.*/
 typedef struct _CRAtImportRule CRAtImportRule ;
 struct _CRAtImportRule
 {
@@ -102,7 +102,7 @@ struct _CRAtImportRule
 };
 
 
-/**abstraction of an @media rule*/
+/**abstraction of an \@media rule*/
 struct _CRAtMediaRule
 {
 	GList *media_list ;
@@ -111,7 +111,7 @@ struct _CRAtMediaRule
 
 
 typedef struct _CRAtPageRule CRAtPageRule ;
-/**The @page rule abstraction*/
+/**The \@page rule abstraction*/
 struct _CRAtPageRule
 {
 	/**a list of instances of #CRDeclaration*/
@@ -122,14 +122,14 @@ struct _CRAtPageRule
 	CRString *pseudo ;
 } ;
 
-/**The @charset rule abstraction*/
+/**The \@charset rule abstraction*/
 typedef struct _CRAtCharsetRule CRAtCharsetRule ;
 struct _CRAtCharsetRule
 {
 	CRString * charset ;
 };
 
-/**The abstaction of the @font-face rule.*/
+/**The abstaction of the \@font-face rule.*/
 typedef struct _CRAtFontFaceRule CRAtFontFaceRule ;
 struct _CRAtFontFaceRule
 {
