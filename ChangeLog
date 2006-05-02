@@ -3,6 +3,7 @@
 	* src/Makefile.am: Fix linking by adding proper dependencies (bug 148790)
 	Cygwin build fixes
 	* configure.in: Detect Cygwin in addition to Mingw (bug 333834)
+	* csslint/csslint.c: Fix 3 "dereferencing type-punned pointer will break strict-aliasing rules" warnings
 	
 2006-04-29  Dom Lachowicz <cinamod@hotmail.com>
 

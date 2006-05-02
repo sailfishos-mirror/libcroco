@@ -431,7 +431,7 @@ end_document (CRDocHandler * a_this)
 
         g_return_if_fail (a_this);
 
-        cr_doc_handler_get_ctxt (a_this, (gpointer *) & context);
+        cr_doc_handler_get_ctxt (a_this, (gpointer *) (gpointer) & context);
         if (context) {
                 g_free (context);
                 context = NULL;
@@ -795,7 +795,7 @@ start_selector (CRDocHandler * a_this, CRSelector * a_selector_list)
 
         g_return_if_fail (a_this);
 
-        cr_doc_handler_get_ctxt (a_this, (gpointer *) & context);
+        cr_doc_handler_get_ctxt (a_this, (gpointer *) (gpointer) & context);
         if (context) {
                 context->level++;
         }
@@ -826,7 +826,7 @@ end_selector (CRDocHandler * a_this,
 
         g_return_if_fail (a_this);
 
-        cr_doc_handler_get_ctxt (a_this, (gpointer *) & context);
+        cr_doc_handler_get_ctxt (a_this, (gpointer *) (gpointer) & context);
         if (context) {
                 context->level--;
         }
