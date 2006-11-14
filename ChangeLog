@@ -1,3 +1,7 @@
+2006-11-14  Dom Lachowicz <domlachowicz@gmail.com>
+
+	* src/cr-rgb.c: Bug 375194 - fix to builtin color processing
+	
 2006-05-02  Peter Moulder <pmoulder at mail.csse.monash.edu.au>
 	
 	* src/*.[ch]: Bug 340298 - Fixes to documentation markup.
