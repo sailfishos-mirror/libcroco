@@ -1,3 +1,8 @@
+2006-11-29  Dom Lachowicz <domlachowicz@gmail.com>
+
+	* src/cr-token.c: Bug 380438 - Leak and trace message in cr_token_clear.
+	Fix suggested by Mark Rogers <mark.rogers at electrum.co.uk>
+	
 2006-11-14  Dom Lachowicz <domlachowicz@gmail.com>
 
 	* src/cr-rgb.c: Bug 375194 - fix to builtin color processing
