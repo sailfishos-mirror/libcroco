@@ -107,7 +107,9 @@ cr_num_to_string (CRNum * a_this)
         if (!test_val) {
                 tmp_char1 = g_strdup_printf ("%ld", (glong) a_this->val);
         } else {
-                tmp_char1 = g_strdup_printf ("%.3f", a_this->val);
+                tmp_char1 = g_new0 (char, G_ASCII_DTOSTR_BUF_SIZE + 1);
+                if (tmp_char1 != NULL)
+                        g_ascii_dtostr (tmp_char1, G_ASCII_DTOSTR_BUF_SIZE, a_this->val);
         }
 
         g_return_val_if_fail (tmp_char1, NULL);

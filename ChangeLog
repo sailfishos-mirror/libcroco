@@ -1,3 +1,8 @@
+2006-11-30  Dom Lachowicz <domlachowicz@gmail.com>
+
+	* src/cr-num.c: Bug 381040 - floating numbers always output to exactly 3 digits after decimal points.
+	Also fixed a related bug where libcroco wouldn't emit compliant CSS strings if run in a non-C locale.
+	
 2006-11-29  Dom Lachowicz <domlachowicz@gmail.com>
 
 	* src/cr-token.c: Bug 380438 - Leak and trace message in cr_token_clear.
