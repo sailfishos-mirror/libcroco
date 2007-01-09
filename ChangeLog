@@ -2,6 +2,7 @@
 
 	* src/cr-tknzr.c: Bug 372011 - comments not parsed correctly
 	* src/cr-tknzr.c: Bug 394680 - problem parsing function name starting with 'u' or 'r'
+	* src/cr-parser.c: Bug 139878 - keep end of ruleset parsing location, and give it to the end_selector sac-handler.
 	
 2007-01-09  Dom Lachowicz <domlachowicz@gmail.com>
 

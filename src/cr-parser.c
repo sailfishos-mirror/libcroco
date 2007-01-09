@@ -3336,6 +3336,7 @@ cr_parser_parse_ruleset (CRParser * a_this)
         CRSelector *selector = NULL;
         gboolean start_selector = FALSE,
                 is_important = FALSE;
+        CRParsingLocation end_parsing_location;
 
         g_return_val_if_fail (a_this, CR_BAD_PARAM_ERROR);
 
@@ -3450,12 +3451,14 @@ cr_parser_parse_ruleset (CRParser * a_this)
 
  end_of_ruleset:
         cr_parser_try_to_skip_spaces_and_comments (a_this);
+        cr_parser_get_parsing_location (a_this, &end_parsing_location);
         READ_NEXT_CHAR (a_this, &cur_char);
         ENSURE_PARSING_COND_ERR
                 (a_this, cur_char == '}',
                  "while parsing rulset: current char must be a '}'",
                  CR_SYNTAX_ERROR);
 
+        selector->location = end_parsing_location;
         if (PRIVATE (a_this)->sac_handler
             && PRIVATE (a_this)->sac_handler->end_selector) {
                 PRIVATE (a_this)->sac_handler->end_selector
