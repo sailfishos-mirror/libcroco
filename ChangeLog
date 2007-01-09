@@ -1,3 +1,8 @@
+2007-01-09  Dom Lachowicz <domlachowicz@gmail.com>
+
+	* src/cr-tknzr.c: Bug 336621 - cr_tknzr_get_next_token wasn't 
+	handling "<!--" correctly
+
 2006-11-30  Dom Lachowicz <domlachowicz@gmail.com>
 
 	* src/cr-num.c: Bug 381040 - floating numbers always output to exactly 3 digits after decimal points.

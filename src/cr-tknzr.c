@@ -2155,12 +2155,13 @@ cr_tknzr_get_next_token (CRTknzr * a_this, CRToken ** a_tk)
                 break;
 
         case '<':
-                if (BYTE (input, 2, NULL) == '-'
-                    && BYTE (input, 3, NULL) == '-') {
+                if (BYTE (input, 2, NULL) == '!'
+                    && BYTE (input, 3, NULL) == '-'
+                    && BYTE (input, 4, NULL) == '-') {
                         SKIP_CHARS (a_this, 1);
                         cr_tknzr_get_parsing_location (a_this, 
                                                        &location) ;
-                        SKIP_CHARS (a_this, 2);
+                        SKIP_CHARS (a_this, 3);
                         status = cr_token_set_cdo (token);
                         CHECK_PARSING_STATUS (status, TRUE);
                         cr_parsing_location_copy (&token->location, 
