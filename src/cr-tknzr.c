@@ -573,7 +573,7 @@ cr_tknzr_parse_unicode_escape (CRTknzr * a_this,
                         cur_char_val = 10 + (cur_char - 'A');
                 }
 
-                unicode = unicode * 10 + cur_char_val;
+                unicode = unicode * 16 + cur_char_val;
 
                 PEEK_NEXT_CHAR (a_this, &cur_char);
         }
