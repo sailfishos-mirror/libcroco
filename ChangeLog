@@ -1,3 +1,7 @@
+2007-01-09  Benjamin Dauvergne <feanor@tol-eressea.org>
+
+	* src/cr-tknzr.c: Bug 372011 - comments not parsed correctly
+	
 2007-01-09  Dom Lachowicz <domlachowicz@gmail.com>
 
 	* src/cr-tknzr.c: Bug 336621 - cr_tknzr_get_next_token wasn't 

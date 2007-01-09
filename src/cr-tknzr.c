@@ -448,38 +448,49 @@ cr_tknzr_parse_comment (CRTknzr * a_this,
         READ_NEXT_CHAR (a_this, &cur_char);
         ENSURE_PARSING_COND (cur_char == '*');
         comment = cr_string_new ();
-        for (;;) {
+        for (;;) { /* [^*]* */
+                PEEK_NEXT_CHAR (a_this, &next_char);
+                if (next_char == '*')
+                        break;
                 READ_NEXT_CHAR (a_this, &cur_char);
-
-                /*make sure there are no nested comments */
-                if (cur_char == '/') {
-                        READ_NEXT_CHAR (a_this, &cur_char);
-                        ENSURE_PARSING_COND (cur_char != '*');
-                        g_string_append_c (comment->stryng, '/');
-                        g_string_append_unichar (comment->stryng, 
-                                                 cur_char);
-                        continue;
-                }
-
-                /*Detect the end of the comments region */
-                if (cur_char == '*') {
-                        PEEK_NEXT_CHAR (a_this, &next_char);
-
-                        if (next_char == '/') {
-                                /*
-                                 *end of comments region
-                                 *Now, call the right SAC callback.
-                                 */
-                                SKIP_CHARS (a_this, 1) ;
-                                status = CR_OK;
-                                break;
-                        } else {
-                                g_string_append_c (comment->stryng, 
-                                                   '*');
-                        }
-                }
                 g_string_append_unichar (comment->stryng, cur_char);
         }
+        /* Stop condition: next_char == '*' */
+        for (;;) { /* \*+ */
+                READ_NEXT_CHAR(a_this, &cur_char);
+                ENSURE_PARSING_COND (cur_char == '*');
+                g_string_append_unichar (comment->stryng, cur_char);
+                PEEK_NEXT_CHAR (a_this, &next_char);
+                if (next_char != '*')
+                        break;
+        }
+        /* Stop condition: next_char != '*' */
+        for (;;) { /* ([^/][^*]*\*+)* */
+                if (next_char == '/')
+                        break;
+                READ_NEXT_CHAR(a_this, &cur_char);
+                g_string_append_unichar (comment->stryng, cur_char);
+                for (;;) { /* [^*]* */
+                        PEEK_NEXT_CHAR (a_this, &next_char);
+                        if (next_char == '*')
+                                break;
+                        READ_NEXT_CHAR (a_this, &cur_char);
+                        g_string_append_unichar (comment->stryng, cur_char);
+                }
+                /* Stop condition: next_char = '*', no need to verify, because peek and read exit to error anyway */
+                for (;;) { /* \*+ */
+                        READ_NEXT_CHAR(a_this, &cur_char);
+                        ENSURE_PARSING_COND (cur_char == '*');
+                        g_string_append_unichar (comment->stryng, cur_char);
+                        PEEK_NEXT_CHAR (a_this, &next_char);
+                        if (next_char != '*')
+                                break;
+                }
+                /* Continue condition: next_char != '*' */
+        }
+        /* Stop condition: next_char == '\/' */
+        READ_NEXT_CHAR(a_this, &cur_char);
+        g_string_append_unichar (comment->stryng, cur_char);
 
         if (status == CR_OK) {
                 cr_parsing_location_copy (&comment->location, 
