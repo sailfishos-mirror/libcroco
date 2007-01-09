@@ -235,6 +235,10 @@ class_add_sel_matches_node (CRAdditionalSel * a_add_sel, xmlNode * a_node)
                                 if ((cur && !*cur)
                                     || cr_utils_is_white_space (*cur) == TRUE)
                                         result = TRUE;
+                        } else {  /* if it doesn't match,  */
+                                /*   then skip to next whitespace character to try again */
+                                while (cur && *cur && !(cr_utils_is_white_space(*cur) == TRUE)) 
+                                        cur++;
                         }
                         if (cur && !*cur)
                                 break ;

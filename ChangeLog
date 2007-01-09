@@ -1,5 +1,9 @@
 2007-01-09  Dom Lachowicz <domlachowicz@gmail.com>
 
+	* src/cr-sel-eng.c: a bug in the class selector code, where it would not require whitespace before the class in a class attribute with multiple classes.
+	
+2007-01-09  Dom Lachowicz <domlachowicz@gmail.com>
+
 	* src/cr-fonts.h: gives syntax errors when included twice
 	* src/cr-fonts.c: the return value of cr_font_family_prepend()
 	should be "the font family list", not CR_OK which is the same as NULL.
