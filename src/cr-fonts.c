@@ -285,7 +285,7 @@ cr_font_family_prepend (CRFontFamily * a_this,
         a_family_to_prepend->next = a_this;
         a_this->prev = a_family_to_prepend;
 
-        return CR_OK;
+        return a_family_to_prepend;
 }
 
 /**
@@ -766,7 +766,7 @@ cr_font_variant_to_string (enum CRFontVariant a_code)
 enum CRFontWeight
 cr_font_weight_get_bolder (enum CRFontWeight a_weight)
 {
-        if (a_weight >= NB_FONT_WEIGHTS) {
+        if (a_weight >= FONT_WEIGHT_900) {
                 return FONT_WEIGHT_900 ;
         } else if (a_weight < FONT_WEIGHT_NORMAL) {
                 return FONT_WEIGHT_NORMAL ;

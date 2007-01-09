@@ -1,6 +1,11 @@
 2007-01-09  Dom Lachowicz <domlachowicz@gmail.com>
 
 	* src/cr-fonts.h: gives syntax errors when included twice
+	* src/cr-fonts.c: the return value of cr_font_family_prepend()
+	should be "the font family list", not CR_OK which is the same as NULL.
+	* src/cr-fonts.c: the logic of cr_font_weight_get_bolder
+	does not take into account the FONT_WEIGHT_INHERIT value, and the
+	shift by 1 can yield out-of-range values. Partial fix
 	
 2007-01-09  Benjamin Dauvergne <feanor@tol-eressea.org>
 
