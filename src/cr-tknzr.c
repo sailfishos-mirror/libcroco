@@ -578,34 +578,11 @@ cr_tknzr_parse_unicode_escape (CRTknzr * a_this,
                 PEEK_NEXT_CHAR (a_this, &cur_char);
         }
 
-        if (occur == 5) {
-                /*
-                 *the unicode escape is 6 digit length
-                 */
-
-                /*
-                 *parse one space that may 
-                 *appear just after the unicode
-                 *escape.
-                 */
-                cr_tknzr_parse_w (a_this, &tmp_char_ptr1, 
-                                  &tmp_char_ptr2, NULL);
-                status = CR_OK;
-        } else {
-                /*
-                 *The unicode escape is less than
-                 *6 digit length. The character
-                 *that comes right after the escape
-                 *must be a white space.
-                 */
-                status = cr_tknzr_parse_w (a_this, &tmp_char_ptr1,
-                                           &tmp_char_ptr2, NULL);
-        }
-
-        if (status == CR_OK) {
-                *a_unicode = unicode;
-                return CR_OK;
-        }
+        /* Eat a whitespace if possible. */
+        cr_tknzr_parse_w (a_this, &tmp_char_ptr1, 
+                          &tmp_char_ptr2, NULL);
+        *a_unicode = unicode;
+        return CR_OK;
 
       error:
         /*
