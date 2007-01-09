@@ -1,6 +1,7 @@
 2007-01-09  Benjamin Dauvergne <feanor@tol-eressea.org>
 
 	* src/cr-tknzr.c: Bug 372011 - comments not parsed correctly
+	* src/cr-tknzr.c: Bug 394680 - problem parsing function name starting with 'u' or 'r'
 	
 2007-01-09  Dom Lachowicz <domlachowicz@gmail.com>
 

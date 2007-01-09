@@ -2120,18 +2120,8 @@ cr_tknzr_get_next_token (CRTknzr * a_this, CRToken ** a_tk)
                                 }
                                 goto done;
                         }
-                } else {
-                        status = cr_tknzr_parse_ident (a_this, &str);
-                        if (status == CR_OK && str) {
-                                status = cr_token_set_ident (token, str);
-                                CHECK_PARSING_STATUS (status, TRUE);
-                                if (str) {
-                                        cr_parsing_location_copy (&token->location, 
-                                                                  &str->location) ;
-                                }
-                                goto done;
-                        }
-                }
+                } 
+                goto fallback;
                 break;
 
         case 'r':
@@ -2150,19 +2140,8 @@ cr_tknzr_get_next_token (CRTknzr * a_this, CRToken ** a_tk)
                                 goto done;
                         }
 
-                } else {
-                        status = cr_tknzr_parse_ident (a_this, &str);
-                        if (status == CR_OK) {
-                                status = cr_token_set_ident (token, str);
-                                CHECK_PARSING_STATUS (status, TRUE);
-                                if (str) {
-                                        cr_parsing_location_copy (&token->location, 
-                                                                  &str->location) ;
-                                }
-                                str = NULL;
-                                goto done;
-                        }
                 }
+                goto fallback;
                 break;
 
         case '<':
@@ -2553,6 +2532,7 @@ cr_tknzr_get_next_token (CRTknzr * a_this, CRToken ** a_tk)
                 break;
 
         default:
+        fallback:
                 /*process the fallback cases here */
 
                 if (next_char == '\\'
