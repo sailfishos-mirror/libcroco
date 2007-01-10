@@ -766,7 +766,10 @@ cr_font_variant_to_string (enum CRFontVariant a_code)
 enum CRFontWeight
 cr_font_weight_get_bolder (enum CRFontWeight a_weight)
 {
-        if (a_weight >= FONT_WEIGHT_900) {
+        if (a_weight == FONT_WEIGHT_INHERIT) {
+                cr_utils_trace_info ("can't return a bolder weight for FONT_WEIGHT_INHERIT") ;
+                return a_weight;
+        } else if (a_weight >= FONT_WEIGHT_900) {
                 return FONT_WEIGHT_900 ;
         } else if (a_weight < FONT_WEIGHT_NORMAL) {
                 return FONT_WEIGHT_NORMAL ;

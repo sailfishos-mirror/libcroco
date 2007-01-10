@@ -2,6 +2,7 @@
 
 	* cr-style.h (enum CRPositionType): Remove trailing comma. Needed for
 	compilation on AIX with xlc.
+	* cr-fonts.c (cr_font_weight_get_bolder): Handle FONT_WEIGHT_INHERIT.
 	
 2007-01-09  Benjamin Dauvergne <feanor@tol-eressea.org>
 
