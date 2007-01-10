@@ -105,6 +105,10 @@ static xmlNode *get_prev_element_node (xmlNode * a_node);
 
 static xmlNode *get_next_parent_element_node (xmlNode * a_node);
 
+/* Quick strcmp.  Test only for == 0 or != 0, not < 0 or > 0.  */
+#define strqcmp(str,lit,lit_len) \
+  (strlen (str) != (lit_len) || memcmp (str, lit, lit_len))
+
 static gboolean
 lang_pseudo_class_handler (CRSelEng * a_this,
                            CRAdditionalSel * a_sel, xmlNode * a_node)
@@ -120,7 +124,7 @@ lang_pseudo_class_handler (CRSelEng * a_this,
                               && a_sel->content.pseudo->name->stryng
                               && a_node, CR_BAD_PARAM_ERROR);
 
-        if (strncmp (a_sel->content.pseudo->name->stryng->str, 
+        if (strqcmp (a_sel->content.pseudo->name->stryng->str, 
                      "lang", 4)
             || !a_sel->content.pseudo->type == FUNCTION_PSEUDO) {
                 cr_utils_trace_info ("This handler is for :lang only");
@@ -134,7 +138,7 @@ lang_pseudo_class_handler (CRSelEng * a_this,
         for (; node; node = get_next_parent_element_node (node)) {
                 val = xmlGetProp (node, "lang");
                 if (val
-                    && !strncmp (val,
+                    && !strqcmp (val,
                                  a_sel->content.pseudo->extra->stryng->str,
                                  a_sel->content.pseudo->extra->stryng->len)) {
                         result = TRUE;
@@ -276,7 +280,7 @@ id_add_sel_matches_node (CRAdditionalSel * a_add_sel, xmlNode * a_node)
 
         if (xmlHasProp (a_node, "id")) {
                 id = xmlGetProp (a_node, "id");
-                if (!strncmp (id, a_add_sel->content.id_name->stryng->str,
+                if (!strqcmp (id, a_add_sel->content.id_name->stryng->str,
                               a_add_sel->content.id_name->stryng->len)) {
                         result = TRUE;
                 }
