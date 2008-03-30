@@ -773,54 +773,29 @@ cr_declaration_destroy (CRDeclaration * a_this)
         g_return_if_fail (a_this);
 
         /*
-         *Go get the tail of the list.
-         *Meanwhile, free each property/value pair contained in the list.
+         * Go to the last element of the list.
          */
-        for (cur = a_this; cur && cur->next; cur = cur->next) {
-                if (cur->property) {
-                        cr_string_destroy (cur->property);
-                        cur->property = NULL;
-                }
+        for (cur = a_this; cur->next; cur = cur->next)
+                g_assert (cur->next->prev == cur);
 
-                if (cur->value) {
-                        cr_term_destroy (cur->value);
-                        cur->value = NULL;
-                }
-        }
-
-        if (cur) {
-                if (cur->property) {
-                        cr_string_destroy (cur->property);
-                        cur->property = NULL;
-                }
-
-                if (cur->value) {
-                        cr_term_destroy (cur->value);
-                        cur->value = NULL;
-                }
-        }
-
-        /*in case the list contains only one element */
-        if (cur && !cur->prev) {
-                g_free (cur);
-                return;
-        }
-
-        /*walk backward the list and free each "next" element */
-        for (cur = cur->prev; cur && cur->prev; cur = cur->prev) {
-                if (cur->next) {
-                        g_free (cur->next);
-                        cur->next = NULL;
-                }
-        }
-
-        if (!cur)
-                return;
-
-        if (cur->next) {
+        /*
+         * Walk backward the list and free each "next" element.
+         * Meanwhile, free each property/value pair contained in the list.
+         */
+        for (; cur; cur = cur->prev) {
                 g_free (cur->next);
                 cur->next = NULL;
+
+                if (cur->property) {
+                        cr_string_destroy (cur->property);
+                        cur->property = NULL;
+                }
+
+                if (cur->value) {
+                        cr_term_destroy (cur->value);
+                        cur->value = NULL;
+                }
         }
 
-        g_free (cur);
+        g_free (a_this);
 }
