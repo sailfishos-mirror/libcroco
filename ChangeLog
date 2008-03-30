@@ -1,3 +1,19 @@
+2008-03-30  Peter Moulder  <pjmoulder@svn.gnome.org>
+
+	* ChangeLog: Change to UTF-8.  I believe this now the preferred
+	  charset for Gnome ChangeLogs.  (Let me know if gratuitous use of
+	  unicode, such as in the following paragraph, causes a problem for
+	  you.  Would a vim/emacsen mode line at the bottom of the file help?)
+
+	* src/*: Add â€˜constâ€™ to various function prototypes, as discussed at
+	  http://www.mail-archive.com/libcroco-list@gnome.org/msg00049.html .
+	  This change is a noop in the sense that it has no effect on
+	  libcroco's object files, but does affect source-level compatibility,
+	  both forwards and backwards â€” though in practice I'd guess that no
+	  existing code will break from this.
+
+	* src/cr-declaration.c: (cr_declaration_new): Doc.
+
 2007-01-10  Bruno Haible  <bruno@clisp.org>
 
 	* cr-style.h (enum CRPositionType): Remove trailing comma. Needed for
@@ -1138,7 +1154,7 @@ Mon Sep 20 18:10:50 CEST 2004 Dodji Seketeli <dodji@gnome.org>
 	docs/examples/selection-example-1.xml: added this code example
 	from Stefan Seefeld.
 
-2003-08-17  Gaël CHAMOULAUD <strider@gnome.org>
+2003-08-17  GaÃ«l CHAMOULAUD <strider@gnome.org>
 
 	* src/layeng/cr-lay-eng.c: (layout_block_box):
 	* src/seleng/cr-sel-eng.c: (put_css_properties_in_hashtable):
@@ -1186,7 +1202,7 @@ Mon Sep 20 18:10:50 CEST 2004 Dodji Seketeli <dodji@gnome.org>
 
 	* src/layeng/cr-box-view.[ch]: fixed some compiler warnings.	
 
-2003-06-28  Gaël Chamoulaud (strider) <strider@freespiders.org>
+2003-06-28  GaÃ«l Chamoulaud (strider) <strider@freespiders.org>
 
 	* csslint/csslint.c (csslint_show_version): Added CROCO_LAYENG_ENABLED
 	test in csslint_show_version function.	
@@ -1654,7 +1670,7 @@ Mon Sep 20 18:10:50 CEST 2004 Dodji Seketeli <dodji@gnome.org>
 	the user that types make rpm must have write acess to
 	/usr/src .
 
-2003-04-02  Gaël Chamoulaud (strider) <strider@freespiders.org>
+2003-04-02  GaÃ«l Chamoulaud (strider) <strider@freespiders.org>
 	
 	* croco-config.1: updated the man page
 	* csslint/csslint.1: updated the man page
@@ -1715,7 +1731,7 @@ Mon Sep 20 18:10:50 CEST 2004 Dodji Seketeli <dodji@gnome.org>
 	I can now, go and get worried about building the annotated
 	xml tree.
 
-2003-03-20  Gaël Chamoulaud  <strider@freespiders.org>
+2003-03-20  GaÃ«l Chamoulaud  <strider@freespiders.org>
 
 	* Makefile.am (SUBDIRS): added man page for croco-config
 
@@ -1723,7 +1739,7 @@ Mon Sep 20 18:10:50 CEST 2004 Dodji Seketeli <dodji@gnome.org>
 
 	* COPYING: replace with contents from COPYING.LIB (GNU LGPL)
 	
-2003-03-20  Gaël Chamoulaud  <strider@freespiders.org>
+2003-03-20  GaÃ«l Chamoulaud  <strider@freespiders.org>
 
 	* configure.in: added conditional compilation of the unit tests
 	in tests/ subdir 
@@ -1731,11 +1747,11 @@ Mon Sep 20 18:10:50 CEST 2004 Dodji Seketeli <dodji@gnome.org>
 	* tests/Makefile.am (INCLUDES): conditional compilation of the unit tests
 	in tests/ subdir 
 
-2003-03-19  Gaël Chamoulaud  <strider@freespiders.org>
+2003-03-19  GaÃ«l Chamoulaud  <strider@freespiders.org>
 
 	* Relicense from GPL -> LGPL
 
-2003-03-18  Gaël Chamoulaud  <strider@freespiders.org>
+2003-03-18  GaÃ«l Chamoulaud  <strider@freespiders.org>
 
 	* configure.in: fixed a configure bug. Make sure to properly
 	check the libxml2 versions.
