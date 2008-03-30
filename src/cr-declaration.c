@@ -65,6 +65,10 @@ dump (CRDeclaration const * a_this, FILE * a_fp, glong a_indent)
  *
  *Returns the newly built instance of #CRDeclaration, or NULL in
  *case of error.
+ *
+ *The returned CRDeclaration takes ownership of @a_property and @a_value.
+ *(E.g. cr_declaration_destroy on this CRDeclaration will also free
+ *@a_property and @a_value.)
  */
 CRDeclaration *
 cr_declaration_new (CRStatement * a_statement,
