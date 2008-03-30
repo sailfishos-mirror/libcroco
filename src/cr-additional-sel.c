@@ -230,11 +230,11 @@ cr_additional_sel_prepend (CRAdditionalSel * a_this, CRAdditionalSel * a_sel)
 }
 
 guchar *
-cr_additional_sel_to_string (CRAdditionalSel * a_this)
+cr_additional_sel_to_string (CRAdditionalSel const * a_this)
 {
         guchar *result = NULL;
         GString *str_buf = NULL;
-        CRAdditionalSel *cur = NULL;
+        CRAdditionalSel const *cur = NULL;
 
         g_return_val_if_fail (a_this, NULL);
 
@@ -332,7 +332,7 @@ cr_additional_sel_to_string (CRAdditionalSel * a_this)
 }
 
 guchar * 
-cr_additional_sel_one_to_string (CRAdditionalSel *a_this)
+cr_additional_sel_one_to_string (CRAdditionalSel const *a_this)
 {
         guchar *result = NULL;
         GString *str_buf = NULL;
@@ -439,7 +439,7 @@ cr_additional_sel_one_to_string (CRAdditionalSel *a_this)
  * Dumps the current instance of #CRAdditionalSel to a file
  */
 void
-cr_additional_sel_dump (CRAdditionalSel * a_this, FILE * a_fp)
+cr_additional_sel_dump (CRAdditionalSel const * a_this, FILE * a_fp)
 {
         guchar *tmp_str = NULL;
 

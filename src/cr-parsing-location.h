@@ -54,11 +54,11 @@ CRParsingLocation * cr_parsing_location_new (void) ;
 enum CRStatus cr_parsing_location_init (CRParsingLocation *a_this) ;
 
 enum CRStatus cr_parsing_location_copy (CRParsingLocation *a_to,
-					CRParsingLocation *a_from) ;
+					CRParsingLocation const *a_from) ;
 
-gchar * cr_parsing_location_to_string (CRParsingLocation *a_this,
+gchar * cr_parsing_location_to_string (CRParsingLocation const *a_this,
 				       enum CRParsingLocationSerialisationMask a_mask) ;
-void cr_parsing_location_dump (CRParsingLocation *a_this,
+void cr_parsing_location_dump (CRParsingLocation const *a_this,
 			       enum CRParsingLocationSerialisationMask a_mask,
 			       FILE *a_fp) ;
 

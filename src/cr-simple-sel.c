@@ -100,12 +100,12 @@ cr_simple_sel_prepend_simple_sel (CRSimpleSel * a_this, CRSimpleSel * a_sel)
 }
 
 guchar *
-cr_simple_sel_to_string (CRSimpleSel * a_this)
+cr_simple_sel_to_string (CRSimpleSel const * a_this)
 {
         GString *str_buf = NULL;
         guchar *result = NULL;
 
-        CRSimpleSel *cur = NULL;
+        CRSimpleSel const *cur = NULL;
 
         g_return_val_if_fail (a_this, NULL);
 
@@ -162,7 +162,7 @@ cr_simple_sel_to_string (CRSimpleSel * a_this)
 
 
 guchar *
-cr_simple_sel_one_to_string (CRSimpleSel * a_this)
+cr_simple_sel_one_to_string (CRSimpleSel const * a_this)
 {
         GString *str_buf = NULL;
         guchar *result = NULL;
@@ -214,7 +214,7 @@ cr_simple_sel_one_to_string (CRSimpleSel * a_this)
  *otherwise.
  */
 enum CRStatus
-cr_simple_sel_dump (CRSimpleSel * a_this, FILE * a_fp)
+cr_simple_sel_dump (CRSimpleSel const * a_this, FILE * a_fp)
 {
         guchar *tmp_str = NULL;
 
@@ -245,8 +245,8 @@ cr_simple_sel_dump (CRSimpleSel * a_this, FILE * a_fp)
 enum CRStatus
 cr_simple_sel_compute_specificity (CRSimpleSel * a_this)
 {
-        CRAdditionalSel *cur_add_sel = NULL;
-        CRSimpleSel *cur_sel = NULL;
+        CRAdditionalSel const *cur_add_sel = NULL;
+        CRSimpleSel const *cur_sel = NULL;
         gulong a = 0,
                 b = 0,
                 c = 0;

@@ -138,7 +138,7 @@ cr_selector_append_simple_sel (CRSelector * a_this,
 }
 
 guchar *
-cr_selector_to_string (CRSelector * a_this)
+cr_selector_to_string (CRSelector const * a_this)
 {
         guchar *result = NULL;
         GString *str_buf = NULL;
@@ -147,7 +147,7 @@ cr_selector_to_string (CRSelector * a_this)
         g_return_val_if_fail (str_buf, NULL);
 
         if (a_this) {
-                CRSelector *cur = NULL;
+                CRSelector const *cur = NULL;
 
                 for (cur = a_this; cur; cur = cur->next) {
                         if (cur->simple_sel) {
@@ -188,7 +188,7 @@ cr_selector_to_string (CRSelector * a_this)
  *Serializes the current instance of #CRSelector to a file.
  */
 void
-cr_selector_dump (CRSelector * a_this, FILE * a_fp)
+cr_selector_dump (CRSelector const * a_this, FILE * a_fp)
 {
         guchar *tmp_buf = NULL;
 

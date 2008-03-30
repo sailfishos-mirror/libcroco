@@ -92,7 +92,7 @@ cr_num_new_with_val (gdouble a_val, enum CRNumType a_type)
  *free the returned string.
  */
 guchar *
-cr_num_to_string (CRNum * a_this)
+cr_num_to_string (CRNum const * a_this)
 {
         gdouble test_val = 0.0;
 
@@ -215,7 +215,7 @@ cr_num_to_string (CRNum * a_this)
  *error code otherwise.
  */
 enum CRStatus
-cr_num_copy (CRNum * a_dest, CRNum * a_src)
+cr_num_copy (CRNum * a_dest, CRNum const * a_src)
 {
         g_return_val_if_fail (a_dest && a_src, CR_BAD_PARAM_ERROR);
 
@@ -234,7 +234,7 @@ cr_num_copy (CRNum * a_dest, CRNum * a_src)
  *Must be freed by cr_num_destroy().
  */
 CRNum *
-cr_num_dup (CRNum * a_this)
+cr_num_dup (CRNum const * a_this)
 {
         CRNum *result = NULL;
         enum CRStatus status = CR_OK;
@@ -284,7 +284,7 @@ cr_num_set (CRNum * a_this, gdouble a_val, enum CRNumType a_type)
  *FALSE otherwise.
  */
 gboolean
-cr_num_is_fixed_length (CRNum * a_this)
+cr_num_is_fixed_length (CRNum const * a_this)
 {
         gboolean result = FALSE;
 

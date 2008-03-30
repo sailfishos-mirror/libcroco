@@ -2952,7 +2952,7 @@ cr_parser_set_use_core_grammar (CRParser * a_this,
  * Returns CR_OK upon succesful completion, an error code otherwise.
  */
 enum CRStatus
-cr_parser_get_use_core_grammar (CRParser * a_this,
+cr_parser_get_use_core_grammar (CRParser const * a_this,
                                 gboolean * a_use_core_grammar)
 {
         g_return_val_if_fail (a_this && PRIVATE (a_this), CR_BAD_PARAM_ERROR);
@@ -4441,7 +4441,7 @@ cr_parser_get_tknzr (CRParser * a_this, CRTknzr ** a_tknzr)
  *otherwise.
  */
 enum CRStatus 
-cr_parser_get_parsing_location (CRParser *a_this, 
+cr_parser_get_parsing_location (CRParser const *a_this,
                                 CRParsingLocation *a_loc)
 {
         g_return_val_if_fail (a_this 

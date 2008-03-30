@@ -42,7 +42,7 @@
  *Dumps (serializes) one css declaration to a file.
  */
 static void
-dump (CRDeclaration * a_this, FILE * a_fp, glong a_indent)
+dump (CRDeclaration const * a_this, FILE * a_fp, glong a_indent)
 {
         guchar *str = NULL;
 
@@ -448,10 +448,10 @@ cr_declaration_append2 (CRDeclaration * a_this,
  *Dumps a declaration list to a file.
  */
 void
-cr_declaration_dump (CRDeclaration * a_this, FILE * a_fp, glong a_indent,
+cr_declaration_dump (CRDeclaration const * a_this, FILE * a_fp, glong a_indent,
                      gboolean a_one_per_line)
 {
-        CRDeclaration *cur = NULL;
+        CRDeclaration const *cur = NULL;
 
         g_return_if_fail (a_this);
 
@@ -475,7 +475,7 @@ cr_declaration_dump (CRDeclaration * a_this, FILE * a_fp, glong a_indent,
  *Dumps the first declaration of the declaration list to a file.
  */
 void
-cr_declaration_dump_one (CRDeclaration * a_this, FILE * a_fp, glong a_indent)
+cr_declaration_dump_one (CRDeclaration const * a_this, FILE * a_fp, glong a_indent)
 {
         g_return_if_fail (a_this);
 
@@ -493,7 +493,7 @@ cr_declaration_dump_one (CRDeclaration * a_this, FILE * a_fp, glong a_indent)
  *free the string using g_free().
  */
 gchar *
-cr_declaration_to_string (CRDeclaration * a_this, gulong a_indent)
+cr_declaration_to_string (CRDeclaration const * a_this, gulong a_indent)
 {
         GString *stringue = NULL;
 
@@ -562,9 +562,9 @@ cr_declaration_to_string (CRDeclaration * a_this, gulong a_indent)
  *Serializes the declaration list into a string
  */
 guchar *
-cr_declaration_list_to_string (CRDeclaration * a_this, gulong a_indent)
+cr_declaration_list_to_string (CRDeclaration const * a_this, gulong a_indent)
 {
-        CRDeclaration *cur = NULL;
+        CRDeclaration const *cur = NULL;
         GString *stringue = NULL;
         guchar *str = NULL,
                 *result = NULL;
@@ -600,10 +600,10 @@ cr_declaration_list_to_string (CRDeclaration * a_this, gulong a_indent)
  *Returns the serialized form the declararation.
  */
 guchar *
-cr_declaration_list_to_string2 (CRDeclaration * a_this,
+cr_declaration_list_to_string2 (CRDeclaration const * a_this,
                                 gulong a_indent, gboolean a_one_decl_per_line)
 {
-        CRDeclaration *cur = NULL;
+        CRDeclaration const *cur = NULL;
         GString *stringue = NULL;
         guchar *str = NULL,
                 *result = NULL;
@@ -648,9 +648,9 @@ cr_declaration_list_to_string2 (CRDeclaration * a_this,
  *Return the number of properties in the declaration
  */
 gint
-cr_declaration_nr_props (CRDeclaration * a_this)
+cr_declaration_nr_props (CRDeclaration const * a_this)
 {
-        CRDeclaration *cur = NULL;
+        CRDeclaration const *cur = NULL;
         int nr = 0;
 
         g_return_val_if_fail (a_this, -1);

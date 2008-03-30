@@ -207,7 +207,7 @@ cr_prop_list_set_prop (CRPropList * a_this, CRString * a_prop)
  *otherwise.
  */
 enum CRStatus
-cr_prop_list_get_prop (CRPropList * a_this, CRString ** a_prop)
+cr_prop_list_get_prop (CRPropList const * a_this, CRString ** a_prop)
 {
         g_return_val_if_fail (a_this && PRIVATE (a_this)
                               && a_prop, CR_BAD_PARAM_ERROR);
@@ -241,7 +241,7 @@ cr_prop_list_set_decl (CRPropList * a_this, CRDeclaration * a_decl)
  * Returns CR_OK upon successful completion.
  */
 enum CRStatus
-cr_prop_list_get_decl (CRPropList * a_this, CRDeclaration ** a_decl)
+cr_prop_list_get_decl (CRPropList const * a_this, CRDeclaration ** a_decl)
 {
         g_return_val_if_fail (a_this && PRIVATE (a_this)
                               && a_decl, CR_BAD_PARAM_ERROR);

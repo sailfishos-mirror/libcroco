@@ -243,7 +243,7 @@ cr_rgb_new_with_vals (gulong a_red, gulong a_green,
  *rgb. MUST BE FREED by the caller using g_free().
  */
 guchar *
-cr_rgb_to_string (CRRgb * a_this)
+cr_rgb_to_string (CRRgb const * a_this)
 {
         guchar *result = NULL;
         GString *str_buf = NULL;
@@ -289,7 +289,7 @@ cr_rgb_to_string (CRRgb * a_this)
  *to a file.
  */
 void
-cr_rgb_dump (CRRgb * a_this, FILE * a_fp)
+cr_rgb_dump (CRRgb const * a_this, FILE * a_fp)
 {
         guchar *str = NULL;
 
@@ -388,7 +388,7 @@ cr_rgb_set_to_inherit (CRRgb *a_this, gboolean a_inherit)
  * Returns TRUE if the rgb is set to the value "inherit", FALSE otherwise.
  */
 gboolean
-cr_rgb_is_set_to_inherit (CRRgb *a_this)
+cr_rgb_is_set_to_inherit (CRRgb const *a_this)
 {
         g_return_val_if_fail (a_this, CR_BAD_PARAM_ERROR) ;
 
@@ -407,7 +407,7 @@ cr_rgb_is_set_to_inherit (CRRgb *a_this)
  *transparent, FALSE otherwise.
  */
 gboolean 
-cr_rgb_is_set_to_transparent (CRRgb *a_this)
+cr_rgb_is_set_to_transparent (CRRgb const *a_this)
 {
         g_return_val_if_fail (a_this, FALSE) ;
         return a_this->is_transparent ;
@@ -441,7 +441,7 @@ cr_rgb_set_to_transparent (CRRgb *a_this,
  *Returns CR_OK upon successful completion, an error code otherwise.
  */
 enum CRStatus
-cr_rgb_set_from_rgb (CRRgb * a_this, CRRgb * a_rgb)
+cr_rgb_set_from_rgb (CRRgb * a_this, CRRgb const * a_rgb)
 {
         g_return_val_if_fail (a_this && a_rgb, CR_BAD_PARAM_ERROR);
 
@@ -602,7 +602,7 @@ cr_rgb_set_from_term (CRRgb *a_this, const struct _CRTerm *a_value)
 }
 
 enum CRStatus 
-cr_rgb_copy (CRRgb *a_dest, CRRgb*a_src)
+cr_rgb_copy (CRRgb *a_dest, CRRgb const *a_src)
 {
         g_return_val_if_fail (a_dest && a_src,
                               CR_BAD_PARAM_ERROR) ;

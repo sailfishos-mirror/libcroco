@@ -276,11 +276,11 @@ CRDocHandler * cr_doc_handler_new (void) ;
 
 enum CRStatus cr_doc_handler_set_result (CRDocHandler *a_this, gpointer a_result) ;
 
-enum CRStatus cr_doc_handler_get_result (CRDocHandler *a_this, gpointer * a_result) ;
+enum CRStatus cr_doc_handler_get_result (CRDocHandler const *a_this, gpointer * a_result) ;
 
 enum CRStatus cr_doc_handler_set_ctxt (CRDocHandler *a_this, gpointer a_ctxt) ;
 
-enum CRStatus cr_doc_handler_get_ctxt (CRDocHandler *a_this, gpointer * a_ctxt) ;
+enum CRStatus cr_doc_handler_get_ctxt (CRDocHandler const *a_this, gpointer * a_ctxt) ;
 
 enum CRStatus cr_doc_handler_set_default_sac_handler (CRDocHandler *a_this) ;
 

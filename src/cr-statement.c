@@ -586,7 +586,7 @@ cr_statement_clear (CRStatement * a_this)
  *by the caller, using g_free().
  */
 static gchar *
-cr_statement_ruleset_to_string (CRStatement * a_this, glong a_indent)
+cr_statement_ruleset_to_string (CRStatement const * a_this, glong a_indent)
 {
         GString *stringue = NULL;
         gchar *tmp_str = NULL,
@@ -650,7 +650,7 @@ cr_statement_ruleset_to_string (CRStatement * a_this, glong a_indent)
  *using g_free().
  */
 static gchar *
-cr_statement_font_face_rule_to_string (CRStatement * a_this, 
+cr_statement_font_face_rule_to_string (CRStatement const * a_this,
                                        glong a_indent)
 {
         gchar *result = NULL, *tmp_str = NULL ;
@@ -698,7 +698,7 @@ cr_statement_font_face_rule_to_string (CRStatement * a_this,
  *freed by the caller using g_free().
  */
 static gchar *
-cr_statement_charset_to_string (CRStatement *a_this, 
+cr_statement_charset_to_string (CRStatement const *a_this,
                                 gulong a_indent)
 {
         gchar *str = NULL ;
@@ -743,7 +743,7 @@ cr_statement_charset_to_string (CRStatement *a_this,
  *Returns the serialized string. Must be freed by the caller
  */
 static gchar *
-cr_statement_at_page_rule_to_string (CRStatement *a_this,
+cr_statement_at_page_rule_to_string (CRStatement const *a_this,
                                      gulong a_indent)
 {
         GString *stringue = NULL;
@@ -795,12 +795,12 @@ cr_statement_at_page_rule_to_string (CRStatement *a_this,
  *by the caller using g_free().
  */
 static gchar *
-cr_statement_media_rule_to_string (CRStatement *a_this,
+cr_statement_media_rule_to_string (CRStatement const *a_this,
                                    gulong a_indent)
 {
         gchar *str = NULL ;
         GString *stringue = NULL ;
-        GList *cur = NULL;
+        GList const *cur = NULL;
 
         g_return_val_if_fail (a_this->type == AT_MEDIA_RULE_STMT,
                               NULL);
@@ -814,7 +814,7 @@ cr_statement_media_rule_to_string (CRStatement *a_this,
                      cur = cur->next) {
                         if (cur->data) {
                                 guchar *str = cr_string_dup2
-                                        ((CRString *) cur->data);
+                                        ((CRString const *) cur->data);
 
                                 if (str) {
                                         if (cur->prev) {
@@ -850,7 +850,7 @@ cr_statement_media_rule_to_string (CRStatement *a_this,
 
 
 static gchar *
-cr_statement_import_rule_to_string (CRStatement *a_this,
+cr_statement_import_rule_to_string (CRStatement const *a_this,
                                     gulong a_indent)
 {
         GString *stringue = NULL ;
@@ -878,12 +878,12 @@ cr_statement_import_rule_to_string (CRStatement *a_this,
                         return NULL;
 
                 if (a_this->kind.import_rule->media_list) {
-                        GList *cur = NULL;
+                        GList const *cur = NULL;
 
                         for (cur = a_this->kind.import_rule->media_list;
                              cur; cur = cur->next) {
                                 if (cur->data) {
-                                        CRString *crstr = cur->data;
+                                        CRString const *crstr = cur->data;
 
                                         if (cur->prev) {
                                                 g_string_append 
@@ -1931,9 +1931,9 @@ cr_statement_unlink (CRStatement * a_stmt)
  *Returns number of rules in the statement list.
  */
 gint
-cr_statement_nr_rules (CRStatement * a_this)
+cr_statement_nr_rules (CRStatement const * a_this)
 {
-        CRStatement *cur = NULL;
+        CRStatement const *cur = NULL;
         int nr = 0;
 
         g_return_val_if_fail (a_this, -1);
@@ -2039,7 +2039,7 @@ cr_statement_ruleset_get_declarations (CRStatement * a_this,
  *Returns CR_OK upon successful completion, an error code otherwise.
  */
 enum CRStatus
-cr_statement_ruleset_get_sel_list (CRStatement * a_this, CRSelector ** a_list)
+cr_statement_ruleset_get_sel_list (CRStatement const * a_this, CRSelector ** a_list)
 {
         g_return_val_if_fail (a_this && a_this->type == RULESET_STMT
                               && a_this->kind.ruleset, CR_BAD_PARAM_ERROR);
@@ -2226,7 +2226,7 @@ cr_statement_at_import_rule_set_url (CRStatement * a_this,
  *Returns CR_OK upon successful completion, an error code otherwise.
  */
 enum CRStatus
-cr_statement_at_import_rule_get_url (CRStatement * a_this, 
+cr_statement_at_import_rule_get_url (CRStatement const * a_this,
                                      CRString ** a_url)
 {
         g_return_val_if_fail (a_this
@@ -2247,7 +2247,7 @@ cr_statement_at_import_rule_get_url (CRStatement * a_this,
  *Returns the number of rules in the media rule;
  */
 int
-cr_statement_at_media_nr_rules (CRStatement * a_this)
+cr_statement_at_media_nr_rules (CRStatement const * a_this)
 {
         g_return_val_if_fail (a_this
                               && a_this->type == AT_MEDIA_RULE_STMT
@@ -2373,7 +2373,7 @@ cr_statement_at_charset_rule_set_charset (CRStatement * a_this,
  * Returns CR_OK upon successful completion, an error code otherwise.
  */
 enum CRStatus
-cr_statement_at_charset_rule_get_charset (CRStatement * a_this,
+cr_statement_at_charset_rule_get_charset (CRStatement const * a_this,
                                           CRString ** a_charset)
 {
         g_return_val_if_fail (a_this
@@ -2491,7 +2491,7 @@ cr_statement_at_font_face_rule_add_decl (CRStatement * a_this,
  *using g_free().
  */
 gchar *
-cr_statement_to_string (CRStatement * a_this, gulong a_indent)
+cr_statement_to_string (CRStatement const * a_this, gulong a_indent)
 {
         gchar *str = NULL ;
 
@@ -2537,9 +2537,9 @@ cr_statement_to_string (CRStatement * a_this, gulong a_indent)
 }
 
 gchar*
-cr_statement_list_to_string (CRStatement *a_this, gulong a_indent)
+cr_statement_list_to_string (CRStatement const *a_this, gulong a_indent)
 {
-        CRStatement *cur_stmt = NULL ;
+        CRStatement const *cur_stmt = NULL ;
         GString *stringue = NULL ;
         gchar *str = NULL ;
 
@@ -2579,7 +2579,7 @@ cr_statement_list_to_string (CRStatement *a_this, gulong a_indent)
  *Dumps the css2 statement to a file.
  */
 void
-cr_statement_dump (CRStatement * a_this, FILE * a_fp, gulong a_indent)
+cr_statement_dump (CRStatement const * a_this, FILE * a_fp, gulong a_indent)
 {
         gchar *str = NULL ;
 
@@ -2604,7 +2604,7 @@ cr_statement_dump (CRStatement * a_this, FILE * a_fp, gulong a_indent)
  *Dumps a ruleset statement to a file.
  */
 void
-cr_statement_dump_ruleset (CRStatement * a_this, FILE * a_fp, glong a_indent)
+cr_statement_dump_ruleset (CRStatement const * a_this, FILE * a_fp, glong a_indent)
 {
         guchar *str = NULL;
 
@@ -2627,7 +2627,7 @@ cr_statement_dump_ruleset (CRStatement * a_this, FILE * a_fp, glong a_indent)
  *Dumps a font face rule statement to a file.
  */
 void
-cr_statement_dump_font_face_rule (CRStatement * a_this, FILE * a_fp,
+cr_statement_dump_font_face_rule (CRStatement const * a_this, FILE * a_fp,
                                   glong a_indent)
 {
         gchar *str = NULL ;
@@ -2653,7 +2653,7 @@ cr_statement_dump_font_face_rule (CRStatement * a_this, FILE * a_fp,
  *Dumps an \@charset rule statement to a file.
  */
 void
-cr_statement_dump_charset (CRStatement * a_this, FILE * a_fp, gulong a_indent)
+cr_statement_dump_charset (CRStatement const * a_this, FILE * a_fp, gulong a_indent)
 {
         guchar *str = NULL;
 
@@ -2679,7 +2679,7 @@ cr_statement_dump_charset (CRStatement * a_this, FILE * a_fp, gulong a_indent)
  *Dumps an \@page rule statement on stdout.
  */
 void
-cr_statement_dump_page (CRStatement * a_this, FILE * a_fp, gulong a_indent)
+cr_statement_dump_page (CRStatement const * a_this, FILE * a_fp, gulong a_indent)
 {
         guchar *str = NULL;
 
@@ -2706,7 +2706,7 @@ cr_statement_dump_page (CRStatement * a_this, FILE * a_fp, gulong a_indent)
  *Dumps an \@media rule statement to a file.
  */
 void
-cr_statement_dump_media_rule (CRStatement * a_this, 
+cr_statement_dump_media_rule (CRStatement const * a_this,
                               FILE * a_fp,
                               gulong a_indent)
 {
@@ -2730,7 +2730,7 @@ cr_statement_dump_media_rule (CRStatement * a_this,
  *Dumps an \@import rule statement to a file.
  */
 void
-cr_statement_dump_import_rule (CRStatement * a_this, FILE * a_fp,
+cr_statement_dump_import_rule (CRStatement const * a_this, FILE * a_fp,
                                gulong a_indent)
 {
         gchar *str = NULL ;

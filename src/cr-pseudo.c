@@ -52,7 +52,7 @@ cr_pseudo_new (void)
  * string using g_free().
  */
 guchar *
-cr_pseudo_to_string (CRPseudo * a_this)
+cr_pseudo_to_string (CRPseudo const * a_this)
 {
         guchar *result = NULL;
         GString *str_buf = NULL;
@@ -128,7 +128,7 @@ cr_pseudo_to_string (CRPseudo * a_this)
  *
  */
 void
-cr_pseudo_dump (CRPseudo * a_this, FILE * a_fp)
+cr_pseudo_dump (CRPseudo const * a_this, FILE * a_fp)
 {
         guchar *tmp_str = NULL;
 

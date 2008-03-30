@@ -314,7 +314,7 @@ cr_statement_ruleset_set_sel_list (CRStatement *a_this,
 				   CRSelector *a_sel_list) ;
 
 enum CRStatus
-cr_statement_ruleset_get_sel_list (CRStatement *a_this,
+cr_statement_ruleset_get_sel_list (CRStatement const *a_this,
 				   CRSelector **a_list) ;
 
 enum CRStatus
@@ -346,11 +346,11 @@ cr_statement_at_import_rule_set_url (CRStatement *a_this,
 				     CRString *a_url) ;
 
 enum CRStatus
-cr_statement_at_import_rule_get_url (CRStatement *a_this,
+cr_statement_at_import_rule_get_url (CRStatement const *a_this,
 				     CRString **a_url) ;
 
 gint
-cr_statement_at_media_nr_rules (CRStatement *a_this) ;
+cr_statement_at_media_nr_rules (CRStatement const *a_this) ;
 
 CRStatement *
 cr_statement_at_media_get_from_list (CRStatement *a_this, int itemnr) ;
@@ -360,7 +360,7 @@ cr_statement_at_page_rule_set_sel (CRStatement *a_this,
 				   CRSelector *a_sel) ;
 
 enum CRStatus
-cr_statement_at_page_rule_get_sel (CRStatement *a_this,
+cr_statement_at_page_rule_get_sel (CRStatement const *a_this,
 				   CRSelector **a_sel) ;
 
 enum CRStatus
@@ -376,7 +376,7 @@ cr_statement_at_charset_rule_set_charset (CRStatement *a_this,
 					  CRString *a_charset) ;
 
 enum CRStatus
-cr_statement_at_charset_rule_get_charset (CRStatement *a_this,
+cr_statement_at_charset_rule_get_charset (CRStatement const *a_this,
 					  CRString **a_charset) ;
 
 enum CRStatus
@@ -393,41 +393,41 @@ cr_statement_at_font_face_rule_add_decl (CRStatement *a_this,
 					 CRTerm *a_value) ;
 
 gchar *
-cr_statement_to_string (CRStatement * a_this, gulong a_indent) ;
+cr_statement_to_string (CRStatement const * a_this, gulong a_indent) ;
 
 gchar*
-cr_statement_list_to_string (CRStatement *a_this, gulong a_indent) ;
+cr_statement_list_to_string (CRStatement const *a_this, gulong a_indent) ;
 
 void
-cr_statement_dump (CRStatement *a_this, FILE *a_fp, gulong a_indent) ;
+cr_statement_dump (CRStatement const *a_this, FILE *a_fp, gulong a_indent) ;
 
 void
-cr_statement_dump_ruleset (CRStatement * a_this, FILE * a_fp, 
+cr_statement_dump_ruleset (CRStatement const * a_this, FILE * a_fp,
                            glong a_indent) ;
 
 void
-cr_statement_dump_font_face_rule (CRStatement * a_this, 
+cr_statement_dump_font_face_rule (CRStatement const * a_this,
                                   FILE * a_fp,
                                   glong a_indent) ;
 
 void
-cr_statement_dump_page (CRStatement * a_this, FILE * a_fp, 
+cr_statement_dump_page (CRStatement const * a_this, FILE * a_fp,
                         gulong a_indent) ;
 
 
 void
-cr_statement_dump_media_rule (CRStatement * a_this, 
+cr_statement_dump_media_rule (CRStatement const * a_this,
                               FILE * a_fp,
                               gulong a_indent) ;
 
 void
-cr_statement_dump_import_rule (CRStatement * a_this, FILE * a_fp,
+cr_statement_dump_import_rule (CRStatement const * a_this, FILE * a_fp,
                                gulong a_indent) ; 
 void
-cr_statement_dump_charset (CRStatement * a_this, FILE * a_fp, 
+cr_statement_dump_charset (CRStatement const * a_this, FILE * a_fp,
                            gulong a_indent) ;
 gint
-cr_statement_nr_rules (CRStatement *a_this) ;
+cr_statement_nr_rules (CRStatement const *a_this) ;
 
 CRStatement *
 cr_statement_get_from_list (CRStatement *a_this, int itemnr) ;

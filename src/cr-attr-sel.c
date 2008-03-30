@@ -105,9 +105,9 @@ cr_attr_sel_prepend_attr_sel (CRAttrSel * a_this,
  * Returns the serialized attribute selector.
  */
 guchar *
-cr_attr_sel_to_string (CRAttrSel * a_this)
+cr_attr_sel_to_string (CRAttrSel const * a_this)
 {
-        CRAttrSel *cur = NULL;
+        CRAttrSel const *cur = NULL;
         guchar *result = NULL;
         GString *str_buf = NULL;
 
@@ -184,7 +184,7 @@ cr_attr_sel_to_string (CRAttrSel * a_this)
  * Dumps the current instance of #CRAttrSel to a file.
  */
 void
-cr_attr_sel_dump (CRAttrSel * a_this, FILE * a_fp)
+cr_attr_sel_dump (CRAttrSel const * a_this, FILE * a_fp)
 {
         guchar *tmp_str = NULL;
 
