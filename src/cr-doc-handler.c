@@ -76,6 +76,7 @@ cr_doc_handler_new (void)
         g_return_val_if_fail (result, NULL);
 
         memset (result, 0, sizeof (CRDocHandler));
+        result->ref_count++;
 
         result->priv = g_try_malloc (sizeof (CRDocHandlerPriv));
         if (!result->priv) {
