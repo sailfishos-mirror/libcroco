@@ -1,3 +1,31 @@
+0.6.2:  February 4, 2009
+
+    Bugfixes since 0.6.1
+    ====================
+
+    - #306823: improve precision of non-integer numbers [Peter Moulder]
+    - #148790, #333834: Cygwin fixes
+    - #340298: Documentation fixes [Peter Moulder]
+    - #375194: fix to builtin color processing [Dom Lachowicz]
+    - #380438: Leak and trace message in cr_token_clear [Mark Rogers]
+    - #381040: floating numbers always output to exactly 3 digits after
+               decimal points [Dom Lachowicz]
+    - #336621: cr_tknzr_get_next_token wasn't handling "<!--" correctly
+    - #372011: comments not parsed correctly [Benjamin Dauvergne]
+    - #394680: problem parsing function name starting with 'u' or 'r'
+               [Benjamin Dauvergne]
+    - #139878: keep end of ruleset parsing location, and give it to the
+               end_selector sac-handler. [Benjamin Dauvergne]
+    - #394294: Escape are wrongly computed [Benjamin Dauvergne]
+    - #314831: Escapes not recognized [Benjamin Dauvergne]
+    - #395099: overly agressive rule matching [Bruno Haible]
+    - #553937: CRDocHandler instances created with reference count of 0
+               [Robert Staudinger]
+
+    - Various fixes to the font handling [Bruno Haible]
+    - Add ‘const’ to various function prototypes [Peter Moulder]
+
+
 0.6.1:  March 5, 2006
 
     Bugfixes since 0.6.0
