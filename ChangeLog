@@ -1,3 +1,8 @@
+2009-02-17  Thomas Wood  <thos@gnome.org>
+
+	* libcroco.pc.in: ensure the library and compiler flags are not
+	hardcoded into the package config file. (bug 342370)
+
 ============= 0.6.2 release =======================
 
 2009-02-04  Thomas Wood  <thos@gnome.org>
