@@ -1,3 +1,5 @@
+DISTCHECK_CONFIGURE_FLAGS = --enable-gtk-doc
+
 SUBDIRS = src csslint docs
 SUBDIRS += tests
 

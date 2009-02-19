@@ -165,6 +165,7 @@ libcroco-zip
 croco-config
 docs/Makefile
 docs/examples/Makefile
+docs/reference/Makefile
 tests/Makefile
 tests/test-inputs/Makefile
 tests/test-output-refs/Makefile
