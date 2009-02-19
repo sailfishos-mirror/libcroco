@@ -1,3 +1,11 @@
+2009-02-19  Thomas Wood  <thos@gnome.org>
+
+	* Makefile.am:
+	* configure.in:
+	* docs/Makefile.am:
+
+	Add infrastructure to allow gtk-doc documentation to be built.
+
 2009-02-17  Thomas Wood  <thos@gnome.org>
 
 	* libcroco.pc.in: ensure the library and compiler flags are not
