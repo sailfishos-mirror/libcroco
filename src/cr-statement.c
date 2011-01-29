@@ -2611,7 +2611,7 @@ cr_statement_dump_ruleset (CRStatement const * a_this, FILE * a_fp, glong a_inde
         g_return_if_fail (a_fp && a_this);
         str = cr_statement_ruleset_to_string (a_this, a_indent);
         if (str) {
-                fprintf (a_fp, str);
+                fprintf (a_fp, "%s", str);
                 g_free (str);
                 str = NULL;
         }
@@ -2662,7 +2662,7 @@ cr_statement_dump_charset (CRStatement const * a_this, FILE * a_fp, gulong a_ind
         str = cr_statement_charset_to_string (a_this,
                                               a_indent) ;
         if (str) {
-                fprintf (a_fp, str) ;
+                fprintf (a_fp, "%s", str) ;
                 g_free (str) ;
                 str = NULL ;
         }
@@ -2689,7 +2689,7 @@ cr_statement_dump_page (CRStatement const * a_this, FILE * a_fp, gulong a_indent
 
         str = cr_statement_at_page_rule_to_string (a_this, a_indent) ;
         if (str) {
-                fprintf (a_fp, str);
+                fprintf (a_fp, "%s", str);
                 g_free (str) ;
                 str = NULL ; 
         }
@@ -2715,7 +2715,7 @@ cr_statement_dump_media_rule (CRStatement const * a_this,
 
         str = cr_statement_media_rule_to_string (a_this, a_indent) ;
         if (str) {
-                fprintf (a_fp, str) ;
+                fprintf (a_fp, "%s", str) ;
                 g_free (str) ;
                 str = NULL ;
         }
@@ -2741,7 +2741,7 @@ cr_statement_dump_import_rule (CRStatement const * a_this, FILE * a_fp,
 
         str = cr_statement_import_rule_to_string (a_this, a_indent) ;
         if (str) {
-                fprintf (a_fp, str) ;
+                fprintf (a_fp, "%s", str) ;
                 g_free (str) ;
                 str = NULL ;
         }

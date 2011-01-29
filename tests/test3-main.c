@@ -123,8 +123,7 @@ test_import_style (CRDocHandler * a_handler,
                                 guchar *str =
                                         cr_string_dup2 ((CRString *) cur->data);
                                 if (str) {
-                                        fprintf (stdout, str);
-                                        fprintf (stdout, "\n");
+                                        fprintf (stdout, "%s\n", str);
                                         g_free (str);
                                         str = NULL;
                                 }
@@ -136,8 +135,7 @@ test_import_style (CRDocHandler * a_handler,
                 if (a_uri_default_ns) {
                         guchar *str = cr_string_dup2 (a_uri_default_ns) ;
                         if (str) {
-                                fprintf (stdout, str);
-                                fprintf (stdout, "\n");
+                                fprintf (stdout, "%s\n", str);
                                 g_free (str);
                                 str = NULL;
                         }
@@ -255,7 +253,7 @@ test_property (CRDocHandler * a_handler, CRString * a_name,
         if (a_name) {
                 guchar *name = cr_string_dup2  (a_name);
                 if (name) {
-                        fprintf (stdout, name);
+                        fprintf (stdout, "%s", name);
                 }
                 if (a_expr) {
                         fprintf (stdout, ": ");
