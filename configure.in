@@ -93,6 +93,7 @@ dnl
 dnl check glib-2.0 version
 dnl
 have_glib2=no
+CROCO_HAVE_GLIB2=0
 PKG_CHECK_MODULES(GLIB2, 
 		  [glib-2.0 >= $GLIB2_VERSION],
 		  [have_glib2=yes
@@ -105,13 +106,19 @@ fi
 AC_SUBST(GLIB2_VERSION)
 AC_SUBST(CROCO_HAVE_GLIB2)
 
+dnl
 dnl check libxml2 version
+dnl
 have_libxml2=no
 CROCO_HAVE_LIBXML2=0
-PKG_CHECK_MODULES(LIBXML2, [libxml-2.0 >= $LIBXML2_VERSION],
-			   [have_libxml2=yes
-			   CROCO_HAVE_LIBXML2=1],
-			   have_libxml2=no)
+PKG_CHECK_MODULES(LIBXML2, 
+			[libxml-2.0 >= $LIBXML2_VERSION],
+			[have_libxml2=yes
+			CROCO_HAVE_LIBXML2=1],
+			have_libxml2=no)
+if test "$have_libxml2" = no ; then
+    AC_MSG_ERROR([*** libxml2 not found. See http://xmlsoft.org/])
+fi
 AC_SUBST(LIBXML2_VERSION)
 AC_SUBST(CROCO_HAVE_LIBXML2)
 
