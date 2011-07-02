@@ -24,51 +24,37 @@
 #include "cr-pseudo.h"
 
 /**
- *@CRPseudo:
+ *@file
  *The definition of the #CRPseudo class.
  */
 
 /**
- * cr_pseudo_new:
  *Constructor of the #CRPseudo class.
- *
- *Returns the newly build instance.
+ *@return the newly build instance.
  */
 CRPseudo *
 cr_pseudo_new (void)
 {
-        CRPseudo *result = NULL;
-
-        result = g_malloc0 (sizeof (CRPseudo));
+        CRPseudo *result = (CRPseudo *)g_malloc0 (sizeof (CRPseudo));
 
         return result;
 }
 
-/**
- * cr_pseudo_to_string:
- * @a_this: the current instance of #CRPseud.
- *
- * Returns the serialized pseudo. Caller must free the returned
- * string using g_free().
- */
 guchar *
-cr_pseudo_to_string (CRPseudo const * a_this)
+cr_pseudo_to_string (CRPseudo * a_this)
 {
         guchar *result = NULL;
-        GString *str_buf = NULL;
 
         g_return_val_if_fail (a_this, NULL);
 
-        str_buf = g_string_new (NULL);
+        GString *str_buf = (GString *)g_string_new (NULL);
 
         if (a_this->type == IDENT_PSEUDO) {
-                guchar *name = NULL;
 
-                if (a_this->name == NULL) {
+                if (a_this->name == NULL)
                         goto error;
-                }
 
-                name = g_strndup (a_this->name->stryng->str, 
+                gchar *name = g_strndup (a_this->name->stryng->str, 
                                   a_this->name->stryng->len);
 
                 if (name) {
@@ -77,13 +63,12 @@ cr_pseudo_to_string (CRPseudo const * a_this)
                         name = NULL;
                 }
         } else if (a_this->type == FUNCTION_PSEUDO) {
-                guchar *name = NULL,
-                        *arg = NULL;
+                gchar *arg = NULL;
 
                 if (a_this->name == NULL)
                         goto error;
 
-                name = g_strndup (a_this->name->stryng->str, 
+                gchar *name = g_strndup (a_this->name->stryng->str, 
                                   a_this->name->stryng->len);
 
                 if (a_this->extra) {
@@ -107,7 +92,7 @@ cr_pseudo_to_string (CRPseudo const * a_this)
         }
 
         if (str_buf) {
-                result = str_buf->str;
+                result = (guchar *)str_buf->str;
                 g_string_free (str_buf, FALSE);
                 str_buf = NULL;
         }
@@ -120,15 +105,12 @@ cr_pseudo_to_string (CRPseudo const * a_this)
 }
 
 /**
- * cr_pseudo_dump:
- *@a_this: the current instance of pseudo
- *@a_fp: the destination file pointer.
- *
  *Dumps the pseudo to a file.
- *
+ *@param a_this the current instance of pseudo
+ *@param a_fp the destination file pointer.
  */
 void
-cr_pseudo_dump (CRPseudo const * a_this, FILE * a_fp)
+cr_pseudo_dump (CRPseudo * a_this, FILE * a_fp)
 {
         guchar *tmp_str = NULL;
 
@@ -143,10 +125,8 @@ cr_pseudo_dump (CRPseudo const * a_this, FILE * a_fp)
 }
 
 /**
- * cr_pseudo_destroy:
- *@a_this: the current instance to destroy.
- *
  *destructor of the #CRPseudo class.
+ *@param a_this the current instance to destroy.
  */
 void
 cr_pseudo_destroy (CRPseudo * a_this)

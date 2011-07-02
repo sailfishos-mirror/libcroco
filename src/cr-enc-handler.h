@@ -21,7 +21,7 @@
  */
 
 /*
- *$Id$
+ *$Id: cr-enc-handler.h,v 1.5 2004/01/24 19:24:01 dodji Exp $
  */
 
 /**
@@ -79,8 +79,10 @@ CREncHandler *
 cr_enc_handler_get_instance (enum CREncoding a_enc) ;
 
 enum CRStatus
-cr_enc_handler_resolve_enc_alias (const guchar *a_alias_name, 
+cr_enc_handler_resolve_enc_alias (const guchar *a_en_alias, 
                                   enum CREncoding *a_enc) ;
+void
+cr_enc_handler_destroy (CREncHandler * a_enc_hdlr) ;
 
 enum CRStatus
 cr_enc_handler_convert_input (CREncHandler *a_this,

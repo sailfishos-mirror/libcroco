@@ -32,9 +32,7 @@
 CRString *
 cr_string_new (void)
 {
-	CRString *result = NULL ;
-
-	result = g_try_malloc (sizeof (CRString)) ;
+	CRString *result = (CRString *)g_try_malloc (sizeof (CRString)) ;
 	if (!result) {
 		cr_utils_trace_info ("Out of memory") ;
 		return NULL ;
@@ -53,9 +51,7 @@ cr_string_new (void)
 CRString  *
 cr_string_new_from_string (const gchar * a_string)
 {
-	CRString *result = NULL ;
-
-	result = cr_string_new () ;
+	CRString *result = cr_string_new () ;
 	if (!result) {
 		cr_utils_trace_info ("Out of memory") ;
 		return NULL ;
@@ -72,11 +68,9 @@ cr_string_new_from_string (const gchar * a_string)
  *@return the newly instanciated #CRString.
  */
 CRString *
-cr_string_new_from_gstring (GString const *a_string)
+cr_string_new_from_gstring (GString *a_string)
 {
-	CRString *result = NULL ;
-
-	result = cr_string_new () ;
+	CRString *result = cr_string_new () ;
 	if (!result) {
 		cr_utils_trace_info ("Out of memory") ;
 		return NULL ;
@@ -91,12 +85,11 @@ cr_string_new_from_gstring (GString const *a_string)
 }
 
 CRString *
-cr_string_dup (CRString const *a_this)
+cr_string_dup (CRString *a_this)
 {
-	CRString *result = NULL ;
 	g_return_val_if_fail (a_this, NULL) ;
 
-	result = cr_string_new_from_gstring (a_this->stryng) ;
+	CRString *result = cr_string_new_from_gstring (a_this->stryng) ;
 	if (!result) {
 		cr_utils_trace_info ("Out of memory") ;
 		return NULL ;
@@ -107,7 +100,7 @@ cr_string_dup (CRString const *a_this)
 }
 
 gchar *
-cr_string_dup2 (CRString const *a_this)
+cr_string_dup2 (CRString *a_this)
 {
         gchar *result = NULL ;
 
@@ -128,7 +121,7 @@ cr_string_dup2 (CRString const *a_this)
  *@param a_this the current instance of #CRString
  */
 const gchar *
-cr_string_peek_raw_str (CRString const *a_this)
+cr_string_peek_raw_str (CRString *a_this)
 {
         g_return_val_if_fail (a_this, NULL) ;
         
@@ -145,7 +138,7 @@ cr_string_peek_raw_str (CRString const *a_this)
  *of -1 if no length can be returned.
  */
 gint
-cr_string_peek_raw_str_len (CRString const *a_this)
+cr_string_peek_raw_str_len (CRString *a_this)
 {
         g_return_val_if_fail (a_this && a_this->stryng,
                               -1) ;

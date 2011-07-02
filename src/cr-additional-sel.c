@@ -26,28 +26,15 @@
 #include "string.h"
 
 /**
- * CRAdditionalSel:
- *
- * #CRAdditionalSel abstracts an additionnal selector.
- * An additional selector is the selector part
- * that comes after the combination of type selectors.
- * It can be either "a class selector (the .class part),
- * a pseudo class selector, an attribute selector 
- * or an id selector.
- */
-
-/**
- * cr_additional_sel_new:
- *
- * Default constructor of #CRAdditionalSel.
- * Returns the newly build instance of #CRAdditionalSel.
+ *Default constructor of #CRAdditionalSel.
+ *@return the newly build instance of #CRAdditionalSel.
  */
 CRAdditionalSel *
 cr_additional_sel_new (void)
 {
         CRAdditionalSel *result = NULL;
 
-        result = g_try_malloc (sizeof (CRAdditionalSel));
+        result = (CRAdditionalSel *)g_try_malloc (sizeof (CRAdditionalSel));
 
         if (result == NULL) {
                 cr_utils_trace_debug ("Out of memory");
@@ -60,12 +47,10 @@ cr_additional_sel_new (void)
 }
 
 /**
- * cr_additional_sel_new_with_type:
- * @a_sel_type: the type of the newly built instance 
- * of #CRAdditionalSel.
- *
- * Constructor of #CRAdditionalSel.
- * Returns the newly built instance of #CRAdditionalSel.
+ *Constructor of #CRAdditionalSel.
+ *@param a_sel_type the type of the newly built instance 
+ *of #CRAdditionalSel.
+ *@return the newly built instance of #CRAdditionalSel.
  */
 CRAdditionalSel *
 cr_additional_sel_new_with_type (enum AddSelectorType a_sel_type)
@@ -82,13 +67,12 @@ cr_additional_sel_new_with_type (enum AddSelectorType a_sel_type)
 }
 
 /**
- * cr_additional_sel_set_class_name:
- * @a_this: the "this pointer" of the current instance
- * of #CRAdditionalSel .
- * @a_class_name: the new class name to set.
+ *Sets a new class name to a
+ *CLASS additional selector.
+ *@param a_this the "this pointer" of the current instance
+ *of #CRAdditionalSel .
+ *@param a_class_name the new class name to set.
  *
- * Sets a new class name to a
- * CLASS additional selector.
  */
 void
 cr_additional_sel_set_class_name (CRAdditionalSel * a_this,
@@ -104,13 +88,11 @@ cr_additional_sel_set_class_name (CRAdditionalSel * a_this,
 }
 
 /**
- * cr_additional_sel_set_id_name:
- * @a_this: the "this pointer" of the current instance
- * of #CRAdditionalSel .
- * @a_id: the new id to set.
- *
- * Sets a new id name to an
- * ID additional selector.
+ *Sets a new id name to an
+ *ID additional selector.
+ *@param a_this the "this pointer" of the current instance
+ *of #CRAdditionalSel .
+ *@param a_id the new id to set.
  */
 void
 cr_additional_sel_set_id_name (CRAdditionalSel * a_this, CRString * a_id)
@@ -125,13 +107,11 @@ cr_additional_sel_set_id_name (CRAdditionalSel * a_this, CRString * a_id)
 }
 
 /**
- * cr_additional_sel_set_pseudo:
- * @a_this: the "this pointer" of the current instance
- * of #CRAdditionalSel .
- * @a_pseudo: the new pseudo to set.
- *
- * Sets a new pseudo to a
- * PSEUDO additional selector.
+ *Sets a new pseudo to a
+ *PSEUDO additional selector.
+ *@param a_this the "this pointer" of the current instance
+ *of #CRAdditionalSel .
+ *@param a_pseudo the new pseudo to set.
  */
 void
 cr_additional_sel_set_pseudo (CRAdditionalSel * a_this, CRPseudo * a_pseudo)
@@ -147,13 +127,11 @@ cr_additional_sel_set_pseudo (CRAdditionalSel * a_this, CRPseudo * a_pseudo)
 }
 
 /**
- * cr_additional_sel_set_attr_sel:
- * @a_this: the "this pointer" of the current instance
- * of #CRAdditionalSel .
- * @a_sel: the new instance of #CRAttrSel to set.
- *
- * Sets a new instance of #CRAttrSel to 
- * a ATTRIBUTE additional selector.
+ *Sets a new instance of #CRAttrSel to 
+ *a ATTRIBUTE additional selector.
+ *@param a_this the "this pointer" of the current instance
+ *of #CRAdditionalSel .
+ *@param a_sel the new instance of #CRAttrSel to set.
  */
 void
 cr_additional_sel_set_attr_sel (CRAdditionalSel * a_this, CRAttrSel * a_sel)
@@ -168,15 +146,12 @@ cr_additional_sel_set_attr_sel (CRAdditionalSel * a_this, CRAttrSel * a_sel)
 }
 
 /**
- * cr_additional_sel_append:
- * @a_this: the "this pointer" of the current instance
- * of #CRAdditionalSel .
- * @a_sel: the new instance to #CRAdditional to append.
- *
- * Appends a new instance of #CRAdditional to the
- * current list of #CRAdditional.
- *
- * Returns the new list of CRAdditionalSel or NULL if an error arises.
+ *Appends a new instance of #CRAdditional to the
+ *current list of #CRAdditional.
+ *@param a_this the "this pointer" of the current instance
+ *of #CRAdditionalSel .
+ *@param a_sel the new instance to #CRAdditional to append.
+ *@return the new list of CRAdditionalSel or NULL if an error arises.
  */
 CRAdditionalSel *
 cr_additional_sel_append (CRAdditionalSel * a_this, CRAdditionalSel * a_sel)
@@ -204,15 +179,12 @@ cr_additional_sel_append (CRAdditionalSel * a_this, CRAdditionalSel * a_sel)
 }
 
 /**
- * cr_additional_sel_prepend:
- * @a_this: the "this pointer" of the current instance
- * of #CRAdditionalSel .
- * @a_sel: the new instance to #CRAdditional to preappend.
- *
- * Preppends a new instance of #CRAdditional to the
- * current list of #CRAdditional.
- *
- * Returns the new list of CRAdditionalSel or NULL if an error arises.
+ *Preppends a new instance of #CRAdditional to the
+ *current list of #CRAdditional.
+ *@param a_this the "this pointer" of the current instance
+ *of #CRAdditionalSel .
+ *@param a_sel the new instance to #CRAdditional to preappend.
+ *@return the new list of CRAdditionalSel or NULL if an error arises.
  */
 CRAdditionalSel *
 cr_additional_sel_prepend (CRAdditionalSel * a_this, CRAdditionalSel * a_sel)
@@ -230,11 +202,11 @@ cr_additional_sel_prepend (CRAdditionalSel * a_this, CRAdditionalSel * a_sel)
 }
 
 guchar *
-cr_additional_sel_to_string (CRAdditionalSel const * a_this)
+cr_additional_sel_to_string (CRAdditionalSel * a_this)
 {
         guchar *result = NULL;
         GString *str_buf = NULL;
-        CRAdditionalSel const *cur = NULL;
+        CRAdditionalSel *cur = NULL;
 
         g_return_val_if_fail (a_this, NULL);
 
@@ -247,7 +219,7 @@ cr_additional_sel_to_string (CRAdditionalSel const * a_this)
                                 guchar *name = NULL;
 
                                 if (cur->content.class_name) {
-                                        name = g_strndup
+                                        name = (guchar *)g_strndup
                                                 (cur->content.class_name->stryng->str,
                                                  cur->content.class_name->stryng->len);
 
@@ -267,7 +239,7 @@ cr_additional_sel_to_string (CRAdditionalSel const * a_this)
                                 guchar *name = NULL;
 
                                 if (cur->content.class_name) {
-                                        name = g_strndup
+                                        name = (guchar *)g_strndup
                                                 (cur->content.id_name->stryng->str,
                                                  cur->content.id_name->stryng->len);
 
@@ -323,7 +295,7 @@ cr_additional_sel_to_string (CRAdditionalSel const * a_this)
         }
 
         if (str_buf) {
-                result = str_buf->str;
+                result = (guchar *)str_buf->str;
                 g_string_free (str_buf, FALSE);
                 str_buf = NULL;
         }
@@ -332,7 +304,7 @@ cr_additional_sel_to_string (CRAdditionalSel const * a_this)
 }
 
 guchar * 
-cr_additional_sel_one_to_string (CRAdditionalSel const *a_this)
+cr_additional_sel_one_to_string (CRAdditionalSel *a_this)
 {
         guchar *result = NULL;
         GString *str_buf = NULL;
@@ -347,7 +319,7 @@ cr_additional_sel_one_to_string (CRAdditionalSel const *a_this)
                 guchar *name = NULL;
 
                 if (a_this->content.class_name) {
-                        name = g_strndup
+                        name = (guchar *)g_strndup
                                 (a_this->content.class_name->stryng->str,
                                  a_this->content.class_name->stryng->len);
 
@@ -367,7 +339,7 @@ cr_additional_sel_one_to_string (CRAdditionalSel const *a_this)
                 guchar *name = NULL;
 
                 if (a_this->content.class_name) {
-                        name = g_strndup
+                        name = (guchar *)g_strndup
                                 (a_this->content.id_name->stryng->str,
                                  a_this->content.id_name->stryng->len);
 
@@ -422,7 +394,7 @@ cr_additional_sel_one_to_string (CRAdditionalSel const *a_this)
         }
 
         if (str_buf) {
-                result = str_buf->str;
+                result = (guchar *)str_buf->str;
                 g_string_free (str_buf, FALSE);
                 str_buf = NULL;
         }
@@ -431,15 +403,13 @@ cr_additional_sel_one_to_string (CRAdditionalSel const *a_this)
 }
 
 /**
- * cr_additional_sel_dump:
- * @a_this: the "this pointer" of the current instance of
- * #CRAdditionalSel.
- * @a_fp: the destination file.
- *
- * Dumps the current instance of #CRAdditionalSel to a file
+ *Dumps the current instance of #CRAdditionalSel to a file
+ *@param a_this the "this pointer" of the current instance of
+ *#CRAdditionalSel.
+ *@param a_fp the destination file.
  */
 void
-cr_additional_sel_dump (CRAdditionalSel const * a_this, FILE * a_fp)
+cr_additional_sel_dump (CRAdditionalSel * a_this, FILE * a_fp)
 {
         guchar *tmp_str = NULL;
 
@@ -456,11 +426,9 @@ cr_additional_sel_dump (CRAdditionalSel const * a_this, FILE * a_fp)
 }
 
 /**
- * cr_additional_sel_destroy:
- * @a_this: the "this pointer" of the current instance
- * of #CRAdditionalSel .
- *
- * Destroys an instance of #CRAdditional.
+ *Destroys an instance of #CRAdditional.
+ *@param a_this the "this pointer" of the current instance
+ *of #CRAdditionalSel .
  */
 void
 cr_additional_sel_destroy (CRAdditionalSel * a_this)
