@@ -19,7 +19,8 @@ bin_SCRIPTS=$(CROCO_CONFIG_FILE)
 #man_MANS = croco-config.1
 
 EXTRA_DIST= croco-config.in $(PKG_CONFIG_FILE) TODO Doxyfile \
-HACKING COPYING.LIB COPYING libcroco.spec libcroco-zip.in 
+HACKING COPYING.LIB COPYING libcroco.spec libcroco-zip.in \
+autogen.sh libcroco.doap
 
 all-local: $(PKG_CONFIG_FILE_UNINSTALLED) $(PKG_CONFIG_FILE) \
 $(CROCO_CONFIG_FILE_UNINSTALLED) $(CROCO_CONFIG_FILE)
