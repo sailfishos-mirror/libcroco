@@ -46,6 +46,7 @@ cr_token_clear (CRToken * a_this)
         switch (a_this->type) {
         case S_TK:
         case CDO_TK:
+        case CDC_TK:
         case INCLUDES_TK:
         case DASHMATCH_TK:
         case PAGE_SYM_TK:
@@ -132,7 +133,9 @@ cr_token_clear (CRToken * a_this)
 CRToken *
 cr_token_new (void)
 {
-        CRToken *result = (CRToken *)g_try_malloc (sizeof (CRToken));
+        CRToken *result = NULL;
+
+        result = g_try_malloc (sizeof (CRToken));
 
         if (result == NULL) {
                 cr_utils_trace_info ("Out of memory");

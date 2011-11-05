@@ -26,10 +26,7 @@
 
 #include <stdio.h>
 #include <glib.h>
-/*
- * We're disabling this #include for Inkscape: see comment in libcroco.h.
-//#include "libcroco-config.h"
- */
+#include "libcroco-config.h"
 
 G_BEGIN_DECLS
 
@@ -239,10 +236,10 @@ cr_utils_dump_n_chars2 (guchar a_char,
                         GString *a_string,
                         glong a_nb) ;
 GList *
-cr_utils_dup_glist_of_string (GList *a_list) ;
+cr_utils_dup_glist_of_string (GList const *a_list) ;
 
 GList *
-cr_utils_dup_glist_of_cr_string (GList * a_list_of_strings) ;
+cr_utils_dup_glist_of_cr_string (GList const * a_list_of_strings) ;
 
 G_END_DECLS
 

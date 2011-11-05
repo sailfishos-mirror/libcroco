@@ -30,9 +30,9 @@
 #include "cr-style.h"
 #include "cr-prop-list.h"
 
-//#ifdef CROCO_HAVE_LIBXML2
+#ifdef CROCO_HAVE_LIBXML2
  #include <libxml/tree.h>
-//#endif
+#endif
 
 
 

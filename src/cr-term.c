@@ -84,7 +84,9 @@ cr_term_clear (CRTerm * a_this)
 CRTerm *
 cr_term_new (void)
 {
-        CRTerm *result = (CRTerm *)g_try_malloc (sizeof (CRTerm));
+        CRTerm *result = NULL;
+
+        result = g_try_malloc (sizeof (CRTerm));
         if (!result) {
                 cr_utils_trace_info ("Out of memory");
                 return NULL;
@@ -104,15 +106,14 @@ CRTerm *
 cr_term_parse_expression_from_buf (const guchar * a_buf,
                                    enum CREncoding a_encoding)
 {
+        CRParser *parser = NULL;
         CRTerm *result = NULL;
         enum CRStatus status = CR_OK;
 
         g_return_val_if_fail (a_buf, NULL);
 
-        CRParser *parser = cr_parser_new_from_buf (
-		                                 (guchar*)a_buf,
-										  strlen ((char *)a_buf),
-                                          a_encoding, FALSE);
+        parser = cr_parser_new_from_buf ((guchar*)a_buf, strlen (a_buf),
+                                         a_encoding, FALSE);
         g_return_val_if_fail (parser, NULL);
 
         status = cr_parser_try_to_skip_spaces_and_comments (parser);
@@ -275,12 +276,12 @@ cr_term_prepend_term (CRTerm * a_this, CRTerm * a_new_term)
  *form of #CRTerm. MUST BE FREED BY THE CALLER using g_free().
  */
 guchar *
-cr_term_to_string (CRTerm * a_this)
+cr_term_to_string (CRTerm const * a_this)
 {
         GString *str_buf = NULL;
-        CRTerm *cur = NULL;
-        guchar *result = NULL;
-        gchar *content = NULL;
+        CRTerm const *cur = NULL;
+        guchar *result = NULL,
+                *content = NULL;
 
         g_return_val_if_fail (a_this, NULL);
 
@@ -329,7 +330,7 @@ cr_term_to_string (CRTerm * a_this)
                 switch (cur->type) {
                 case TERM_NUMBER:
                         if (cur->content.num) {
-                                content = (gchar *)cr_num_to_string (cur->content.num);
+                                content = cr_num_to_string (cur->content.num);
                         }
 
                         if (content) {
@@ -360,7 +361,7 @@ cr_term_to_string (CRTerm * a_this)
 
                                         if (tmp_str) {
                                                 g_string_append (str_buf, 
-								                    (gchar *)tmp_str);
+								 tmp_str);
                                                 g_free (tmp_str);
                                                 tmp_str = NULL;
                                         }
@@ -405,8 +406,8 @@ cr_term_to_string (CRTerm * a_this)
                 case TERM_URI:
                         if (cur->content.str) {
                                 content = g_strndup
-                                          (cur->content.str->stryng->str,
-                                           cur->content.str->stryng->len);
+                                        (cur->content.str->stryng->str,
+                                         cur->content.str->stryng->len);
                         }
 
                         if (content) {
@@ -425,7 +426,7 @@ cr_term_to_string (CRTerm * a_this)
                                 tmp_str = cr_rgb_to_string (cur->content.rgb);
 
                                 if (tmp_str) {
-                                        g_string_append (str_buf, (gchar *)tmp_str);
+                                        g_string_append (str_buf, tmp_str);
                                         g_free (tmp_str);
                                         tmp_str = NULL;
                                 }
@@ -463,7 +464,7 @@ cr_term_to_string (CRTerm * a_this)
         }
 
         if (str_buf) {
-                result = (guchar *)str_buf->str;
+                result = str_buf->str;
                 g_string_free (str_buf, FALSE);
                 str_buf = NULL;
         }
@@ -472,11 +473,11 @@ cr_term_to_string (CRTerm * a_this)
 }
 
 guchar *
-cr_term_one_to_string (CRTerm * a_this)
+cr_term_one_to_string (CRTerm const * a_this)
 {
         GString *str_buf = NULL;
-        guchar *result = NULL;
-        gchar *content = NULL;
+        guchar *result = NULL,
+                *content = NULL;
 
         g_return_val_if_fail (a_this, NULL);
 
@@ -524,7 +525,7 @@ cr_term_one_to_string (CRTerm * a_this)
         switch (a_this->type) {
         case TERM_NUMBER:
                 if (a_this->content.num) {
-                        content = (gchar *)cr_num_to_string (a_this->content.num);
+                        content = cr_num_to_string (a_this->content.num);
                 }
 
                 if (content) {
@@ -615,9 +616,10 @@ cr_term_one_to_string (CRTerm * a_this)
 
         case TERM_RGB:
                 if (a_this->content.rgb) {
+                        guchar *tmp_str = NULL;
 
                         g_string_append_printf (str_buf, "rgb(");
-                        gchar *tmp_str = (gchar *)cr_rgb_to_string (a_this->content.rgb);
+                        tmp_str = cr_rgb_to_string (a_this->content.rgb);
 
                         if (tmp_str) {
                                 g_string_append (str_buf, tmp_str);
@@ -658,7 +660,7 @@ cr_term_one_to_string (CRTerm * a_this)
         }
 
         if (str_buf) {
-                result = (guchar *)str_buf->str;
+                result = str_buf->str;
                 g_string_free (str_buf, FALSE);
                 str_buf = NULL;
         }
@@ -675,7 +677,7 @@ cr_term_one_to_string (CRTerm * a_this)
  *@param a_fp the destination file pointer.
  */
 void
-cr_term_dump (CRTerm * a_this, FILE * a_fp)
+cr_term_dump (CRTerm const * a_this, FILE * a_fp)
 {
         guchar *content = NULL;
 
@@ -695,9 +697,9 @@ cr_term_dump (CRTerm * a_this, FILE * a_fp)
  *@return number of terms in the expression.
  */
 int
-cr_term_nr_values (CRTerm *a_this)
+cr_term_nr_values (CRTerm const *a_this)
 {
-	CRTerm *cur = NULL ;
+	CRTerm const *cur = NULL ;
 	int nr = 0;
 
 	g_return_val_if_fail (a_this, -1) ;

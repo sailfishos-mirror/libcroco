@@ -23,7 +23,7 @@
  */
 
 /*
- *$Id: cr-cascade.c,v 1.6 2004/03/07 13:22:47 dodji Exp $
+ *$Id$
  */
 
 #include <string.h>
@@ -44,6 +44,11 @@ struct _CRCascadePriv {
 };
 
 /**
+ * cr_cascade_new:
+ *@a_author_sheet: the author origin style sheet.  May be NULL.
+ *@a_user_sheet: the user origin style sheet.  May be NULL.
+ *@a_ua_sheet: the user agent origin style sheet.  May be NULL.
+ *
  *Constructor of the #CRCascade class.
  *Note that all three parameters of this
  *method are ref counted and their refcount is increased.
@@ -51,26 +56,25 @@ struct _CRCascadePriv {
  *the instance of #CRCascade.
  *So the caller should not call their destructor. The caller
  *should call their ref/unref method instead if it wants
- *@param a_author_sheet the autor origin style sheet
- *@param a_user_sheet the user origin style sheet.
- *@param a_ua_sheet the user agent origin style sheet.
- *@return the newly built instance of CRCascade or NULL if
+ *
+ *Returns the newly built instance of CRCascade or NULL if
  *an error arose during constrution.
  */
 CRCascade *
 cr_cascade_new (CRStyleSheet * a_author_sheet,
                 CRStyleSheet * a_user_sheet, CRStyleSheet * a_ua_sheet)
 {
-        CRCascade *result = (CRCascade *)g_try_malloc (sizeof (CRCascade));
+        CRCascade *result = NULL;
+
+        result = g_try_malloc (sizeof (CRCascade));
         if (!result) {
                 cr_utils_trace_info ("Out of memory");
                 return NULL;
         }
         memset (result, 0, sizeof (CRCascade));
 
-        PRIVATE (result) = (CRCascadePriv *)g_try_malloc (sizeof (CRCascadePriv));
+        PRIVATE (result) = g_try_malloc (sizeof (CRCascadePriv));
         if (!PRIVATE (result)) {
-                g_free(result);
                 cr_utils_trace_info ("Out of memory");
                 return NULL;
         }
@@ -90,33 +94,40 @@ cr_cascade_new (CRStyleSheet * a_author_sheet,
 }
 
 /**
+ * cr_cascade_get_sheet:
+ *@a_this: the current instance of #CRCascade.
+ *@a_origin: the origin of the style sheet as
+ *defined in the css2 spec in chapter 6.4.
  *Gets a given origin sheet.
+ *
+ *Gets a sheet, part of the cascade.
  *Note that the returned stylesheet
  *is refcounted so if the caller wants
- *to manage its lifecycle, it must use
+ *to manage it's lifecycle, it must use
  *cr_stylesheet_ref()/cr_stylesheet_unref() instead
  *of the cr_stylesheet_destroy() method.
- *@param a_this the current instance of #CRCascade.
- *@param a_origin the origin of the style sheet as
- *defined in the css2 spec in chapter 6.4.
- *@return the style sheet, or NULL if it does not
+ *Returns the style sheet, or NULL if it does not
  *exist.
  */
 CRStyleSheet *
 cr_cascade_get_sheet (CRCascade * a_this, enum CRStyleOrigin a_origin)
 {
         g_return_val_if_fail (a_this
-                              && (unsigned)a_origin < NB_ORIGINS, NULL);
+                              && a_origin >= ORIGIN_UA
+                              && a_origin < NB_ORIGINS, NULL);
 
         return PRIVATE (a_this)->sheets[a_origin];
 }
 
 /**
+ * cr_cascade_set_sheet:
+ *@a_this: the current instance of #CRCascade.
+ *@a_sheet: the stylesheet to set.
+ *@a_origin: the origin of the stylesheet.
+ *
  *Sets a stylesheet in the cascade
- *@param a_this the current instance of #CRCascade.
- *@param a_sheet the stylesheet to set.
- *@param a_origin the origin of the stylesheet.
- *@return CR_OK upon successfull completion, an error
+ *
+ *Returns CR_OK upon successfull completion, an error
  *code otherwise.
  */
 enum CRStatus
@@ -125,7 +136,8 @@ cr_cascade_set_sheet (CRCascade * a_this,
 {
         g_return_val_if_fail (a_this
                               && a_sheet
-                              && (unsigned)a_origin < NB_ORIGINS, CR_BAD_PARAM_ERROR);
+                              && a_origin >= ORIGIN_UA
+                              && a_origin < NB_ORIGINS, CR_BAD_PARAM_ERROR);
 
         if (PRIVATE (a_this)->sheets[a_origin])
                 cr_stylesheet_unref (PRIVATE (a_this)->sheets[a_origin]);
@@ -136,10 +148,11 @@ cr_cascade_set_sheet (CRCascade * a_this,
 }
 
 /**
+ *cr_cascade_ref:
+ *@a_this: the current instance of #CRCascade
+ *
  *Increases the reference counter of the current instance
  *of #CRCascade.
- *@param a_this the current instance of #CRCascade
- *
  */
 void
 cr_cascade_ref (CRCascade * a_this)
@@ -150,12 +163,14 @@ cr_cascade_ref (CRCascade * a_this)
 }
 
 /**
+ * cr_cascade_unref:
+ *@a_this: the current instance of 
+ *#CRCascade.
+ *
  *Decrements the reference counter associated
  *to this instance of #CRCascade. If the reference
  *counter reaches zero, the instance is destroyed 
  *using cr_cascade_destroy()
- *@param a_this the current instance of 
- *#CRCascade.
  */
 void
 cr_cascade_unref (CRCascade * a_this)
@@ -170,7 +185,10 @@ cr_cascade_unref (CRCascade * a_this)
 }
 
 /**
- *Destructor of #CRCascade.
+ * cr_cascade_destroy:
+ * @a_this: the current instance of #CRCascade
+ *
+ * Destructor of #CRCascade.
  */
 void
 cr_cascade_destroy (CRCascade * a_this)

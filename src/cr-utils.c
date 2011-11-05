@@ -725,7 +725,7 @@ cr_utils_utf8_str_to_ucs4 (const guchar * a_in,
 
         g_return_val_if_fail (status == CR_OK, status);
 
-        *a_out = (guint32 *) g_malloc0 (*a_out_len * sizeof (guint32));
+        *a_out = g_malloc0 (*a_out_len * sizeof (guint32));
 
         status = cr_utils_utf8_to_ucs4 (a_in, a_in_len, *a_out, a_out_len);
 
@@ -971,7 +971,7 @@ cr_utils_ucs1_str_to_utf8 (const guchar * a_in,
 
         in_len = *a_in_len;
 
-        *a_out = (guchar *) g_malloc0 (out_len);
+        *a_out = g_malloc0 (out_len);
 
         status = cr_utils_ucs1_to_utf8 (a_in, a_in_len, *a_out, &out_len);
 
@@ -1172,7 +1172,7 @@ cr_utils_utf8_str_to_ucs1 (const guchar * a_in,
 
         g_return_val_if_fail (status == CR_OK, status);
 
-        *a_out = (guchar *) g_malloc0 (*a_out_len * sizeof (guint32));
+        *a_out = g_malloc0 (*a_out_len * sizeof (guint32));
 
         status = cr_utils_utf8_to_ucs1 (a_in, a_in_len, *a_out, a_out_len);
         return status;
@@ -1299,10 +1299,10 @@ cr_utils_dump_n_chars2 (guchar a_char, GString * a_string, glong a_nb)
  *@param a_list_of_strings the list of strings to be duplicated.
  */
 GList *
-cr_utils_dup_glist_of_string (GList * a_list_of_strings)
+cr_utils_dup_glist_of_string (GList const * a_list_of_strings)
 {
-        GList *cur = NULL,
-                *result = NULL;
+        GList const *cur = NULL;
+        GList *result = NULL;
 
         g_return_val_if_fail (a_list_of_strings, NULL);
 
@@ -1325,16 +1325,17 @@ cr_utils_dup_glist_of_string (GList * a_list_of_strings)
  *happened.
  */
 GList *
-cr_utils_dup_glist_of_cr_string (GList * a_list_of_strings)
+cr_utils_dup_glist_of_cr_string (GList const * a_list_of_strings)
 {
-        GList *cur = NULL, *result = NULL;
+        GList const *cur = NULL;
+        GList *result = NULL;
 
         g_return_val_if_fail (a_list_of_strings, NULL);
 
         for (cur = a_list_of_strings; cur; cur = cur->next) {
                 CRString *str = NULL;
 
-                str = cr_string_dup ((CRString *) cur->data) ;
+                str = cr_string_dup ((CRString const *) cur->data) ;
                 if (str)
                         result = g_list_append (result, str);
         }
