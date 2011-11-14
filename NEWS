@@ -1,3 +1,10 @@
+0.6.3:
+
+    Bugfixes since 0.6.2
+    ====================
+    - #342370: ensure the library and compiler flags are not hardcoded into the pc file
+    - add gtk-doc build infrastructure
+ 
 0.6.2:  February 4, 2009
 
     Bugfixes since 0.6.1
