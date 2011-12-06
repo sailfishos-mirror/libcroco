@@ -58,3 +58,14 @@ test:	all
 apidoc:
 	if ! test -d docs/apis ; then  mkdir -p docs/apis ;  fi ;
 	doxygen Doxyfile
+
+ChangeLog:
+	$(AM_V_GEN) if test -f $(top_srcdir)/.git/HEAD; then \
+		git log --stat > $@; \
+	fi
+
+dist: ChangeLog
+
+.PHONY: ChangeLog
+
+
