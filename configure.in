@@ -3,7 +3,7 @@ AC_PREREQ(2.5)
 AC_INIT([libcroco],[0.6.4],[http://bugzilla.gnome.org/enter_bug.cgi?product=libcroco],[libcroco])
 AC_CONFIG_SRCDIR([src/cr-input.c])
 PACKAGE=libcroco
-AC_CANONICAL_TARGET
+AC_CANONICAL_HOST
 
 AM_INIT_AUTOMAKE([1.9 no-dist-gzip dist-bzip2])
 AM_CONFIG_HEADER(config.h)
