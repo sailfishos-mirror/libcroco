@@ -28,7 +28,7 @@
 #include "cr-term.h"
 #include "cr-parser.h"
 
-static CRRgb gv_standard_colors[] = {
+static const CRRgb gv_standard_colors[] = {
         {"aliceblue", 240, 248, 255, 0,},
         {"antiquewhite", 250, 235, 215, 0},
         {"aqua", 0, 255, 255, 0},
