@@ -1,11 +1,15 @@
+NULL =
+
+lib_LTLIBRARIES=libcroco-0.6.la
+
 if PLATFORM_WIN32
 no_undefined = -no-undefined
 endif
 
 #Headers files to be distributed
-INSTALL_DIR_NAME=@PACKAGE@-@LIBCROCO_MAJOR_VERSION@.@LIBCROCO_MINOR_VERSION@
-crocoincdir=$(includedir)/$(INSTALL_DIR_NAME)/libcroco
-crocoinc_HEADERS= libcroco.h \
+crocoincdir = $(includedir)/$(PACKAGE)-$(LIBCROCO_MAJOR_VERSION).$(LIBCROCO_MINOR_VERSION)/libcroco
+crocoinc_HEADERS = \
+libcroco.h \
 cr-additional-sel.h \
 cr-attr-sel.h \
 cr-cascade.h \
@@ -32,11 +36,10 @@ cr-style.h \
 cr-prop-list.h \
 cr-parsing-location.h \
 cr-string.h \
-libcroco-config.h
+libcroco-config.h \
+$(NULL)
 
-
-#the files to be compiled
-SRCS=\
+libcroco_0_6_la_SOURCES = \
 cr-utils.c \
 cr-utils.h \
 cr-input.c \
@@ -88,13 +91,26 @@ cr-prop-list.h \
 cr-parsing-location.c \
 cr-parsing-location.h \
 cr-string.c \
-cr-string.h
+cr-string.h \
+$(NULL)
 
-lib_LTLIBRARIES=libcroco-0.6.la
-libcroco_0_6_la_SOURCES= $(SRCS)
+libcroco_0_6_la_CPPFLAGS = \
+	-I$(top_srcdir) \
+	-I$(top_srcdir)/intl \
+	-I $(top_builddir)/src \
+	$(AM_CPPFLAGS)
 
-INCLUDES=-I$(top_srcdir) -I$(top_srcdir)/intl \
--I $(top_builddir)/src @GLIB2_CFLAGS@ @LIBXML2_CFLAGS@
-libcroco_0_6_la_LDFLAGS=-version-info @LIBCROCO_VERSION_INFO@ \
-@GLIB2_CFLAGS@ @GLIB2_LIBS@ @LIBXML2_LIBS@ $(no_undefined)
-libcroco_0_6_la_LIBADD=@GLIB2_LIBS@ @LIBXML2_LIBS@
+libcroco_0_6_la_CFLAGS = \
+	@GLIB2_CFLAGS@ \
+	@LIBXML2_CFLAGS@ \
+	$(AM_CFLAGS)
+
+libcroco_0_6_la_LDFLAGS = \
+	-version-info @LIBCROCO_VERSION_INFO@ \
+	$(no_undefined) \
+	$(BSYMBOLIC_LDFLAG) \
+	$(AM_LDFLAGS)
+
+libcroco_0_6_la_LIBADD = \
+	@GLIB2_LIBS@ \
+	@LIBXML2_LIBS@
