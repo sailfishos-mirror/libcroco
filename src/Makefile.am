@@ -101,8 +101,7 @@ libcroco_0_6_la_CPPFLAGS = \
 	$(AM_CPPFLAGS)
 
 libcroco_0_6_la_CFLAGS = \
-	@GLIB2_CFLAGS@ \
-	@LIBXML2_CFLAGS@ \
+	$(CROCO_CFLAGS) \
 	$(AM_CFLAGS)
 
 libcroco_0_6_la_LDFLAGS = \
@@ -112,5 +111,4 @@ libcroco_0_6_la_LDFLAGS = \
 	$(AM_LDFLAGS)
 
 libcroco_0_6_la_LIBADD = \
-	@GLIB2_LIBS@ \
-	@LIBXML2_LIBS@
+	$(CROCO_LIBS)

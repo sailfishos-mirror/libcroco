@@ -9,10 +9,9 @@ LDADD=$(croco_lib)
 INCLUDES=-I$(top_srcdir)/intl \
 	-I$(top_srcdir)/src \
 	-I$(top_builddir)/src \
-	@GLIB2_CFLAGS@ \
-	@LIBXML2_CFLAGS@
+	$(CROCO_CFLAGS)
 
-csslint_0_6_LDFLAGS=@GLIB2_LIBS@ @LIBXML2_LIBS@
+csslint_0_6_LDFLAGS=$(CROCO_LIBS)
 AM_CFLAGS=$(INCLUDES)
 
 #EXTRA_DIST = $(man_MANS)

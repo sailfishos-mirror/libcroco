@@ -43,8 +43,10 @@ content_files=\
 # CFLAGS and LDFLAGS for compiling scan program. Only needed if your app/lib
 # contains GtkObjects/GObjects and you want to document signals and properties.
 GTKDOC_CFLAGS=\
+	$(CROCO_CFLAGS) \
 	$(NULL)
 GTKDOC_LIBS=\
+	$(CROCO_LIBS) \
 	$(NULL)
 
 include $(top_srcdir)/gtk-doc.make

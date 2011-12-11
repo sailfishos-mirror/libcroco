@@ -12,7 +12,6 @@
 #endif
 #endif
 
-#if @CROCO_HAVE_LIBXML2@
-#define CROCO_HAVE_LIBXML2 @CROCO_HAVE_LIBXML2@
+#ifndef CROCO_HAVE_LIBXML2
+#define CROCO_HAVE_LIBXML2 (1)
 #endif
-

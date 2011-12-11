@@ -6,7 +6,7 @@ test-several-media.sh
 
 #the list of all possible tests goes here.
 
-EXTRALDFLAGS=@GLIB2_LIBS@ @LIBXML2_LIBS@
+EXTRALDFLAGS=$(CROCO_LIBS)
 testprogs=test0 test1 test2 test3 test4 test5 test6
 noinst_PROGRAMS=$(testprogs)
 test0_SOURCES=test0-main.c
@@ -29,4 +29,4 @@ LDADD=$(croco_lib)
 
 INCLUDES=-I$(top_srcdir)/intl -I$(top_srcdir)/src -I$(top_builddir)/src
 
-AM_CFLAGS=-I. @LIBXML2_CFLAGS@ @GLIB2_CFLAGS@
+AM_CFLAGS=-I. $(CROCO_CFLAGS)
