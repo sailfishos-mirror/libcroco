@@ -459,7 +459,7 @@ cr_rgb_color_name_compare (const void *a,
         const char *a_color_name = a;
         const CRRgb *rgb = b;
 
-        return strcmp (a_color_name, (const char *) rgb->name);
+        return g_ascii_strcasecmp (a_color_name, (const char *) rgb->name);
 }
 
 /**
