@@ -21,9 +21,11 @@
  * See COPYRIGHTS file for copyrights information.
  */
 
+#include "config.h"
 
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
 #include "cr-rgb.h"
 #include "cr-term.h"
 #include "cr-parser.h"
@@ -450,30 +452,38 @@ cr_rgb_set_from_rgb (CRRgb * a_this, CRRgb const * a_rgb)
         return CR_OK;
 }
 
+static int
+cr_rgb_color_name_compare (const void *a,
+                           const void *b)
+{
+        const char *a_color_name = a;
+        const CRRgb *rgb = b;
+
+        return strcmp (a_color_name, (const char *) rgb->name);
+}
+
 /**
  * cr_rgb_set_from_name:
  * @a_this: the current instance of #CRRgb
  * @a_color_name: the color name
- * 
+ *
  * Returns CR_OK upon successful completion, an error code otherwise.
  */
 enum CRStatus
 cr_rgb_set_from_name (CRRgb * a_this, const guchar * a_color_name)
 {
-        gulong i = 0;
         enum CRStatus status = CR_OK;
+        CRRgb *result;
 
         g_return_val_if_fail (a_this && a_color_name, CR_BAD_PARAM_ERROR);
 
-        for (i = 0; i < G_N_ELEMENTS (gv_standard_colors); i++) {
-                if (!strcmp (a_color_name, gv_standard_colors[i].name)) {
-                        cr_rgb_set_from_rgb (a_this, &gv_standard_colors[i]);
-                        break;
-                }
-        }
-
-        if (i < G_N_ELEMENTS (gv_standard_colors))
-                status = CR_OK;
+        result = bsearch (a_color_name,
+                          gv_standard_colors,
+                          G_N_ELEMENTS (gv_standard_colors),
+                          sizeof (gv_standard_colors[0]),
+                          cr_rgb_color_name_compare);
+        if (result != NULL)
+                cr_rgb_set_from_rgb (a_this, result);
         else
                status = CR_UNKNOWN_TYPE_ERROR;
 
