@@ -1,6 +1,7 @@
 DISTCHECK_CONFIGURE_FLAGS = --enable-gtk-doc
 
-SUBDIRS = src csslint docs tests build
+SUBDIRS = src csslint docs
+SUBDIRS += tests
 
 PKG_CONFIG_FILE_UNINSTALLED=libcroco-@LIBCROCO_MAJOR_VERSION@.@LIBCROCO_MINOR_VERSION@-uninstalled.pc
 PKG_CONFIG_FILE=libcroco-@LIBCROCO_MAJOR_VERSION@.@LIBCROCO_MINOR_VERSION@.pc
@@ -19,7 +20,7 @@ bin_SCRIPTS=$(CROCO_CONFIG_FILE)
 
 EXTRA_DIST= croco-config.in $(PKG_CONFIG_FILE) TODO Doxyfile \
 HACKING COPYING.LIB COPYING libcroco.spec libcroco-zip.in \
-autogen.sh libcroco.doap config.h.win32.in config.h.win32
+autogen.sh libcroco.doap
 
 all-local: $(PKG_CONFIG_FILE_UNINSTALLED) $(PKG_CONFIG_FILE) \
 $(CROCO_CONFIG_FILE_UNINSTALLED) $(CROCO_CONFIG_FILE)
