@@ -112,3 +112,37 @@ libcroco_0_6_la_LDFLAGS = \
 
 libcroco_0_6_la_LIBADD = \
 	$(CROCO_LIBS)
+
+EXTRA_DIST = libcroco.symbols
+
+dist-hook: ../build/win32/vs9/croco.vcproj ../build/win32/vs10/croco.vcxproj ../build/win32/vs10/croco.vcxproj.filters
+
+../build/win32/vs9/croco.vcproj: $(top_srcdir)/build/win32/vs9/croco.vcprojin
+	for F in $(libcroco_0_6_la_SOURCES); do \
+		case $$F in \
+		*.c) echo '   <File RelativePath="..\..\..\src\'$$F'" />' \
+		     ;; \
+		esac; \
+	done >libcroco.sourcefiles
+	$(CPP) -P - <$(top_srcdir)/build/win32/vs9/croco.vcprojin >$@
+	rm libcroco.sourcefiles
+
+../build/win32/vs10/croco.vcxproj: $(top_srcdir)/build/win32/vs10/croco.vcxprojin
+	for F in $(libcroco_0_6_la_SOURCES); do \
+		case $$F in \
+		*.c) echo '    <ClCompile Include="..\..\..\src\'$$F'" />' \
+		     ;; \
+		esac; \
+	done >libcroco.vs10.sourcefiles
+	$(CPP) -P - <$(top_srcdir)/build/win32/vs10/croco.vcxprojin >$@
+	rm libcroco.vs10.sourcefiles
+
+../build/win32/vs10/croco.vcxproj.filters: $(top_srcdir)/build/win32/vs10/croco.vcxproj.filtersin
+	for F in $(libcroco_0_6_la_SOURCES); do \
+		case $$F in \
+		*.c) echo '    <ClCompile Include="..\..\..\src\'$$F'"><Filter>Source Files</Filter></ClCompile>' \
+		     ;; \
+		esac; \
+	done >libcroco.vs10.sourcefiles.filters
+	$(CPP) -P - <$(top_srcdir)/build/win32/vs10/croco.vcxproj.filtersin >$@
+	rm libcroco.vs10.sourcefiles.filters
