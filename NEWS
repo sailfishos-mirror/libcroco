@@ -1,3 +1,12 @@
+0.6.4
+
+    Changes & Bugfixes since 0.6.3
+    ==============================
+    * Use -Bsymbolic-functions when available
+    * Modernise and simplify configure
+    * #666248: vc++ compilation support
+    * #640897: fix format string warning in testcase
+
 0.6.3:
 
     Bugfixes since 0.6.2
