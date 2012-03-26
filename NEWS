@@ -1,3 +1,9 @@
+0.6.5
+
+    Changes & Bugfixes since 0.6.4
+    ==============================
+    * Fix mapping of 'green' colour (#672332)
+
 0.6.4
 
     Changes & Bugfixes since 0.6.3
