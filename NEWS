@@ -1,3 +1,6 @@
+0.6.6
+    * Mem leak fixes (#678736)
+
 0.6.5
 
     Changes & Bugfixes since 0.6.4
