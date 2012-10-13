@@ -1,3 +1,7 @@
+0.6.6.6
+    * Fix 'green' colour (#685679)
+    * Build fixes
+
 0.6.6
     * Mem leak fixes (#678736)
 
