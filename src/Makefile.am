@@ -97,7 +97,7 @@ $(NULL)
 libcroco_0_6_la_CPPFLAGS = \
 	-I$(top_srcdir) \
 	-I$(top_srcdir)/intl \
-	-I $(top_builddir)/src \
+	-I$(top_builddir)/src \
 	$(AM_CPPFLAGS)
 
 libcroco_0_6_la_CFLAGS = \
