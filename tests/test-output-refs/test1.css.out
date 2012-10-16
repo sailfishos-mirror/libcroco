@@ -309,6 +309,8 @@ border-left-width : 1px;
 
 .postbody { line-height: 18px} 
 
- 
+.magic {
+    margin-left: -20px;
+} 
 
 /* END of formIE.css */ 
