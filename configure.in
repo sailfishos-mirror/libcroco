@@ -5,7 +5,7 @@ AC_CONFIG_SRCDIR([src/cr-input.c])
 AC_CANONICAL_HOST
 
 AM_INIT_AUTOMAKE([1.9 no-dist-gzip dist-bzip2])
-AM_CONFIG_HEADER(config.h)
+AC_CONFIG_HEADERS([config.h])
 
 if test -z "$enable_maintainer_mode"; then
   enable_maintainer_mode=yes
