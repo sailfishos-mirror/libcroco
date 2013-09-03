@@ -266,7 +266,7 @@ cr_additional_sel_to_string (CRAdditionalSel const * a_this)
                         {
                                 guchar *name = NULL;
 
-                                if (cur->content.class_name) {
+                                if (cur->content.id_name) {
                                         name = (guchar *) g_strndup
                                                 (cur->content.id_name->stryng->str,
                                                  cur->content.id_name->stryng->len);
@@ -366,7 +366,7 @@ cr_additional_sel_one_to_string (CRAdditionalSel const *a_this)
         {
                 guchar *name = NULL;
 
-                if (a_this->content.class_name) {
+                if (a_this->content.id_name) {
                         name = (guchar *) g_strndup
                                 (a_this->content.id_name->stryng->str,
                                  a_this->content.id_name->stryng->len);
