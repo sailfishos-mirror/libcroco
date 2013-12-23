@@ -1,6 +1,6 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 11.00
-# Visual C++ Express 2010
+# Visual Studio 2010
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "croco", "croco.vcxproj", "{4AFE9F9B-7F78-41A8-B066-C7CA89938ABA}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "csslint", "csslint.vcxproj", "{345080B1-9C5B-44B8-98D7-7381D50F3E13}"

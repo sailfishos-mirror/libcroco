@@ -45,12 +45,20 @@ copy ..\..\..\config.h.win32 ..\..\..\config.h&#x0D;&#x0A;
 "
 	/>
 	<UserMacro
-		Name="LibCrocoApiVersion"
+		Name="ApiVersion"
 		Value="@LIBCROCO_MAJOR_VERSION@.@LIBCROCO_MINOR_VERSION@"
 	/>
 	<UserMacro
+		Name="VSVer"
+		Value="9"
+	/>
+	<UserMacro
 		Name="GlibEtcInstallRoot"
-		Value="..\..\..\..\..\vs9\$(PlatformName)"
+		Value="$(SolutionDir)\..\..\..\..\vs$(VSVer)\$(PlatformName)"
+	/>
+	<UserMacro
+		Name="DefDir"
+		Value="$(SolutionDir)$(ConfigurationName)\$(PlatformName)\obj\$(ProjectName)"
 	/>
 	<UserMacro
 		Name="LibCrocoDoInstall"
@@ -60,46 +68,46 @@ mkdir $(GlibEtcInstallRoot)\bin&#x0D;&#x0A;
 copy $(SolutionDir)$(ConfigurationName)\$(PlatformName)\bin\*.dll $(GlibEtcInstallRoot)\bin&#x0D;&#x0A;
 copy $(SolutionDir)$(ConfigurationName)\$(PlatformName)\bin\*.exe $(GlibEtcInstallRoot)\bin&#x0D;&#x0A;
 
-mkdir $(GlibEtcInstallRoot)\include\libcroco-$(LibCrocoApiVersion)\libcroco&#x0D;&#x0A;
-copy ..\..\..\src\libcroco.h $(GlibEtcInstallRoot)\include\libcroco-$(LibCrocoApiVersion)\libcroco&#x0D;&#x0A;
-copy ..\..\..\src\libcroco-config.h $(GlibEtcInstallRoot)\include\libcroco-$(LibCrocoApiVersion)\libcroco&#x0D;&#x0A;
-copy ..\..\..\src\cr-additional-sel.h $(GlibEtcInstallRoot)\include\libcroco-$(LibCrocoApiVersion)\libcroco&#x0D;&#x0A;
-copy ..\..\..\src\cr-attr-sel.h $(GlibEtcInstallRoot)\include\libcroco-$(LibCrocoApiVersion)\libcroco&#x0D;&#x0A;
-copy ..\..\..\src\cr-cascade.h $(GlibEtcInstallRoot)\include\libcroco-$(LibCrocoApiVersion)\libcroco&#x0D;&#x0A;
-copy ..\..\..\src\cr-declaration.h $(GlibEtcInstallRoot)\include\libcroco-$(LibCrocoApiVersion)\libcroco&#x0D;&#x0A;
-copy ..\..\..\src\cr-doc-handler.h $(GlibEtcInstallRoot)\include\libcroco-$(LibCrocoApiVersion)\libcroco&#x0D;&#x0A;
-copy ..\..\..\src\cr-enc-handler.h $(GlibEtcInstallRoot)\include\libcroco-$(LibCrocoApiVersion)\libcroco&#x0D;&#x0A;
-copy ..\..\..\src\cr-fonts.h $(GlibEtcInstallRoot)\include\libcroco-$(LibCrocoApiVersion)\libcroco&#x0D;&#x0A;
-copy ..\..\..\src\cr-input.h $(GlibEtcInstallRoot)\include\libcroco-$(LibCrocoApiVersion)\libcroco&#x0D;&#x0A;
-copy ..\..\..\src\cr-num.h $(GlibEtcInstallRoot)\include\libcroco-$(LibCrocoApiVersion)\libcroco&#x0D;&#x0A;
-copy ..\..\..\src\cr-om-parser.h $(GlibEtcInstallRoot)\include\libcroco-$(LibCrocoApiVersion)\libcroco&#x0D;&#x0A;
-copy ..\..\..\src\cr-parser.h $(GlibEtcInstallRoot)\include\libcroco-$(LibCrocoApiVersion)\libcroco&#x0D;&#x0A;
-copy ..\..\..\src\cr-parsing-location.h $(GlibEtcInstallRoot)\include\libcroco-$(LibCrocoApiVersion)\libcroco&#x0D;&#x0A;
-copy ..\..\..\src\cr-prop-list.h $(GlibEtcInstallRoot)\include\libcroco-$(LibCrocoApiVersion)\libcroco&#x0D;&#x0A;
-copy ..\..\..\src\cr-pseudo.h $(GlibEtcInstallRoot)\include\libcroco-$(LibCrocoApiVersion)\libcroco&#x0D;&#x0A;
-copy ..\..\..\src\cr-rgb.h $(GlibEtcInstallRoot)\include\libcroco-$(LibCrocoApiVersion)\libcroco&#x0D;&#x0A;
-copy ..\..\..\src\cr-selector.h $(GlibEtcInstallRoot)\include\libcroco-$(LibCrocoApiVersion)\libcroco&#x0D;&#x0A;
-copy ..\..\..\src\cr-sel-eng.h $(GlibEtcInstallRoot)\include\libcroco-$(LibCrocoApiVersion)\libcroco&#x0D;&#x0A;
-copy ..\..\..\src\cr-simple-sel.h $(GlibEtcInstallRoot)\include\libcroco-$(LibCrocoApiVersion)\libcroco&#x0D;&#x0A;
-copy ..\..\..\src\cr-statement.h $(GlibEtcInstallRoot)\include\libcroco-$(LibCrocoApiVersion)\libcroco&#x0D;&#x0A;
-copy ..\..\..\src\cr-string.h $(GlibEtcInstallRoot)\include\libcroco-$(LibCrocoApiVersion)\libcroco&#x0D;&#x0A;
-copy ..\..\..\src\cr-stylesheet.h $(GlibEtcInstallRoot)\include\libcroco-$(LibCrocoApiVersion)\libcroco&#x0D;&#x0A;
-copy ..\..\..\src\cr-style.h $(GlibEtcInstallRoot)\include\libcroco-$(LibCrocoApiVersion)\libcroco&#x0D;&#x0A;
-copy ..\..\..\src\cr-term.h $(GlibEtcInstallRoot)\include\libcroco-$(LibCrocoApiVersion)\libcroco&#x0D;&#x0A;
-copy ..\..\..\src\cr-tknzr.h $(GlibEtcInstallRoot)\include\libcroco-$(LibCrocoApiVersion)\libcroco&#x0D;&#x0A;
-copy ..\..\..\src\cr-token.h $(GlibEtcInstallRoot)\include\libcroco-$(LibCrocoApiVersion)\libcroco&#x0D;&#x0A;
-copy ..\..\..\src\cr-utils.h $(GlibEtcInstallRoot)\include\libcroco-$(LibCrocoApiVersion)\libcroco&#x0D;&#x0A;
+mkdir $(GlibEtcInstallRoot)\include\libcroco-$(ApiVersion)\libcroco&#x0D;&#x0A;
+copy ..\..\..\src\libcroco.h $(GlibEtcInstallRoot)\include\libcroco-$(ApiVersion)\libcroco&#x0D;&#x0A;
+copy ..\..\..\src\libcroco-config.h $(GlibEtcInstallRoot)\include\libcroco-$(ApiVersion)\libcroco&#x0D;&#x0A;
+copy ..\..\..\src\cr-additional-sel.h $(GlibEtcInstallRoot)\include\libcroco-$(ApiVersion)\libcroco&#x0D;&#x0A;
+copy ..\..\..\src\cr-attr-sel.h $(GlibEtcInstallRoot)\include\libcroco-$(ApiVersion)\libcroco&#x0D;&#x0A;
+copy ..\..\..\src\cr-cascade.h $(GlibEtcInstallRoot)\include\libcroco-$(ApiVersion)\libcroco&#x0D;&#x0A;
+copy ..\..\..\src\cr-declaration.h $(GlibEtcInstallRoot)\include\libcroco-$(ApiVersion)\libcroco&#x0D;&#x0A;
+copy ..\..\..\src\cr-doc-handler.h $(GlibEtcInstallRoot)\include\libcroco-$(ApiVersion)\libcroco&#x0D;&#x0A;
+copy ..\..\..\src\cr-enc-handler.h $(GlibEtcInstallRoot)\include\libcroco-$(ApiVersion)\libcroco&#x0D;&#x0A;
+copy ..\..\..\src\cr-fonts.h $(GlibEtcInstallRoot)\include\libcroco-$(ApiVersion)\libcroco&#x0D;&#x0A;
+copy ..\..\..\src\cr-input.h $(GlibEtcInstallRoot)\include\libcroco-$(ApiVersion)\libcroco&#x0D;&#x0A;
+copy ..\..\..\src\cr-num.h $(GlibEtcInstallRoot)\include\libcroco-$(ApiVersion)\libcroco&#x0D;&#x0A;
+copy ..\..\..\src\cr-om-parser.h $(GlibEtcInstallRoot)\include\libcroco-$(ApiVersion)\libcroco&#x0D;&#x0A;
+copy ..\..\..\src\cr-parser.h $(GlibEtcInstallRoot)\include\libcroco-$(ApiVersion)\libcroco&#x0D;&#x0A;
+copy ..\..\..\src\cr-parsing-location.h $(GlibEtcInstallRoot)\include\libcroco-$(ApiVersion)\libcroco&#x0D;&#x0A;
+copy ..\..\..\src\cr-prop-list.h $(GlibEtcInstallRoot)\include\libcroco-$(ApiVersion)\libcroco&#x0D;&#x0A;
+copy ..\..\..\src\cr-pseudo.h $(GlibEtcInstallRoot)\include\libcroco-$(ApiVersion)\libcroco&#x0D;&#x0A;
+copy ..\..\..\src\cr-rgb.h $(GlibEtcInstallRoot)\include\libcroco-$(ApiVersion)\libcroco&#x0D;&#x0A;
+copy ..\..\..\src\cr-selector.h $(GlibEtcInstallRoot)\include\libcroco-$(ApiVersion)\libcroco&#x0D;&#x0A;
+copy ..\..\..\src\cr-sel-eng.h $(GlibEtcInstallRoot)\include\libcroco-$(ApiVersion)\libcroco&#x0D;&#x0A;
+copy ..\..\..\src\cr-simple-sel.h $(GlibEtcInstallRoot)\include\libcroco-$(ApiVersion)\libcroco&#x0D;&#x0A;
+copy ..\..\..\src\cr-statement.h $(GlibEtcInstallRoot)\include\libcroco-$(ApiVersion)\libcroco&#x0D;&#x0A;
+copy ..\..\..\src\cr-string.h $(GlibEtcInstallRoot)\include\libcroco-$(ApiVersion)\libcroco&#x0D;&#x0A;
+copy ..\..\..\src\cr-stylesheet.h $(GlibEtcInstallRoot)\include\libcroco-$(ApiVersion)\libcroco&#x0D;&#x0A;
+copy ..\..\..\src\cr-style.h $(GlibEtcInstallRoot)\include\libcroco-$(ApiVersion)\libcroco&#x0D;&#x0A;
+copy ..\..\..\src\cr-term.h $(GlibEtcInstallRoot)\include\libcroco-$(ApiVersion)\libcroco&#x0D;&#x0A;
+copy ..\..\..\src\cr-tknzr.h $(GlibEtcInstallRoot)\include\libcroco-$(ApiVersion)\libcroco&#x0D;&#x0A;
+copy ..\..\..\src\cr-token.h $(GlibEtcInstallRoot)\include\libcroco-$(ApiVersion)\libcroco&#x0D;&#x0A;
+copy ..\..\..\src\cr-utils.h $(GlibEtcInstallRoot)\include\libcroco-$(ApiVersion)\libcroco&#x0D;&#x0A;
 
 mkdir $(GlibEtcInstallRoot)\lib&#x0D;&#x0A;
-copy $(SolutionDir)$(ConfigurationName)\$(PlatformName)\bin\*-$(LibCrocoApiVersion).lib $(GlibEtcInstallRoot)\lib&#x0D;&#x0A;
+copy $(SolutionDir)$(ConfigurationName)\$(PlatformName)\bin\*-$(ApiVersion).lib $(GlibEtcInstallRoot)\lib&#x0D;&#x0A;
 "
 	/>
 	<UserMacro
 		Name="GenerateLibCrocoDef"
 		Value="
-if exist $(IntDir)\libcroco.def goto END&#x0D;&#x0A;
-echo EXPORTS &gt; $(IntDir)\libcroco.def&#x0D;&#x0A;
-cl  /EP ..\..\..\src\libcroco.symbols &gt;&gt; $(IntDir)\libcroco.def&#x0D;&#x0A;
+if exist $(DefDir)\libcroco.def goto END&#x0D;&#x0A;
+echo EXPORTS &gt; $(DefDir)\libcroco.def&#x0D;&#x0A;
+cl  /EP ..\..\..\src\libcroco.symbols &gt;&gt; $(DefDir)\libcroco.def&#x0D;&#x0A;
 :END&#x0D;&#x0A;
 			  "
 	/>
@@ -109,24 +117,24 @@ cl  /EP ..\..\..\src\libcroco.symbols &gt;&gt; $(IntDir)\libcroco.def&#x0D;&#x0A
 	/>
 	<UserMacro
 		Name="LibCrocoLibtoolCompatibleDllSuffix"
-		Value="-@LIBCROCO_MAJOR_VERSION@.@LIBCROCO_MINOR_VERSION@-0"
+		Value="-$(ApiVersion)-0"
 	/>
 	<UserMacro
-		Name="LibCrocoSeparateVS9DllPrefix"
+		Name="LibCrocoSeparateVSDllPrefix"
 		Value=""
 	/>
 	<UserMacro
-		Name="LibCrocoSeparateVS9DllSuffix"
-		Value="-@LIBCROCO_MAJOR_VERSION@.@LIBCROCO_MINOR_VERSION@-vs9"
+		Name="LibCrocoSeparateVSDllSuffix"
+		Value="-$(ApiVersion)-vs$(VSVer)"
 	/>
 	<!-- Change these two to LibCrocoLibtoolCompatibleDllPrefix and
 	LibCrocoLibtoolCompatibleDllSuffix if that is what you want -->
 	<UserMacro
 		Name="LibCrocoDllPrefix"
-		Value="$(LibCrocoSeparateVS9DllPrefix)"
+		Value="$(LibCrocoSeparateVSDllPrefix)"
 	/>
 	<UserMacro
 		Name="LibCrocoDllSuffix"
-		Value="$(LibCrocoSeparateVS9DllSuffix)"
+		Value="$(LibCrocoSeparateVSDllSuffix)"
 	/>
 </VisualStudioPropertySheet>
