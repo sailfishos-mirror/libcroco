@@ -1676,7 +1676,7 @@ set_prop_white_space_from_value (CRStyle * a_style, CRTerm * a_value)
 				a_style->white_space = WHITE_SPACE_NORMAL;
 			} else if (!strcmp (a_value->content.str->stryng->str, 
                                             "pre")) {
-				a_style->font_weight = WHITE_SPACE_PRE;
+				a_style->white_space = WHITE_SPACE_PRE;
 			} else if (!strcmp (a_value->content.str->stryng->str,
                                             "nowrap")) {
 				a_style->white_space = WHITE_SPACE_NOWRAP;
