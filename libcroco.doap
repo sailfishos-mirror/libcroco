@@ -9,8 +9,8 @@
   <description>A CSS parsing library</description>
   <homepage rdf:resource="http://www.linuxfromscratch.org/blfs/view/svn/general/libcroco.html" />
   <mailing-list rdf:resource="http://mail.gnome.org/mailman/listinfo/libcroco-list" />
-  <download-page rdf:resource="http://ftp.gnome.org/pub/GNOME/sources/libcroco/0.6/" />
-  <category rdf:resource="http://api.gnome.org/doap-extensions#platform" />
+  <download-page rdf:resource="https://download.gnome.org/sources/libcroco/" />
+  <category rdf:resource="http://api.gnome.org/doap-extensions#core" />
 
   <maintainer>
     <foaf:Person>
