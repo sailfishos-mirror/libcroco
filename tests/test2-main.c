@@ -111,6 +111,8 @@ test_import_style (CRDocHandler * a_handler,
                    CRString * a_uri_default_ns,
                    CRParsingLocation *a_location)
 {
+	(void) a_uri;
+
         g_return_if_fail (a_handler) ;
 
         fprintf (stdout, "****************\n");

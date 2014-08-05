@@ -109,6 +109,8 @@ test_import_style (CRDocHandler * a_handler,
 {
         g_return_if_fail (a_handler);
 
+	(void) a_uri;
+
         fprintf (stdout, "****************\n");
         fprintf (stdout, "import_style\n");
 

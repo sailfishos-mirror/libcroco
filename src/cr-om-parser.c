@@ -386,6 +386,9 @@ end_page (CRDocHandler * a_this,
         ParsingContext **ctxtptr = NULL;
         CRStatement *stmt = NULL;
 
+        (void) a_page;
+        (void) a_pseudo_page;
+
         g_return_if_fail (a_this);
 	ctxtptr = &ctxt;
         status = cr_doc_handler_get_ctxt (a_this, (gpointer *) ctxtptr);
@@ -449,6 +452,8 @@ end_media (CRDocHandler * a_this, GList * a_media_list)
         ParsingContext **ctxtptr = NULL;
         CRStatement *stmts = NULL;
 
+        (void) a_media_list;
+
         g_return_if_fail (a_this);
 	ctxtptr = &ctxt;
         status = cr_doc_handler_get_ctxt (a_this, (gpointer *) ctxtptr);
@@ -487,6 +492,8 @@ import_style (CRDocHandler * a_this,
         ParsingContext *ctxt = NULL;
         ParsingContext **ctxtptr = NULL;
         GList *media_list = NULL ;
+
+        (void) a_uri_default_ns;
 
         g_return_if_fail (a_this);
 	ctxtptr = &ctxt;
@@ -560,6 +567,8 @@ end_selector (CRDocHandler * a_this, CRSelector * a_selector_list)
         enum CRStatus status = CR_OK;
         ParsingContext *ctxt = NULL;
         ParsingContext **ctxtptr = NULL;
+
+        (void) a_selector_list;
 
         g_return_if_fail (a_this);
 	ctxtptr = &ctxt;
