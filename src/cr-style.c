@@ -465,7 +465,7 @@ set_prop_padding_x_from_value (CRStyle * a_style,
                 if (a_value->content.str
                     && a_value->content.str->stryng
 		    && a_value->content.str->stryng->str
-                    && !strncmp ((guchar *) "inherit",
+                    && !strncmp ((const char *) "inherit",
                                  a_value->content.str->stryng->str,
                                  sizeof ("inherit")-1)) {
 			status = cr_num_set (num_val, 0.0, NUM_INHERIT);

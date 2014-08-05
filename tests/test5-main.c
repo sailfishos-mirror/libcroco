@@ -160,7 +160,7 @@ test_sel_eng (guchar * a_file_uri)
                 goto error;
         }
 
-        xml_doc = xmlParseMemory (xml_content, strlen (xml_content));
+        xml_doc = xmlParseMemory ((const char *) xml_content, strlen ((const char *) xml_content));
         if (!xml_doc) {
                 cr_utils_trace_info ("Could not parse xml content");
                 goto error;

@@ -367,7 +367,7 @@ evaluate_selectors (gchar * a_xml_path,
                         ("Error: Could not instanciate the xpath context\n");
                 return CR_ERROR;
         }
-        xpath_object = xmlXPathEvalExpression (a_xpath, xpath_context);
+        xpath_object = xmlXPathEvalExpression ((const xmlChar *) a_xpath, xpath_context);
         if (!xpath_object) {
                 g_printerr ("Error: Could not evaluate xpath expression\n");
                 return CR_ERROR;

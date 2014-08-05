@@ -711,7 +711,7 @@ cr_declaration_get_by_prop_name (CRDeclaration * a_this,
 		    && cur->property->stryng
 		    && cur->property->stryng->str) {
 			if (!strcmp (cur->property->stryng->str, 
-				     a_prop)) {
+				     (const char *) a_prop)) {
 				return cur;
 			}
 		}

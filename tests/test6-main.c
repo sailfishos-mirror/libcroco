@@ -54,7 +54,7 @@ test_cr_parser_parse (void)
 
         parser = cr_om_parser_new (NULL);
         status = cr_om_parser_parse_buf (parser, (guchar *) gv_cssbuf,
-                                         strlen (gv_cssbuf),
+                                         strlen ((const char *) gv_cssbuf),
                                          CR_ASCII, &stylesheet);
 
         if (status == CR_OK && stylesheet) {

@@ -935,7 +935,7 @@ cr_statement_does_buf_parses_against_core (const guchar * a_buf,
         enum CRStatus status = CR_OK;
         gboolean result = FALSE;
 
-        parser = cr_parser_new_from_buf ((guchar*)a_buf, strlen (a_buf),
+        parser = cr_parser_new_from_buf ((guchar*)a_buf, strlen ((const char *) a_buf),
                                          a_encoding, FALSE);
         g_return_val_if_fail (parser, FALSE);
 
@@ -1055,7 +1055,7 @@ cr_statement_ruleset_parse_from_buf (const guchar * a_buf,
 
         g_return_val_if_fail (a_buf, NULL);
 
-        parser = cr_parser_new_from_buf ((guchar*)a_buf, strlen (a_buf), 
+        parser = cr_parser_new_from_buf ((guchar*)a_buf, strlen ((const char *) a_buf), 
                                          a_enc, FALSE);
 
         g_return_val_if_fail (parser, NULL);
@@ -1192,7 +1192,7 @@ cr_statement_at_media_rule_parse_from_buf (const guchar * a_buf,
         CRDocHandler *sac_handler = NULL;
         enum CRStatus status = CR_OK;
 
-        parser = cr_parser_new_from_buf ((guchar*)a_buf, strlen (a_buf), 
+        parser = cr_parser_new_from_buf ((guchar*)a_buf, strlen ((const char *) a_buf), 
                                          a_enc, FALSE);
         if (!parser) {
                 cr_utils_trace_info ("Instanciation of the parser failed");
@@ -1378,7 +1378,7 @@ cr_statement_at_import_rule_parse_from_buf (const guchar * a_buf,
         CRString *import_string = NULL;
         CRParsingLocation location = {0} ;
 
-        parser = cr_parser_new_from_buf ((guchar*)a_buf, strlen (a_buf),
+        parser = cr_parser_new_from_buf ((guchar*)a_buf, strlen ((const char *) a_buf),
                                          a_encoding, FALSE);
         if (!parser) {
                 cr_utils_trace_info ("Instanciation of parser failed.");
@@ -1507,7 +1507,7 @@ cr_statement_at_page_rule_parse_from_buf (const guchar * a_buf,
 
         g_return_val_if_fail (a_buf, NULL);
 
-        parser = cr_parser_new_from_buf ((guchar*)a_buf, strlen (a_buf),
+        parser = cr_parser_new_from_buf ((guchar*)a_buf, strlen ((const char *) a_buf),
                                          a_encoding, FALSE);
         if (!parser) {
                 cr_utils_trace_info ("Instanciation of the parser failed.");
@@ -1623,7 +1623,7 @@ cr_statement_at_charset_rule_parse_from_buf (const guchar * a_buf,
 
         g_return_val_if_fail (a_buf, NULL);
 
-        parser = cr_parser_new_from_buf ((guchar*)a_buf, strlen (a_buf),
+        parser = cr_parser_new_from_buf ((guchar*)a_buf, strlen ((const char *) a_buf),
                                          a_encoding, FALSE);
         if (!parser) {
                 cr_utils_trace_info ("Instanciation of the parser failed.");
@@ -1720,7 +1720,7 @@ cr_statement_font_face_rule_parse_from_buf (const guchar * a_buf,
         CRDocHandler *sac_handler = NULL;
         enum CRStatus status = CR_OK;
 
-        parser = cr_parser_new_from_buf ((guchar*)a_buf, strlen (a_buf),
+        parser = cr_parser_new_from_buf ((guchar*)a_buf, strlen ((const char *) a_buf),
                                          a_encoding, FALSE);
         if (!parser)
                 goto cleanup;

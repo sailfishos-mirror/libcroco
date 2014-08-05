@@ -506,7 +506,7 @@ cr_rgb_set_from_hex_str (CRRgb * a_this, const guchar * a_hex)
 
         g_return_val_if_fail (a_this && a_hex, CR_BAD_PARAM_ERROR);
 
-        if (strlen (a_hex) == 3) {
+        if (strlen ((const char *) a_hex) == 3) {
                 for (i = 0; i < 3; i++) {
                         if (a_hex[i] >= '0' && a_hex[i] <= '9') {
                                 colors[i] = a_hex[i] - '0';
@@ -521,7 +521,7 @@ cr_rgb_set_from_hex_str (CRRgb * a_this, const guchar * a_hex)
                                 status = CR_UNKNOWN_TYPE_ERROR;
                         }
                 }
-        } else if (strlen (a_hex) == 6) {
+        } else if (strlen ((const char *) a_hex) == 6) {
                 for (i = 0; i < 6; i++) {
                         if (a_hex[i] >= '0' && a_hex[i] <= '9') {
                                 colors[i / 2] <<= 4;
