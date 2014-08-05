@@ -813,10 +813,10 @@ cr_statement_media_rule_to_string (CRStatement const *a_this,
                 for (cur = a_this->kind.media_rule->media_list; cur;
                      cur = cur->next) {
                         if (cur->data) {
-                                guchar *str = cr_string_dup2
+                                gchar *str2 = cr_string_dup2
                                         ((CRString const *) cur->data);
 
-                                if (str) {
+                                if (str2) {
                                         if (cur->prev) {
                                                 g_string_append
                                                         (stringue, 
@@ -824,9 +824,9 @@ cr_statement_media_rule_to_string (CRStatement const *a_this,
                                         }
                                         g_string_append_printf 
                                                 (stringue, 
-                                                 " %s", str);
-                                        g_free (str);
-                                        str = NULL;
+                                                 " %s", str2);
+                                        g_free (str2);
+                                        str2 = NULL;
                                 }
                         }
                 }
