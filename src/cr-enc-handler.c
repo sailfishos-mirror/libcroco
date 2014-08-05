@@ -89,8 +89,7 @@ cr_enc_handler_get_instance (enum CREncoding a_enc)
 
         for (i = 0; gv_default_enc_handlers[i].encoding; i++) {
                 if (gv_default_enc_handlers[i].encoding == a_enc) {
-                        return (CREncHandler *)
-                                & gv_default_enc_handlers[i].encoding;
+                        return (CREncHandler *) & gv_default_enc_handlers[i];
                 }
         }
 
