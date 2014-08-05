@@ -143,6 +143,7 @@ test_import_style (CRDocHandler * a_handler,
                         }
                 }
         }
+
         fprintf (stdout, "******************\n\n");
         a_uri = NULL;           /*keep compiler happy */
 }
