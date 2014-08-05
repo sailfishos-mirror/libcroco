@@ -105,11 +105,11 @@ cr_num_to_string (CRNum const * a_this)
         test_val = a_this->val - (glong) a_this->val;
 
         if (!test_val) {
-                tmp_char1 = g_strdup_printf ("%ld", (glong) a_this->val);
+                tmp_char1 = (guchar *) g_strdup_printf ("%ld", (glong) a_this->val);
         } else {
-                tmp_char1 = g_new0 (char, G_ASCII_DTOSTR_BUF_SIZE + 1);
+                tmp_char1 = (guchar *) g_new0 (char, G_ASCII_DTOSTR_BUF_SIZE + 1);
                 if (tmp_char1 != NULL)
-                        g_ascii_dtostr (tmp_char1, G_ASCII_DTOSTR_BUF_SIZE, a_this->val);
+                        g_ascii_dtostr ((gchar *) tmp_char1, G_ASCII_DTOSTR_BUF_SIZE, a_this->val);
         }
 
         g_return_val_if_fail (tmp_char1, NULL);
@@ -193,7 +193,7 @@ cr_num_to_string (CRNum const * a_this)
         }
 
         if (tmp_char2) {
-                result = g_strconcat (tmp_char1, tmp_char2, NULL);
+                result = (guchar *)  g_strconcat ((gchar *) tmp_char1, tmp_char2, NULL);
                 g_free (tmp_char1);
         } else {
                 result = tmp_char1;

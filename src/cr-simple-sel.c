@@ -112,7 +112,7 @@ cr_simple_sel_to_string (CRSimpleSel const * a_this)
         str_buf = g_string_new (NULL);
         for (cur = a_this; cur; cur = cur->next) {
                 if (cur->name) {
-                        guchar *str = g_strndup (cur->name->stryng->str,
+                        guchar *str = (guchar *) g_strndup (cur->name->stryng->str,
                                                  cur->name->stryng->len);
 
                         if (str) {
@@ -133,7 +133,7 @@ cr_simple_sel_to_string (CRSimpleSel const * a_this)
                                         break;
                                 }
 
-                                g_string_append (str_buf, str);
+                                g_string_append (str_buf, (const gchar *) str);
                                 g_free (str);
                                 str = NULL;
                         }
@@ -144,7 +144,7 @@ cr_simple_sel_to_string (CRSimpleSel const * a_this)
 
                         tmp_str = cr_additional_sel_to_string (cur->add_sel);
                         if (tmp_str) {
-                                g_string_append (str_buf, tmp_str);
+                                g_string_append (str_buf, (const gchar *) tmp_str);
                                 g_free (tmp_str);
                                 tmp_str = NULL;
                         }
@@ -152,7 +152,7 @@ cr_simple_sel_to_string (CRSimpleSel const * a_this)
         }
 
         if (str_buf) {
-                result = str_buf->str;
+                result = (guchar *) str_buf->str;
                 g_string_free (str_buf, FALSE);
                 str_buf = NULL;
         }
@@ -171,7 +171,7 @@ cr_simple_sel_one_to_string (CRSimpleSel const * a_this)
 
         str_buf = g_string_new (NULL);
         if (a_this->name) {
-                guchar *str = g_strndup (a_this->name->stryng->str,
+                guchar *str = (guchar *) g_strndup (a_this->name->stryng->str,
                                          a_this->name->stryng->len);
 
                 if (str) {
@@ -194,7 +194,7 @@ cr_simple_sel_one_to_string (CRSimpleSel const * a_this)
         }
 
         if (str_buf) {
-                result = str_buf->str;
+                result = (guchar *) str_buf->str;
                 g_string_free (str_buf, FALSE);
                 str_buf = NULL;
         }

@@ -120,7 +120,7 @@ test_import_style (CRDocHandler * a_handler,
 
                 for (cur = a_media_list; cur; cur = cur->next) {
                         if (cur->data) {
-                                guchar *str =
+                                gchar *str =
                                         cr_string_dup2 ((CRString *) cur->data);
                                 if (str) {
                                         fprintf (stdout, "%s\n", str);
@@ -133,7 +133,7 @@ test_import_style (CRDocHandler * a_handler,
                 fprintf (stdout, "--------------------\n");
 
                 if (a_uri_default_ns) {
-                        guchar *str = cr_string_dup2 (a_uri_default_ns) ;
+                        gchar *str = cr_string_dup2 (a_uri_default_ns) ;
                         if (str) {
                                 fprintf (stdout, "%s\n", str);
                                 g_free (str);
@@ -157,7 +157,7 @@ test_namespace_declaration (CRDocHandler * a_handler,
         fprintf (stdout, "namespace_declaration:\n");
 
         if (a_prefix) {
-                guchar *prefix = NULL;
+                gchar *prefix = NULL;
 
                 prefix = cr_string_dup2 (a_prefix);
                 if (prefix) {
@@ -168,7 +168,7 @@ test_namespace_declaration (CRDocHandler * a_handler,
         }
 
         if (a_uri) {
-                guchar *uri = NULL;
+                gchar *uri = NULL;
                 uri = cr_string_dup2 (a_uri) ;
                 if (uri) {
                         fprintf (stdout, "uri: %s\n", uri);
@@ -192,7 +192,7 @@ test_comment (CRDocHandler * a_handler,
         fprintf (stdout, "comment:\n");
 
         if (a_comment) {
-                guchar *comment = NULL;
+                gchar *comment = NULL;
 
                 comment = cr_string_dup2 (a_comment);
 
@@ -251,7 +251,7 @@ test_property (CRDocHandler * a_handler, CRString * a_name,
         fprintf (stdout, "property\n");
 
         if (a_name) {
-                guchar *name = cr_string_dup2  (a_name);
+                gchar *name = cr_string_dup2  (a_name);
                 if (name) {
                         fprintf (stdout, "%s", name);
                 }
@@ -302,7 +302,7 @@ test_start_media (CRDocHandler * a_handler,
 
         if (a_media_list) {
                 GList *cur = NULL;
-                guchar *medium = NULL;
+                gchar *medium = NULL;
 
                 for (cur = a_media_list; cur; cur = cur->next) {
                         if (cur->data == NULL)
@@ -331,7 +331,7 @@ test_end_media (CRDocHandler * a_handler,
 
         if (a_media_list) {
                 GList *cur = NULL;
-                guchar *medium = NULL;
+                gchar *medium = NULL;
 
                 for (cur = a_media_list; cur; cur = cur->next) {
                         if (cur->data == NULL)
@@ -355,7 +355,7 @@ test_start_page (CRDocHandler * a_handler,
                  CRString * a_pseudo_page,
                  CRParsingLocation *a_location)
 {
-        guchar *name = NULL,
+        gchar *name = NULL,
                 *pseudo_page = NULL;
 
         g_return_if_fail (a_handler);
@@ -391,7 +391,7 @@ test_end_page (CRDocHandler * a_handler,
                CRString * a_name, 
                CRString * a_pseudo_page)
 {
-        guchar *name = NULL,
+        gchar *name = NULL,
                 *pseudo_page = NULL;
 
         g_return_if_fail (a_handler);
@@ -426,7 +426,7 @@ static void
 test_ignorable_at_rule (CRDocHandler * a_handler, 
                         CRString * a_name)
 {
-        guchar *name = NULL;
+        gchar *name = NULL;
 
         g_return_if_fail (a_handler);
 
@@ -532,7 +532,7 @@ main (int argc, char **argv)
                 return 0;
         }
 
-        status = test_cr_parser_parse (options.files_list[0]);
+        status = test_cr_parser_parse ((guchar *) options.files_list[0]);
 
         if (status != CR_OK) {
                 fprintf (stdout, "KO\n");

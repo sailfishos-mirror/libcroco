@@ -601,7 +601,7 @@ cr_statement_ruleset_to_string (CRStatement const * a_this, glong a_indent)
                         cr_utils_dump_n_chars2 (' ', stringue, a_indent);
 
                 tmp_str =
-                        cr_selector_to_string (a_this->kind.ruleset->
+                        (gchar *) cr_selector_to_string (a_this->kind.ruleset->
                                                sel_list);
                 if (tmp_str) {
                         g_string_append (stringue, tmp_str);
@@ -611,7 +611,7 @@ cr_statement_ruleset_to_string (CRStatement const * a_this, glong a_indent)
         }
         g_string_append (stringue, " {\n");
         if (a_this->kind.ruleset->decl_list) {
-                tmp_str = cr_declaration_list_to_string2
+                tmp_str = (gchar *) cr_declaration_list_to_string2
                         (a_this->kind.ruleset->decl_list,
                          a_indent + DECLARATION_INDENT_NB, TRUE);
                 if (tmp_str) {
@@ -667,7 +667,7 @@ cr_statement_font_face_rule_to_string (CRStatement const * a_this,
                         cr_utils_dump_n_chars2 (' ', stringue, 
                                         a_indent);
                 g_string_append (stringue, "@font-face {\n");
-                tmp_str = cr_declaration_list_to_string2 
+                tmp_str = (gchar *) cr_declaration_list_to_string2 
                         (a_this->kind.font_face_rule->decl_list,
                          a_indent + DECLARATION_INDENT_NB, TRUE) ;
                 if (tmp_str) {
@@ -770,7 +770,7 @@ cr_statement_at_page_rule_to_string (CRStatement const *a_this,
         if (a_this->kind.page_rule->decl_list) {
                 gchar *str = NULL ;
                 g_string_append (stringue, " {\n");
-                str = cr_declaration_list_to_string2
+                str = (gchar *) cr_declaration_list_to_string2
                         (a_this->kind.page_rule->decl_list,
                          a_indent + DECLARATION_INDENT_NB, TRUE) ;
                 if (str) {
@@ -854,7 +854,7 @@ cr_statement_import_rule_to_string (CRStatement const *a_this,
                                     gulong a_indent)
 {
         GString *stringue = NULL ;
-        guchar *str = NULL;
+        gchar *str = NULL;
 
         g_return_val_if_fail (a_this
                               && a_this->type == AT_IMPORT_RULE_STMT
@@ -2606,7 +2606,7 @@ cr_statement_dump (CRStatement const * a_this, FILE * a_fp, gulong a_indent)
 void
 cr_statement_dump_ruleset (CRStatement const * a_this, FILE * a_fp, glong a_indent)
 {
-        guchar *str = NULL;
+        gchar *str = NULL;
 
         g_return_if_fail (a_fp && a_this);
         str = cr_statement_ruleset_to_string (a_this, a_indent);
@@ -2655,7 +2655,7 @@ cr_statement_dump_font_face_rule (CRStatement const * a_this, FILE * a_fp,
 void
 cr_statement_dump_charset (CRStatement const * a_this, FILE * a_fp, gulong a_indent)
 {
-        guchar *str = NULL;
+        gchar *str = NULL;
 
         g_return_if_fail (a_this && a_this->type == AT_CHARSET_RULE_STMT);
 
@@ -2681,7 +2681,7 @@ cr_statement_dump_charset (CRStatement const * a_this, FILE * a_fp, gulong a_ind
 void
 cr_statement_dump_page (CRStatement const * a_this, FILE * a_fp, gulong a_indent)
 {
-        guchar *str = NULL;
+        gchar *str = NULL;
 
         g_return_if_fail (a_this
                           && a_this->type == AT_PAGE_RULE_STMT

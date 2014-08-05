@@ -48,7 +48,7 @@ dump (CRDeclaration const * a_this, FILE * a_fp, glong a_indent)
 
         g_return_if_fail (a_this);
 
-        str = cr_declaration_to_string (a_this, a_indent);
+        str = (guchar *) cr_declaration_to_string (a_this, a_indent);
         if (str) {
                 fprintf (a_fp, "%s", str);
                 g_free (str);
@@ -130,7 +130,7 @@ cr_declaration_parse_from_buf (CRStatement * a_statement,
                 g_return_val_if_fail (a_statement->type == RULESET_STMT,
                                       NULL);
 
-        parser = cr_parser_new_from_buf ((guchar*)a_str, strlen (a_str), a_enc, FALSE);
+        parser = cr_parser_new_from_buf ((guchar*)a_str, strlen ((const char *) a_str), a_enc, FALSE);
         g_return_val_if_fail (parser, NULL);
 
         status = cr_parser_try_to_skip_spaces_and_comments (parser);
@@ -194,7 +194,7 @@ cr_declaration_parse_list_from_buf (const guchar * a_str,
 
         g_return_val_if_fail (a_str, NULL);
 
-        parser = cr_parser_new_from_buf ((guchar*)a_str, strlen (a_str), a_enc, FALSE);
+        parser = cr_parser_new_from_buf ((guchar*)a_str, strlen ((const char *) a_str), a_enc, FALSE);
         g_return_val_if_fail (parser, NULL);
         status = cr_parser_get_tknzr (parser, &tokenizer);
         if (status != CR_OK || !tokenizer) {
@@ -501,7 +501,7 @@ cr_declaration_to_string (CRDeclaration const * a_this, gulong a_indent)
 {
         GString *stringue = NULL;
 
-        guchar *str = NULL,
+        gchar *str = NULL,
                 *result = NULL;
 
         g_return_val_if_fail (a_this, NULL);
@@ -578,7 +578,7 @@ cr_declaration_list_to_string (CRDeclaration const * a_this, gulong a_indent)
         stringue = g_string_new (NULL);
 
         for (cur = a_this; cur; cur = cur->next) {
-                str = cr_declaration_to_string (cur, a_indent);
+                str = (guchar *) cr_declaration_to_string (cur, a_indent);
                 if (str) {
                         g_string_append_printf (stringue, "%s;", str);
                         g_free (str);
@@ -586,7 +586,7 @@ cr_declaration_list_to_string (CRDeclaration const * a_this, gulong a_indent)
                         break;
         }
         if (stringue && stringue->str) {
-                result = stringue->str;
+                result = (guchar *) stringue->str;
                 g_string_free (stringue, FALSE);
         }
 
@@ -617,7 +617,7 @@ cr_declaration_list_to_string2 (CRDeclaration const * a_this,
         stringue = g_string_new (NULL);
 
         for (cur = a_this; cur; cur = cur->next) {
-                str = cr_declaration_to_string (cur, a_indent);
+                str = (guchar *) cr_declaration_to_string (cur, a_indent);
                 if (str) {
                         if (a_one_decl_per_line == TRUE) {
                                 if (cur->next)
@@ -625,21 +625,21 @@ cr_declaration_list_to_string2 (CRDeclaration const * a_this,
                                                                 "%s;\n", str);
                                 else
                                         g_string_append (stringue,
-                                                         str);
+                                                         (const gchar *) str);
                         } else {
                                 if (cur->next)
                                         g_string_append_printf (stringue,
                                                                 "%s;", str);
                                 else
                                         g_string_append (stringue,
-                                                         str);
+                                                         (const gchar *) str);
                         }
                         g_free (str);
                 } else
                         break;
         }
         if (stringue && stringue->str) {
-                result = stringue->str;
+                result = (guchar *) stringue->str;
                 g_string_free (stringue, FALSE);
         }
 

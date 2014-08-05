@@ -1639,7 +1639,7 @@ cr_tknzr_new_from_uri (const guchar * a_file_uri,
         CRTknzr *result = NULL;
         CRInput *input = NULL;
 
-        input = cr_input_new_from_uri (a_file_uri, a_enc);
+        input = cr_input_new_from_uri ((const gchar *) a_file_uri, a_enc);
         g_return_val_if_fail (input != NULL, NULL);
 
         result = cr_tknzr_new (input);

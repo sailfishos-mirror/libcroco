@@ -32,27 +32,27 @@
 
 CRDocHandler *gv_test_handler = { 0 };
 
-const guchar *gv_term_buf = "106";
+const guchar *gv_term_buf = (const guchar *) "106";
 
-const guchar *gv_decl_buf = "toto: tutu, tata";
+const guchar *gv_decl_buf = (const guchar *) "toto: tutu, tata";
 
-const guchar *gv_decl_list_buf = "toto: titi; prop1:val1 ; prop2:val2;";
+const guchar *gv_decl_list_buf = (const guchar *) "toto: titi; prop1:val1 ; prop2:val2;";
 
-const guchar *gv_ruleset_buf = "s1 > s2 {toto: tutu, tata} ";
+const guchar *gv_ruleset_buf = (const guchar *) "s1 > s2 {toto: tutu, tata} ";
 
 const guchar *gv_at_media_buf =
-        "@media print, toto {" "  BODY { font-size: 10pt }" "  }";
+        (const guchar *) "@media print, toto {" "  BODY { font-size: 10pt }" "  }";
 
-const guchar *gv_at_page_buf = "@page { size :8.5in 11in; margin: 2cm }";
+const guchar *gv_at_page_buf = (const guchar *) "@page { size :8.5in 11in; margin: 2cm }";
 
-const guchar *gv_at_charset_buf = "@charset \"ISO-8859-1\" ; ";
+const guchar *gv_at_charset_buf = (const guchar *) "@charset \"ISO-8859-1\" ; ";
 
 const guchar *gv_at_font_face_buf =
-        "@font-face {"
+        (const guchar *) "@font-face {"
         " font-family: \"Robson Celtic\";"
         " src: url(\"http://site/fonts/rob-celt\")" "}";
 
-const guchar *gv_at_import_buf = "@import \"subs.css\";";
+const guchar *gv_at_import_buf = (const guchar *) "@import \"subs.css\";";
 
 static void display_help (char *prg_name);
 
@@ -166,7 +166,7 @@ test_cr_term_parse_expression_from_buf (void)
 static enum CRStatus
 test_cr_declaration_parse (void)
 {
-        guchar *tmp_str = NULL;
+        gchar *tmp_str = NULL;
         CRDeclaration *decl = NULL;
 
         decl = cr_declaration_parse_from_buf (NULL, gv_decl_buf, CR_UTF_8);
@@ -190,7 +190,7 @@ static enum CRStatus
 test_cr_declaration_parse_list (void)
 {
         GString *str = NULL;
-        guchar *tmp_str = NULL;
+        gchar *tmp_str = NULL;
         CRDeclaration *decl = NULL,
                 *cur_decl = NULL;
 
@@ -426,7 +426,7 @@ main (int argc, char **argv)
                 return 0;
         }
 
-        status = test_cr_parser_parse (options.files_list[0]);
+        status = test_cr_parser_parse ((guchar *) options.files_list[0]);
         if (status != CR_OK) {
                 g_print ("\nKO\n");
         }

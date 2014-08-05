@@ -31,7 +31,7 @@
 #include "cr-test-utils.h"
 
 const guchar *gv_cssbuf =
-        ".str0 {stroke:#007844;stroke-width:44}" ".fil0 {fill:url(#id0)}";
+        (const guchar *) ".str0 {stroke:#007844;stroke-width:44}" ".fil0 {fill:url(#id0)}";
 
 static enum CRStatus
   test_cr_parser_parse (void);

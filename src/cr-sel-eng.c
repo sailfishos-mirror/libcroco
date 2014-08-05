@@ -196,7 +196,7 @@ pseudo_class_add_sel_matches_node (CRSelEng * a_this,
                               && a_node, CR_BAD_PARAM_ERROR);
 
         status = cr_sel_eng_get_pseudo_class_selector_handler
-                (a_this, a_add_sel->content.pseudo->name->stryng->str,
+                (a_this, (guchar *) a_add_sel->content.pseudo->name->stryng->str,
                  a_add_sel->content.pseudo->type, &handler);
         if (status != CR_OK || !handler)
                 return FALSE;
@@ -451,7 +451,7 @@ attr_add_sel_matches_node (CRAdditionalSel * a_add_sel, xmlNode * a_node)
                                         ptr2 = cur;
 
                                         if (g_strstr_len
-                                            (ptr1, ptr2 - ptr1 + 1,
+                                            ((const gchar *) ptr1, ptr2 - ptr1 + 1,
                                              cur_sel->value->stryng->str)
                                             == (gchar *) ptr1) {
                                                 found = TRUE;
@@ -1180,7 +1180,7 @@ cr_sel_eng_register_pseudo_class_sel_handler (CRSelEng * a_this,
         }
         memset (handler_entry, 0,
                 sizeof (struct CRPseudoClassSelHandlerEntry));
-        handler_entry->name = g_strdup (a_name);
+        handler_entry->name = (guchar *) g_strdup ((const gchar *) a_name);
         handler_entry->type = a_type;
         handler_entry->handler = a_handler;
         list = g_list_append (PRIVATE (a_this)->pcs_handlers, handler_entry);

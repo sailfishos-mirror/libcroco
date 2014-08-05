@@ -274,7 +274,7 @@ cr_rgb_to_string (CRRgb const * a_this)
         }
 
         if (str_buf) {
-                result = str_buf->str;
+                result = (guchar *) str_buf->str;
                 g_string_free (str_buf, FALSE);
         }
 
@@ -586,7 +586,7 @@ cr_rgb_set_from_term (CRRgb *a_this, const struct _CRTerm *a_value)
 			} else  {
                         	status = cr_rgb_set_from_name
                                         (a_this,
-                                         a_value->content.str->stryng->str) ;
+                                         (const guchar *) a_value->content.str->stryng->str) ;
 			}
                 } else {
                         cr_utils_trace_info 
@@ -599,7 +599,7 @@ cr_rgb_set_from_term (CRRgb *a_this, const struct _CRTerm *a_value)
                     && a_value->content.str->stryng->str) {
                         status = cr_rgb_set_from_hex_str
                                 (a_this, 
-                                 a_value->content.str->stryng->str) ;
+                                 (const guchar *) a_value->content.str->stryng->str) ;
                 } else {
                         cr_utils_trace_info
                                 ("a_value has NULL string value") ;
@@ -655,8 +655,7 @@ cr_rgb_parse_from_buf (const guchar *a_str,
 	
 	g_return_val_if_fail (a_str, NULL);
 	
-	parser = cr_parser_new_from_buf ((guchar*)a_str, strlen (a_str), 
-                                         a_enc, FALSE) ;
+	parser = cr_parser_new_from_buf ((guchar *) a_str, strlen ((const char *) a_str), a_enc, FALSE);
 
 	g_return_val_if_fail (parser, NULL);
 

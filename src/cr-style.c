@@ -92,7 +92,7 @@ enum CRPropertyID {
 typedef struct _CRPropertyDesc CRPropertyDesc;
 
 struct _CRPropertyDesc {
-        const guchar *name;
+        const gchar *name;
         enum CRPropertyID prop_id;
 };
 
@@ -804,7 +804,7 @@ set_prop_margin_x_from_value (CRStyle * a_style, CRTerm * a_value,
 }
 
 struct CRPropDisplayValPair {
-        const guchar *prop_name;
+        const gchar *prop_name;
         enum CRDisplayType type;
 };
 
@@ -865,7 +865,7 @@ set_prop_display_from_value (CRStyle * a_style, CRTerm * a_value)
 }
 
 struct CRPropPositionValPair {
-        const guchar *name;
+        const gchar *name;
         enum CRPositionType type;
 };
 
@@ -1120,11 +1120,11 @@ set_prop_border_x_color_from_value (CRStyle * a_style, CRTerm * a_value,
                     && a_value->content.str->stryng->str) {
                         status = cr_rgb_set_from_name
                                 (rgb_color, 
-                                 a_value->content.str->stryng->str);
+                                 (const guchar *) a_value->content.str->stryng->str);
 
                 }
                 if (status != CR_OK) {
-                        cr_rgb_set_from_name (rgb_color, "black");
+                        cr_rgb_set_from_name (rgb_color, (const guchar *) "black");
                 }
         } else if (a_value->type == TERM_RGB) {
                 if (a_value->content.rgb) {
@@ -1358,7 +1358,7 @@ set_prop_font_family_from_value (CRStyle * a_style, CRTerm * a_value)
                                     && cur_term->content.str->stryng->str) {
                                         cur_ff = cr_font_family_new
                                                 (FONT_FAMILY_NON_GENERIC,
-                                                 cur_term->content.str->stryng->str);
+                                                 (guchar *) cur_term->content.str->stryng->str);
                                 }
                         }
                         break;
@@ -2024,7 +2024,7 @@ cr_style_set_style_from_decl (CRStyle * a_this, CRDeclaration * a_decl)
                               CR_BAD_PARAM_ERROR);
 
         prop_id = cr_style_get_prop_id
-                (a_decl->property->stryng->str);
+                ((const guchar *) a_decl->property->stryng->str);
 
         value = a_decl->value;
         switch (prop_id) {
@@ -2746,7 +2746,7 @@ cr_style_to_string (CRStyle * a_this, GString ** a_str, guint a_nb_indent)
 
         cr_utils_dump_n_chars2 (' ', str, indent);
         g_string_append (str, "font-family: ");
-        tmp_str = cr_font_family_to_string (a_this->font_family, TRUE);
+        tmp_str = (gchar *) cr_font_family_to_string (a_this->font_family, TRUE);
         if (tmp_str) {
                 g_string_append (str, tmp_str);
                 g_free (tmp_str);

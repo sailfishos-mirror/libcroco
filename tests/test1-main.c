@@ -140,7 +140,7 @@ test_cr_input_read_char (guchar * a_file_uri)
 
         g_return_val_if_fail (a_file_uri, CR_BAD_PARAM_ERROR);
 
-        input = cr_input_new_from_uri (a_file_uri, CR_UTF_8);
+        input = cr_input_new_from_uri ((const gchar *) a_file_uri, CR_UTF_8);
 
         if (!input) {
                 cr_utils_trace_debug ("Input Stream creation failed.");
@@ -191,7 +191,7 @@ main (int argc, char **argv)
                 return 0;
         }
 
-        test_cr_input_read_char (options.files_list[0]);
+        test_cr_input_read_char ((guchar *) options.files_list[0]);
 
         return 0;
 }

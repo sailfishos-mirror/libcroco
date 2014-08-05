@@ -444,7 +444,7 @@ cr_parser_error_set_msg (CRParserError * a_this, const guchar * a_msg)
                 g_free (a_this->msg);
         }
 
-        a_this->msg = g_strdup (a_msg);
+        a_this->msg = (guchar *) g_strdup ((const gchar *) a_msg);
 }
 
 /**
@@ -733,7 +733,7 @@ cr_parser_parse_stylesheet_core (CRParser * a_this)
 
  error:
         cr_parser_push_error
-                (a_this, "could not recognize next production", CR_ERROR);
+                (a_this, (const guchar *) "could not recognize next production", CR_ERROR);
 
         cr_parser_dump_err_stack (a_this, TRUE);
 
@@ -2703,7 +2703,7 @@ cr_parser_parse_stylesheet (CRParser * a_this)
         }
 
         cr_parser_push_error
-                (a_this, "could not recognize next production", CR_ERROR);
+                (a_this, (const guchar *) "could not recognize next production", CR_ERROR);
 
         if (PRIVATE (a_this)->sac_handler
             && PRIVATE (a_this)->sac_handler->unrecoverable_error) {
@@ -3189,7 +3189,7 @@ cr_parser_parse_declaration (CRParser * a_this,
 
         CHECK_PARSING_STATUS_ERR
                 (a_this, status, FALSE,
-                 "while parsing declaration: next property is malformed",
+                 (const guchar *) "while parsing declaration: next property is malformed",
                  CR_SYNTAX_ERROR);
 
         READ_NEXT_CHAR (a_this, &cur_char);
@@ -3198,7 +3198,7 @@ cr_parser_parse_declaration (CRParser * a_this,
                 status = CR_PARSING_ERROR;
                 cr_parser_push_error
                         (a_this,
-                         "while parsing declaration: this char must be ':'",
+                         (const guchar *) "while parsing declaration: this char must be ':'",
                          CR_SYNTAX_ERROR);
                 goto error;
         }
@@ -3209,7 +3209,7 @@ cr_parser_parse_declaration (CRParser * a_this,
 
         CHECK_PARSING_STATUS_ERR
                 (a_this, status, FALSE,
-                 "while parsing declaration: next expression is malformed",
+                 (const guchar *) "while parsing declaration: next expression is malformed",
                  CR_SYNTAX_ERROR);
 
         cr_parser_try_to_skip_spaces_and_comments (a_this);
@@ -3349,7 +3349,7 @@ cr_parser_parse_ruleset (CRParser * a_this)
 
         ENSURE_PARSING_COND_ERR
                 (a_this, cur_char == '{',
-                 "while parsing rulset: current char should be '{'",
+                 (const guchar *) "while parsing rulset: current char should be '{'",
                  CR_SYNTAX_ERROR);
 
         if (PRIVATE (a_this)->sac_handler
@@ -3413,7 +3413,7 @@ cr_parser_parse_ruleset (CRParser * a_this)
         }
         CHECK_PARSING_STATUS_ERR
                 (a_this, status, FALSE,
-                 "while parsing ruleset: next construction should be a declaration",
+                 (const guchar *) "while parsing ruleset: next construction should be a declaration",
                  CR_SYNTAX_ERROR);
 
         for (;;) {
@@ -3455,7 +3455,7 @@ cr_parser_parse_ruleset (CRParser * a_this)
         READ_NEXT_CHAR (a_this, &cur_char);
         ENSURE_PARSING_COND_ERR
                 (a_this, cur_char == '}',
-                 "while parsing rulset: current char must be a '}'",
+                 (const guchar *) "while parsing rulset: current char must be a '}'",
                  CR_SYNTAX_ERROR);
 
         selector->location = end_parsing_location;

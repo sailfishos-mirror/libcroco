@@ -32,7 +32,7 @@
 CRDocHandler *gv_test_handler = { 0 };
 
 const guchar *xml_content =
-        "<document>"
+        (const guchar *) "<document>"
         "<E0>text0</E0> "
         "<E1><E1-1>text1</E1-1></E1>"
         "<E2 attr2=\"val2\">text2</E2>"
@@ -242,7 +242,7 @@ main (int argc, char **argv)
                 return 0;
         }
 
-        status = test_sel_eng (options.files_list[0]);
+        status = test_sel_eng ((guchar *) options.files_list[0]);
 
         if (status != CR_OK) {
                 g_print ("\nKO\n");
