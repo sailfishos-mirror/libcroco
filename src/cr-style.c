@@ -319,7 +319,7 @@ set_prop_font_weight_from_value (CRStyle * a_style, CRTerm * a_value);
 static const gchar *
 num_prop_code_to_string (enum CRNumProp a_code)
 {
-        gint len = sizeof (gv_num_props_dump_infos) /
+        guint len = sizeof (gv_num_props_dump_infos) /
                 sizeof (struct CRNumPropEnumDumpInfo);
         if (a_code >= len) {
                 cr_utils_trace_info ("A field has been added "
@@ -342,7 +342,7 @@ num_prop_code_to_string (enum CRNumProp a_code)
 static const gchar *
 rgb_prop_code_to_string (enum CRRgbProp a_code)
 {
-        gint len = sizeof (gv_rgb_props_dump_infos) /
+        guint len = sizeof (gv_rgb_props_dump_infos) /
                 sizeof (struct CRRgbPropEnumDumpInfo);
 
         if (a_code >= len) {
@@ -366,7 +366,7 @@ rgb_prop_code_to_string (enum CRRgbProp a_code)
 static const gchar *
 border_style_prop_code_to_string (enum CRBorderStyleProp a_code)
 {
-        gint len = sizeof (gv_border_style_props_dump_infos) /
+        guint len = sizeof (gv_border_style_props_dump_infos) /
                 sizeof (struct CRBorderStylePropEnumDumpInfo);
 
         if (a_code >= len) {

@@ -195,7 +195,7 @@ CHECK_PARSING_STATUS (status, TRUE) ;
  */
 #define SKIP_CHARS(a_tknzr, a_nb_chars) \
 { \
-glong nb_chars = a_nb_chars ; \
+gulong nb_chars = a_nb_chars ; \
 status = cr_input_consume_chars \
      (PRIVATE (a_tknzr)->input,0, &nb_chars) ; \
 CHECK_PARSING_STATUS (status, TRUE) ; \
@@ -408,7 +408,7 @@ cr_tknzr_try_to_skip_spaces (CRTknzr * a_this)
         }
 
         if (cr_utils_is_white_space (cur_char) == TRUE) {
-                glong nb_chars = -1; /*consume all spaces */
+                gulong nb_chars = -1; /*consume all spaces */
 
                 status = cr_input_consume_white_spaces
                         (PRIVATE (a_this)->input, &nb_chars);
