@@ -420,8 +420,8 @@ cr_font_size_set_predefined_absolute_font_size (CRFontSize *a_this,
                                                 enum CRPredefinedAbsoluteFontSize a_predefined)
 {
         g_return_val_if_fail (a_this, CR_BAD_PARAM_ERROR) ;
-        g_return_val_if_fail (a_predefined >= PREDEFINED_ABSOLUTE_FONT_SIZE
-                              && a_predefined < NB_FONT_SIZE_TYPE,
+        g_return_val_if_fail (a_predefined >= FONT_SIZE_XX_SMALL
+                              && a_predefined < NB_PREDEFINED_ABSOLUTE_FONT_SIZES,
                               CR_BAD_PARAM_ERROR) ;
 
         a_this->type = PREDEFINED_ABSOLUTE_FONT_SIZE ;
