@@ -2100,15 +2100,15 @@ cr_tknzr_get_next_token (CRTknzr * a_this, CRToken ** a_tk)
                 if (BYTE (input, 2, NULL) == 'r'
                     && BYTE (input, 3, NULL) == 'l'
                     && BYTE (input, 4, NULL) == '(') {
-                        CRString *str = NULL;
+                        CRString *str2 = NULL;
 
-                        status = cr_tknzr_parse_uri (a_this, &str);
+                        status = cr_tknzr_parse_uri (a_this, &str2);
                         if (status == CR_OK) {
-                                status = cr_token_set_uri (token, str);
+                                status = cr_token_set_uri (token, str2);
                                 CHECK_PARSING_STATUS (status, TRUE);
-                                if (str) {
+                                if (str2) {
                                         cr_parsing_location_copy (&token->location,
-                                                                  &str->location) ;
+                                                                  &str2->location) ;
                                 }
                                 goto done;
                         }
