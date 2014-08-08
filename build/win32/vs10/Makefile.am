@@ -26,19 +26,5 @@ EXTRA_DIST = \
 	install.vcxproj			\
 	libcroco.sln			\
 	libcroco.props			\
-	libcroco.props.in		\
-	test0.vcxproj			\
-	test0.vcxproj.filters	\
-	test1.vcxproj			\
-	test1.vcxproj.filters	\
-	test2.vcxproj			\
-	test2.vcxproj.filters	\
-	test3.vcxproj			\
-	test3.vcxproj.filters	\
-	test4.vcxproj			\
-	test4.vcxproj.filters	\
-	test5.vcxproj			\
-	test5.vcxproj.filters	\
-	test6.vcxproj			\
-	test6.vcxproj.filters
+	libcroco.props.in
 

@@ -23,12 +23,5 @@ EXTRA_DIST = \
 	install.vcproj	\
 	libcroco.sln	\
 	libcroco.vsprops	\
-	libcroco.vsprops.in	\
-	test0.vcproj	\
-	test1.vcproj	\
-	test2.vcproj	\
-	test3.vcproj	\
-	test4.vcproj	\
-	test5.vcproj	\
-	test6.vcproj
+	libcroco.vsprops.in
 
