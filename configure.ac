@@ -147,9 +147,9 @@ config.h.win32
 build/Makefile
 build/win32/Makefile
 build/win32/vs9/Makefile
-build/win32/vs9/libcroco.vsprops
+build/win32/vs9/croco-version-paths.vsprops
 build/win32/vs10/Makefile
-build/win32/vs10/libcroco.props
+build/win32/vs10/croco-version-paths.props
 docs/Makefile
 docs/examples/Makefile
 docs/reference/Makefile

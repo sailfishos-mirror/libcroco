@@ -25,6 +25,9 @@ EXTRA_DIST = \
 	csslint.vcxproj.filters	\
 	install.vcxproj			\
 	libcroco.sln			\
-	libcroco.props			\
-	libcroco.props.in
+	croco-build-defines.props	\
+	croco-gen-srcs.props	\
+	croco-install.props	\
+	croco-version-paths.props	\
+	croco-version-paths.props.in
 

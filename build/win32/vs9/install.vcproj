@@ -41,7 +41,7 @@ See COPYRIGHTS file for copyright information.
 			Name="Debug|Win32"
 			OutputDirectory="$(GlibEtcInstallRoot)"
 			ConfigurationType="10"
-			InheritedPropertySheets=".\libcroco.vsprops"
+			InheritedPropertySheets=".\croco-install.vsprops"
 			CharacterSet="2"
 			>
 			<Tool
@@ -52,7 +52,7 @@ See COPYRIGHTS file for copyright information.
 		<Configuration
 			Name="Debug|x64"
 			OutputDirectory="$(GlibEtcInstallRoot)"
-			InheritedPropertySheets=".\libcroco.vsprops"
+			InheritedPropertySheets=".\croco-install.vsprops"
 			ConfigurationType="10"
 			CharacterSet="2"
 			DeleteExtensionsOnClean=""
@@ -66,7 +66,7 @@ See COPYRIGHTS file for copyright information.
 			Name="Release|Win32"
 			OutputDirectory="$(GlibEtcInstallRoot)"
 			ConfigurationType="10"
-			InheritedPropertySheets=".\libcroco.vsprops"
+			InheritedPropertySheets=".\croco-install.vsprops"
 			CharacterSet="2"
 			WholeProgramOptimization="1"
 			>
@@ -78,7 +78,7 @@ See COPYRIGHTS file for copyright information.
 		<Configuration
 			Name="Release|x64"
 			OutputDirectory="$(GlibEtcInstallRoot)"
-			InheritedPropertySheets=".\libcroco.vsprops"
+			InheritedPropertySheets=".\croco-install.vsprops"
 			ConfigurationType="10"
 			CharacterSet="2"
 			WholeProgramOptimization="1"
