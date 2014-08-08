@@ -150,6 +150,8 @@ build/win32/vs9/Makefile
 build/win32/vs9/croco-version-paths.vsprops
 build/win32/vs10/Makefile
 build/win32/vs10/croco-version-paths.props
+build/win32/vs11/Makefile
+build/win32/vs12/Makefile
 docs/Makefile
 docs/examples/Makefile
 docs/reference/Makefile
