@@ -24,6 +24,7 @@ See COPYRIGHTS file for copyright information.
     <VSVer>10</VSVer>
     <GlibEtcInstallRoot>$(SolutionDir)\..\..\..\..\vs$(VSVer)\$(Platform)</GlibEtcInstallRoot>
     <DefDir>$(SolutionDir)$(Configuration)\$(PlatformName)\obj\$(ProjectName)\</DefDir>
+    <CopyConfigH>copy ..\..\..\config.h.win32 ..\..\..\config.h</CopyConfigH>
     <LibCrocoDoInstall>
 mkdir $(GlibEtcInstallRoot)
 
@@ -99,15 +100,10 @@ copy $(SolutionDir)$(Configuration)\$(Platform)\bin\*-$(ApiVersion).lib $(GlibEt
 
 </LibCrocoDoInstall>
     <GenerateLibCrocoDef>
-if exist $(DefDir)libcroco.def goto END
-
 echo EXPORTS &gt; $(DefDir)libcroco.def
 
 cl  /EP ..\..\..\src\libcroco.symbols &gt;&gt; $(DefDir)libcroco.def
-
-:END
-
-     </GenerateLibCrocoDef>
+    </GenerateLibCrocoDef>
     <LibCrocoLibtoolCompatibleDllPrefix>lib</LibCrocoLibtoolCompatibleDllPrefix>
     <LibCrocoLibtoolCompatibleDllSuffix>-$(ApiVersion)-0</LibCrocoLibtoolCompatibleDllSuffix>
     <LibCrocoSeparateVSDllPrefix />
@@ -130,16 +126,6 @@ cl  /EP ..\..\..\src\libcroco.symbols &gt;&gt; $(DefDir)libcroco.def
       <AdditionalDependencies>libxml2.lib;glib-2.0.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(GlibEtcInstallRoot)\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
-    <PreBuildEvent>
-      <Command>
-if exist ..\..\..\config.h goto DONE_CONFIG_H
-
-copy ..\..\..\config.h.win32 ..\..\..\config.h
-
-:DONE_CONFIG_H
-
-</Command>
-    </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <BuildMacro Include="ApiVersion">
@@ -153,6 +139,9 @@ copy ..\..\..\config.h.win32 ..\..\..\config.h
     </BuildMacro>
     <BuildMacro Include="DefDir">
       <Value>$(DefDir)</Value>
+    </BuildMacro>
+    <BuildMacro Include="CopyConfigH">
+      <Value>$(CopyConfigH)</Value>
     </BuildMacro>
     <BuildMacro Include="LibCrocoDoInstall">
       <Value>$(LibCrocoDoInstall)</Value>

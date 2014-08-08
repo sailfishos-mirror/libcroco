@@ -104,9 +104,6 @@ See COPYRIGHTS file for copyright information.
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <ForcedIncludeFiles>%(ForcedIncludeFiles)</ForcedIncludeFiles>
     </ClCompile>
-    <PreLinkEvent>
-      <Command>$(GenerateLibCrocoDef)</Command>
-    </PreLinkEvent>
     <Link>
       <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(LibCrocoDllPrefix)$(ProjectName)$(LibCrocoDllSuffix).dll</OutputFile>
@@ -130,9 +127,6 @@ See COPYRIGHTS file for copyright information.
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <ForcedIncludeFiles>%(ForcedIncludeFiles)</ForcedIncludeFiles>
     </ClCompile>
-    <PreLinkEvent>
-      <Command>$(GenerateLibCrocoDef)</Command>
-    </PreLinkEvent>
     <Link>
       <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(LibCrocoDllPrefix)$(ProjectName)$(LibCrocoDllSuffix).dll</OutputFile>
@@ -161,9 +155,6 @@ See COPYRIGHTS file for copyright information.
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <ForcedIncludeFiles>%(ForcedIncludeFiles)</ForcedIncludeFiles>
     </ClCompile>
-    <PreLinkEvent>
-      <Command>$(GenerateLibCrocoDef)</Command>
-    </PreLinkEvent>
     <Link>
       <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(LibCrocoDllPrefix)$(ProjectName)$(LibCrocoDllSuffix).dll</OutputFile>
@@ -190,9 +181,6 @@ See COPYRIGHTS file for copyright information.
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <ForcedIncludeFiles>%(ForcedIncludeFiles)</ForcedIncludeFiles>
     </ClCompile>
-    <PreLinkEvent>
-      <Command>$(GenerateLibCrocoDef)</Command>
-    </PreLinkEvent>
     <Link>
       <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(LibCrocoDllPrefix)$(ProjectName)$(LibCrocoDllSuffix).dll</OutputFile>
@@ -207,6 +195,36 @@ See COPYRIGHTS file for copyright information.
   </ItemDefinitionGroup>
   <ItemGroup>
 #include "libcroco.vs10.sourcefiles"
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="..\..\..\config.h.win32">
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Copying config.h from config.h.win32...</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(CopyConfigH)</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">..\..\..\config.h;%(Outputs)</Outputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Copying config.h from config.h.win32...</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(CopyConfigH)</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">..\..\..\config.h;%(Outputs)</Outputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Copying config.h from config.h.win32...</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(CopyConfigH)</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">..\..\..\config.h;%(Outputs)</Outputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Copying config.h from config.h.win32...</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(CopyConfigH)</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">..\..\..\config.h;%(Outputs)</Outputs>
+    </CustomBuild>
+    <CustomBuild Include="..\..\..\src\libcroco.symbols">
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Generating libcroco.def...</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(GenerateLibCrocoDef)</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(IntDir)\libcroco.def;%(Outputs)</Outputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Generating libcroco.def...</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(GenerateLibCrocoDef)</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(IntDir)\libcroco.def;%(Outputs)</Outputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Generating libcroco.def...</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(GenerateLibCrocoDef)</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(IntDir)\libcroco.def;%(Outputs)</Outputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Generating libcroco.def...</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(GenerateLibCrocoDef)</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(IntDir)\libcroco.def;%(Outputs)</Outputs>
+    </CustomBuild>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

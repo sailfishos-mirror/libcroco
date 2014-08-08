@@ -60,10 +60,6 @@ See COPYRIGHTS file for copyright information.
 				ForcedIncludeFiles=""
 			/>
 			<Tool
-				Name="VCPreLinkEventTool"
-				CommandLine="$(GenerateLibCrocoDef)"
-			/>
-			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies=""
 				OutputFile="$(OutDir)\$(LibCrocoDllPrefix)$(ProjectName)$(LibCrocoDllSuffix).dll"
@@ -96,10 +92,6 @@ See COPYRIGHTS file for copyright information.
 				WarningLevel="3"
 				DebugInformationFormat="3"
 				ForcedIncludeFiles=""
-			/>
-			<Tool
-				Name="VCPreLinkEventTool"
-				CommandLine="$(GenerateLibCrocoDef)"
 			/>
 			<Tool
 				Name="VCLinkerTool"
@@ -141,10 +133,6 @@ See COPYRIGHTS file for copyright information.
 				ForcedIncludeFiles=""
 			/>
 			<Tool
-				Name="VCPreLinkEventTool"
-				CommandLine="$(GenerateLibCrocoDef)"
-			/>
-			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies=""
 				OutputFile="$(OutDir)\$(LibCrocoDllPrefix)$(ProjectName)$(LibCrocoDllSuffix).dll"
@@ -183,10 +171,6 @@ See COPYRIGHTS file for copyright information.
 				ForcedIncludeFiles=""
 			/>
 			<Tool
-				Name="VCPreLinkEventTool"
-				CommandLine="$(GenerateLibCrocoDef)"
-			/>
-			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies=""
 				OutputFile="$(OutDir)\$(LibCrocoDllPrefix)$(ProjectName)$(LibCrocoDllSuffix).dll"
@@ -222,6 +206,66 @@ See COPYRIGHTS file for copyright information.
 			Filter="rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav"
 			UniqueIdentifier="{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}"
 			>
+			<File RelativePath="..\..\..\config.h.win32">
+				<FileConfiguration Name="Debug|Win32">
+					<Tool Name="VCCustomBuildTool"
+						Description="Copying config.h from config.h.win32..."
+						CommandLine="$(CopyConfigH)"
+						Outputs="..\..\..\config.h"
+					/>
+				</FileConfiguration>
+				<FileConfiguration Name="Release|Win32">
+					<Tool Name="VCCustomBuildTool"
+						Description="Copying config.h from config.h.win32..."
+						CommandLine="$(CopyConfigH)"
+						Outputs="..\..\..\config.h"
+					/>
+				</FileConfiguration>
+				<FileConfiguration Name="Debug|x64">
+					<Tool Name="VCCustomBuildTool"
+						Description="Copying config.h from config.h.win32..."
+						CommandLine="$(CopyConfigH)"
+						Outputs="..\..\..\config.h"
+					/>
+				</FileConfiguration>
+				<FileConfiguration Name="Release|x64">
+					<Tool Name="VCCustomBuildTool"
+						Description="Copying config.h from config.h.win32..."
+						CommandLine="$(CopyConfigH)"
+						Outputs="..\..\..\config.h"
+					/>
+				</FileConfiguration>
+			</File>
+			<File RelativePath="..\..\..\src\libcroco.symbols">
+				<FileConfiguration Name="Debug|Win32">
+					<Tool Name="VCCustomBuildTool"
+						Description="Generating libcroco.def..."
+						CommandLine="$(GenerateLibCrocoDef)"
+						Outputs="$(IntDir)\libcroco.def"
+					/>
+				</FileConfiguration>
+				<FileConfiguration Name="Release|Win32">
+					<Tool Name="VCCustomBuildTool"
+						Description="Generating libcroco.def..."
+						CommandLine="$(GenerateLibCrocoDef)"
+						Outputs="$(IntDir)\libcroco.def"
+					/>
+				</FileConfiguration>
+				<FileConfiguration Name="Debug|x64">
+					<Tool Name="VCCustomBuildTool"
+						Description="Generating libcroco.def..."
+						CommandLine="$(GenerateLibCrocoDef)"
+						Outputs="$(IntDir)\libcroco.def"
+					/>
+				</FileConfiguration>
+				<FileConfiguration Name="Release|x64">
+					<Tool Name="VCCustomBuildTool"
+						Description="Generating libcroco.def..."
+						CommandLine="$(GenerateLibCrocoDef)"
+						Outputs="$(IntDir)\libcroco.def"
+					/>
+				</FileConfiguration>
+			</File>
 		</Filter>
 	</Files>
 	<Globals>
