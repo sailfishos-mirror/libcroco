@@ -36,6 +36,10 @@ See COPYRIGHTS file for copyright information.
 		Value="$(SolutionDir)\..\..\..\..\vs$(VSVer)\$(PlatformName)"
 	/>
 	<UserMacro
+		Name="CopyDir"
+		Value="$(GlibEtcInstallRoot)"
+	/>
+	<UserMacro
 		Name="DefDir"
 		Value="$(SolutionDir)$(ConfigurationName)\$(PlatformName)\obj\$(ProjectName)"
 	/>
