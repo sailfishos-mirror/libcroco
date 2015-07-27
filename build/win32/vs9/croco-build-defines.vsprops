@@ -28,9 +28,10 @@ See COPYRIGHTS file for copyright information.
 	>
 	<Tool
 		Name="VCCLCompilerTool"
-		AdditionalIncludeDirectories="..\..\..\src;..\..\..;$(GlibEtcInstallRoot)\include;$(GlibEtcInstallRoot)\include\glib-2.0;$(GlibEtcInstallRoot)\lib\glib-2.0\include\"
+		AdditionalIncludeDirectories="..\..\..\src;..\..\..;$(GlibEtcInstallRoot)\include;$(GlibEtcInstallRoot)\include\glib-2.0;$(GlibEtcInstallRoot)\lib\glib-2.0\include;$(GlibEtcInstallRoot)\include\libxml2"
 		PreprocessorDefinitions="HAVE_CONFIG_H"
 		ForcedIncludeFiles="msvc_recommended_pragmas.h"
+		AdditionalOptions="/MP"
 	/>
 	<Tool
 		Name="VCLinkerTool"
