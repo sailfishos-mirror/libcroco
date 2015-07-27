@@ -198,7 +198,7 @@ See COPYRIGHTS file for copyright information.
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-#include "libcroco.vs10.sourcefiles"
+#include "croco.vs10.sourcefiles"
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="..\..\..\config.h.win32">

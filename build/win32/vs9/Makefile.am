@@ -16,14 +16,24 @@
 #Author: Fan, Chun-wei
 #See COPYRIGHTS file for copyright information.
 
-EXTRA_DIST = \
-	croco.vcprojin	\
-	croco.vcproj	\
-	csslint.vcproj	\
-	install.vcproj	\
-	libcroco.sln	\
-	croco-build-defines.vsprops	\
-	croco-gen-srcs.vsprops	\
+GENERATED_ITEMS =	\
+	croco.vcproj		\
 	croco-install.vsprops	\
-	croco-version-paths.vsprops	\
-	croco-version-paths.vsprops.in
+	croco-version-paths.vsprops
+
+EXTRA_DIST = \
+	croco.vcprojin			\
+	csslint.vcproj			\
+	install.vcproj			\
+	libcroco.sln			\
+	croco-build-defines.vsprops	\
+	croco-gen-srcs.vsprops		\
+	croco-install.vspropsin		\
+	croco-version-paths.vsprops.in	\
+	$(GENERATED_ITEMS)
+
+croco-install.vsprops: $(top_srcdir)/build/win32/vs9/croco-install.vspropsin
+	$(CPP) -P -<$< >$@
+	-rm croco.headers
+
+DISTCLEANFILES = $(GENERATED_ITEMS)
