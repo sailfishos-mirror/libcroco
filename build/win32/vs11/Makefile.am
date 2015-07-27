@@ -17,14 +17,16 @@
 # See COPYRIGHTS file for copyright information.
 
 EXTRA_DIST = \
-	libcroco.sln	\
-	croco.vcproj	\
-	csslint.vcproj	\
-	install.vcproj	\
-	croco-build-defines.vsprops	\
-	croco-gen-srcs.vsprops	\
-	croco-install.vsprops	\
-	croco-version-paths.vsprops
+	libcroco.sln		\
+	croco.vcxproj		\
+	croco.vcxproj.filters		\
+	csslint.vcxproj		\
+	csslint.vcxproj.filters		\
+	install.vcxproj		\
+	croco-build-defines.props	\
+	croco-gen-srcs.props	\
+	croco-install.props	\
+	croco-version-paths.props
 
 DISTCLEANFILES = $(EXTRA_DIST)
 
