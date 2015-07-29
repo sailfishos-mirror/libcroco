@@ -38,7 +38,7 @@ mkdir $(CopyDir)\include\libcroco-$(ApiVersion)\libcroco&#x0D;&#x0A;
 #include "croco.headers"
 
 mkdir $(CopyDir)\lib&#x0D;&#x0A;
-copy $(SolutionDir)$(ConfigurationName)\$(PlatformName)\bin\*-$(ApiVersion).lib $(CopyDir)\lib&#x0D;&#x0A;
+copy $(SolutionDir)$(ConfigurationName)\$(PlatformName)\bin\croco-$(ApiVersion).lib $(CopyDir)\lib&#x0D;&#x0A;
 "
 	/>
 </VisualStudioPropertySheet>
