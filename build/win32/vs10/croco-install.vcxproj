@@ -38,8 +38,8 @@ See COPYRIGHTS file for copyright information.
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{00702787-1566-484D-991F-3E7E459BB909}</ProjectGuid>
-    <RootNamespace>install</RootNamespace>
+    <ProjectGuid>{00702787-1566-484D-991F-4E7E459BB909}</ProjectGuid>
+    <RootNamespace>crocoinstall</RootNamespace>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">

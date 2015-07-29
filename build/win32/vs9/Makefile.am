@@ -24,7 +24,7 @@ GENERATED_ITEMS =	\
 EXTRA_DIST = \
 	croco.vcprojin			\
 	csslint.vcproj			\
-	install.vcproj			\
+	croco-install.vcproj	\
 	libcroco.sln			\
 	croco-build-defines.vsprops	\
 	croco-gen-srcs.vsprops		\

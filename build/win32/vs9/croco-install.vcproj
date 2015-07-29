@@ -21,9 +21,9 @@ See COPYRIGHTS file for copyright information.
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="9.00"
-	Name="install"
-	ProjectGUID="{00702787-1566-484D-991F-3E7E459BB909}"
-	RootNamespace="install"
+	Name="croco-install"
+	ProjectGUID="{00702787-1566-484D-991F-4E7E459BB909}"
+	RootNamespace="crocoinstall"
 	TargetFrameworkVersion="196613"
 	>
 	<Platforms>
