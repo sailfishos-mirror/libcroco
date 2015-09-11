@@ -15,13 +15,6 @@
 
   <maintainer>
     <foaf:Person>
-      <foaf:name>Christian Persch</foaf:name>
-      <foaf:mbox rdf:resource="mailto:chpe%40gnome.org" />
-      <gnome:userid>chpe</gnome:userid>
-    </foaf:Person>
-  </maintainer>
-  <maintainer>
-    <foaf:Person>
       <foaf:name>Abhishek Sharma</foaf:name>
       <foaf:mbox rdf:resource="mailto:abhisheks@gnome.org" />
       <gnome:userid>abhisheks</gnome:userid>
