@@ -1411,9 +1411,7 @@ cr_statement_at_import_rule_parse_from_buf (const guchar * a_buf,
                 parser = NULL;
         }
         if (media_list) {
-                GList *cur = NULL;
-
-                for (cur = media_list; media_list;
+                for (; media_list;
                      media_list = g_list_next (media_list)) {
                         if (media_list->data) {
                                 cr_string_destroy ((CRString*)media_list->data);
