@@ -1,3 +1,9 @@
+0.6.9
+    * Added Visual Studio projects (Chun-wei Fan)
+    * Lots of warnings fixed (Руслан Ижбулатов)
+    * Improve build system (Nuno Araujo)
+    * Misc bug fixes
+
 0.6.8
      * Handle signed units (Jasper St. Pierre, #686239)
  
