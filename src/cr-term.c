@@ -365,11 +365,10 @@ cr_term_to_string (CRTerm const * a_this)
                                                 g_free (tmp_str);
                                                 tmp_str = NULL;
                                         }
-
-                                        g_free (content);
-                                        content = NULL;
                                 }
                                 g_string_append (str_buf, ")");
+                                g_free (content);
+                                content = NULL;
                         }
 
                         break;
