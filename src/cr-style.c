@@ -913,7 +913,7 @@ set_prop_position_from_value (CRStyle * a_style, CRTerm * a_value)
                 break;
         }
 
-        return CR_OK;
+        return status;
 }
 
 static enum CRStatus
