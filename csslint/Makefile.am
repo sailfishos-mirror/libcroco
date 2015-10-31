@@ -3,15 +3,16 @@ bin_PROGRAMS = csslint-0.6
 
 csslint_0_6_SOURCES = csslint.c
 
-croco_lib=$(top_builddir)/src/@CROCO_LIB@
-LDADD=$(croco_lib)
+croco_lib = $(top_builddir)/src/@CROCO_LIB@
 
-INCLUDES=-I$(top_srcdir)/intl \
+csslint_0_6_LDADD = $(croco_lib)
+
+csslint_0_6_CPPFLAGS = \
+	-I$(top_srcdir)/intl \
 	-I$(top_srcdir)/src \
 	-I$(top_builddir)/src \
 	$(CROCO_CFLAGS)
 
 csslint_0_6_LDFLAGS=$(CROCO_LIBS)
-AM_CFLAGS=$(INCLUDES)
 
 #EXTRA_DIST = $(man_MANS)
