@@ -1011,7 +1011,6 @@ cr_utils_utf8_to_ucs1 (const guchar * a_in,
                               && a_out && a_out_len, CR_BAD_PARAM_ERROR);
 
         if (*a_in_len < 1) {
-                status = CR_OK;
                 goto end;
         }
 
@@ -1090,7 +1089,6 @@ cr_utils_utf8_to_ucs1 (const guchar * a_in,
                  *(if any) to get the current character.
                  */
                 if (in_index + nb_bytes_2_decode - 1 >= in_len) {
-                        status = CR_OK;
                         goto end;
                 }
 
@@ -1124,7 +1122,7 @@ cr_utils_utf8_to_ucs1 (const guchar * a_in,
         *a_out_len = out_index;
         *a_in_len = in_index;
 
-        return CR_OK;
+        return status;
 }
 
 /**
