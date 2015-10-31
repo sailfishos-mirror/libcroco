@@ -4,7 +4,8 @@ AC_INIT([libcroco],[0.6.9],[http://bugzilla.gnome.org/enter_bug.cgi?product=libc
 AC_CONFIG_SRCDIR([src/cr-input.c])
 AC_CANONICAL_HOST
 
-AM_INIT_AUTOMAKE([1.9 no-dist-gzip dist-bzip2])
+# gnu strictness to generate the INSTALL file
+AM_INIT_AUTOMAKE([1.13 tar-ustar dist-xz no-dist-gzip -Wno-portability gnu])
 AC_CONFIG_HEADERS([config.h])
 
 if test -z "$enable_maintainer_mode"; then
