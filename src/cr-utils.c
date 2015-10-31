@@ -898,14 +898,9 @@ cr_utils_ucs1_to_utf8 (const guchar * a_in,
 
         if (*a_in_len == 0) {
                 *a_out_len = 0 ;
-                return CR_OK ;
+                return status;
         }
         g_return_val_if_fail (a_out, CR_BAD_PARAM_ERROR) ;
-
-        if (*a_in_len < 1) {
-                status = CR_OK;
-                goto end;
-        }
 
         in_len = *a_in_len;
         out_len = *a_out_len;
@@ -927,11 +922,10 @@ cr_utils_ucs1_to_utf8 (const guchar * a_in,
                 }
         }                       /*end for */
 
-      end:
         *a_in_len = in_index;
         *a_out_len = out_index;
 
-        return CR_OK;
+        return status;
 }
 
 /**
