@@ -1,7 +1,7 @@
 0.6.9
     * Added Visual Studio projects (Chun-wei Fan)
     * Lots of warnings fixed (Руслан Ижбулатов)
-    * Improve build system (Nuno Araujo)
+    * Improve build system (Nuno Araujo, Ignacio Casal Quinteiro)
     * Misc bug fixes
 
 0.6.8
