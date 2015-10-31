@@ -327,7 +327,8 @@ evaluate_selectors (gchar * a_xml_path,
         xml_doc = xmlParseFile (a_xml_path);
         if (!xml_doc) {
                 g_printerr ("Error: Could not parse file %s\n", a_xml_path);
-                return CR_ERROR;
+                status = CR_ERROR;
+                goto end;
         }
         if (a_author_sheet_path) {
                 status = cr_om_parser_simply_parse_file
@@ -351,31 +352,46 @@ evaluate_selectors (gchar * a_xml_path,
                 }
         }
         cascade = cr_cascade_new (author_sheet, user_sheet, ua_sheet);
+
+        if (author_sheet)
+          cr_stylesheet_unref (author_sheet);
+
+        if (user_sheet)
+          cr_stylesheet_unref (user_sheet);
+
+        if (ua_sheet)
+          cr_stylesheet_unref (ua_sheet);
+
         if (!cascade) {
                 g_printerr ("Could not instanciate the cascade\n");
-                return CR_ERROR;
+                status = CR_ERROR;
+                goto end;
         }
         sel_eng = cr_sel_eng_new ();
         if (!sel_eng) {
                 g_printerr
                         ("Error: Could not instanciate the selection engine\n");
-                return CR_ERROR;
+                status = CR_ERROR;
+                goto end;
         }
         xpath_context = xmlXPathNewContext (xml_doc);
         if (!xpath_context) {
                 g_printerr
                         ("Error: Could not instanciate the xpath context\n");
-                return CR_ERROR;
+                status = CR_ERROR;
+                goto end;
         }
         xpath_object = xmlXPathEvalExpression ((const xmlChar *) a_xpath, xpath_context);
         if (!xpath_object) {
                 g_printerr ("Error: Could not evaluate xpath expression\n");
-                return CR_ERROR;
+                status = CR_ERROR;
+                goto end;
         }
         if (xpath_object->type != XPATH_NODESET || !xpath_object->nodesetval) {
                 g_printerr
                         ("Error: xpath does not evalualuate to a node set\n");
-                return CR_ERROR;
+                status = CR_ERROR;
+                goto end;
         }
 
         for (i = 0; i < xpath_object->nodesetval->nodeNr; i++) {
@@ -386,11 +402,13 @@ evaluate_selectors (gchar * a_xml_path,
                 }
         }
 
+        end:
+
         if (xpath_context) {
                 xmlXPathFreeContext (xpath_context);
                 xpath_context = NULL;
         }
-        if (xpath_context) {
+        if (xpath_object) {
                 xmlXPathFreeObject (xpath_object);
                 xpath_object = NULL;
         }
@@ -400,8 +418,14 @@ evaluate_selectors (gchar * a_xml_path,
         }
         if (cascade) {
                 cr_cascade_destroy (cascade);
+                cascade = NULL;
         }
-        return CR_OK;
+        if (xml_doc) {
+                xmlFreeDoc (xml_doc);
+                xml_doc = NULL;
+        }
+
+        return status;
 }
 
 /***************************
