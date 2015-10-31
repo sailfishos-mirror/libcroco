@@ -1006,5 +1006,5 @@ main (int argc, char **argv)
                 }
         }
 
-        return 0;
+        return (status == CR_OK) ? 0 : -2;
 }
