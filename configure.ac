@@ -7,6 +7,7 @@ AC_CANONICAL_HOST
 # gnu strictness to generate the INSTALL file
 AM_INIT_AUTOMAKE([1.13 tar-ustar dist-xz no-dist-gzip -Wno-portability gnu])
 AC_CONFIG_HEADERS([config.h])
+AC_CONFIG_MACRO_DIR([m4])
 
 if test -z "$enable_maintainer_mode"; then
   enable_maintainer_mode=yes
