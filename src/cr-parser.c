@@ -2745,7 +2745,7 @@ cr_parser_parse_stylesheet (CRParser * a_this)
  *coming the input stream given in parameter.
  *
  *Returns the newly created instance of #CRParser,
- *or NULL if an error occured.
+ *or NULL if an error occurred.
  */
 CRParser *
 cr_parser_new (CRTknzr * a_tknzr)
