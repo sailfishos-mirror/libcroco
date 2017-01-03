@@ -984,7 +984,7 @@ set_prop_float (CRStyle * a_style, CRTerm * a_value)
             || !a_value->content.str
             || !a_value->content.str->stryng
             || !a_value->content.str->stryng->str) { 
-                /*unknow type, the float type is set to it's default value */
+                /*unknown type, the float type is set to it's default value */
                 return CR_OK;
         }
 
@@ -1529,7 +1529,7 @@ set_prop_font_size_from_value (CRStyle * a_style, CRTerm * a_value)
 			a_style->font_size.sv.type = INHERITED_FONT_SIZE;
 
                 } else {
-                        cr_utils_trace_info ("Unknow value of font-size") ;
+                        cr_utils_trace_info ("Unknown value of font-size") ;
                         status = init_style_font_size_field (a_style);
                         return CR_UNKNOWN_PROP_VAL_ERROR;
                 }
@@ -2637,7 +2637,7 @@ cr_style_white_space_type_to_string (enum CRWhiteSpaceType a_code,
 		str = (gchar *) "inherited";
 		break;
 	default:
-		str = (gchar *) "unknow white space property value";
+		str = (gchar *) "unknown white space property value";
 		break;
 	}
 	cr_utils_dump_n_chars2 (' ', a_str, a_nb_indent);
