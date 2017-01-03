@@ -815,7 +815,7 @@ cr_om_parser_new (CRInput * a_input)
         PRIVATE (result)->parser = cr_parser_new_from_input (a_input);
 
         if (!PRIVATE (result)->parser) {
-                cr_utils_trace_info ("parsing instanciation failed");
+                cr_utils_trace_info ("parsing instantiation failed");
                 goto error;
         }
 
