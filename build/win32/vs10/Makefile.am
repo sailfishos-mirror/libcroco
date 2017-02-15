@@ -39,6 +39,7 @@ croco-install.props: $(top_srcdir)/build/win32/vs10/croco-install.propsin croco.
 	-$(RM) $(top_builddir)/build/win32/vs11/croco-install.props
 	-$(RM) $(top_builddir)/build/win32/vs12/croco-install.props
 	-$(RM) $(top_builddir)/build/win32/vs14/croco-install.props
+	-$(RM) $(top_builddir)/build/win32/vs15/croco-install.props
 	$(CPP) -P - <$(top_srcdir)/build/win32/vs10/croco-install.propsin > $@
 	rm croco.vs10.headers
 

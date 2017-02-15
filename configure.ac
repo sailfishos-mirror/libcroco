@@ -118,6 +118,13 @@ fi
 
 AC_SUBST([BSYMBOLIC_LDFLAG])
 
+##############################################
+# Check whether MSVC toolset is explicitly set
+##############################################
+
+AM_CONDITIONAL(MSVC_BASE_NO_TOOLSET_SET, [test x$MSVC_BASE_TOOLSET = x])
+AM_CONDITIONAL(MSVC_NO_TOOLSET_SET, [test x$MSVC_TOOLSET = x])
+
 ###################
 # Compiler warnings
 ###################
@@ -155,6 +162,7 @@ build/win32/vs10/croco-version-paths.props
 build/win32/vs11/Makefile
 build/win32/vs12/Makefile
 build/win32/vs14/Makefile
+build/win32/vs15/Makefile
 docs/Makefile
 docs/examples/Makefile
 docs/reference/Makefile
