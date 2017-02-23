@@ -126,8 +126,8 @@ croco_HEADERS_DIR = $(crocoincdir)
 croco_HEADERS_INST = $(crocoinc_HEADERS)
 croco_HEADERS_EXCLUDES = dummy
 
-include $(top_srcdir)/build/Makefile.msvcproj
+include $(top_srcdir)/win32/Makefile.msvcproj
 
 dist-hook:	\
-	$(top_builddir)/build/win32/vs9/croco.vcproj \
-	$(top_builddir)/build/win32/vs9/croco.headers
+	$(top_builddir)/win32/vs9/croco.vcproj \
+	$(top_builddir)/win32/vs9/croco.headers

@@ -23,11 +23,11 @@ See COPYRIGHTS file for copyright information.
     <Import Project="croco-build-defines.props" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros">
-    <CopyConfigH>copy ..\..\..\config.h.win32 ..\..\..\config.h</CopyConfigH>
+    <CopyConfigH>copy ..\..\config.h.win32 ..\..\config.h</CopyConfigH>
     <GenerateLibCrocoDef>
 echo EXPORTS &gt; $(DefDir)libcroco.def
 
-cl  /EP ..\..\..\src\libcroco.symbols &gt;&gt; $(DefDir)libcroco.def
+cl  /EP ..\..\src\libcroco.symbols &gt;&gt; $(DefDir)libcroco.def
     </GenerateLibCrocoDef>
   </PropertyGroup>
   <PropertyGroup>

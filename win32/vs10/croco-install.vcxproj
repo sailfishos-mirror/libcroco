@@ -85,11 +85,9 @@ See COPYRIGHTS file for copyright information.
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(GlibEtcInstallRoot)\</OutDir>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(GlibEtcInstallRoot)\</OutDir>
+    <OutDir Condition="'$(Configuration)'=='Debug'">$(GlibEtcInstallRoot)\</OutDir>
     <ExtensionsToDeleteOnClean Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" />
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(GlibEtcInstallRoot)\</OutDir>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(GlibEtcInstallRoot)\</OutDir>
+    <OutDir Condition="'$(Configuration)'=='Release'">$(GlibEtcInstallRoot)\</OutDir>
     <ExtensionsToDeleteOnClean Condition="'$(Configuration)|$(Platform)'=='Release|x64'" />
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -101,19 +99,13 @@ See COPYRIGHTS file for copyright information.
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
   </ItemDefinitionGroup>
   <ItemGroup>
-    <CustomBuild Include="..\..\..\config.h.win32">
-      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Installing Build Results...</Message>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(LibCrocoDoInstall)</Command>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(InstalledDlls);$(InstalledBins);$(InstalledWin32Bins);%(Outputs)</Outputs>
-      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Installing Build Results...</Message>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(LibCrocoDoInstall)</Command>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(InstalledDlls);$(InstalledBins);$(InstalledX64Bins);%(Outputs)</Outputs>
-      <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Installing Build Results...</Message>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(LibCrocoDoInstall)</Command>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(InstalledDlls);$(InstalledBins);$(InstalledWin32Bins);%(Outputs)</Outputs>
-      <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Installing Build Results...</Message>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(LibCrocoDoInstall)</Command>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(InstalledDlls);$(InstalledBins);$(InstalledX64Bins);%(Outputs)</Outputs>
+    <CustomBuild Include="..\..\config.h.win32">
+      <Message Condition="'$(Configuration)'=='Debug'">Installing Build Results...</Message>
+      <Command Condition="'$(Configuration)'=='Debug'">$(LibCrocoDoInstall)</Command>
+      <Outputs Condition="'$(Configuration)'=='Debug">blah;%(Outputs)</Outputs>
+      <Message Condition="'$(Configuration)'=='Release'">Installing Build Results...</Message>
+      <Command Condition="'$(Configuration)'=='Release'">$(LibCrocoDoInstall)</Command>
+      <Outputs Condition="'$(Configuration)'=='Release'">blah;%(Outputs)</Outputs>
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>

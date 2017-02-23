@@ -35,12 +35,12 @@ EXTRA_DIST = \
 	croco-version-paths.props.in	\
 	$(GENERATED_ITEMS)
 
-croco-install.props: $(top_srcdir)/build/win32/vs10/croco-install.propsin croco.vs10.headers
-	-$(RM) $(top_builddir)/build/win32/vs11/croco-install.props
-	-$(RM) $(top_builddir)/build/win32/vs12/croco-install.props
-	-$(RM) $(top_builddir)/build/win32/vs14/croco-install.props
-	-$(RM) $(top_builddir)/build/win32/vs15/croco-install.props
-	$(CPP) -P - <$(top_srcdir)/build/win32/vs10/croco-install.propsin > $@
+croco-install.props: $(top_srcdir)/win32/vs10/croco-install.propsin croco.vs10.headers
+	-$(RM) $(top_builddir)/win32/vs11/croco-install.props
+	-$(RM) $(top_builddir)/win32/vs12/croco-install.props
+	-$(RM) $(top_builddir)/win32/vs14/croco-install.props
+	-$(RM) $(top_builddir)/win32/vs15/croco-install.props
+	$(CPP) -P - <$(top_srcdir)/win32/vs10/croco-install.propsin > $@
 	rm croco.vs10.headers
 
 DISTCLEANFILES = $(GENERATED_ITEMS)

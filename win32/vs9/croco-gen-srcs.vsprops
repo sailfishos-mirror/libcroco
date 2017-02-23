@@ -26,13 +26,13 @@ See COPYRIGHTS file for copyright information.
 	>
 	<UserMacro
 		Name="CopyConfigH"
-		Value="copy ..\..\..\config.h.win32 ..\..\..\config.h"
+		Value="copy ..\..\config.h.win32 ..\..\config.h"
 	/>
 	<UserMacro
 		Name="GenerateLibCrocoDef"
 		Value="
 echo EXPORTS &gt; $(DefDir)\libcroco.def&#x0D;&#x0A;
-cl  /EP ..\..\..\src\libcroco.symbols &gt;&gt; $(DefDir)\libcroco.def&#x0D;&#x0A;
+cl  /EP ..\..\src\libcroco.symbols &gt;&gt; $(DefDir)\libcroco.def&#x0D;&#x0A;
 			  "
 	/>
 </VisualStudioPropertySheet>

@@ -22,7 +22,7 @@ See COPYRIGHTS file for copyright information.
   <PropertyGroup Label="UserMacros">
     <ApiVersion>@LIBCROCO_MAJOR_VERSION@.@LIBCROCO_MINOR_VERSION@</ApiVersion>
     <VSVer>10</VSVer>
-    <GlibEtcInstallRoot>$(SolutionDir)\..\..\..\..\vs$(VSVer)\$(Platform)</GlibEtcInstallRoot>
+    <GlibEtcInstallRoot>$(SolutionDir)\..\..\..\vs$(VSVer)\$(Platform)</GlibEtcInstallRoot>
     <CopyDir>$(GlibEtcInstallRoot)</CopyDir>
     <DefDir>$(SolutionDir)$(Configuration)\$(PlatformName)\obj\$(ProjectName)\</DefDir>
     <LibCrocoLibtoolCompatibleDllPrefix>lib</LibCrocoLibtoolCompatibleDllPrefix>
