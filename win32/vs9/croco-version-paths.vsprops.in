@@ -24,8 +24,20 @@ See COPYRIGHTS file for copyright information.
 	Name="crocoversionpathsprops"
 	>
 	<UserMacro
+		Name="CrocoMajorVersion"
+		Value="@LIBCROCO_MAJOR_VERSION@"
+	/>
+	<UserMacro
+		Name="CrocoMinorVersion"
+		Value="@LIBCROCO_MINOR_VERSION@"
+	/>
+	<UserMacro
+		Name="CrocoMicroVersion"
+		Value="@LIBCROCO_MICRO_VERSION@"
+	/>
+	<UserMacro
 		Name="ApiVersion"
-		Value="@LIBCROCO_MAJOR_VERSION@.@LIBCROCO_MINOR_VERSION@"
+		Value="$(CrocoMajorVersion).$(CrocoMinorVersion)"
 	/>
 	<UserMacro
 		Name="VSVer"

@@ -20,7 +20,10 @@ See COPYRIGHTS file for copyright information.
 -->
 <Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup Label="UserMacros">
-    <ApiVersion>@LIBCROCO_MAJOR_VERSION@.@LIBCROCO_MINOR_VERSION@</ApiVersion>
+    <CrocoMajorVersion>@LIBCROCO_MAJOR_VERSION@</CrocoMajorVersion>
+    <CrocoMinorVersion>@LIBCROCO_MINOR_VERSION@</CrocoMinorVersion>
+    <CrocoMicroVersion>@LIBCROCO_MICRO_VERSION@</CrocoMicroVersion>
+    <ApiVersion>$(CrocoMajorVersion).$(CrocoMinorVersion)</ApiVersion>
     <VSVer>10</VSVer>
     <GlibEtcInstallRoot>$(SolutionDir)\..\..\..\vs$(VSVer)\$(Platform)</GlibEtcInstallRoot>
     <CopyDir>$(GlibEtcInstallRoot)</CopyDir>
@@ -36,6 +39,15 @@ See COPYRIGHTS file for copyright information.
     <_PropertySheetDisplayName>crocoversionpathsprops</_PropertySheetDisplayName>
   </PropertyGroup>
   <ItemGroup>
+    <BuildMacro Include="CrocoMajorVersion">
+      <Value>$(CrocoMajorVersion)</Value>
+    </BuildMacro>
+    <BuildMacro Include="CrocoMinorVersion">
+      <Value>$(CrocoMinorVersion)</Value>
+    </BuildMacro>
+    <BuildMacro Include="CrocoMicroVersion">
+      <Value>$(CrocoMicroVersion)</Value>
+    </BuildMacro>
     <BuildMacro Include="ApiVersion">
       <Value>$(ApiVersion)</Value>
     </BuildMacro>
