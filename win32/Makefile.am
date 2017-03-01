@@ -16,6 +16,7 @@
 #Author: Fan, Chun-wei
 #See COPYRIGHTS file for copyright information.
 
-SUBDIRS = \
-	vs9 vs10 vs11 vs12 vs14 vs15
+SUBDIRS = vs9 vs10 vs11 vs12 vs14 vs15
+
+EXTRA_DIST = crocopc.py pc_base.py replace.py
 
