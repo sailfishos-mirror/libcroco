@@ -58,7 +58,7 @@ See COPYRIGHTS file for copyright information.
 			DeleteExtensionsOnClean=""
 			>
 			<Tool
-				Name="VCPreBuildEventTool"
+				Name="VCPostBuildEventTool"
 				CommandLine="$(LibCrocoDoInstall)"
 			/>
 		</Configuration>
@@ -85,14 +85,52 @@ See COPYRIGHTS file for copyright information.
 			DeleteExtensionsOnClean=""
 			>
 			<Tool
-				Name="VCPreBuildEventTool"
+				Name="VCPostBuildEventTool"
 				CommandLine="$(LibCrocoDoInstall)"
 			/>
 		</Configuration>
 	</Configurations>
-	<References>
-	</References>
 	<Files>
+		<Filter
+			Name="Resource Files"
+			Filter="rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav"
+			UniqueIdentifier="{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}"
+			>
+			<File RelativePath="..\..\libcroco.pc.in">
+				<FileConfiguration Name="Debug|Win32">
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Generating .pc files..."
+						CommandLine="$(LibcrocoGenPC)"
+						Outputs="..\libcroco-0.6.pc"
+					/>
+				</FileConfiguration>
+				<FileConfiguration Name="Release|Win32">
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Generating .pc files..."
+						CommandLine="$(LibcrocoGenPC)"
+						Outputs="..\libcroco-0.6.pc"
+					/>
+				</FileConfiguration>
+				<FileConfiguration Name="Debug|x64">
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Generating .pc files..."
+						CommandLine="$(LibcrocoGenPC)"
+						Outputs="..\libcroco-0.6.pc"
+					/>
+				</FileConfiguration>
+				<FileConfiguration Name="Release|x64">
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Generating .pc files..."
+						CommandLine="$(LibcrocoGenPC)"
+						Outputs="..\libcroco-0.6.pc"
+					/>
+				</FileConfiguration>
+			</File>
+		</Filter>
 	</Files>
 	<Globals>
 	</Globals>

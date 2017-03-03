@@ -24,29 +24,39 @@ See COPYRIGHTS file for copyright information.
   </ImportGroup>
   <PropertyGroup Label="UserMacros">
     <BinDir>$(SolutionDir)$(Configuration)\$(Platform)\bin</BinDir>
-    <InstalledDlls>$(BinDir)\$(GlibDllPrefix)croco(GlibDllSuffix).dll</InstalledDlls>
-    <InstalledBins>$(BinDir)\csslint.exe</InstalledBins>
     <LibCrocoDoInstall>
 mkdir $(CopyDir)
 mkdir $(CopyDir)\bin
-copy $(SolutionDir)$(Configuration)\$(Platform)\bin\$(LibCrocoDllPrefix)croco$(LibCrocoDllSuffix).dll $(CopyDir)\bin
-copy $(SolutionDir)$(Configuration)\$(Platform)\bin\$(LibCrocoDllPrefix)croco$(LibCrocoDllSuffix).pdb $(CopyDir)\bin
-copy $(SolutionDir)$(Configuration)\$(Platform)\bin\csslint.exe $(CopyDir)\bin
-copy $(SolutionDir)$(Configuration)\$(Platform)\bin\csslint.pdb	 $(CopyDir)\bin
+copy $(BinDir)\$(LibCrocoDllPrefix)croco$(LibCrocoDllSuffix).dll $(CopyDir)\bin
+copy $(BinDir)\$(LibCrocoDllPrefix)croco$(LibCrocoDllSuffix).pdb $(CopyDir)\bin
+copy $(BinDir)\csslint.exe $(CopyDir)\bin
+copy $(BinDir)\csslint.pdb $(CopyDir)\bin
 
 mkdir $(CopyDir)\include\libcroco-$(ApiVersion)\libcroco
 #include "croco.vs10.headers"
 
-mkdir $(CopyDir)\lib
-copy $(SolutionDir)$(Configuration)\$(Platform)\bin\croco-$(ApiVersion).lib $(CopyDir)\lib
+mkdir $(CopyDir)\lib\pkgconfig
+copy $(BinDir)\croco-$(ApiVersion).lib $(CopyDir)\lib
+copy ..\libcroco-$(ApiVersion).pc $(CopyDir)\lib\pkgconfig
     </LibCrocoDoInstall>
+    <LibcrocoPCFiles>..\libcroco-$(ApiVersion).pc</LibcrocoPCFiles>
+    <LibcrocoGenPC>(if not exist $(CopyDir) mkdir $(CopyDir)) &amp; (if exist $(PythonPath)\python.exe $(PythonPath)\python.exe ..\crocopc.py --prefix=$(CopyDir) --version=$(CrocoMajorVersion).$(CrocoMinorVersion).$(CrocoMicroVersion))</LibcrocoGenPC>
   </PropertyGroup>
   <PropertyGroup>
     <_PropertySheetDisplayName>crocoinstallprops</_PropertySheetDisplayName>
   </PropertyGroup>
   <ItemGroup>
+    <BuildMacro Include="BinDir">
+      <Value>$(BinDir)</Value>
+    </BuildMacro>
     <BuildMacro Include="LibCrocoDoInstall">
       <Value>$(LibCrocoDoInstall)</Value>
+    </BuildMacro>
+    <BuildMacro Include="LibcrocoPCFiles">
+      <Value>$(LibcrocoPCFiles)</Value>
+    </BuildMacro>
+    <BuildMacro Include="LibcrocoGenPC">
+      <Value>$(LibcrocoGenPC)</Value>
     </BuildMacro>
   </ItemGroup>
 </Project>

@@ -34,6 +34,7 @@ See COPYRIGHTS file for copyright information.
     <LibCrocoSeparateVSDllSuffix>-$(ApiVersion)-vs$(VSVer)</LibCrocoSeparateVSDllSuffix>
     <LibCrocoDllPrefix>$(LibCrocoSeparateVSDllPrefix)</LibCrocoDllPrefix>
     <LibCrocoDllSuffix>$(LibCrocoSeparateVSDllSuffix)</LibCrocoDllSuffix>
+    <PythonPath>c:\python34</PythonPath>
   </PropertyGroup>
   <PropertyGroup>
     <_PropertySheetDisplayName>crocoversionpathsprops</_PropertySheetDisplayName>
@@ -80,6 +81,9 @@ See COPYRIGHTS file for copyright information.
     </BuildMacro>
     <BuildMacro Include="LibCrocoDllSuffix">
       <Value>$(LibCrocoDllSuffix)</Value>
+    </BuildMacro>
+    <BuildMacro Include="PythonPath">
+      <Value>$(PythonPath)</Value>
     </BuildMacro>
   </ItemGroup>
 </Project>

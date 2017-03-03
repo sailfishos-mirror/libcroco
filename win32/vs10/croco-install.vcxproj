@@ -99,11 +99,21 @@ See COPYRIGHTS file for copyright information.
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
   </ItemDefinitionGroup>
   <ItemGroup>
+    <CustomBuild Include="..\..\libcroco.pc.in">
+      <Message Condition="'$(Configuration)'=='Debug'">Generating .pc files...</Message>
+      <Command Condition="'$(Configuration)'=='Debug'">$(LibcrocoGenPC)</Command>
+      <Outputs Condition="'$(Configuration)'=='Debug'">$(LibcrocoPCFiles);%(Outputs)</Outputs>
+      <Message Condition="'$(Configuration)'=='Release'">Generating .pc files...</Message>
+      <Command Condition="'$(Configuration)'=='Release'">$(LibcrocoGenPC)</Command>
+      <Outputs Condition="'$(Configuration)'=='Release'">$(LibcrocoPCFiles);%(Outputs)</Outputs>
+    </CustomBuild>
     <CustomBuild Include="..\..\config.h.win32">
       <Message Condition="'$(Configuration)'=='Debug'">Installing Build Results...</Message>
+      <AdditionalInputs Condition="'$(Configuration)'=='Debug'">$(LibcrocoPCFiles)</AdditionalInputs>
       <Command Condition="'$(Configuration)'=='Debug'">$(LibCrocoDoInstall)</Command>
-      <Outputs Condition="'$(Configuration)'=='Debug">blah;%(Outputs)</Outputs>
+      <Outputs Condition="'$(Configuration)'=='Debug'">blah;%(Outputs)</Outputs>
       <Message Condition="'$(Configuration)'=='Release'">Installing Build Results...</Message>
+      <AdditionalInputs Condition="'$(Configuration)'=='Release'">$(LibcrocoPCFiles)</AdditionalInputs>
       <Command Condition="'$(Configuration)'=='Release'">$(LibCrocoDoInstall)</Command>
       <Outputs Condition="'$(Configuration)'=='Release'">blah;%(Outputs)</Outputs>
     </CustomBuild>

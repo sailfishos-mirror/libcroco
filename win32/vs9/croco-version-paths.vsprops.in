@@ -81,4 +81,8 @@ See COPYRIGHTS file for copyright information.
 		Name="LibCrocoDllSuffix"
 		Value="$(LibCrocoSeparateVSDllSuffix)"
 	/>
+	<UserMacro
+		Name="PythonPath"
+		Value="c:\python27"
+	/>
 </VisualStudioPropertySheet>
