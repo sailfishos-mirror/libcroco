@@ -1,6 +1,6 @@
 dnl Process this file with autoconf to produce a configure script.
 AC_PREREQ(2.64)
-AC_INIT([libcroco],[0.6.12],[http://bugzilla.gnome.org/enter_bug.cgi?product=libcroco],[libcroco])
+AC_INIT([libcroco],[0.6.13],[http://bugzilla.gnome.org/enter_bug.cgi?product=libcroco],[libcroco])
 AC_CONFIG_SRCDIR([src/cr-input.c])
 AC_CANONICAL_HOST
 
