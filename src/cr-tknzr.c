@@ -299,7 +299,6 @@ cr_tknzr_parse_w (CRTknzr * a_this,
 
                 status = cr_tknzr_peek_char (a_this, &cur_char);
                 if (status == CR_END_OF_INPUT_ERROR) {
-                        status = CR_OK;
                         break;
                 } else if (status != CR_OK) {
                         goto error;
