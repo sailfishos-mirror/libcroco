@@ -1279,6 +1279,11 @@ cr_tknzr_parse_rgb (CRTknzr * a_this, CRRgb ** a_rgb)
         status = cr_tknzr_parse_num (a_this, &num);
         ENSURE_PARSING_COND ((status == CR_OK) && (num != NULL));
 
+        if (num->val > G_MAXLONG) {
+                status = CR_PARSING_ERROR;
+                goto error;
+        }
+
         red = num->val;
         cr_num_destroy (num);
         num = NULL;
@@ -1297,6 +1302,11 @@ cr_tknzr_parse_rgb (CRTknzr * a_this, CRRgb ** a_rgb)
                 cr_tknzr_try_to_skip_spaces (a_this);
                 status = cr_tknzr_parse_num (a_this, &num);
                 ENSURE_PARSING_COND ((status == CR_OK) && (num != NULL));
+
+                if (num->val > G_MAXLONG) {
+                        status = CR_PARSING_ERROR;
+                        goto error;
+                }
 
                 PEEK_BYTE (a_this, 1, &next_bytes[0]);
                 if (next_bytes[0] == '%') {
