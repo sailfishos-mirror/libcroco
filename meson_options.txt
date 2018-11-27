@@ -1,0 +1,9 @@
+option('bsymbolic_functions',
+       type : 'boolean',
+       value : true,
+       description : 'Link with -Bsymbolic-functions if supported')
+
+option('gtk_doc',
+       type : 'feature',
+       value : 'auto',
+       description : 'Use gtk-doc to build documentation')
