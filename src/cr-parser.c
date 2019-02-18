@@ -525,11 +525,11 @@ cr_parser_push_error (CRParser * a_this,
         g_return_val_if_fail (a_this && PRIVATE (a_this)
                               && a_msg, CR_BAD_PARAM_ERROR);
 
+        RECORD_INITIAL_POS (a_this, &pos);
+
         error = cr_parser_error_new (a_msg, a_status);
 
         g_return_val_if_fail (error, CR_ERROR);
-
-        RECORD_INITIAL_POS (a_this, &pos);
 
         cr_parser_error_set_pos
                 (error, pos.line, pos.col, pos.next_byte_index - 1);
