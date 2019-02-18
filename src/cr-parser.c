@@ -1665,6 +1665,7 @@ cr_parser_parse_simple_selector (CRParser * a_this, CRSimpleSel ** a_sel)
         CRInputPos init_pos;
         CRToken *token = NULL;
         CRSimpleSel *sel = NULL;
+        CRPseudo *pseudo = NULL;
         CRAdditionalSel *add_sel_list = NULL;
         gboolean found_sel = FALSE;
         guint32 cur_char = 0;
@@ -1798,7 +1799,6 @@ cr_parser_parse_simple_selector (CRParser * a_this, CRSimpleSel ** a_sel)
                                  &attr_sel->location) ;
                 } else if (token && (token->type == DELIM_TK)
                            && (token->u.unichar == ':')) {
-                        CRPseudo *pseudo = NULL;
 
                         /*try to parse a pseudo */
 
@@ -1889,6 +1889,8 @@ cr_parser_parse_simple_selector (CRParser * a_this, CRSimpleSel ** a_sel)
         }
 
  error:
+
+        g_clear_pointer (&pseudo, cr_pseudo_destroy);
 
         if (token) {
                 cr_token_destroy (token);
