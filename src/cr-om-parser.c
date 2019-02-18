@@ -318,8 +318,8 @@ charset (CRDocHandler * a_this, CRString * a_charset,
 
         charset = cr_string_dup (a_charset) ;
         stmt = cr_statement_new_at_charset_rule (ctxt->stylesheet, charset);
-        g_return_if_fail (stmt);
-        stmt2 = cr_statement_append (ctxt->stylesheet->statements, stmt);
+        if (stmt)
+                stmt2 = cr_statement_append (ctxt->stylesheet->statements, stmt);
         if (!stmt2) {
                 if (stmt) {
                         cr_statement_destroy (stmt);
