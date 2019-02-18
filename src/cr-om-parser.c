@@ -669,6 +669,8 @@ property (CRDocHandler * a_this,
 
         /*instanciates a new declaration */
         decl = cr_declaration_new (ctxt->cur_stmt, str, a_expression);
+        if (decl == NULL)
+                g_clear_pointer (&str, cr_string_destroy);
         g_return_if_fail (decl);
         str = NULL;
         decl->important = a_important;
