@@ -2825,6 +2825,8 @@ cr_parser_new_from_input (CRInput * a_input)
         }
 
         result = cr_parser_new (tokenizer);
+        if (!result)
+                g_clear_pointer (&tokenizer, cr_tknzr_unref);
         g_return_val_if_fail (result, NULL);
 
         return result;
@@ -2850,6 +2852,8 @@ cr_parser_new_from_file (const guchar * a_file_uri, enum CREncoding a_enc)
         }
 
         result = cr_parser_new (tokenizer);
+        if (!result)
+                g_clear_pointer (&tokenizer, cr_tknzr_unref);
         g_return_val_if_fail (result, NULL);
         return result;
 }
@@ -2992,6 +2996,8 @@ cr_parser_parse_file (CRParser * a_this,
         g_return_val_if_fail (tknzr != NULL, CR_ERROR);
 
         status = cr_parser_set_tknzr (a_this, tknzr);
+        if (status != CR_OK)
+                g_clear_pointer (&tknzr, cr_tknzr_unref);
         g_return_val_if_fail (status == CR_OK, CR_ERROR);
 
         status = cr_parser_parse (a_this);
@@ -4483,6 +4489,8 @@ cr_parser_parse_buf (CRParser * a_this,
         g_return_val_if_fail (tknzr != NULL, CR_ERROR);
 
         status = cr_parser_set_tknzr (a_this, tknzr);
+        if (status != CR_OK)
+                g_clear_pointer (&tknzr, cr_tknzr_unref);
         g_return_val_if_fail (status == CR_OK, CR_ERROR);
 
         status = cr_parser_parse (a_this);
