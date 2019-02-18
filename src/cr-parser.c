@@ -2761,6 +2761,8 @@ cr_parser_new (CRTknzr * a_tknzr)
 
         if (a_tknzr) {
                 status = cr_parser_set_tknzr (result, a_tknzr);
+                if (status != CR_OK)
+                        cr_parser_destroy (result);
         }
 
         g_return_val_if_fail (status == CR_OK, NULL);
