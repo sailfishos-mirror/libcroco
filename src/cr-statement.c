@@ -1067,7 +1067,8 @@ cr_statement_ruleset_parse_from_buf (const guchar * a_buf,
         g_return_val_if_fail (parser, NULL);
 
         sac_handler = cr_doc_handler_new ();
-        g_return_val_if_fail (parser, NULL);
+        if (!sac_handler)
+                goto cleanup;
 
         sac_handler->start_selector = parse_ruleset_start_selector_cb;
         sac_handler->end_selector = parse_ruleset_end_selector_cb;
