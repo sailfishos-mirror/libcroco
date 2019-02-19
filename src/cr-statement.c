@@ -1310,6 +1310,7 @@ cr_statement_new_at_media_rule (CRStyleSheet * a_sheet,
         return result;
 
       error:
+        g_clear_pointer (&result, cr_statement_destroy);
         return NULL;
 }
 
