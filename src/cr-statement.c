@@ -201,6 +201,8 @@ parse_page_property_cb (CRDocHandler * a_this,
         g_return_if_fail (name);
 
         decl = cr_declaration_new (stmt, name, a_expression);
+        if (!decl)
+                cr_string_destroy(name);
         g_return_if_fail (decl);
         decl->important = a_important;
         stmt->kind.page_rule->decl_list =
@@ -327,6 +329,8 @@ parse_at_media_property_cb (CRDocHandler * a_this,
         g_return_if_fail (name);
 
         decl = cr_declaration_new (stmt, name, a_value);
+        if (!decl)
+                cr_string_destroy(name);
         g_return_if_fail (decl);
         decl->important = a_important;
         status = cr_statement_ruleset_append_decl (stmt, decl);
@@ -434,6 +438,8 @@ parse_ruleset_property_cb (CRDocHandler * a_this,
         g_return_if_fail (stringue);
 
         decl = cr_declaration_new (ruleset, stringue, a_value);
+        if (!decl)
+                cr_string_destroy (stringue);
         g_return_if_fail (decl);
         decl->important = a_important;
         status = cr_statement_ruleset_append_decl (ruleset, decl);
