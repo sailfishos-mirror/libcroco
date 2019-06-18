@@ -162,6 +162,7 @@ win32/vs11/Makefile
 win32/vs12/Makefile
 win32/vs14/Makefile
 win32/vs15/Makefile
+win32/vs16/Makefile
 docs/Makefile
 docs/examples/Makefile
 docs/reference/Makefile
